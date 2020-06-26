@@ -1,0 +1,2 @@
+recursive-include dicogis/locale *
+recursive-include dicogis/bin/img *

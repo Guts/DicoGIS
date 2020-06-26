@@ -1,0 +1,5 @@
+-r dev.txt
+
+--find-links=../lib
+
+gdal==3.0.* --no-index

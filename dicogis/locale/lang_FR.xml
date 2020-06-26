@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<lang iso="FR">
+<!-- Name of language -->
+	<langue>Français</langue>
+<!-- Paths -->
+	<path_lang>locale\lang_FR.xml</path_lang>
+<!-- GUI -->
+	<gui_excel>Classeurs Excel 2003</gui_excel>
+	<hi>Bonjour </hi>
+	<gui_choix>Parcourir</gui_choix>
+	<gui_cible>Sélectionner le dossier cible</gui_cible>
+	<gui_cholang>Langue :</gui_cholang>
+	<gui_go>Lancer</gui_go>
+	<gui_quit>Quitter</gui_quit>
+	<gui_tab1> Fichiers </gui_tab1>
+	<gui_tab2> Base de données </gui_tab2>
+	<gui_tab3> Services </gui_tab3>
+	<gui_tab5> Options </gui_tab5>
+	<gui_fr1> Arborescence cible </gui_fr1>
+	<gui_fr2> Base de données cible </gui_fr2>
+	<gui_fr3> Formats </gui_fr3>
+	<gui_fr4> Fichier en sortie </gui_fr4>
+	<gui_path>Chemin du dossier : </gui_path>
+	<gui_fic>Nom du fichier en sortie : </gui_fic>
+	<gui_views>Vues logiques ? </gui_views>
+	<gui_host>Hôte : </gui_host>
+	<gui_port>Port : </gui_port>
+	<gui_db>Base de données : </gui_db>
+	<gui_user>Utilisateur : </gui_user>
+	<gui_mdp>Mot de passe : </gui_mdp>
+	<gui_prox_server>Serveur : </gui_prox_server>
+	<gui_srv_url>URL GetCapabilities : </gui_srv_url>
+	<gui_prog>Progression</gui_prog>
+	<gui_prog1>Progression : recherche des fichiers compatibles</gui_prog1>
+	<gui_prog2>Progression : traitement des fichiers en cours</gui_prog2>
+	<info_end>Fin du programme</info_end>
+	<info_end2>DicoGIS a terminé son travail.</info_end2>
+	<info_end3>Le dictionnaire se trouve dans le dossier : </info_end3>
+	<info_err> erreur(s) rencontrée(s). Consulter le fichier log.</info_err>
+	<info_noerr>Aucune erreur rencontrée.</info_noerr>
+	<info_restart1>Redémarrage requis</info_restart1>
+	<info_restart2>Le programme a besoin de redémarrer pour appliquer les changements.</info_restart2>
+<!-- Log -->
+	<log_dossdest>Dossier de destination : </log_dossdest>
+	<log_dossour>Dossier source des shapes : </log_dossour>
+	<log_end>Fin du traitement : </log_end>
+	<log_entete>DicoGIS - dictionnaire automatisé de données géographiques</log_entete>
+	<log_numshp>Nombre de fichiers : </log_numshp>
+	<log_numfold> dossiers.</log_numfold>
+	<log_start>Début du traitement : </log_start>
+	<log_tps>Temps écoulé : </log_tps>
+<!-- Output file: commons -->
+	<sheet_vectors>Vecteurs</sheet_vectors>
+	<sheet_rasters>Rasters</sheet_rasters>
+	<sheet_filedb>Base de données fichiers</sheet_filedb>
+	<sheet_cdao>CAO - DAO</sheet_cdao>
+	<sheet_maplans>Documents cartographiques</sheet_maplans>
+	<sheet_lyr>Fichiers de couches</sheet_lyr>
+	<nomfic>Nom du fichier</nomfic>
+	<path>Chemin</path>
+	<browse>Atteindre le dossier</browse>
+	<theme>Dossier</theme>
+	<date_crea>Création (sur l'ordinateur)</date_crea>
+	<date_actu>Dernière actualisation</date_actu>
+	<srs>Système de coordonnées (SRS)</srs>
+	<srs_type>Type du SRS</srs_type>
+	<codepsg>EPSG</codepsg>
+	<emprise>Emprise spatiale</emprise>
+	<format>Format</format>
+	<li_depends>Dépendances</li_depends>
+	<tot_size>Taille totale</tot_size>
+<!-- Output file: vectors -->
+	<num_objets># objets</num_objets>
+	<num_attrib># attributs</num_attrib>
+	<geometrie>Type de géométrie</geometrie>
+	<geom_point>Point</geom_point>
+	<geom_ligne>Ligne</geom_ligne>
+	<geom_polyg>Polygone</geom_polyg>
+	<li_chps>Attributs</li_chps>
+	<entier>Numérique (entier)</entier>
+	<reel>Numérique (réel)</reel>
+	<string>Texte</string>
+	<date>Date</date>
+	<longueur>, Lg. = </longueur>
+	<precision>, Pr. = </precision>
+<!-- Output file: rasters -->
+	<num_bands># bandes</num_bands>
+	<size_X># colonnes</size_X>
+	<size_Y># lignes</size_Y>
+	<pixel_w>Largeur de pixel</pixel_w>
+	<pixel_h>Hauteur de pixel</pixel_h>
+	<origin_x>Origine X</origin_x>
+	<origin_y>Origine Y</origin_y>
+	<compression>Taux de compression</compression>
+	<coloref>Référentiel couleur</coloref>
+	<gdal_warn>Avertissements GDAL</gdal_warn>
+<!-- Output file: PostGIS -->
+	<schema>Schéma</schema>
+	<conn_chain>Chaîne de connexion</conn_chain>
+<!-- Output file: FileGDB -->
+	<feats_class>Classes d'entités</feats_class>
+<!-- Output file: Maps & Docs -->
+	<sub_layers>Couches - Calques</sub_layers>
+	<custom_title>Titre</custom_title>
+	<res_image>Résolution (DPI)</res_image>
+	<creator_prod>Créateur - Générateur</creator_prod>
+	<keywords>Mots-clés</keywords>
+	<subject>Sujet</subject>
+<!-- SRS -->
+	<srs_comp>Composée (2D +)</srs_comp>
+	<srs_geoc>Géocentrique</srs_geoc>
+	<srs_geog>Géographique</srs_geog>
+	<srs_loca>Locale</srs_loca>
+	<srs_proj>Projetée</srs_proj>
+	<srs_vert>Verticale</srs_vert>
+	<srs_nr>Non renseignée</srs_nr>
+<!-- Esri LYR types -->
+    <lyr_featL>Feature</lyr_featL>
+    <lyr_rastL>Raster</lyr_rastL>
+    <lyr_rastzL>Rasterizing</lyr_rastzL>
+    <lyr_netwaL>Network Analyst</lyr_netwaL>
+    <lyr_servL>Web Service</lyr_servL>
+    <lyr_groupL>Group</lyr_groupL>
+<!-- Gestion erreurs -->
+	<nofolder>Aucun dossier sélectionné</nofolder>
+	<nodata>Aucune donnée géographique compatible trouvée.</nodata>
+	<noformat>Aucun format sélectionné</noformat>
+	<err_incomp>Fichier non pris en compte : est-il bien géographique ? </err_incomp>
+	<err_encod>Le nom du champ n'est pas bien formaté (caractères spéciaux) : </err_encod>
+	<err_nobjet> Cette donnée n'a aucun objet. Traitement impossible !</err_nobjet>
+	<err_corrupt> Fichier corrompu </err_corrupt>
+	<err_noprj> Aucun référentiel de coordonnées trouvé (ex: .prj) </err_noprj>
+	<err_pg_empty_field>Champ requis</err_pg_empty_field>
+	<err_pg_conn_fail>La connexion a échoué</err_pg_conn_fail>
+</lang>

@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "davidanson.vscode-markdownlint",
+        "mikestead.dotenv",
+        "ms-azure-devops.azure-pipelines",
+        "ms-python.python",
+    ]
+}

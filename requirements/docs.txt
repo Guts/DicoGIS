@@ -1,0 +1,11 @@
+-r base.txt
+-r dev.txt
+
+# Documentation (for devs)
+# -----------------------
+sphinx==3.1.*
+sphinx-autodoc-typehints==1.11.*
+sphinx-copybutton==0.2.*
+sphinx-markdown-tables==0.0.15  # to render markdown tables
+sphinx-rtd-theme==0.5.*
+recommonmark==0.6.*

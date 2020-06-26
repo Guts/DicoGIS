@@ -1,0 +1,15 @@
+-r base.txt
+
+# Dev requirements
+# -----------------------
+babel==2.8.*
+black==19.10b0
+flake8>=3.7.*,<3.9
+pre-commit>=2.3.*,<2.6
+pytest==5.4.*
+pytest-cov==2.10.*
+
+# Packaging
+# -----------------------
+pyinstaller>=3.6,<3.7
+pypiwin32==223 ; sys_platform == 'win32'

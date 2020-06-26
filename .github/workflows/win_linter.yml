@@ -1,0 +1,74 @@
+name: Quick Linter
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  lint-windows:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Get source code
+      uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    # - name: Download GDAL Core for Windows
+    #   uses: carlosperate/download-file-action@v1.0.3
+    #   id: download-gdal-core
+    #   with:
+    #     # URL of the file to download
+    #     file-url: http://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
+    #     # New filename to rename the downloaded file
+    #     file-name: gdal-core.msi
+    #     location: "."
+
+    # - name: Install GDAL Core
+    #   run: ./gdal-core.msi /quiet
+
+    # - name: Download GDAL Python bindings for Windows
+    #   uses: carlosperate/download-file-action@v1.0.3
+    #   id: download-gdal-py-bindings
+    #   with:
+    #     # URL of the file to download
+    #     file-url: http://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.7.msi
+    #     # New filename to rename the downloaded file
+    #     file-name: gdal-python-bindings.msi
+    #     location: "."
+
+    # - name: Install GDAL Python Bindings
+    #   run: ./gdal-python-bindings.msi /quiet
+
+    # - name: Add GDAL to the path
+    #   run: echo "::add-path::C:\Program Files\GDAL"
+
+    - name: Cache pip
+      # https://github.com/actions/cache/blob/master/examples.md#python---pip
+      uses: actions/cache@v1
+      with:
+        path: ~\AppData\Local\pip\Cache # This path is specific to Windows
+        # Look to see if there is a cache hit for the corresponding requirements file
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install -r requirements/windows.txt
+        python -m pip install -e .
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings.
+        flake8 . --count --exit-zero --statistics

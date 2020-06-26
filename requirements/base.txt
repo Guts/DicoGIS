@@ -1,0 +1,14 @@
+# Common requirements
+# -----------------------
+
+setuptools
+wheel
+
+# Project requirements
+# -----------------------
+dxfgrabber==1.0.*
+geoserver-restconfig==2.0.4.*
+pygdal==3.0.4.* ; sys_platform != 'win32'
+numpy==1.19.*
+openpyxl==3.0.*
+xmltodict==0.12.*
