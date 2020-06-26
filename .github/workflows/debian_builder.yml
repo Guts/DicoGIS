@@ -1,11 +1,11 @@
-name: Windows Builder
+name: Ubuntu Builder
 
 on:
   push:
     branches: [ master ]
 
 jobs:
-  build-windows:
+  build-ubuntu:
 
     runs-on: ubuntu-latest
 
