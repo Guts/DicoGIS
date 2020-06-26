@@ -26,12 +26,20 @@ Updated: |date|
 
 .. toctree::
    :maxdepth: 3
+   :caption: Development
+   :titlesonly:
+
+   development/windows
+   development/ubuntu
+
+.. toctree::
+   :maxdepth: 3
    :caption: Miscellaneous
    :titlesonly:
 
-   formats_matrix
-   compatibility
-   credits
+   misc/formats_matrix
+   misc/compatibility
+   misc/credits
 
 Package modules
 +++++++++++++++

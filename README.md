@@ -1,5 +1,9 @@
 ﻿# DicoGIS
 
+![Ubuntu Builder](https://github.com/Guts/DicoGIS/workflows/Ubuntu%20Builder/badge.svg)
+![Windows Builder](https://github.com/Guts/DicoGIS/workflows/Windows%20Builder/badge.svg)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 Automatize the creation of a dictionnary of geographic data in a folders structure. The output dictionary is an Excel file (.xlsx).
 
 ## Documentation
@@ -66,3 +70,6 @@ sudo pip install -r requirements.txt
 ## Localization
 
 Available in 3 languages (English, French and Spanish) but you can add your own translations (in [locale folder](https://github.com/Guts/DicoGIS/tree/master/data/locale)).
+
+
+
