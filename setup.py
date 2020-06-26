@@ -45,7 +45,7 @@ setup(
     ),
     include_package_data=True,
     # dependencies
-    python_requires=">=3.7, <4",
+    python_requires=">=3.6, <4",
     extras_require={
         "dev": ["black", "flake8", "pre-commit"],
         "test": ["pytest", "pytest-cov"],
