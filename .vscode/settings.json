@@ -5,7 +5,7 @@
     ],
     "editor.wordWrapColumn": 88,
     // Python environment
-    "python.pythonPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+    "python.pythonPath": ".venv\\Scripts\\python.exe",
     // Formatter
     "python.formatting.provider": "black",
     "python.formatting.blackArgs": [

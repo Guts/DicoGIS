@@ -5,34 +5,13 @@
     "tasks": [
         {
             "label": "Format code",
-            "dependsOn": [
-                "Format code",
-                "Format modules"
-            ],
-            "problemMatcher": []
-        },
-        {
-            "label": "Format code",
             "type": "shell",
             "command": "${config:python.pythonPath}",
             "args": [
                 "-m",
                 "black",
                 "--target-version=py37",
-                "./DicoGIS.py"
-            ],
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Format modules",
-            "type": "shell",
-            "command": "${config:python.pythonPath}",
-            "args": [
-                "-m",
-                "black",
-                "--target-version=py37",
-                "./modules"
+                "./dicogis"
             ],
             "group": "build",
             "problemMatcher": []
