@@ -1,0 +1,3 @@
+-r dev.txt
+
+pygdal==3.0.4.* ; sys_platform == 'linux'
