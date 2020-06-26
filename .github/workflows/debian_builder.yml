@@ -1,0 +1,26 @@
+name: Windows Builder
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-windows:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get source code
+      uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install GDAL
+      run: |
+        sudo apt-get install libgdal1-dev
+        gdal-config --version
