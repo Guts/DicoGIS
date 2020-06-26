@@ -20,34 +20,34 @@ jobs:
       with:
         python-version: 3.7
 
-    # - name: Download GDAL Core for Windows
-    #   uses: carlosperate/download-file-action@v1.0.3
-    #   id: download-gdal-core
-    #   with:
-    #     # URL of the file to download
-    #     file-url: http://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
-    #     # New filename to rename the downloaded file
-    #     file-name: gdal-core.msi
-    #     location: "."
+    - name: Download GDAL Core for Windows
+      uses: carlosperate/download-file-action@v1.0.3
+      id: download-gdal-core
+      with:
+        # URL of the file to download
+        file-url: http://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
+        # New filename to rename the downloaded file
+        file-name: gdal-core.msi
+        location: "."
 
-    # - name: Install GDAL Core
-    #   run: ./gdal-core.msi /quiet
+    - name: Install GDAL Core
+      run: ./gdal-core.msi /quiet
 
-    # - name: Download GDAL Python bindings for Windows
-    #   uses: carlosperate/download-file-action@v1.0.3
-    #   id: download-gdal-py-bindings
-    #   with:
-    #     # URL of the file to download
-    #     file-url: http://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.7.msi
-    #     # New filename to rename the downloaded file
-    #     file-name: gdal-python-bindings.msi
-    #     location: "."
+    - name: Download GDAL Python bindings for Windows
+      uses: carlosperate/download-file-action@v1.0.3
+      id: download-gdal-py-bindings
+      with:
+        # URL of the file to download
+        file-url: http://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.7.msi
+        # New filename to rename the downloaded file
+        file-name: gdal-python-bindings.msi
+        location: "."
 
-    # - name: Install GDAL Python Bindings
-    #   run: ./gdal-python-bindings.msi /quiet
+    - name: Install GDAL Python Bindings
+      run: ./gdal-python-bindings.msi /quiet
 
-    # - name: Add GDAL to the path
-    #   run: echo "::add-path::C:\Program Files\GDAL"
+    - name: Add GDAL to the path
+      run: echo "::add-path::C:\Program Files\GDAL"
 
     - name: Cache pip
       # https://github.com/actions/cache/blob/master/examples.md#python---pip
