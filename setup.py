@@ -53,7 +53,7 @@ setup(
     install_requires=[
         "dxfgrabber==1.0.*",
         "geoserver-restconfig==2.0.4.*",
-        "gdal==3.0.*",
+        "gdal>=3.0,<3.2",
         "numpy==1.19.*",
         "openpyxl==3.0.*",
         "xmltodict==0.12.*",
