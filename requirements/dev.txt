@@ -10,5 +10,5 @@ pytest-cov>=2.10,<2.11
 
 # Packaging
 # -----------------------
-pyinstaller>=3.6,<3.7
+pyinstaller>=3.6,<4.1
 pypiwin32==223 ; sys_platform == 'win32'
