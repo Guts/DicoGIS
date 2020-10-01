@@ -5,7 +5,7 @@
 babel==2.8.*
 black==19.10b0
 flake8>=3.7.*,<3.9
-pre-commit>=2.3.*,<2.6
+pre-commit>=2.3.0.a,<2.8
 pytest==5.4.*
 pytest-cov==2.10.*
 
