@@ -7,7 +7,7 @@ on:
 env:
   URL_GDAL_CORE: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
   URL_GDAL_PYTHON: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.7.msi
-  PATH_GDAL_INSTALL: ${{ github.workspace }}/GDAL_INSTALL
+  PATH_GDAL_INSTALL: ${{ github.workspace }}\GDAL_INSTALL
 
 jobs:
   lint-windows:
@@ -57,7 +57,6 @@ jobs:
 
     - name: just a check
       run: |
-        ls
         ls ${{ env.PATH_GDAL_INSTALL }}
 
     # - name: Cache pip
