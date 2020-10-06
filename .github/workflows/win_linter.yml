@@ -33,28 +33,30 @@ jobs:
 
     - name: Install GDAL Core
       run: |
-        echo "::debug::${{ env.PATH_GDAL_INSTALL }})"
         msiexec /i gdal-core.msi INSTALLDIR="${{ env.PATH_GDAL_INSTALL }}" /quiet
 
-    # - name: Download GDAL Python bindings for Windows
-    #   uses: carlosperate/download-file-action@v1.0.3
-    #   id: download-gdal-py-bindings
-    #   with:
-    #     # URL of the file to download
-    #     file-url: ${{ env.URL_GDAL_PYTHON }}
-    #     # New filename to rename the downloaded file
-    #     file-name: gdal-python-bindings.msi
-    #     location: "."
+    - name: Download GDAL Python bindings for Windows
+      uses: carlosperate/download-file-action@v1.0.3
+      id: download-gdal-py-bindings
+      with:
+        # URL of the file to download
+        file-url: ${{ env.URL_GDAL_PYTHON }}
+        # New filename to rename the downloaded file
+        file-name: gdal-python-bindings.msi
+        location: "."
 
-    # - name: Install GDAL Python Bindings
-    #   run: |
-    #     msiexec /i ./gdal-python-bindings.msi INSTALLDIR="./GDAL_INSTALL" /quiet
+    - name: Install GDAL Python Bindings
+      run: |
+        msiexec /i ./gdal-python-bindings.msi INSTALLDIR="${{ env.PATH_GDAL_INSTALL }}" /quiet
 
-    # - name: Add GDAL to the path
-    #   run: echo "./GDAL_INSTALL" >> $GITHUB_PATH
+    - name: Add GDAL to the path
+      run: echo "${{ env.PATH_GDAL_INSTALL }}" >> $GITHUB_PATH
 
-    # - name: Add GDAL DATA as environment variable
-    #   run: echo "GDAL_DATA=./GDAL_INSTALL/gdal-data" >> $GITHUB_ENV
+    - name: Add GDAL DATA as environment variable
+      run: echo "GDAL_DATA=${{ env.PATH_GDAL_INSTALL }}/gdal-data" >> $GITHUB_ENV
+
+    - name: just a check
+      run: ls ${{ env.PATH_GDAL_INSTALL }}
 
     # - name: Cache pip
     #   # https://github.com/actions/cache/blob/master/examples.md#python---pip
