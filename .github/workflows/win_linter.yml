@@ -48,9 +48,10 @@ jobs:
     - name: Add GDAL DATA as environment variable
       run: echo "GDAL_DATA=${{ env.PATH_GDAL_DATA }}" >> $GITHUB_ENV
 
-    - name: Display GDAL installation folder
+    - name: Display GDAL installation folder and version
       run: |
         ls ${{ env.PATH_GDAL_INSTALL }}
+        echo "::debug::GDAL version: $(gdalinfo --version)"
 
     # -- GDAL Python bindings ----------------------------------------------------------
     - name: Download GDAL Python bindings for Windows
