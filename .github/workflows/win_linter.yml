@@ -51,6 +51,7 @@ jobs:
     - name: Display GDAL installation folder and version
       run: |
         ls ${{ env.PATH_GDAL_INSTALL }}
+        $env:Path += ";${{ env.PATH_GDAL_INSTALL }}"
         gdalinfo --version
 
     # -- GDAL Python bindings ----------------------------------------------------------
@@ -66,6 +67,7 @@ jobs:
 
     - name: Install GDAL Python Bindings
       run: |
+        $env:Path += ";${{ env.PATH_GDAL_INSTALL }}"
         msiexec /i gdal-python-bindings.msi /quiet
 
     - name: Display GDAL Python bindings version
