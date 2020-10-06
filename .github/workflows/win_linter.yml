@@ -19,6 +19,11 @@ jobs:
     - name: Get source code
       uses: actions/checkout@v2
 
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+      
     - name: Prepare 
       run: mkdir ${{ env.PATH_GDAL_INSTALL }}
 
