@@ -8,6 +8,7 @@ env:
   URL_GDAL_CORE: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
   URL_GDAL_PYTHON: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.7.msi
   PATH_GDAL_INSTALL: ${{ github.workspace }}\GDAL_INSTALL
+  GDAL_DATA: ${{ github.workspace }}\GDAL_INSTALL\gdal-data
 
 jobs:
   lint-windows:
@@ -53,7 +54,7 @@ jobs:
       run: echo "${{ env.PATH_GDAL_INSTALL }}" >> $GITHUB_PATH
 
     - name: Add GDAL DATA as environment variable
-      run: echo "GDAL_DATA=${{ env.PATH_GDAL_INSTALL }}/gdal-data" >> $GITHUB_ENV
+      run: echo "GDAL_DATA=${{ env.PATH_GDAL_DATA }}" >> $GITHUB_ENV
 
     - name: Display GDAL installation folder
       run: |
@@ -76,8 +77,6 @@ jobs:
     #     python -m pip install -r requirements/dev.txt
 
     - name: Install Python GDAL
-      env:
-        GDAL_DATA: "${{ env.PATH_GDAL_INSTALL }}\gdal-data"
       run: |
         gdalinfo --version
     #     # python -m pip install gdal==3.0.*
