@@ -56,7 +56,9 @@ jobs:
       run: echo "GDAL_DATA=${{ env.PATH_GDAL_INSTALL }}/gdal-data" >> $GITHUB_ENV
 
     - name: just a check
-      run: ls ${{ env.PATH_GDAL_INSTALL }}
+      run: |
+        ls
+        ls ${{ env.PATH_GDAL_INSTALL }}
 
     # - name: Cache pip
     #   # https://github.com/actions/cache/blob/master/examples.md#python---pip
