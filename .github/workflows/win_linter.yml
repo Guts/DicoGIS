@@ -4,6 +4,13 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  GDAL_VERSION_MAJOR: 3
+  GDAL_VERSION_MINOR: 1
+  GDAL_VERSION_PATCH: 3
+  MSVC_VERSION_ID: 1911
+
+
 jobs:
   lint-windows:
 
@@ -15,36 +22,20 @@ jobs:
       with:
         lfs: true
 
-    # Restore from cache the previously built ports. If cache-miss, download, build vcpkg.
-    - name: Restore from cache and install vcpkg
-      # Download and build vcpkg, without installing any port. If content is cached already, it is a no-op.
-      uses: lukka/run-vcpkg@v4
+
+
+    - name: Download GDAL Core for Windows
+      uses: carlosperate/download-file-action@v1.0.3
+      id: download-gdal-core
       with:
-        setupOnly: true
+        # URL of the file to download
+        file-url: http://download.gisinternals.com/sdk/downloads/release-${{ env.MSVC_VERSION_ID }}-x64-gdal-${{ env.GDAL_VERSION_MAJOR }}-${{ env.GDAL_VERSION_MINOR }}-${{ env.GDAL_VERSION_PATCH }}-mapserver-7-4-3/gdal-300-${{ env.MSVC_VERSION_ID }}-x64-core.msi
+        # New filename to rename the downloaded file
+        file-name: gdal-core.msi
+        location: "."
 
-    # Now that vcpkg is installed, it is being used to run desired arguments.
-    - run: |
-        $VCPKG_ROOT/vcpkg @$vcpkgResponseFile
-        $VCPKG_ROOT/vcpkg install gdal
-      shell: bash
-
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-
-    # - name: Download GDAL Core for Windows
-    #   uses: carlosperate/download-file-action@v1.0.3
-    #   id: download-gdal-core
-    #   with:
-    #     # URL of the file to download
-    #     file-url: http://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
-    #     # New filename to rename the downloaded file
-    #     file-name: gdal-core.msi
-    #     location: "."
-
-    # - name: Install GDAL Core
-    #   run: ./gdal-core.msi /quiet
+    - name: Install GDAL Core
+      run: ./gdal-core.msi /quiet
 
     # - name: Download GDAL Python bindings for Windows
     #   uses: carlosperate/download-file-action@v1.0.3
