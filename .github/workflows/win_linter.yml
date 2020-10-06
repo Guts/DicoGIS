@@ -33,7 +33,7 @@ jobs:
 
     - name: Install GDAL Core
       run: |
-        msiexec /i gdal-core.msi INSTALLDIR="GDAL_INSTALL/" /quiet
+        msiexec /i gdal-core.msi INSTALLDIR="${{ env.GITHUB_WORKSPACE }}/GDAL_INSTALL/" /quiet
         ls GDAL_INSTALL/
 
     # - name: Download GDAL Python bindings for Windows
