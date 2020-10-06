@@ -6,6 +6,7 @@ on:
 
 jobs:
   build-docs:
+    runs-on: ubuntu-latest
     container: osgeo/gdal:alpine-normal-latest
     steps:
     - name: Ensure pip is installed
