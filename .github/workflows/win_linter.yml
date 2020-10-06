@@ -29,7 +29,7 @@ jobs:
         location: "."
 
     - name: Install GDAL Core
-      run: ./gdal-core.msi /quiet
+      run: ./gdal-core.msi /passive
 
     - name: Download GDAL Python bindings for Windows
       uses: carlosperate/download-file-action@v1.0.3
@@ -65,8 +65,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip setuptools wheel
         python -m pip install -r requirements/dev.txt
-        python -m pip install gdal==3.0.*
-        # python -m pip install -e .
+
+    # - name: Install Python GDAL
+    #   run: |
+    #     # python -m pip install gdal==3.0.*
 
     # - name: Lint with flake8
     #   run: |
