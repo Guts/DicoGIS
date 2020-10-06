@@ -7,13 +7,21 @@ on:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
-    container: osgeo/gdal:alpine-normal-latest
+    container: osgeo/gdal:ubuntu-normal-latest
     steps:
     - name: Get source code
       uses: actions/checkout@v2
 
     - name: Ensure pip is installed
       run: apk add py3-pip
+
+    - name: Caching pip dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements/docs.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: python -m pip install -U -r requirements/docs.txt
