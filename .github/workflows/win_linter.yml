@@ -78,7 +78,8 @@ jobs:
 
     - name: Install Python GDAL
       run: |
-        gdalinfo --version
+        echo "${{ env.PATH_GDAL_INSTALL }}" >> $GITHUB_PATH
+        echo $(gdalinfo --version)
     #     # python -m pip install gdal==3.0.*
 
     # - name: Lint with flake8
