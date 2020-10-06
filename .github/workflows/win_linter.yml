@@ -24,8 +24,8 @@ jobs:
       with:
         python-version: 3.7
 
-    # -- GDAL STUFF --------------------------------------
-    - name: Prepare 
+    # -- GDAL CORE ---------------------------------------------------------------------
+    - name: Prepare destination folder
       run: mkdir ${{ env.PATH_GDAL_INSTALL }}
 
     - name: Download GDAL Core for Windows
@@ -42,20 +42,6 @@ jobs:
       run: |
         msiexec /i gdal-core.msi INSTALLDIR="${{ env.PATH_GDAL_INSTALL }}" /quiet
 
-    # - name: Download GDAL Python bindings for Windows
-    #   uses: carlosperate/download-file-action@v1.0.3
-    #   id: download-gdal-py-bindings
-    #   with:
-    #     # URL of the file to download
-    #     file-url: ${{ env.URL_GDAL_PYTHON }}
-    #     # New filename to rename the downloaded file
-    #     file-name: gdal-python-bindings.msi
-    #     location: "."
-
-    # - name: Install GDAL Python Bindings
-    #   run: |
-    #     msiexec /i ./gdal-python-bindings.msi INSTALLDIR="${{ env.PATH_GDAL_INSTALL }}" /quiet
-
     - name: Add GDAL to the path
       run: echo "${{ env.PATH_GDAL_INSTALL }}" >> $GITHUB_PATH
 
@@ -66,32 +52,41 @@ jobs:
       run: |
         ls ${{ env.PATH_GDAL_INSTALL }}
 
-    # - name: Cache pip
-    #   # https://github.com/actions/cache/blob/master/examples.md#python---pip
-    #   uses: actions/cache@v1
-    #   with:
-    #     path: ~\AppData\Local\pip\Cache # This path is specific to Windows
-    #     # Look to see if there is a cache hit for the corresponding requirements file
-    #     key: ${{ runner.os }}-pip-${{ hashFiles('requirements/base.txt') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-pip-
-    #       ${{ runner.os }}-
+    # -- GDAL Python bindings ----------------------------------------------------------
+    - name: Download GDAL Python bindings for Windows
+      uses: carlosperate/download-file-action@v1.0.3
+      id: download-gdal-py-bindings
+      with:
+        # URL of the file to download
+        file-url: ${{ env.URL_GDAL_PYTHON }}
+        # New filename to rename the downloaded file
+        file-name: gdal-python-bindings.msi
+        location: "."
 
-    # - name: Install dependencies
-    #   run: |
-    #     python -m pip install --upgrade pip setuptools wheel
-    #     python -m pip install -r requirements/dev.txt
-
-    - name: Install Python GDAL
+    - name: Install GDAL Python Bindings
       run: |
-        echo "${{ env.PATH_GDAL_INSTALL }}" >> $GITHUB_PATH
-        $env:Path += ";${{ env.PATH_GDAL_INSTALL }}"
-        echo $(gdalinfo --version)
-    #     # python -m pip install gdal==3.0.*
+        msiexec /i gdal-python-bindings.msi /quiet
 
-    # - name: Lint with flake8
-    #   run: |
-    #     # stop the build if there are Python syntax errors or undefined names
-    #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-    #     # exit-zero treats all errors as warnings.
-    #     flake8 . --count --exit-zero --statistics
+    # -- Project Python dependencies ---------------------------------------------------
+    - name: Cache pip
+      # https://github.com/actions/cache/blob/master/examples.md#python---pip
+      uses: actions/cache@v1
+      with:
+        path: ~\AppData\Local\pip\Cache # This path is specific to Windows
+        # Look to see if there is a cache hit for the corresponding requirements file
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements/base.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install -r requirements/dev.txt
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings.
+        flake8 . --count --exit-zero --statistics
