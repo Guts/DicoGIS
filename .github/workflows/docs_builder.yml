@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     container: osgeo/gdal:alpine-normal-latest
     steps:
+    - name: Get source code
+      uses: actions/checkout@v2
+
     - name: Ensure pip is installed
       run: apk add py3-pip
 
