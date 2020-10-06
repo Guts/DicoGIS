@@ -1,0 +1,15 @@
+name: Documentation Builder
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-docs:
+    container: osgeo/gdal:alpine-normal-latest
+    steps:
+    - name: Install dependencies
+      run: python -m pip install -U -r requirements/docs.txt
+
+    - name: Build doc using Sphinx
+      run: sphinx-build -b html docs docs/_build

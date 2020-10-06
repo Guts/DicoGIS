@@ -62,8 +62,3 @@ jobs:
       with:
         name: DicoGIS_ubuntu_executable
         path: DicoGIS_ubuntu_64bits.zip
-
-    - name: Generates documentation
-      run: |
-        python -m pip install -U -r requirements/docs.txt
-        make gh-pages
