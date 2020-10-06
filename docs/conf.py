@@ -51,6 +51,8 @@ extensions = [
     # Sphinx included
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.githubpages",
     # 3rd party
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
