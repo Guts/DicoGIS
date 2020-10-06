@@ -5,10 +5,8 @@ on:
     branches: [ master ]
 
 env:
-  GDAL_VERSION_MAJOR: 3
-  GDAL_VERSION_MINOR: 1
-  GDAL_VERSION_PATCH: 3
-  MSVC_VERSION_ID: 1911
+  URL_GDAL_CORE: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
+  URL_GDAL_PYTHON: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.7.msi
 
 
 jobs:
@@ -19,17 +17,13 @@ jobs:
     steps:
     - name: Get source code
       uses: actions/checkout@v2
-      with:
-        lfs: true
-
-
 
     - name: Download GDAL Core for Windows
       uses: carlosperate/download-file-action@v1.0.3
       id: download-gdal-core
       with:
         # URL of the file to download
-        file-url: http://download.gisinternals.com/sdk/downloads/release-${{ env.MSVC_VERSION_ID }}-x64-gdal-${{ env.GDAL_VERSION_MAJOR }}-${{ env.GDAL_VERSION_MINOR }}-${{ env.GDAL_VERSION_PATCH }}-mapserver-7-4-3/gdal-300-${{ env.MSVC_VERSION_ID }}-x64-core.msi
+        file-url: ${{ env.URL_GDAL_CORE }}
         # New filename to rename the downloaded file
         file-name: gdal-core.msi
         location: "."
@@ -37,21 +31,21 @@ jobs:
     - name: Install GDAL Core
       run: ./gdal-core.msi /quiet
 
-    # - name: Download GDAL Python bindings for Windows
-    #   uses: carlosperate/download-file-action@v1.0.3
-    #   id: download-gdal-py-bindings
-    #   with:
-    #     # URL of the file to download
-    #     file-url: http://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.7.msi
-    #     # New filename to rename the downloaded file
-    #     file-name: gdal-python-bindings.msi
-    #     location: "."
+    - name: Download GDAL Python bindings for Windows
+      uses: carlosperate/download-file-action@v1.0.3
+      id: download-gdal-py-bindings
+      with:
+        # URL of the file to download
+        file-url: ${{ env.URL_GDAL_PYTHON }}
+        # New filename to rename the downloaded file
+        file-name: gdal-python-bindings.msi
+        location: "."
 
-    # - name: Install GDAL Python Bindings
-    #   run: ./gdal-python-bindings.msi /quiet
+    - name: Install GDAL Python Bindings
+      run: ./gdal-python-bindings.msi /quiet
 
-    # - name: Add GDAL to the path
-    #   run: echo "::add-path::C:\Program Files\GDAL"
+    - name: Add GDAL to the path
+      run: echo "::add-path::C:\Program Files\GDAL"
 
     - name: Cache pip
       # https://github.com/actions/cache/blob/master/examples.md#python---pip
@@ -64,11 +58,11 @@ jobs:
           ${{ runner.os }}-pip-
           ${{ runner.os }}-
 
-    # - name: Install dependencies
-    #   run: |
-    #     python -m pip install --upgrade pip setuptools wheel
-    #     python -m pip install -r requirements/windows.txt
-    #     python -m pip install -e .
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install -r requirements/windows.txt
+        python -m pip install -e .
 
     # - name: Lint with flake8
     #   run: |
