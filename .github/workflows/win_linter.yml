@@ -47,6 +47,9 @@ jobs:
     - name: Add GDAL to the path
       run: echo "%ProgramFiles%\GDAL" >> $GITHUB_PATH
 
+    - name: Add GDAL DATA as environment variable
+      run: echo "GDAL_DATA=%ProgramFiles%\GDAL\gdal-data" >> $GITHUB_ENV
+
     - name: Cache pip
       # https://github.com/actions/cache/blob/master/examples.md#python---pip
       uses: actions/cache@v1
