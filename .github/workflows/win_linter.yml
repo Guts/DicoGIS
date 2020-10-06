@@ -30,7 +30,7 @@ jobs:
 
     - name: Install GDAL Core
       run: |
-        ls -a
+        ls
         mkdir GDAL_INSTALL
         # msiexec /i ./gdal-core.msi INSTALLDIR="./GDAL_INSTALL" /quiet
         # ls ./GDAL_INSTALL/
