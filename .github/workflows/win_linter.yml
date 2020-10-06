@@ -23,7 +23,8 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
-      
+
+    # -- GDAL STUFF --------------------------------------
     - name: Prepare 
       run: mkdir ${{ env.PATH_GDAL_INSTALL }}
 
@@ -41,19 +42,19 @@ jobs:
       run: |
         msiexec /i gdal-core.msi INSTALLDIR="${{ env.PATH_GDAL_INSTALL }}" /quiet
 
-    - name: Download GDAL Python bindings for Windows
-      uses: carlosperate/download-file-action@v1.0.3
-      id: download-gdal-py-bindings
-      with:
-        # URL of the file to download
-        file-url: ${{ env.URL_GDAL_PYTHON }}
-        # New filename to rename the downloaded file
-        file-name: gdal-python-bindings.msi
-        location: "."
+    # - name: Download GDAL Python bindings for Windows
+    #   uses: carlosperate/download-file-action@v1.0.3
+    #   id: download-gdal-py-bindings
+    #   with:
+    #     # URL of the file to download
+    #     file-url: ${{ env.URL_GDAL_PYTHON }}
+    #     # New filename to rename the downloaded file
+    #     file-name: gdal-python-bindings.msi
+    #     location: "."
 
-    - name: Install GDAL Python Bindings
-      run: |
-        msiexec /i ./gdal-python-bindings.msi INSTALLDIR="${{ env.PATH_GDAL_INSTALL }}" /quiet
+    # - name: Install GDAL Python Bindings
+    #   run: |
+    #     msiexec /i ./gdal-python-bindings.msi INSTALLDIR="${{ env.PATH_GDAL_INSTALL }}" /quiet
 
     - name: Add GDAL to the path
       run: echo "${{ env.PATH_GDAL_INSTALL }}" >> $GITHUB_PATH
@@ -84,6 +85,7 @@ jobs:
     - name: Install Python GDAL
       run: |
         echo "${{ env.PATH_GDAL_INSTALL }}" >> $GITHUB_PATH
+        $env:Path += ";${{ env.PATH_GDAL_INSTALL }}"
         echo $(gdalinfo --version)
     #     # python -m pip install gdal==3.0.*
 
