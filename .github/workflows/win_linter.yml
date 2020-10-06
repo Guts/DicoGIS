@@ -55,7 +55,7 @@ jobs:
     - name: Add GDAL DATA as environment variable
       run: echo "GDAL_DATA=${{ env.PATH_GDAL_INSTALL }}/gdal-data" >> $GITHUB_ENV
 
-    - name: just a check
+    - name: Display GDAL installation folder
       run: |
         ls ${{ env.PATH_GDAL_INSTALL }}
 
@@ -75,11 +75,11 @@ jobs:
     #     python -m pip install --upgrade pip setuptools wheel
     #     python -m pip install -r requirements/dev.txt
 
-    # - name: Install Python GDAL
-    #   env:
-    #     GDAL_DATA: "./GDAL_INSTALL/gdal-data"
-    #   run: |
-    #     gdalinfo --version
+    - name: Install Python GDAL
+      env:
+        GDAL_DATA: "${{ env.PATH_GDAL_INSTALL }}\gdal-data"
+      run: |
+        gdalinfo --version
     #     # python -m pip install gdal==3.0.*
 
     # - name: Lint with flake8
