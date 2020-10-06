@@ -29,7 +29,9 @@ jobs:
         location: "."
 
     - name: Install GDAL Core
-      run: ./gdal-core.msi /passive
+      run: |
+        msiexec /i ./gdal-core.msi INSTALLDIR="./GDAL_INSTALL" /quiet
+        ls ./GDAL_INSTALL/
 
     - name: Download GDAL Python bindings for Windows
       uses: carlosperate/download-file-action@v1.0.3
@@ -42,13 +44,14 @@ jobs:
         location: "."
 
     - name: Install GDAL Python Bindings
-      run: ./gdal-python-bindings.msi /quiet
+      run: |
+        msiexec /i ./gdal-python-bindings.msi INSTALLDIR="./GDAL_INSTALL" /quiet
 
     - name: Add GDAL to the path
-      run: echo "%ProgramFiles%\GDAL" >> $GITHUB_PATH
+      run: echo "./GDAL_INSTALL" >> $GITHUB_PATH
 
     - name: Add GDAL DATA as environment variable
-      run: echo "GDAL_DATA=%ProgramFiles%\GDAL\gdal-data" >> $GITHUB_ENV
+      run: echo "GDAL_DATA=./GDAL_INSTALL/gdal-data" >> $GITHUB_ENV
 
     - name: Cache pip
       # https://github.com/actions/cache/blob/master/examples.md#python---pip
@@ -68,7 +71,7 @@ jobs:
 
     - name: Install Python GDAL
       env:
-        GDAL_DATA: "C:\\Program Files\\GDAL\\gdal-data"
+        GDAL_DATA: "./GDAL_INSTALL/gdal-data"
       run: |
         gdalinfo --version
         # python -m pip install gdal==3.0.*
