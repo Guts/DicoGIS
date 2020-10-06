@@ -1,6 +1,4 @@
-﻿# -*- coding: UTF-8 -*-
-#! python3  # noqa: E265
-
+﻿#! python3  # noqa: E265
 
 """
     Name:         InfosSHP
@@ -34,7 +32,7 @@ try:
     from .gdal_exceptions_handler import GdalErrorHandler
     from .geo_infos_generic import GeoInfosGenericReader
     from .geoutils import Utils
-except ValueError:
+except ImportError:
     from gdal_exceptions_handler import GdalErrorHandler
     from geo_infos_generic import GeoInfosGenericReader
     from geoutils import Utils
@@ -172,7 +170,7 @@ class ReadVectorFlatDataset:
 # ################################
 
 if __name__ == "__main__":
-    """ standalone execution for tests. Paths are relative considering a test
+    """standalone execution for tests. Paths are relative considering a test
     within the official repository (https://github.com/Guts/DicoGIS)"""
     # libraries import
     # from os import getcwd

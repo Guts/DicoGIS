@@ -127,7 +127,11 @@ class GeoInfosGenericReader(object):
 
         # handling exceptions in srs names'encoding
         try:
-            if srs.GetAttrValue(str("PROJCS")) != "unnamed":
+            if srs.GetName() is not None:
+                srs_name = srs.GetName()
+            elif srs.IsGeographic() and srs.GetAttrValue(str("GEOGCS")):
+                srs_name = srs.GetAttrValue(str("GEOGCS")).replace("_", " ")
+            elif srs.IsProjected() and srs.GetAttrValue(str("PROJCS")):
                 srs_name = srs.GetAttrValue(str("PROJCS")).replace("_", " ")
             else:
                 srs_name = srs.GetAttrValue(str("PROJECTION")).replace("_", " ")
@@ -153,7 +157,7 @@ class GeoInfosGenericReader(object):
 
         return (srs_name, srs_epsg, srs_type)
 
-    def get_title(self, layer):
+    def get_title(self, layer) -> str:
         """Get layer title preventing encoding errors."""
         try:
             layer_title = layer.GetName()
