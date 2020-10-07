@@ -5,7 +5,8 @@ on:
     branches: [ master ]
 
 env:
-  GDAL_DATA: ${{ github.workspace }}\GDAL_INSTALL\gdal-data
+  GDAL_VERSION: 3.0.4
+  PATH_GDAL_DATA: ${{ github.workspace }}\GDAL_INSTALL\gdal-data
   PATH_GDAL_INSTALL: ${{ github.workspace }}\GDAL_INSTALL
   PROJECT_FOLDER: "dicogis"
   URL_GDAL_CORE: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
@@ -64,7 +65,7 @@ jobs:
       run: echo "${{ env.PATH_GDAL_INSTALL }}" >> $GITHUB_PATH
 
     - name: Add GDAL DATA as environment variable
-      run: echo "GDAL_DATA=${{ env.PATH_GDAL_DATA }}" >> $GITHUB_ENV
+      run: echo "PATH_GDAL_DATA=${{ env.PATH_PATH_GDAL_DATA }}" >> $GITHUB_ENV
 
     - name: Display GDAL installation folder and version
       run: |
@@ -103,7 +104,7 @@ jobs:
         python-version: 3.7
 
     - name: Install gdal using conda
-      run: conda install gdal==3.04
+      run: conda install gdal==${{ env.GDAL_VERSION }}
 
     - name: Lint with flake8
       run: |
