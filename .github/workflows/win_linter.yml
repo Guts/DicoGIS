@@ -70,10 +70,10 @@ jobs:
         $env:Path += ";${{ env.PATH_GDAL_INSTALL }}"
         msiexec /i gdal-python-bindings.msi /quiet
 
-    - name: Display GDAL Python bindings version
-      run: |
-        $env:Path += ";${{ env.PATH_GDAL_INSTALL }}"
-        python -c "from osgeo import gdal; print(gdal.__version__)"
+    # - name: Display GDAL Python bindings version
+    #   run: |
+    #     $env:Path += ";${{ env.PATH_GDAL_INSTALL }}"
+    #     python -c "from osgeo import gdal; print(gdal.__version__)"
 
     # -- Project Python dependencies ---------------------------------------------------
     - name: Cache pip
