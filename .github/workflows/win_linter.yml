@@ -102,9 +102,8 @@ jobs:
         auto-update-conda: true
         python-version: 3.7
 
-
-
-
+    - name: Install gdal using conda
+      run: conda install gdal==3.04
 
     - name: Lint with flake8
       run: |
