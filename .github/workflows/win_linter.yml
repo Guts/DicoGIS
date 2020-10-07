@@ -100,11 +100,12 @@ jobs:
       with:
         add-pip-as-python-dependency: true
         architecture: "x64"
-        auto-update-conda: true
+        auto-update-conda: false
         python-version: 3.7
+        use-only-tar-bz2: true  # IMPORTANT: This needs to be set for caching to work properly!
 
     - name: Install gdal using conda
-      run: conda install gdal==${{ env.GDAL_VERSION }}
+      run: conda install -c conda-forge gdal==${{ env.GDAL_VERSION }}
 
     - name: Lint with flake8
       run: |
