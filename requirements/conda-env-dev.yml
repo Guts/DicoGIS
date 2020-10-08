@@ -1,0 +1,15 @@
+name: dicogis-dev
+channels:
+  - conda-forge
+dependencies:
+  - gdal=3.0.4
+  - mkl
+  - numpy=1.19.*
+  - python=3.7
+  - pip
+  - pyinstaller>=3.6,<4.1
+  - setuptools
+  - wheel
+  - pip:
+    - -r file:base.txt
+    - -r file:dev.txt
