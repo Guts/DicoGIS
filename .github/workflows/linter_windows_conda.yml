@@ -30,8 +30,9 @@ jobs:
       with:
         activate-environment: dicogis-dev
         channels: conda-forge,defaults
-        channel-priority: strict
         environment-file: requirements/conda-env-dev.yml
+        channel-priority: true
+        python-version: 3.7
         use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
 
     - name: Install project as a package
