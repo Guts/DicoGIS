@@ -1,6 +1,7 @@
 name: dicogis-dev
 channels:
   - conda-forge
+  - defaults
 dependencies:
   - gdal=3.0.4
   - mkl
