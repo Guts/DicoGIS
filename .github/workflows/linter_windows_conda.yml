@@ -32,6 +32,7 @@ jobs:
         channels: conda-forge,defaults
         environment-file: requirements/conda-env-dev.yml
         channel-priority: true
+        mamba-version: "*"
         python-version: 3.7
         use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
 
