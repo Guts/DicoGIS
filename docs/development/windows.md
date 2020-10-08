@@ -2,42 +2,79 @@
 
 Tested on:
 
-- Windows 10 2004 Professional
+- Windows 10 Professional - build 19041 (= version 2004)
 
-## Install Python and Git
+## Common
 
-Install system requirements:
+### Enable remote scripts (for virtual environment)
 
-```bash
-sudo apt install git python3-pip python3-tk python3-virtualenv python3-venv virtualenv
+Open a Powershell prompt as **administrator** inside the repository folder:
+
+```powershell
+# if not already done, enable scripts  - required by virtualenv
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-Clone the repository where you want:
+----
 
-```bash
-git clone https://github.com/Guts/DicoGIS.git
-# or using ssh
-git clone git@github.com:Guts/DicoGIS.git
-```
+## Using pre-built wheel
 
-Create and enter virtual environment (change the path at your convenience):
+### Requirements
 
-```bash
-virtualenv -p /usr/bin/python3 ~/pyvenvs/dicogis
-source ~/pyvenvs/dicogis/bin/activate
-```
+- Python 3.7 installed with the Windows MSI installer (version from the Windows store is not working)
 
-## Install project requirements
+### Download GDAL wheel
 
-```bash
-python -m pip install -U pip setuptools wheel
-python -m pip install -U -r requirements/ubuntu.txt
-```
+1. Go to <https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>
+2. Download the adequate package. For example: `GDAL‑3.1.3‑cp37‑cp37m‑win_amd64.whl`
+3. Move downloaded wheel to the `lib` subfolder
 
-## Install project
+### Installation steps
 
-```bash
+```powershell
+# create a virtual env
+py -3.7 -m venv .venv
+
+# enable virtual env
+.\.venv\Scripts\activate
+
+# upgrade basic tooling
+python -m pip install -U pip
+
+# install dependencies
+python -m pip install -U -r base.txt
+python -m pip install -U -r dev.txt
+python -m pip install -U -r windows.txt
+
+# finally, install the package in editable mode
 python -m pip install -e .
 ```
 
-Happy coding!
+----
+
+## Using conda
+
+### Requirements
+
+- conda >= 4.8
+
+### Installation steps
+
+Open the Anaconda Powershell Prompt in the repository folder, then:
+
+```powershell
+# add conda-forge to channels
+conda config --add channels conda-forge
+
+# ensure pip, setuptools and wheel are added
+conda config --set add_pip_as_python_dependency true
+
+# create conda environment
+conda env create -f .\requirements\conda-env-dev.yml
+
+# enter the conda virtual environment
+conda activate dicogis-dev
+
+# finally, install the package in editable mode
+python -m pip install -e .
+```
