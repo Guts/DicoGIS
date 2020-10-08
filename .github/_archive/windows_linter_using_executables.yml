@@ -95,29 +95,6 @@ jobs:
     #     python -c "from osgeo import gdal; print(gdal.__version__)"
 
     # -- Project Python dependencies ---------------------------------------------------
-    - name: Cache conda
-      uses: actions/cache@v1
-      env:
-        # Increase this value to reset cache if etc/example-environment.yml has not changed
-        CACHE_NUMBER: 0
-      with:
-        path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ env.GDAL_VERSION }}
-
-    - name: Install conda
-      uses: conda-incubator/setup-miniconda@v1
-      with:
-        add-pip-as-python-dependency: true
-        architecture: "x64"
-        auto-activate-base: false
-        auto-update-conda: false
-        conda-version: 4.8.5
-        python-version: 3.7
-        use-only-tar-bz2: true  # IMPORTANT: This needs to be set for caching to work properly!
-
-    - name: Install gdal using conda
-      run: conda install -c conda-forge gdal==${{ env.GDAL_VERSION }}
-
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
