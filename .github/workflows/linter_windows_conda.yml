@@ -51,3 +51,15 @@ jobs:
 
     - name: Generates MS Executable
       run: python -O .\builder\pyinstaller_build_windows.py
+
+    - name: Zip generated application folder
+      uses: papeloto/action-zip@v1
+      with:
+        files: dist/DicoGIS
+        dest: DicoGIS_windows_64bits.zip
+
+    - name: Save it as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: DicoGIS_windows_executable
+        path: DicoGIS_windows_64bits.zip
