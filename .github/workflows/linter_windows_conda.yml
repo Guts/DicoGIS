@@ -1,0 +1,41 @@
+name: Quick Linter
+
+on:
+  pull_request:
+    branches: [ master ]
+
+env:
+  GDAL_VERSION: 3.0.4
+  PROJECT_FOLDER: "dicogis"
+
+jobs:
+  lint-windows:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Get source code
+      uses: actions/checkout@v2
+
+    - name: Cache conda
+      uses: actions/cache@v1
+      env:
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('requirements/conda-env-dev.yml') }}
+
+    - name: Setup conda environment
+      uses: conda-incubator/setup-miniconda@v1
+      with:
+        activate-environment: dicogis-dev
+        channel-priority: strict
+        environment-file: requirements/conda-env-dev.yml
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 ${{ env.PROJECT_FOLDER }} --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings.
+        flake8 ${{ env.PROJECT_FOLDER }} --count --exit-zero --statistics
