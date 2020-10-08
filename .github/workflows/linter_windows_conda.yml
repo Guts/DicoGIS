@@ -23,15 +23,15 @@ jobs:
         CACHE_NUMBER: 0
       with:
         path: ~/conda_pkgs_dir
-        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('requirements/conda-env-dev.yml') }}
+        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('requirements/conda-env-dev.yml.lock') }}
 
     - name: Setup conda environment
       uses: conda-incubator/setup-miniconda@v1.7.0
       with:
         activate-environment: dicogis-dev
         channels: conda-forge,defaults
-        environment-file: requirements/conda-env-dev.yml
         channel-priority: true
+        environment-file: requirements/conda-env-dev.yml.lock
         mamba-version: "*"
         python-version: 3.7
         use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
