@@ -22,4 +22,5 @@
     // extensions
     "autoDocstring.customTemplatePath": ".vscode\\docstring-config.mustache",
     "autoDocstring.generateDocstringOnEnter": false,
+    "restructuredtext.confPath": "${workspaceFolder}\\docs",
 }

@@ -1,17 +1,12 @@
-DicoGIS
+|title|
 =======
-
-.. module:: dicogis
-.. moduleauthor:: Julien Moura
-
-:Author: Julien Moura
-:Source code: https://github.com/Guts/dicogis/
-:Issues: https://github.com/Guts/dicogis/issues
 
 .. |date| date::
 
-Updated: |date|
-
+:Author: |author|
+:Source code: |repo_url|
+:Package version: |version|
+:Documentation update: |date|
 
 ----
 

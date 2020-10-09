@@ -1,5 +1,8 @@
 {
     "recommendations": [
+        "coenraads.bracket-pair-colorizer-2",
+        "github.vscode-pull-request-github",
+        "grapecity.gc-excelviewer",
         "ms-python.python",
         "njpwerner.autodocstring"
     ]

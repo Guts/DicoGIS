@@ -35,6 +35,10 @@ version = __about__.__version__
 # The full version, including alpha/beta/rc tags
 release = __about__.__version__
 
+# replacement variables
+rst_epilog = ".. |title| replace:: %s" % project
+rst_epilog += "\n.. |author| replace:: %s" % author
+rst_epilog += "\n.. |repo_url| replace:: %s" % __about__.__uri__
 
 # -- General configuration ---------------------------------------------------
 
