@@ -18,7 +18,7 @@ import PyInstaller.__main__
 
 # package
 sys.path.insert(0, str(Path(".").resolve()))
-from dicogis import __about__
+from dicogis import __about__  # noqa: E402
 
 
 # #############################################################################
