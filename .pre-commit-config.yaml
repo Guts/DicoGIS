@@ -20,7 +20,7 @@ repos:
   hooks:
   - id: black
     exclude_types: [directory,]
-    language_version: python3.7
+    language_version: python3
     log_file: ./dev_precommit_black.log
     require_serial: true
     types: [file, python]
