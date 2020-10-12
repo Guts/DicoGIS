@@ -4,6 +4,9 @@
         88
     ],
     "editor.wordWrapColumn": 88,
+    "files.associations": {
+        "./requirements/*.txt": "pip-requirements"
+    },
     // Python environment
     "python.pythonPath": ".venv\\Scripts\\python.exe",
     // Formatter
