@@ -63,9 +63,9 @@ jobs:
     - uses: papeloto/action-zip@v1
       with:
         files: dist/DicoGIS
-        dest: DicoGIS_ubuntu_64bits.zip
+        dest: DicoGIS_${{ runner.os }}_64bits_python${{ matrix.python }}.zip
 
     - uses: actions/upload-artifact@v2
       with:
         name: DicoGIS_ubuntu_executable
-        path: DicoGIS_ubuntu_64bits.zip
+        path: DicoGIS_${{ runner.os }}_64bits_python${{ matrix.python }}.zip

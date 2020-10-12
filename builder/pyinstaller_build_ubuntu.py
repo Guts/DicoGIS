@@ -10,6 +10,7 @@
 
 # Standard library
 from pathlib import Path
+import platform
 import sys
 
 
@@ -35,15 +36,22 @@ PyInstaller.__main__.run(
         "--add-data=README.md:.",
         "--clean",
         # "--debug=all",
-        "--hidden-import=pkg_resources.py2_warn",
+        # "--hidden-import=pkg_resources.py2_warn",
         # "--icon={}".format((package_folder / "bin/img/DicoGIS.ico").resolve()),
         "--log-level=WARN",
-        "--name={}".format(__about__.__title_clean__),
+        "--name={}_{}_{}{}_Python{}-{}".format(
+            __about__.__title_clean__,
+            __about__.__version__.replace(".", "-"),
+            platform.system(),
+            platform.architecture()[0],
+            platform.python_version_tuple()[0],
+            platform.python_version_tuple()[1],
+        ),
         "--noconfirm",
         "--noupx",
         "--onedir",
         # "--onefile",
-        "--version-file={}".format("version_info.txt"),
+        # "--version-file={}".format("version_info.txt"),
         # "--windowed",
         str(package_folder / "DicoGIS.py"),
     ]
