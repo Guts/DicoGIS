@@ -63,5 +63,5 @@ jobs:
 
     - uses: actions/upload-artifact@v2
       with:
-        name: DicoGIS_${{ python3 -c "import distro; print('{}{}'.format(distro.name(), distro.version()))" }}_64bits_python${{ env.PYTHON_VERSION }}
+        name: DicoGIS_"`python3 -c 'import distro; print("{}{}".format(distro.name(), distro.version()))'`"_64bits_python${{ env.PYTHON_VERSION }}
         path: dist/
