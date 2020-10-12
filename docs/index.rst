@@ -26,6 +26,7 @@
 
    development/windows
    development/ubuntu
+   development/documentation
 
 .. toctree::
    :maxdepth: 3
