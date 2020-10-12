@@ -16,6 +16,7 @@ import sys
 
 
 # 3rd party
+import distro
 import PyInstaller.__main__
 
 # package
@@ -40,14 +41,14 @@ PyInstaller.__main__.run(
         # "--hidden-import=pkg_resources.py2_warn",
         # "--icon={}".format((package_folder / "bin/img/DicoGIS.ico").resolve()),
         "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
-        "--name={}_{}_{}{}_Python{}-{}".format(
+        "--name={}_{}_{}{}_{}_Python{}".format(
             __about__.__title_clean__,
-            __about__.__version__.replace(".", "-"),
-            platform.system(),
+            __about__.__version__,
+            distro.name(),
+            distro.version(),
             platform.architecture()[0],
-            platform.python_version_tuple()[0],
-            platform.python_version_tuple()[1],
-        ),
+            platform.python_version(),
+        ).replace(".", "-"),
         "--noconfirm",
         "--noupx",
         "--onedir",
