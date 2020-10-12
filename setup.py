@@ -47,7 +47,7 @@ setup(
     # dependencies
     python_requires=">=3.6, <4",
     extras_require={
-        "dev": ["black", "flake8", "pre-commit"],
+        "dev": ["black", "flake8", "pre-commit", "pyinstaller"],
         "test": ["pytest", "pytest-cov"],
     },
     install_requires=[

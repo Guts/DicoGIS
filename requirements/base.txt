@@ -6,8 +6,8 @@ wheel
 
 # Project requirements
 # -----------------------
-dxfgrabber==1.0.*
-geoserver-restconfig==2.0.4.*
-numpy==1.19.*
-openpyxl==3.0.*
-xmltodict==0.12.*
+dxfgrabber>=1.0,<1.1
+geoserver-restconfig>=2.0.4,<2.0.5
+numpy>=1.19,<1.20
+openpyxl>=3.0,<3.1
+xmltodict>=0.12,<1
