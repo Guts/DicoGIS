@@ -3,6 +3,8 @@ name: Ubuntu Builder
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build-ubuntu:
@@ -13,7 +15,7 @@ jobs:
     steps:
     - name: Set environment variables
       run: |
-        echo ::set-env name=GDAL_VERSION::3.0.*
+        echo ::set-env name=GDAL_VERSION::3.0
 
     - name: Get source code
       uses: actions/checkout@v2
