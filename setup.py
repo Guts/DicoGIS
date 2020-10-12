@@ -51,12 +51,12 @@ setup(
         "test": ["pytest", "pytest-cov"],
     },
     install_requires=[
-        "dxfgrabber==1.0.*",
-        "geoserver-restconfig==2.0.4.*",
-        "gdal==3.0.*",
-        "numpy==1.19.*",
-        "openpyxl==3.0.*",
-        "xmltodict==0.12.*",
+        "dxfgrabber>=1.0,<1.1",
+        "gdal==3.*",
+        "geoserver-restconfig>=2.0.4,<2.0.5",
+        "numpy>=1.19,<1.20",
+        "openpyxl>=3.0,<3.1",
+        "xmltodict>=0.12,<1",
     ],
     # metadata
     classifiers=[
