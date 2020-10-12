@@ -10,6 +10,7 @@ env:
   GDAL_VERSION: 3.*
   PROJECT_FOLDER: "dicogis"
   PYINSTALLER_LOG_LEVEL: "DEBUG"
+  PYTHON_VERSION: 3.8
 
 jobs:
   build-ubuntu:
@@ -18,7 +19,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-18.04, ubuntu-20.04]
-        python: [3.7, 3.8]
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
     steps:
@@ -28,7 +28,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python }}
+        python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install GDAL binaries
       run: |
@@ -61,12 +61,7 @@ jobs:
     - name: Generates Executable
       run: python -O ./builder/pyinstaller_build_ubuntu.py
 
-    # - uses: papeloto/action-zip@v1
-    #   with:
-    #     files: dist/DicoGIS*
-    #     dest: DicoGIS_${{ runner.os }}_64bits_python${{ matrix.python }}.zip
-
     - uses: actions/upload-artifact@v2
       with:
-        name: DicoGIS_${{ runner.os }}_64bits_python${{ matrix.python }}
+        name: DicoGIS_${{ python3 -c "import distro; print('{}{}'.format(distro.name(), distro.version()))" }}_64bits_python${{ env.PYTHON_VERSION }}
         path: dist/
