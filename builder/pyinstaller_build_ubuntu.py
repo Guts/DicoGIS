@@ -9,6 +9,7 @@
 # ##################################
 
 # Standard library
+from os import getenv
 from pathlib import Path
 import platform
 import sys
@@ -38,7 +39,7 @@ PyInstaller.__main__.run(
         # "--debug=all",
         # "--hidden-import=pkg_resources.py2_warn",
         # "--icon={}".format((package_folder / "bin/img/DicoGIS.ico").resolve()),
-        "--log-level=WARN",
+        "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
         "--name={}_{}_{}{}_Python{}-{}".format(
             __about__.__title_clean__,
             __about__.__version__.replace(".", "-"),

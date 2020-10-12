@@ -9,6 +9,7 @@ on:
 env:
   GDAL_VERSION: 3.*
   PROJECT_FOLDER: "dicogis"
+  PYINSTALLER_LOG_LEVEL: "DEBUG"
 
 jobs:
   build-ubuntu:
