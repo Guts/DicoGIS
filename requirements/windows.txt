@@ -1,5 +1,3 @@
--r dev.txt
-
 --find-links=../lib
 
-gdal==3.0.* --no-index ; sys_platform == 'win32'
+gdal==3.* --no-index ; sys_platform == 'win32'

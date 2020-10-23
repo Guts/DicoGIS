@@ -1,3 +1,1 @@
--r dev.txt
-
-pygdal==3.0.4.* ; sys_platform == 'linux'
+pygdal==3.* ; sys_platform == 'linux'
