@@ -3,6 +3,7 @@ name: Windows Builder
 on:
   push:
     branches: [ master ]
+    tags: "*"
 
 env:
   GDAL_VERSION: 3.1.3
