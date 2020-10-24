@@ -7,7 +7,7 @@ on:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
-    container: osgeo/gdal:ubuntu-normal-latest
+    container: osgeo/gdal:alpine-normal-latest
     steps:
       - name: Get source code
         uses: actions/checkout@v2
