@@ -45,7 +45,7 @@ class MiscButtons(Frame):
             master=self, file=images_folder / "DicoGIS_logo_200px.png"
         )
         Label(self, borderwidth=2, image=self.icone).grid(
-            row=1, columnspan=3, column=0, padx=2, pady=2, sticky=W
+            row=1, columnspan=2, column=0, padx=2, pady=2, sticky=W
         )
         # credits
         s = Style(self)
@@ -56,7 +56,7 @@ class MiscButtons(Frame):
             style="Kim.TButton",
             command=lambda: open_new_tab(parent.package_about.__uri__),
         )
-        btn_credits.grid(row=2, columnspan=3, padx=2, pady=2, sticky="WE")
+        btn_credits.grid(row=2, columnspan=2, padx=2, pady=2, sticky="WE")
 
         # contact
         mailto = "mailto:{}?" "subject=[{}]%20Question".format(
@@ -79,14 +79,14 @@ class MiscButtons(Frame):
         # documentation
         btn_doc = Button(
             self,
-            text="\1F56E" + _("Documentation"),
+            text="\U0001F56E " + _("Documentation"),
             command=lambda: open_new_tab(__about__.__uri_doc__),
         )
 
         # griding
         btn_contact.grid(row=3, column=0, padx=2, pady=2, sticky="WE")
         btn_src.grid(row=3, column=1, padx=2, pady=2, sticky="EW")
-        btn_doc.grid(row=3, column=2, padx=2, pady=2, sticky="EW")
+        btn_doc.grid(row=4, column=0, columnspan=2, padx=2, pady=2, sticky="WE")
 
 
 # #############################################################################
