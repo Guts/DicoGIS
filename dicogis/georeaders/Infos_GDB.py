@@ -6,11 +6,6 @@
 # Purpose:      Uses OGR to read into Esri File GeoDataBase.
 #
 # Author:       Julien Moura (https://github.com/Guts/)
-#
-# Python:       2.7.x
-# Created:      24/05/2014
-# Updated:      11/11/2014
-# Licence:      GPL 3
 # ----------------------------------------------------------------------------
 
 
@@ -193,7 +188,7 @@ class ReadGDB:
 # ################################
 
 if __name__ == "__main__":
-    """ standalone execution for tests. Paths are relative considering a test
+    """standalone execution for tests. Paths are relative considering a test
     within the official repository (https://github.com/Guts/DicoGIS/)"""
     from os import chdir
 

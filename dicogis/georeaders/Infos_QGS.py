@@ -6,11 +6,6 @@
 # Purpose:      Get some metadata about QGIS .qgs files without using QGIS.
 #
 # Author:       Julien Moura (https://github.com/Guts)
-#
-# Python:       2.7.x
-# Created:      28/09/2015
-# Updated:      12/10/2017
-# Licence:      GPL 3
 # ----------------------------------------------------------------------------
 
 # ############################################################################

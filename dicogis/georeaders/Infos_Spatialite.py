@@ -7,11 +7,6 @@
 #               geospatial extension)
 #
 # Author:       Julien Moura (https://github.com/Guts/)
-#
-# Python:       2.7.x
-# Created:      16/11/2014
-# Updated:      17/11/2014
-# Licence:      GPL 3
 # ----------------------------------------------------------------------------
 
 

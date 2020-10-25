@@ -8,11 +8,6 @@
 #                   submodule.
 #
 # Author:       Julien Moura (https://github.com/Guts/)
-#
-# Python:       2.7.x
-# Created:      11/04/2015
-# Updated:      11/04/2015
-# Licence:      GPL 3
 """
 
 
@@ -57,7 +52,7 @@ youtils = Utils()
 
 class ReadGXT:
     def __init__(self, layerpath, dico_layer, tipo, txt=""):
-        """ Uses OGR functions to extract basic informations about
+        """Uses OGR functions to extract basic informations about
         geographic vector file (handles shapefile or MapInfo tables)
         and store into dictionaries.
 

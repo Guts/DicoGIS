@@ -6,11 +6,6 @@
 # Purpose:      Uses OGR to read GeoServer
 #
 # Author:       Julien Moura (https://github.com/Guts/)
-#
-# Python:       2.7.x
-# Created:      04/04/2016
-# Updated:      2016
-# Licence:      GPL 3
 # ----------------------------------------------------------------------------
 
 # ############################################################################
@@ -27,7 +22,7 @@ from geoserver.catalog import Catalog
 
 class ReadGeoServer:
     def __init__(self, gs_axx, dico_gs, tipo, txt=""):
-        """ Uses OGR functions to extract basic informations about
+        """Uses OGR functions to extract basic informations about
         geographic Web Features Services.
 
         gs_axx = tuple like {url of a geoserver, user, password)

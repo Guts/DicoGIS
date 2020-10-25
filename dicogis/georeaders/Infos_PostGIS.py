@@ -8,11 +8,6 @@
 #                   It permits a more friendly use as submodule.
 #
 # Author:       Julien Moura (https://github.com/Guts/)
-#
-# Python:       2.7.x
-# Created:      18/06/2013
-# Updated:      13/08/2014
-# Licence:      GPL 3
 # ----------------------------------------------------------------------------
 
 # ############################################################################
@@ -248,7 +243,7 @@ class ReadPostGIS:
 # #################################
 
 if __name__ == "__main__":
-    """ standalone execution for tests. Paths are relative considering a test
+    """standalone execution for tests. Paths are relative considering a test
     within the official repository (https://github.com/Guts/DicoGIS/)"""
     # libraries import
 

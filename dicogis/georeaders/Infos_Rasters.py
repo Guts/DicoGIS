@@ -8,11 +8,6 @@
 #                   submodule.
 #
 # Author:       Julien Moura (https://github.com/Guts/)
-#
-# Python:       2.7.x
-# Created:      18/02/2014
-# Updated:      13/08/2014
-# Licence:      GPL 3
 # ----------------------------------------------------------------------------
 
 
@@ -339,8 +334,8 @@ class ReadRasters(object):
         return dico_bands
 
     def sizeof(self, os_size):
-        """ return size in different units depending on size
-        see http://stackoverflow.com/a/1094933 """
+        """return size in different units depending on size
+        see http://stackoverflow.com/a/1094933"""
         for size_cat in ["octets", "Ko", "Mo", "Go"]:
             if os_size < 1024.0:
                 return "%3.1f %s" % (os_size, size_cat)
@@ -362,7 +357,7 @@ class ReadRasters(object):
 # #################################
 
 if __name__ == "__main__":
-    """ standalone execution for tests. Paths are relative considering a test
+    """standalone execution for tests. Paths are relative considering a test
     within the official repository (https://github.com/Guts/DicoShapes/)"""
     # listing test files by formats
     li_ecw = [r"..\..\test\datatest\rasters\ECW\0468_6740.ecw"]  # ECW

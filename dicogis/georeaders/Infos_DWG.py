@@ -5,11 +5,6 @@
 # Purpose:      Use GDAL/OGR to read into AutoCAD exchanges file format.
 #
 # Author:       Julien Moura (https://github.com/Guts/)
-#
-# Python:       2.7.x
-# Created:      24/07/2014
-# Updated:      08/08/2014
-# Licence:      GPL 3
 """
 
 
@@ -37,7 +32,7 @@ except ImportError:
 # ################################
 class ReadDWG:
     def __init__(self, dxfpath, dico_dxf, tipo, txt=""):
-        """ Uses OGR functions to extract basic informations about
+        """Uses OGR functions to extract basic informations about
         geographic vector file (handles shapefile or MapInfo tables)
         and store into dictionaries.
 
@@ -264,8 +259,8 @@ class ReadDWG:
         return dico_fields
 
     def sizeof(self, os_size):
-        """ return size in different units depending on size
-        see http://stackoverflow.com/a/1094933 """
+        """return size in different units depending on size
+        see http://stackoverflow.com/a/1094933"""
         for size_cat in ["octets", "Ko", "Mo", "Go"]:
             if os_size < 1024.0:
                 return "%3.1f %s" % (os_size, size_cat)
