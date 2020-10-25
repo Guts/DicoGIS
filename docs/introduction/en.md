@@ -16,11 +16,9 @@ Some useful cases:
 - you receive a dark database of files and you would like to know what there's inside;
 - before you deliver your geographic data to a non-specialist superior / colleague / client / partner / alien you want to give a description of data trasmitted, just because it's a good practice and you are a good GIS person.
 
-For the story, I started to develop DicoGIS in complement of [Metadator](https://github.com/Guts/Metadator) and I continue using it until today.
-
 ## Technical specifications
 
-Formats handled are potentially the entire list of [GDAL](http://www.gdal.org/formats_list.html) and [OGR](http://www.gdal.org/ogr_formats.html) but for now I just implemented these ones:
+Formats handled are potentially the entire list of [GDAL](https://gdal.org/drivers/raster/index.html) and [OGR](https://gdal.org/drivers/vector/index.html) but for now I just implemented these ones:
 
 - vectors: shapefile, MapInfo tables, GeoJSON, GML, KML
 - rasters: ECW, GeoTIFF, JPEG
@@ -28,7 +26,7 @@ Formats handled are potentially the entire list of [GDAL](http://www.gdal.org/fo
 - CAD: DWG (only listing), DXF
 - Map documents: Geospatial PDF
 
-DicoGIS is localized in [3 languages (Français, Anglais et Espagnol)](https://github.com/Guts/DicoGIS/tree/master/data/locale) but every one can add a translation or custom the existing texts/labels.
+DicoGIS is localized in [3 languages (Français, Anglais et Espagnol)](https://github.com/Guts/DicoGIS/tree/master/dicogis/locale/) but every one can add a translation or custom the existing texts/labels.
 
 Talking about perforamnces, it's always very dependant on the computer but to give an idea, it needs 30 seconds for:
 
@@ -55,7 +53,7 @@ Talking about perforamnces, it's always very dependant on the computer but to gi
 4. Depending on the kind of data you want to list:
 
     - For files:
-    
+
         1. Pick the parent folder where you data is stored: listing starts and progress bar is moving until the end of listing
         2. Choose the expected formats
 

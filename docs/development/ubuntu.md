@@ -9,7 +9,7 @@ Tested on:
 Set GDAL expected version:
 
 ```bash
-export GDAL_VERSION=3.0.4
+export GDAL_VERSION=3.*
 ```
 
 Install GDAL:

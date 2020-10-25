@@ -11,34 +11,29 @@
 ----
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Introduction
-   :titlesonly:
 
    introduction/en
    introduction/fr
    introduction/es
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Development
-   :titlesonly:
 
    development/windows
    development/ubuntu
    development/documentation
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Miscellaneous
    :titlesonly:
 
    misc/formats_matrix
    misc/compatibility
    misc/credits
-
-Package modules
-+++++++++++++++
 
 .. toctree::
    :maxdepth: 3
@@ -47,9 +42,10 @@ Package modules
 
    _apidoc/modules
 
+* :ref:`modindex`
+
 Indices and tables
-==================
+##################
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
