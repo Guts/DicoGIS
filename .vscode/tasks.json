@@ -10,7 +10,7 @@
             "args": [
                 "-m",
                 "black",
-                "--target-version=py37",
+                "--target-version=py38",
                 "./dicogis"
             ],
             "group": "build",

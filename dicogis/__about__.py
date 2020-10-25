@@ -24,13 +24,14 @@ __all__ = [
 
 __author__ = "Julien Moura"
 __copyright__ = "2014 - {0}, {1}".format(date.today().year, __author__)
-__email__ = "ingeoveritas@protonmail.com"
+__email__ = "dev@ingeoveritas.com"
 __executable_name__ = "DicoGIS.exe"
 __license__ = "GNU General Public License v3.0"
 __summary__ = "Create Excel spreadsheet describing geographical data."
 __title__ = "DicoGIS"
 __title_clean__ = "".join(e for e in __title__ if e.isalnum())
 __uri__ = "https://github.com/Guts/DicoGIS/"
+__uri_doc__ = "https://guts.github.io/DicoGIS/"
 
 __version__ = "3.0.0"
 __version_info__ = tuple(
