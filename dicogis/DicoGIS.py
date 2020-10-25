@@ -94,7 +94,7 @@ class DicoGIS(Tk):
     package_about = __about__
 
     def __init__(self):
-        """ Main window constructor
+        """Main window constructor
         Creates 1 frame and 2 labelled subframes"""
         logger.info(
             "\t============== {} =============".format(
@@ -1154,8 +1154,9 @@ class DicoGIS(Tk):
         """ Check if required fields are not empty """
         # error counter
         # checking empty fields
-        if self.tab_sgbd.host.get() == "" or self.tab_sgbd.host.get() == self.blabla.get(
-            "err_pg_empty_field"
+        if (
+            self.tab_sgbd.host.get() == ""
+            or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
         ):
             self.tab_sgbd.ent_H.configure(foreground="red")
             self.tab_sgbd.ent_H.delete(0, END)
@@ -1170,8 +1171,9 @@ class DicoGIS(Tk):
             return
         else:
             pass
-        if self.tab_sgbd.dbnb.get() == "" or self.tab_sgbd.host.get() == self.blabla.get(
-            "err_pg_empty_field"
+        if (
+            self.tab_sgbd.dbnb.get() == ""
+            or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
         ):
             self.tab_sgbd.ent_D.configure(foreground="red")
             self.tab_sgbd.ent_D.delete(0, END)
@@ -1179,8 +1181,9 @@ class DicoGIS(Tk):
             return
         else:
             pass
-        if self.tab_sgbd.user.get() == "" or self.tab_sgbd.host.get() == self.blabla.get(
-            "err_pg_empty_field"
+        if (
+            self.tab_sgbd.user.get() == ""
+            or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
         ):
             self.tab_sgbd.ent_U.configure(foreground="red")
             self.tab_sgbd.ent_U.delete(0, END)
@@ -1188,8 +1191,9 @@ class DicoGIS(Tk):
             return
         else:
             pass
-        if self.tab_sgbd.pswd.get() == "" or self.tab_sgbd.pswd.get() == self.blabla.get(
-            "err_pg_empty_field"
+        if (
+            self.tab_sgbd.pswd.get() == ""
+            or self.tab_sgbd.pswd.get() == self.blabla.get("err_pg_empty_field")
         ):
             self.tab_sgbd.ent_M.configure(foreground="red")
             self.tab_sgbd.ent_M.delete(0, END)

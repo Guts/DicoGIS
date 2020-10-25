@@ -375,7 +375,10 @@ class MetadataToXlsx(Workbook):
         self.ws_v["I{}".format(self.idx_v)] = layer.get("EPSG", "")
         # Spatial extent
         emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
-            layer.get("Xmin"), layer.get("Xmax"), layer.get("Ymin"), layer.get("Ymax"),
+            layer.get("Xmin"),
+            layer.get("Xmax"),
+            layer.get("Ymin"),
+            layer.get("Ymax"),
         )
         self.ws_v["J{}".format(self.idx_v)].style = "wrap"
         self.ws_v["J{}".format(self.idx_v)] = emprise
@@ -1023,7 +1026,10 @@ class MetadataToXlsx(Workbook):
 
         # Spatial extent
         emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
-            layer.get("Xmin"), layer.get("Xmax"), layer.get("Ymin"), layer.get("Ymax"),
+            layer.get("Xmin"),
+            layer.get("Xmax"),
+            layer.get("Ymin"),
+            layer.get("Ymax"),
         )
         self.ws_sgbd["J{}".format(self.idx_s)].style = "wrap"
         self.ws_sgbd["J{}".format(self.idx_s)] = emprise
@@ -1084,6 +1090,5 @@ class MetadataToXlsx(Workbook):
 # ##### Stand alone program ########
 # ##################################
 if __name__ == "__main__":
-    """ Standalone execution and tests
-    """
+    """Standalone execution and tests"""
     pass
