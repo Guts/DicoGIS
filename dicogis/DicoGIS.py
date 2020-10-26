@@ -354,6 +354,10 @@ class DicoGIS(Tk):
         self.tab_options.prox_lb_P.config(text=self.blabla.get("gui_port"))
         self.tab_options.prox_lb_M.config(text=self.blabla.get("gui_mdp"))
         self.tab_options.prox_lb_H.config(text=self.blabla.get("gui_host"))
+
+        # credits
+        self.nb.tab(3, text=self.blabla.get("gui_tab6"))
+
         # setting locale according to the language passed
         try:
             if opersys == "win32":
