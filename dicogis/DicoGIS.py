@@ -58,7 +58,7 @@ from dicogis.georeaders import (
     ReadSpaDB,
     ReadVectorFlatDataset,
 )
-from dicogis.ui import MiscButtons, TabFiles, TabSettings, TabSGBD
+from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
 from dicogis.utils import CheckNorris, OptionsManager, TextsManager, Utilities
 from dicogis.xlwriter import MetadataToXlsx
 
@@ -207,6 +207,9 @@ class DicoGIS(Tk):
         self.tab_options = TabSettings(
             self.nb, self.blabla, utils_global.ui_switch
         )  # tab_id = 2
+        self.tab_credits = TabCredits(
+            self.nb, self.blabla, utils_global.ui_switch
+        )  # tab_id = 3
 
         # fillfulling text
         txt_manager.load_texts(dico_texts=self.blabla, lang=self.def_lang)
@@ -224,6 +227,11 @@ class DicoGIS(Tk):
 
         # ## TAB 3: Options ##
         self.nb.add(self.tab_options, text="Options", padding=3)
+
+        # =================================================================================
+
+        # ## TAB 4: Options ##
+        self.nb.add(self.tab_credits, text="Credits", padding=3)
 
         # =================================================================================
         # ## MAIN FRAME ##
