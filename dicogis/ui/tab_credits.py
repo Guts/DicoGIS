@@ -14,6 +14,7 @@
 
 # Standard library
 import logging
+import platform
 from tkinter import ACTIVE, DISABLED, Tk
 from tkinter.ttk import Frame, Label
 
@@ -62,6 +63,12 @@ class TabCredits(Frame):
             self.FrCreditsVersions, text=openpyxl_version
         )
 
+        # Python
+        self.cred_lb_python_name = Label(self.FrCreditsVersions, text="Python")
+        self.cred_lb_python_value = Label(
+            self.FrCreditsVersions, text=platform.python_version()
+        )
+
         # -- Widgets placement ---------------------------------------------------------
         self.cred_lb_dxfgrabber_name.grid(row=0, column=0, sticky="WE", padx=2, pady=2)
         self.cred_lb_dxfgrabber_value.grid(row=0, column=1, sticky="WE", padx=2, pady=2)
@@ -69,6 +76,8 @@ class TabCredits(Frame):
         self.cred_lb_gdal_value.grid(row=1, column=1, sticky="WE", padx=2, pady=2)
         self.cred_lb_openpyxl_name.grid(row=2, column=0, sticky="WE", padx=2, pady=2)
         self.cred_lb_openpyxl_value.grid(row=2, column=1, sticky="WE", padx=2, pady=2)
+        self.cred_lb_python_name.grid(row=3, column=0, sticky="WE", padx=3, pady=2)
+        self.cred_lb_python_value.grid(row=3, column=1, sticky="WE", padx=3, pady=2)
 
 
 # #############################################################################
