@@ -10,6 +10,15 @@
 
 ----
 
+Whats is it? Short video to understand quickly:
+-----------------------------------------------
+
+.. raw:: html
+
+   <div style="position: relative; padding-bottom: 5%; overflow: hidden; max-width: 100%; height: auto; align: middle">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/3d6xiInUXIU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+   </div>
+
 .. toctree::
    :maxdepth: 2
    :caption: Introduction
