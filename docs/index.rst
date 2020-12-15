@@ -34,6 +34,7 @@ Whats is it? Short video to understand quickly:
    development/windows
    development/ubuntu
    development/documentation
+   development/packaging
 
 .. toctree::
    :maxdepth: 2
