@@ -21,8 +21,7 @@ import platform
 import threading
 from collections import OrderedDict
 from logging.handlers import RotatingFileHandler
-from os import environ as env
-from os import path, walk
+from os import getlogin, path, walk
 from pathlib import Path
 from sys import exit
 from sys import platform as opersys
@@ -115,19 +114,18 @@ class DicoGIS(Tk):
         # basics settings
         Tk.__init__(self)  # constructor of parent graphic class
         self.title("DicoGIS {0}".format(self.package_about.__version__))
+        self.uzer = getlogin()
         if opersys == "win32":
             logger.info("Operating system: {0}".format(platform.platform()))
             self.iconbitmap(self.dir_imgs / "DicoGIS.ico")  # windows icon
-            self.uzer = env.get("USERNAME")
-        elif opersys == "linux2":
+        elif opersys.startswith("linux"):
             logger.info("Operating system: {0}".format(platform.platform()))
-            self.uzer = env.get("USER")
             icon = Image("photo", file=self.dir_imgs / "DicoGIS_logo.gif")
             self.call("wm", "iconphoto", self._w, icon)
             self.style = Style().theme_use("clam")
+
         elif opersys == "darwin":
             logger.info("Operating system: {0}".format(platform.platform()))
-            self.uzer = env.get("USER")
         else:
             logger.warning("Operating system unknown")
             logger.info("Operating system: {0}".format(platform.platform()))
