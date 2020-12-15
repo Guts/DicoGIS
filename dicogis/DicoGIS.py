@@ -28,7 +28,7 @@ from sys import platform as opersys
 from time import strftime
 
 # GUI
-from tkinter import ACTIVE, DISABLED, END, Image, StringVar, Tk, font
+from tkinter import ACTIVE, DISABLED, END, Image, StringVar, Tk
 from tkinter.filedialog import askdirectory
 from tkinter.messagebox import showerror as avert
 from tkinter.messagebox import showinfo as info
@@ -194,9 +194,6 @@ class DicoGIS(Tk):
         self.global_ignored = 0  # files ignored by an user filter
         self.global_dico_fields = OrderedDict()
 
-        # GUI fonts
-        ft_tit = font.Font(family="Times", size=10, weight=font.BOLD)
-
         # Notebook
         self.nb = Notebook(self)
         # tabs
@@ -235,7 +232,7 @@ class DicoGIS(Tk):
         # ## MAIN FRAME ##
         # welcome message
         self.welcome = Label(
-            self, text=self.blabla.get("hi") + self.uzer, font=ft_tit, foreground="blue"
+            self, text=self.blabla.get("hi") + self.uzer, foreground="blue"
         )
 
         # Frame: Output
