@@ -23,7 +23,8 @@
     ],
     "python.linting.pylintEnabled": false,
     // extensions
-    "autoDocstring.customTemplatePath": ".vscode\\docstring-config.mustache",
+    "autoDocstring.guessTypes": true,
+    "autoDocstring.docstringFormat": "google",
     "autoDocstring.generateDocstringOnEnter": false,
     "restructuredtext.confPath": "${workspaceFolder}\\docs",
 }
