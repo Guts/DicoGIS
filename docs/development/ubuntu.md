@@ -9,7 +9,7 @@ Tested on:
 Set GDAL expected version:
 
 ```bash
-export GDAL_VERSION=3.1.*
+export GDAL_VERSION=3.1.3
 ```
 
 Install GDAL:
@@ -51,13 +51,26 @@ source ~/pyvenvs/dicogis/bin/activate
 ```bash
 python -m pip install -U pip setuptools wheel
 python -m pip install -U -r requirements/base.txt
-python -m pip install -U -r requirements/ubuntu.txt
+python -m pip install pygdal=="`gdal-config --version`.*"
+```
+
+```eval_rst
+.. note::
+    If you want to work outsite a virtual environment, you should install GDAL Python bindings using:
+    
+        python -m pip install GDAL=="`gdal-config --version`.*"
 ```
 
 ## Install project
 
 ```bash
 python -m pip install -e .
+```
+
+Try it with:
+
+```bash
+python dicogis/DicoGIS.py
 ```
 
 Happy coding!

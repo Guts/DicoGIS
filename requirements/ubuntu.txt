@@ -1,2 +1,0 @@
-# pygdal==3.1.* ; sys_platform == 'linux'
-pygdal==${GDAL_VERSION} ; sys_platform == 'linux'

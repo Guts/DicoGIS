@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.abspath(r".."))
 # 3rd party
 import recommonmark
 import sphinx_rtd_theme  # noqa: F401 theme of Read the Docs
+from recommonmark.transform import AutoStructify
 
 from dicogis import __about__
 from dicogis import *
@@ -54,6 +55,7 @@ extensions = [
     "recommonmark",
     # Sphinx included
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
@@ -112,17 +114,25 @@ pygments_style = "sphinx"
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-# html_theme = "nature"
+# Theme
+html_favicon = "static/img/DicoGIS_logo_200px.png"
+html_logo = "static/img/DicoGIS_logo_200px.png"
 html_theme = "sphinx_rtd_theme"
+html_theme_options = {
+    # "canonical_url": __about__.__uri_homepage__,
+    "display_version": True,
+    "logo_only": False,
+    "prev_next_buttons_location": "both",
+    "style_external_links": True,
+    "style_nav_header_background": "SteelBlue",
+    # Toc options
+    "collapse_navigation": False,
+    "includehidden": False,
+    "navigation_depth": 4,
+    "sticky_navigation": False,
+    "titles_only": False,
+}
 
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
-# html_theme_options = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -171,4 +181,10 @@ def run_apidoc(_):
 
 # launch setup
 def setup(app):
+    app.add_config_value(
+        "recommonmark_config",
+        {"enable_auto_toc_tree": True, "enable_eval_rst": True},
+        True,
+    )
+    app.add_transform(AutoStructify)
     app.connect("builder-inited", run_apidoc)
