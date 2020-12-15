@@ -3,13 +3,13 @@
 Or how to easily get detailed and structured information about its GIS data in a few minutes.
 Introducing a simple tool without any pretention except give a hand to GIS fellows to manage data.
 
-![DicoGIS - Animated demonstration](../_static/img/DicoGIS_demo.gif "DicoGIS - Animated demonstration")
+![DicoGIS - Animated demonstration](../static/img/DicoGIS_demo.gif "DicoGIS - Animated demonstration")
 
 ## In a nutshell
 
 [DicoGIS](https://github.com/Guts/DicoGIS) creates an Excel workbook (2003) with technical metadata gathered from geographic data (files and PostGIS database). Available as a Python script (see requirements below) or as a Windows executable without installation required, so you can use take it on a USB device for example.
 
-![DicoGIS - Logo](../_static/img/DicoGIS_logo.png "DicoGIS - Logo")
+![DicoGIS - Logo](../static/img/DicoGIS_logo.png "DicoGIS - Logo")
 
 Some useful cases:
 
@@ -44,11 +44,11 @@ Talking about perforamnces, it's always very dependant on the computer but to gi
 
 2. Unzip it and launch DicoGIS.exe / DicoGIS.py
 
-    ![DicoGIS - Launch](../_static/img/00a_DicoGIS_Win32exe.PNG "DicoGIS - Launch")
+    ![DicoGIS - Launch](../static/img/00a_DicoGIS_Win32exe.PNG "DicoGIS - Launch")
 
 3. Switch language as you need
 
-    ![DicoGIS - Switch language](../_static/img/99_DicoGIS_SwitchLanguage.gif "DicoGIS - Switch language")
+    ![DicoGIS - Switch language](../static/img/99_DicoGIS_SwitchLanguage.gif "DicoGIS - Switch language")
 
 4. Depending on the kind of data you want to list:
 
@@ -57,15 +57,15 @@ Talking about perforamnces, it's always very dependant on the computer but to gi
         1. Pick the parent folder where you data is stored: listing starts and progress bar is moving until the end of listing
         2. Choose the expected formats
 
-        ![DicoGIS - Listing](../_static/img/02_DicoGIS_Listing.gif "DicoGIS - Listing")
+        ![DicoGIS - Listing](../static/img/02_DicoGIS_Listing.gif "DicoGIS - Listing")
 
     - For PostgreSQL / PostGIS (database), it's more or less the same story but you have to give the connection settings:
 
-        ![DicoGIS - Processing PostGIS](../_static/img/06_DicoGIS_PostGIS.gif "DicoGIS - Processing PostGIS")
+        ![DicoGIS - Processing PostGIS](../static/img/06_DicoGIS_PostGIS.gif "DicoGIS - Processing PostGIS")
 
 5. Launch and wait: save the output file where you want.
 
-    ![DicoGIS - Processing files](../_static/img/05_DicoGIS_Processing.gif "DicoGIS - Processing files")
+    ![DicoGIS - Processing files](../static/img/05_DicoGIS_Processing.gif "DicoGIS - Processing files")
 
 6. Have a look to the output file and apply some Excel enhancements (convert to a newer version if you have, use a default style, etc.)
 

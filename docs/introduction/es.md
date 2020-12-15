@@ -3,13 +3,13 @@
 O como crearse su propio DRAE de la información geográfica en 5 minutos y 3 clicks.
 Les presento un pequeño herramienta sin ninguna pretensión sino de ser bien práctico para manejar sus datos.
 
-![DicoGIS - Animated demonstration](../_static/img/DicoGIS_demo.gif "DicoGIS - Animated demonstration")
+![DicoGIS - Animated demonstration](../static/img/DicoGIS_demo.gif "DicoGIS - Animated demonstration")
 
 ## Presentación
 
 [DicoGIS](https://github.com/Guts/DicoGIS) es un pequeño utilitario que produce un diccionario de datos al formato Excel 2003 (.xls). Disponible en ejecutable Windows (.exe) sin instalación requerida y en script (consultar las dependencias), se puede usar directamente desde una USB.
 
-![DicoGIS - Logo](../_static/img/DicoGIS_logo.png "DicoGIS - Logo")
+![DicoGIS - Logo](../static/img/DicoGIS_logo.png "DicoGIS - Logo")
 
 Es muy útil para precisos casos:
 
@@ -50,11 +50,11 @@ DicoGIS existe en [3 idiomas (Français, Anglais et Espagnol)](https://github.co
 
 2. Descomprimir y iniciar DicoGIS.exe / el script DicoGIS.py
 
-    ![DicoGIS - Launch](../_static/img/00a_DicoGIS_Win32exe.PNG "DicoGIS - Launch")
+    ![DicoGIS - Launch](../static/img/00a_DicoGIS_Win32exe.PNG "DicoGIS - Launch")
 
 3. Cambiar el idioma
 
-    ![DicoGIS - Switch language](../_static/img/99_DicoGIS_SwitchLanguage.gif "DicoGIS - Switch language")
+    ![DicoGIS - Switch language](../static/img/99_DicoGIS_SwitchLanguage.gif "DicoGIS - Switch language")
 
 4. Segûn el tipo de datos que quieres analizar:
 
@@ -63,15 +63,15 @@ DicoGIS existe en [3 idiomas (Français, Anglais et Espagnol)](https://github.co
         1. Escoger la carpeta principal: la exploración empieza y la barra de progresión continua hasta el fin del listing;
         2. Elegir los formatos deseados;
 
-        ![DicoGIS - Listing](../_static/img/02_DicoGIS_Listing.gif "DicoGIS - Listing")
+        ![DicoGIS - Listing](../static/img/02_DicoGIS_Listing.gif "DicoGIS - Listing")
 
     - Para datos almacenados en una base de datos PostgreSQL/PostGIS, es lo mismo principio excepto que se debe entrar los parámetros de conexión:
 
-        ![DicoGIS - Processing PostGIS](../_static/img/06_DicoGIS_PostGIS.gif "DicoGIS - Processing PostGIS")
+        ![DicoGIS - Processing PostGIS](../static/img/06_DicoGIS_PostGIS.gif "DicoGIS - Processing PostGIS")
 
 5. Iniciar y esperar hasta el fin del proceso: guardar el archivo Excel generado.
 
-    ![DicoGIS - Processing files](../_static/img/05_DicoGIS_Processing.gif "DicoGIS - Processing files")
+    ![DicoGIS - Processing files](../static/img/05_DicoGIS_Processing.gif "DicoGIS - Processing files")
 
 6. Consultar el archivo y arreglar los estilos según sus preferencias.
 
