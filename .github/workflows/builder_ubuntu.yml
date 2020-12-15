@@ -6,7 +6,7 @@ on:
     tags: "*"
 
 env:
-  GDAL_VERSION: 3.*
+  GDAL_VERSION: 3.1.*
   PROJECT_FOLDER: "dicogis"
   PYINSTALLER_LOG_LEVEL: "DEBUG"
   PYTHON_VERSION: 3.8

@@ -9,7 +9,7 @@ Tested on:
 Set GDAL expected version:
 
 ```bash
-export GDAL_VERSION=3.*
+export GDAL_VERSION=3.1.*
 ```
 
 Install GDAL:
@@ -50,6 +50,7 @@ source ~/pyvenvs/dicogis/bin/activate
 
 ```bash
 python -m pip install -U pip setuptools wheel
+python -m pip install -U -r requirements/base.txt
 python -m pip install -U -r requirements/ubuntu.txt
 ```
 
