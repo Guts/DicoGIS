@@ -25,15 +25,6 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install GDAL binaries
-      run: |
-        sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable && sudo apt-get update
-        sudo apt install gdal-bin=${{ env.GDAL_VERSION }}
-        sudo apt install libgdal-dev=${{ env.GDAL_VERSION }}
-        export CPLUS_INCLUDE_PATH=/usr/include/gdal
-        export C_INCLUDE_PATH=/usr/include/gdal
-        gdal-config --version
-
     - name: Install complementary tools
       run: |
         sudo apt install python3-tk
