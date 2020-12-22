@@ -11,9 +11,9 @@ from collections import OrderedDict  # Python 3 backported
 
 # 3rd party libraries
 try:
-    from osgeo import osr
+    from osgeo import ogr, osr
 except ImportError:
-    import osr
+    import ogr, osr
 
 # ############################################################################
 # ######### Globals ############
@@ -58,20 +58,32 @@ class GeoInfosGenericReader(object):
         # end of function
         return dico_fields
 
-    def get_geometry_type(self, layer):
+    def get_geometry_type(self, layer: ogr.Layer) -> str:
         """Get geometry type human readable."""
-        for feat in layer:
+        try:
+            logger.warning(ogr.GeometryTypeToName(layer.GetGeomType()))
+            # if layer.GetGeomType():
+            #     geom_type = layer.GetGeomType()
+            #     layer.ResetReading()
+            #     logger.error(geom_type)
+
+            #     return geom_type
+
+            feat = layer.GetNextFeature()
             if not hasattr(feat, "GetGeometryRef"):
-                print("zut")
-                continue
-            else:
-                layer_geom = feat.GetGeometryRef()
-                if hasattr(layer_geom, "GetGeometryName"):
-                    geom_type = layer_geom.GetGeometryName()
-                else:
-                    geom_type = None
-                return geom_type
-        # return None
+                logger.error("Unable to determine GeoMetryRef")
+                return None
+            layer_geom = feat.GetGeometryRef()
+            if hasattr(layer_geom, "GetGeometryName"):
+                return layer_geom.GetGeometryName()
+
+        except Exception as err:
+            logger.error(
+                "Unable to retrieve geometry type for layer: {}. Trace: {}".format(
+                    layer.GetName(), err
+                )
+            )
+            return None
 
         # try:
         #     print("\n\nTRY")
