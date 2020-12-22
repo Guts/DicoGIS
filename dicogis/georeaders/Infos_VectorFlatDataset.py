@@ -16,7 +16,7 @@
 # Standard library
 import logging
 from collections import OrderedDict
-from os import chdir, path
+from os import path
 from time import localtime, strftime
 
 # 3rd party libraries
@@ -61,7 +61,9 @@ class ReadVectorFlatDataset:
         ogr.UseExceptions()
         self.alert = 0
 
-    def infos_dataset(self, source_path, dico_dataset, txt: dict = dict(), tipo=None):
+    def infos_dataset(
+        self, source_path: str, dico_dataset, txt: dict = dict(), tipo=None
+    ):
         """Use OGR functions to extract basic informations about
         geographic vector file (handles shapefile or MapInfo tables)
         and store into dictionaries.
@@ -72,7 +74,7 @@ class ReadVectorFlatDataset:
         txt = dictionary of text in the selected language
         """
         # changing working directory to layer folder
-        chdir(path.dirname(source_path))
+        # chdir(path.dirname(source_path))
 
         # raising corrupt files
         try:

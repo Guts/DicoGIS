@@ -50,12 +50,14 @@ jobs:
         python -m pip install -U pip setuptools wheel
         python -m pip install -U -r requirements/base.txt
         python -m pip install -U -r requirements/dev.txt
-        python -m pip install -U gisdata -t ./tests/fixtures
         python -m pip install GDAL=="`gdal-config --version`.*"
         python -m pip install -e .
 
     - name: Install project as a package
       run: python -m pip install -e .
+
+    - name: Install tests fixtures
+      run: python -m pip install -U gisdata -t ./tests/fixtures
 
     - name: Unit tests
       run: pytest
