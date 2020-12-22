@@ -402,8 +402,8 @@ class DicoGIS(Tk):
         else:
             pass
         # set the default output file
-        self.output.delete(0, END)
-        self.output.insert(
+        self.ent_outxl_filename.delete(0, END)
+        self.ent_outxl_filename.insert(
             0,
             "DicoGIS_{0}_{1}.xlsx".format(
                 path.split(self.tab_files.ent_target.get())[1], self.today
@@ -1142,12 +1142,11 @@ class DicoGIS(Tk):
         self.wb.tunning_worksheets()
         saved = utils_global.safe_save(
             wb=self.wb,
-            # dest_dir=self.target.get(),
-            dest_filename=self.output.get(),
+            dest_filename=self.ent_outxl_filename.get(),
             ftype="Excel Workbook",
             dlg_title=self.blabla.get("gui_excel"),
         )
-        logger.info("\n\tWorkbook saved: %s", self.output.get())
+        logger.info("\n\tWorkbook saved: %s", self.ent_outxl_filename.get())
 
         # quit and exit
         utils_global.open_dir_file(saved[1])
@@ -1262,8 +1261,8 @@ class DicoGIS(Tk):
 
         self.status.set("{} tables".format(len(sgbd_reader.conn)))
         # set the default output file
-        self.output.delete(0, END)
-        self.output.insert(
+        self.ent_outxl_filename.delete(0, END)
+        self.ent_outxl_filename.insert(
             0,
             "DicoGIS_{0}-{1}_{2}.xlsx".format(
                 self.tab_sgbd.dbnb.get(), self.tab_sgbd.host.get(), self.today
