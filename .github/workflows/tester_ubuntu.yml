@@ -3,8 +3,8 @@ name: Tester
 on:
   pull_request:
     branches: [ master ]
-  paths:
-    - '**.py'
+    paths:
+      - '**.py'
 
 env:
   GDAL_VERSION: 3.*

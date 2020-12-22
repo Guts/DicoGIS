@@ -3,10 +3,13 @@ name: Linter
 on:
   push:
     branches: [ master ]
+    paths:
+      - '**.py'
+
   pull_request:
     branches: [ master ]
-  paths:
-    - '**.py'
+    paths:
+      - '**.py'
 
 env:
   GDAL_VERSION: 3.*
