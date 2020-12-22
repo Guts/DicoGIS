@@ -195,12 +195,17 @@ arcpy.pth
 
 # binaries
 /setup/
+*.zip
+
+# tests
+junit/
 
 # geodatabase
 \test\datatestGDB*
 *.xls
 *.xlsx
 arcpy.pth
+tests/fixtures/gisdata*
 
 # packaging
 !bundle_executable_cli.spec
