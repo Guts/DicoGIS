@@ -15,8 +15,8 @@
 # #################################
 # Standard library
 import logging
-from collections import OrderedDict  # Python 3 backported
-from os import path, walk  # files and folder managing
+from collections import OrderedDict
+from os import path, walk
 from time import localtime, strftime
 
 try:

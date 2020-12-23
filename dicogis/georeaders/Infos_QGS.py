@@ -14,7 +14,7 @@
 
 # Standard library
 import logging
-from os import chdir, listdir, path  # files and folder managing
+from os import chdir, listdir, path
 from time import localtime, strftime
 
 # 3rd party

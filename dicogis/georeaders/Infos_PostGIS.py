@@ -15,7 +15,7 @@
 # #################################
 
 # Standard library
-from collections import OrderedDict  # Python 3 backported
+from collections import OrderedDict
 import logging
 
 # 3rd party libraries

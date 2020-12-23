@@ -16,8 +16,8 @@
 # #################################
 # Standard library
 import logging
-from collections import OrderedDict  # Python 3 backported
-from os import chdir, path  # files and folder managing
+from collections import OrderedDict
+from os import chdir, path
 from time import localtime, strftime
 
 # 3rd party libraries
