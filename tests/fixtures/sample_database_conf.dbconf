@@ -1,0 +1,15 @@
+[database_name]
+host=postgresql-cluster.server.net
+port=5432
+user=reader
+password=postgresreader
+schemas=*
+type=postgis
+
+[other_database]
+host=postgis.provider.com
+port=5432
+user=pgreader
+password=riderdb20
+schemas=public,administrative
+type=postgresql

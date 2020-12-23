@@ -2,7 +2,7 @@
 
 """
     Usage from the repo root folder:
-        python -m unittest tests.test_infos_shp
+        python -m unittest tests.test_infos_vector
 """
 
 # #############################################################################
@@ -29,8 +29,8 @@ fixtures_folder = "tests/fixtures/gisdata/data/good/vector/"
 # ##################################
 
 
-class TestInfosEsriShapefiles(unittest.TestCase):
-    """Test info extractor for Shapefiles."""
+class TestInfosFlatVector(unittest.TestCase):
+    """Test info extractor for flat vector datasets."""
 
     # standard methods
     def setUp(self):
