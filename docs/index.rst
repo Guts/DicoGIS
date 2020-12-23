@@ -33,6 +33,7 @@ Whats is it? Short video to understand quickly:
 
    development/windows
    development/ubuntu
+   development/tests
    development/documentation
    development/packaging
 

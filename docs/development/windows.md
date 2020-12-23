@@ -78,3 +78,5 @@ conda activate dicogis-dev
 # finally, install the package in editable mode
 python -m pip install -e .
 ```
+
+Happy coding!

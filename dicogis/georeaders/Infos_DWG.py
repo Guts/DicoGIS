@@ -211,10 +211,10 @@ class ReadDWG:
                         .replace("_", " ")
                     )
             finally:
-                dico_layer["EPSG"] = srs.GetAttrValue("AUTHORITY", 1)
+                dico_layer["epsg"] = srs.GetAttrValue("AUTHORITY", 1)
 
             # World SRS default
-            if dico_layer["EPSG"] == "4326" and dico_layer["srs"] == "None":
+            if dico_layer["epsg"] == "4326" and dico_layer["srs"] == "None":
                 dico_layer["srs"] = "WGS 84"
             else:
                 pass
@@ -242,10 +242,10 @@ class ReadDWG:
             dico_layer["type_geom"] = geom.GetGeometryName()
 
         # spatial extent (bounding box)
-        dico_layer["Xmin"] = round(layer_obj.GetExtent()[0], 2)
-        dico_layer["Xmax"] = round(layer_obj.GetExtent()[1], 2)
-        dico_layer["Ymin"] = round(layer_obj.GetExtent()[2], 2)
-        dico_layer["Ymax"] = round(layer_obj.GetExtent()[3], 2)
+        dico_layer["xmin"] = round(layer_obj.GetExtent()[0], 2)
+        dico_layer["xmax"] = round(layer_obj.GetExtent()[1], 2)
+        dico_layer["ymin"] = round(layer_obj.GetExtent()[2], 2)
+        dico_layer["ymax"] = round(layer_obj.GetExtent()[3], 2)
 
         # end of function
         return dico_layer

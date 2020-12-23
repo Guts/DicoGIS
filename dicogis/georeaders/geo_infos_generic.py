@@ -7,7 +7,7 @@
 
 # Standard library
 import logging
-from collections import OrderedDict  # Python 3 backported
+from collections import OrderedDict
 
 # 3rd party libraries
 try:
@@ -45,7 +45,7 @@ class GeoInfosGenericReader(object):
         else:
             return (None, None, None, None)
 
-    def get_fields_details(self, layer_def):
+    def get_fields_details(self, layer_def) -> dict:
         """Get fields definition."""
         dico_fields = OrderedDict()
         for i in range(layer_def.GetFieldCount()):

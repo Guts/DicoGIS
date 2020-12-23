@@ -372,13 +372,13 @@ class MetadataToXlsx(Workbook):
         # Type of SRS
         self.ws_v["H{}".format(self.idx_v)] = layer.get("srs_type", "")
         # EPSG code
-        self.ws_v["I{}".format(self.idx_v)] = layer.get("EPSG", "")
+        self.ws_v["I{}".format(self.idx_v)] = layer.get("epsg", "")
         # Spatial extent
         emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
-            layer.get("Xmin"),
-            layer.get("Xmax"),
-            layer.get("Ymin"),
-            layer.get("Ymax"),
+            layer.get("xmin"),
+            layer.get("xmax"),
+            layer.get("ymin"),
+            layer.get("ymax"),
         )
         self.ws_v["J{}".format(self.idx_v)].style = "wrap"
         self.ws_v["J{}".format(self.idx_v)] = emprise
@@ -388,7 +388,7 @@ class MetadataToXlsx(Workbook):
         # Last update date
         self.ws_v["L{}".format(self.idx_v)] = layer.get("date_actu")
         # Format of data
-        self.ws_v["M{}".format(self.idx_v)] = layer.get("type")
+        self.ws_v["M{}".format(self.idx_v)] = layer.get("format")
         # dependencies
         self.ws_v["N{}".format(self.idx_v)].style = "wrap"
         self.ws_v["N{}".format(self.idx_v)] = " |\n ".join(
@@ -496,7 +496,7 @@ class MetadataToXlsx(Workbook):
         # Type of SRS
         self.ws_r["J{}".format(self.idx_r)] = layer.get("srs_type")
         # EPSG code
-        self.ws_r["K{}".format(self.idx_r)] = layer.get("EPSG")
+        self.ws_r["K{}".format(self.idx_r)] = layer.get("epsg")
 
         # Creation date
         self.ws_r["M{}".format(self.idx_r)] = layer.get("date_crea")
@@ -624,14 +624,14 @@ class MetadataToXlsx(Workbook):
             self.ws_fdb["J{}".format(self.idx_f)] = gdb_layer.get("type_geom")
             self.ws_fdb["K{}".format(self.idx_f)] = gdb_layer.get("srs")
             self.ws_fdb["L{}".format(self.idx_f)] = gdb_layer.get("srs_type")
-            self.ws_fdb["M{}".format(self.idx_f)] = gdb_layer.get("EPSG")
+            self.ws_fdb["M{}".format(self.idx_f)] = gdb_layer.get("epsg")
 
             # Spatial extent
             emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
-                gdb_layer.get("Xmin"),
-                gdb_layer.get("Xmax"),
-                gdb_layer.get("Ymin"),
-                gdb_layer.get("Ymax"),
+                gdb_layer.get("xmin"),
+                gdb_layer.get("xmax"),
+                gdb_layer.get("ymin"),
+                gdb_layer.get("ymax"),
             )
             self.ws_fdb["N{}".format(self.idx_f)].style = "wrap"
             self.ws_fdb["N{}".format(self.idx_f)] = emprise
@@ -735,7 +735,7 @@ class MetadataToXlsx(Workbook):
         self.ws_mdocs["M{}".format(self.idx_m)] = mapdoc.get("yOrigin")
         self.ws_mdocs["N{}".format(self.idx_m)] = mapdoc.get("srs")
         self.ws_mdocs["O{}".format(self.idx_m)] = mapdoc.get("srs_type")
-        self.ws_mdocs["P{}".format(self.idx_m)] = mapdoc.get("EPSG")
+        self.ws_mdocs["P{}".format(self.idx_m)] = mapdoc.get("epsg")
         self.ws_mdocs["Q{}".format(self.idx_m)] = mapdoc.get("layers_count")
         self.ws_mdocs["R{}".format(self.idx_m)] = mapdoc.get("total_fields")
         self.ws_mdocs["S{}".format(self.idx_m)] = mapdoc.get("total_objs")
@@ -911,14 +911,14 @@ class MetadataToXlsx(Workbook):
             self.ws_cad["J{}".format(self.idx_c)] = layer.get("type_geom")
             self.ws_cad["K{}".format(self.idx_c)] = layer.get("srs")
             self.ws_cad["L{}".format(self.idx_c)] = layer.get("srs_type")
-            self.ws_cad["M{}".format(self.idx_c)] = layer.get("EPSG")
+            self.ws_cad["M{}".format(self.idx_c)] = layer.get("epsg")
 
             # Spatial extent
             emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
-                layer.get("Xmin"),
-                layer.get("Xmax"),
-                layer.get("Ymin"),
-                layer.get("Ymax"),
+                layer.get("xmin"),
+                layer.get("xmax"),
+                layer.get("ymin"),
+                layer.get("ymax"),
             )
             self.ws_cad["N{}".format(self.idx_c)].style = "wrap"
             self.ws_cad["N{}".format(self.idx_c)] = emprise
@@ -1022,20 +1022,20 @@ class MetadataToXlsx(Workbook):
         # SRS
         self.ws_sgbd["G{}".format(self.idx_s)] = layer.get("srs")
         self.ws_sgbd["H{}".format(self.idx_s)] = layer.get("srs_type")
-        self.ws_sgbd["I{}".format(self.idx_s)] = layer.get("EPSG")
+        self.ws_sgbd["I{}".format(self.idx_s)] = layer.get("epsg")
 
         # Spatial extent
         emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
-            layer.get("Xmin"),
-            layer.get("Xmax"),
-            layer.get("Ymin"),
-            layer.get("Ymax"),
+            layer.get("xmin"),
+            layer.get("xmax"),
+            layer.get("ymin"),
+            layer.get("ymax"),
         )
         self.ws_sgbd["J{}".format(self.idx_s)].style = "wrap"
         self.ws_sgbd["J{}".format(self.idx_s)] = emprise
 
         # type
-        self.ws_sgbd["K{}".format(self.idx_s)] = layer.get("type")
+        self.ws_sgbd["K{}".format(self.idx_s)] = layer.get("format")
 
         # Field informations
         fields = layer.get("fields")

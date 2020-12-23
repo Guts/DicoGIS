@@ -14,7 +14,7 @@
 # ################################
 
 # Standard library
-from os import path, access, R_OK  # files and folder managing
+from os import path, access, R_OK
 from sys import exit, platform as opersys
 import subprocess
 
