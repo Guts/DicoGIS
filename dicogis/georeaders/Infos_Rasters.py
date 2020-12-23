@@ -264,7 +264,7 @@ class ReadRasters(object):
                         .replace("_", " ")
                     )
 
-        dico_raster["EPSG"] = srs.GetAttrValue("AUTHORITY", 1)
+        dico_raster["epsg"] = srs.GetAttrValue("AUTHORITY", 1)
 
         # end of function
         return dico_raster

@@ -154,7 +154,7 @@ class ReadPostGIS:
             logging.error("OGR: {} - {}".format(layer, "Not a PostGIS layer."))
             return None
         else:
-            dico_dataset["type"] = tipo
+            dico_dataset["format"] = tipo
             pass
 
         # connection info
@@ -219,15 +219,15 @@ class ReadPostGIS:
         # SRS
         srs_details = georeader.get_srs_details(layer, self.txt)
         dico_dataset["srs"] = srs_details[0]
-        dico_dataset["EPSG"] = srs_details[1]
+        dico_dataset["epsg"] = srs_details[1]
         dico_dataset["srs_type"] = srs_details[2]
 
         # spatial extent
         extent = georeader.get_extent_as_tuple(layer)
-        dico_dataset["Xmin"] = extent[0]
-        dico_dataset["Xmax"] = extent[1]
-        dico_dataset["Ymin"] = extent[2]
-        dico_dataset["Ymax"] = extent[3]
+        dico_dataset["xmin"] = extent[0]
+        dico_dataset["xmax"] = extent[1]
+        dico_dataset["ymin"] = extent[2]
+        dico_dataset["ymax"] = extent[3]
 
         # warnings messages
         if self.alert:

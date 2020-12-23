@@ -80,14 +80,14 @@ class ReadVectorFlatDataset:
         try:
             src = gdal.OpenEx(source_path, 0)  # GDAL driver
             if not tipo:
-                dico_dataset["type"] = src.GetDriver().LongName
+                dico_dataset["format"] = src.GetDriver().LongName
             else:
-                dico_dataset["type"] = tipo
+                dico_dataset["format"] = tipo
                 pass
         except Exception as e:
             logger.error(e)
             self.alert = self.alert + 1
-            dico_dataset["type"] = tipo
+            dico_dataset["format"] = tipo
             youtils.erratum(dico_dataset, source_path, "err_corrupt")
             dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
             return 0
@@ -146,15 +146,15 @@ class ReadVectorFlatDataset:
         # SRS
         srs_details = georeader.get_srs_details(layer, txt)
         dico_dataset["srs"] = srs_details[0]
-        dico_dataset["EPSG"] = srs_details[1]
+        dico_dataset["epsg"] = srs_details[1]
         dico_dataset["srs_type"] = srs_details[2]
 
         # spatial extent
         extent = georeader.get_extent_as_tuple(layer)
-        dico_dataset["Xmin"] = extent[0]
-        dico_dataset["Xmax"] = extent[1]
-        dico_dataset["Ymin"] = extent[2]
-        dico_dataset["Ymax"] = extent[3]
+        dico_dataset["xmin"] = extent[0]
+        dico_dataset["xmax"] = extent[1]
+        dico_dataset["ymin"] = extent[2]
+        dico_dataset["ymax"] = extent[3]
 
         # warnings messages
         if self.alert:

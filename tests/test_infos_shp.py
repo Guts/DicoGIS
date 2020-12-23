@@ -66,12 +66,12 @@ class TestInfosEsriShapefiles(unittest.TestCase):
             self.assertIn("srs_type", dico_layer)
             self.assertIn("title", dico_layer)
             self.assertIn("total_size", dico_layer)
-            self.assertIn("type", dico_layer)
+            self.assertIn("format", dico_layer)
             self.assertIn("type_geom", dico_layer)
-            self.assertIn("Xmin", dico_layer)
-            self.assertIn("Xmax", dico_layer)
-            self.assertIn("Ymin", dico_layer)
-            self.assertIn("Ymax", dico_layer)
+            self.assertIn("xmin", dico_layer)
+            self.assertIn("xmax", dico_layer)
+            self.assertIn("ymin", dico_layer)
+            self.assertIn("ymax", dico_layer)
 
             # check types
             self.assertIsInstance(dico_layer.get("date_actu"), str)
@@ -87,12 +87,12 @@ class TestInfosEsriShapefiles(unittest.TestCase):
             self.assertIsInstance(dico_layer.get("srs_type"), (str, type(None)))
             self.assertIsInstance(dico_layer.get("title"), str)
             self.assertIsInstance(dico_layer.get("total_size"), str)
-            self.assertIsInstance(dico_layer.get("type"), str)
+            self.assertIsInstance(dico_layer.get("format"), str)
             self.assertIsInstance(dico_layer.get("type_geom"), str)
-            self.assertIsInstance(dico_layer.get("Xmin"), float)
-            self.assertIsInstance(dico_layer.get("Xmax"), float)
-            self.assertIsInstance(dico_layer.get("Ymin"), float)
-            self.assertIsInstance(dico_layer.get("Ymax"), float)
+            self.assertIsInstance(dico_layer.get("xmin"), float)
+            self.assertIsInstance(dico_layer.get("xmax"), float)
+            self.assertIsInstance(dico_layer.get("ymin"), float)
+            self.assertIsInstance(dico_layer.get("ymax"), float)
 
 
 # #############################################################################

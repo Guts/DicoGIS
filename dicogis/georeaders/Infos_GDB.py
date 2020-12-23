@@ -67,7 +67,7 @@ class ReadGDB:
         tipo = format
         txt = dictionary of text in the selected language
         """
-        dico_dataset["type"] = tipo
+        dico_dataset["format"] = tipo
 
         # opening GDB
         try:
@@ -78,9 +78,9 @@ class ReadGDB:
             # src = gdal.OpenEx(source_path, 0)  # GDAL driver
             # print(type(src), dir(src), len(dir(src)))
             if not tipo:
-                dico_dataset["type"] = driver.GetName()
+                dico_dataset["format"] = driver.GetName()
             else:
-                dico_dataset["type"] = tipo
+                dico_dataset["format"] = tipo
                 pass
         except Exception as e:
             logger.error(e)
@@ -150,15 +150,15 @@ class ReadGDB:
             # SRS
             srs_details = georeader.get_srs_details(layer, txt)
             dico_layer["srs"] = srs_details[0]
-            dico_layer["EPSG"] = srs_details[1]
+            dico_layer["epsg"] = srs_details[1]
             dico_layer["srs_type"] = srs_details[2]
 
             # spatial extent
             extent = georeader.get_extent_as_tuple(layer)
-            dico_layer["Xmin"] = extent[0]
-            dico_layer["Xmax"] = extent[1]
-            dico_layer["Ymin"] = extent[2]
-            dico_layer["Ymax"] = extent[3]
+            dico_layer["xmin"] = extent[0]
+            dico_layer["xmax"] = extent[1]
+            dico_layer["ymin"] = extent[2]
+            dico_layer["ymax"] = extent[3]
 
             # storing layer into the GDB dictionary
             dico_dataset[

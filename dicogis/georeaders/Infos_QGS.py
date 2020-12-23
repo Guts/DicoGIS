@@ -80,10 +80,10 @@ class ReadQGS:
             dico_qgs["units"] = qgs_map.get("units")
 
             qgs_extent = qgs_map.get("extent")
-            dico_qgs["Xmin"] = round(float(qgs_extent.get("xmin")), 2)
-            dico_qgs["Xmax"] = round(float(qgs_extent.get("xmax")), 2)
-            dico_qgs["Ymin"] = round(float(qgs_extent.get("ymin")), 2)
-            dico_qgs["Ymax"] = round(float(qgs_extent.get("ymax")), 2)
+            dico_qgs["xmin"] = round(float(qgs_extent.get("xmin")), 2)
+            dico_qgs["xmax"] = round(float(qgs_extent.get("xmax")), 2)
+            dico_qgs["ymin"] = round(float(qgs_extent.get("ymin")), 2)
+            dico_qgs["ymax"] = round(float(qgs_extent.get("ymax")), 2)
 
             # SRS
             qgs_srs = qgs_map.get("destinationsrs").get("spatialrefsys")
@@ -93,7 +93,7 @@ class ReadQGS:
                 dico_qgs["srs_type"] = "Projected"
             else:
                 dico_qgs["srs_type"] = "Geographic"
-            dico_qgs["EPSG"] = qgs_srs.get("authid")
+            dico_qgs["epsg"] = qgs_srs.get("authid")
 
             # LAYERS
             # print(xml_qgis.get("projectlayers").get("maplayer"))
