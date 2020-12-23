@@ -23,7 +23,6 @@ from dicogis.georeaders import ReadVectorFlatDataset
 
 # variables
 fixtures_folder = "tests/fixtures/gisdata/data/good/vector/"
-extension_pattern = "**/*.shp"
 
 # #############################################################################
 # ########## Classes ###############
@@ -43,8 +42,8 @@ class TestInfosEsriShapefiles(unittest.TestCase):
         pass
 
     #  -- Tests ------------------------------------------------------------
-    def test_read(self):
-        fixtures_shp = Path(fixtures_folder).glob(extension_pattern)
+    def test_read_shapefiles(self):
+        fixtures_shp = Path(fixtures_folder).glob("**/*.shp")
         georeader_vector = ReadVectorFlatDataset()
         for f in fixtures_shp:
             # run
