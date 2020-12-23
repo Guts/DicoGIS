@@ -33,10 +33,10 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2.0.1
       with:
         activate-environment: dicogis-dev
+        auto-update-conda: true
         channels: conda-forge,defaults
         channel-priority: true
         environment-file: requirements/conda-env-dev.yml
-        mamba-version: "*"
         python-version: ${{ env.PYTHON_VERSION }}
         use-only-tar-bz2: true
 
