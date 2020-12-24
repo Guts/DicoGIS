@@ -15,13 +15,14 @@
 # ##################################
 
 # standard library
+import getpass
 import locale
 import logging
 import platform
 import threading
 from collections import OrderedDict
 from logging.handlers import RotatingFileHandler
-from os import getlogin, path, walk
+from os import path, walk
 from pathlib import Path
 from sys import exit
 from sys import platform as opersys
@@ -114,7 +115,7 @@ class DicoGIS(Tk):
         # basics settings
         Tk.__init__(self)  # constructor of parent graphic class
         self.title("DicoGIS {0}".format(self.package_about.__version__))
-        self.uzer = getlogin()
+        self.uzer = getpass.getuser()
         if opersys == "win32":
             logger.info("Operating system: {0}".format(platform.platform()))
             self.iconbitmap(self.dir_imgs / "DicoGIS.ico")  # windows icon
