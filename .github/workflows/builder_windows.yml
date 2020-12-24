@@ -40,9 +40,6 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
         use-only-tar-bz2: true
 
-    - name: Remove MKL from Conda
-      run: conda remove mkl mkl-service
-
     - name: Install project as a package
       run: python -m pip install -e .
 
