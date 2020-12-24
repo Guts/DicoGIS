@@ -4,11 +4,13 @@ on:
   push:
     branches: [ master ]
     paths:
-      - '**.py'
+      - '**/*.py'
+      - '.github/workflows/tester_ubuntu.yml'
   pull_request:
     branches: [ master ]
     paths:
-      - '**.py'
+      - '**/*.py'
+      - '.github/workflows/tester_ubuntu.yml'
 
 env:
   GDAL_VERSION: 3.*
