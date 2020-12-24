@@ -3,6 +3,10 @@ name: Documentation Builder
 on:
   push:
     branches: [master]
+    paths:
+      - 'docs/**/*'
+      - '.github/workflows/docs_builder.yml'
+      - 'dicogis/**/*.py'
 
 env:
   GDAL_VERSION: 3.*
