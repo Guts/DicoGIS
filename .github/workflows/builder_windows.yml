@@ -40,6 +40,9 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
         use-only-tar-bz2: true
 
+    - name: Remove MKL from Conda
+      run: conda remove mkl mkl-service
+
     - name: Install project as a package
       run: python -m pip install -e .
 
@@ -48,12 +51,6 @@ jobs:
 
     - name: Generates MS Executable
       run: python -O .\builder\pyinstaller_build_windows.py
-
-    # - name: Zip generated application folder
-    #   uses: papeloto/action-zip@v1
-    #   with:
-    #     files: dist/DicoGIS*/
-    #     dest: DicoGIS_windows_64bits.zip
 
     - name: Save it as artifact
       uses: actions/upload-artifact@v2
