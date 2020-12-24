@@ -3,6 +3,11 @@ name: Ubuntu Builder
 on:
   push:
     branches: [ master ]
+    paths:
+      - '.github/workflows/builder_ubuntu.yml'
+      - 'builder/**/*'
+      - 'dicogis/**/*.py'
+
     tags: "*"
 
 env:

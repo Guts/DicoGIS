@@ -3,6 +3,11 @@ name: Windows Builder
 on:
   push:
     branches: [ master ]
+    paths:
+      - '.github/workflows/builder_windows.yml'
+      - 'builder/**/*'
+      - 'dicogis/**/*.py'
+
     tags: "*"
 
 env:
