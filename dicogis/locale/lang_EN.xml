@@ -30,6 +30,7 @@
 	<gui_user>User: </gui_user>
 	<gui_mdp>Password: </gui_mdp>
 	<gui_prox_server>Server: </gui_prox_server>
+	<gui_srv_url>URL GetCapabilities : </gui_srv_url>
 	<gui_prog>Progression</gui_prog>
 	<gui_prog1>Progress: parsing and retrieving compatible files</gui_prog1>
 	<gui_prog2>Progress: processing the files</gui_prog2>

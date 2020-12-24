@@ -31,6 +31,7 @@
 	<gui_mdp>Contraseña: </gui_mdp>
 	<gui_prog>Progresión</gui_prog>
 	<gui_prox_server>Servidor: </gui_prox_server>
+	<gui_srv_url>URL GetCapabilities : </gui_srv_url>
 	<gui_prog1>Progresión: análisis de los archivos compatibles</gui_prog1>
 	<gui_prog2>Progresión: proceso de los archivos</gui_prog2>
 	<info_end>Fín del programa</info_end>

@@ -1,10 +1,8 @@
-# -*- coding: UTF-8 -*-
 #! python3
 
 # Standard library
 import logging
 from pathlib import Path
-import unittest
 
 # package
 from dicogis.georeaders import ReadVectorFlatDataset

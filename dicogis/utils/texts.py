@@ -16,7 +16,7 @@
 import gettext
 import logging
 from pathlib import Path
-from xml.etree import ElementTree as ET  # XML parsing and writer
+from xml.etree import ElementTree as ET
 
 # #############################################################################
 # ########## Globals ###############
@@ -57,12 +57,15 @@ class TextsManager:
         # clearing the text dictionary
         dico_texts.clear()
 
-        # check file
+        # check file, if not exists log the error and return the default language
         lang_file = self.locale_folder / "lang_{}.xml".format(lang)
         if not lang_file.is_file():
-            raise FileNotFoundError(
-                _("Langue file not found: {}").format(lang_file.resolve())
+            logger.error(
+                FileNotFoundError(
+                    _("Langue file not found: {}").format(lang_file.resolve())
+                )
             )
+            return self.load_texts(dico_texts=dico_texts)
 
         # open xml cursor
         xml = ET.parse(lang_file)
