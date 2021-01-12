@@ -128,6 +128,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    needs: [build-ubuntu, build-windows]
+
     steps:
 
       - uses: actions/download-artifact@v2
