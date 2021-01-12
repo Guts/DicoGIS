@@ -121,3 +121,40 @@ jobs:
       with:
         name: DicoGIS_windows_executable
         path: dist/DicoGIS*
+
+
+  release:
+    name: "Release on tag 🚀"
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: DicoGIS_ubuntu_executable
+          path: builds/ubuntu/
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: DicoGIS_windows_executable
+          path: builds/windows/
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: builds/
+
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      #   with:
+      #     tag_name: ${{ github.ref }}
+      #     release_name: Release ${{ github.ref }}
+      #     body: |
+      #       Changes in this Release
+      #       - First Change
+      #       - Second Change
+      #     draft: false
+      #     prerelease: false
