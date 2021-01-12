@@ -154,7 +154,6 @@ class MetadataToXlsx(Workbook):
         Keyword arguments:
         """
         super(MetadataToXlsx, self).__init__()
-        # super(files2xlsx, self).__init__(write_only=True)
         self.txt = texts
 
         # styles
