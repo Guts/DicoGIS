@@ -366,8 +366,24 @@ class MetadataToXlsx(Workbook):
         self.ws_v["E{}".format(self.idx_v)] = layer.get("num_obj", "")
         # Geometry type
         self.ws_v["F{}".format(self.idx_v)] = layer.get("type_geom", "")
+
         # Name of srs
-        self.ws_v["G{}".format(self.idx_v)] = layer.get("srs", "")
+        try:
+            self.ws_v["G{}".format(self.idx_v)] = layer.get("srs", "").encode(
+                "utf-8", "surrogatepass"
+            )
+        except UnicodeError as err:
+            err_msg = "Encoding error into the PRJ file."
+            logger.warning(
+                "{}. Layer: {}. Trace: {}".format(err_msg, layer.get("name"), err)
+            )
+            self.ws_v["Q{}".format(self.idx_v)] = " ".join(
+                [self.ws_v["Q{}".format(self.idx_v)].value or "", str(err_msg)]
+            ).strip()
+            self.ws_v["G{}".format(self.idx_v)] = layer.get("srs", "").encode(
+                "utf8", "xmlcharrefreplace"
+            )
+
         # Type of SRS
         self.ws_v["H{}".format(self.idx_v)] = layer.get("srs_type", "")
         # EPSG code
