@@ -800,18 +800,18 @@ class DicoGIS(Tk):
                     georeader_vector.infos_dataset(
                         path.abspath(shp), self.dico_layer, self.blabla
                     )
-                    logger.info("\t Infos OK")
-                except (AttributeError, RuntimeError, Exception) as e:
+                    logger.debug("Infos OK")
+                except (AttributeError, RuntimeError, Exception) as err:
                     """ empty files """
-                    logger.error(e)
+                    logger.error(err)
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_vector(self.dico_layer)
 
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
                 # getting for metrics analysis
-                logger.info("\t Added to global metrics")
+                logger.debug("\t Added to global metrics")
         else:
             logger.info("\tIgnoring {0} shapefiles".format(len(self.li_shp)))
             pass
@@ -833,7 +833,7 @@ class DicoGIS(Tk):
                     georeader_vector.infos_dataset(
                         path.abspath(tab), self.dico_layer, self.blabla
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -842,7 +842,7 @@ class DicoGIS(Tk):
                 # writing to the Excel file
                 self.wb.store_md_vector(self.dico_layer)
 
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info("\tIgnoring {0} MapInfo tables".format(len(self.li_tab)))
             pass
@@ -864,7 +864,7 @@ class DicoGIS(Tk):
                     georeader_vector.infos_dataset(
                         path.abspath(kml), self.dico_layer, self.blabla
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -872,7 +872,7 @@ class DicoGIS(Tk):
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_vector(self.dico_layer)
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info("\tIgnoring {0} KML".format(len(self.li_kml)))
             pass
@@ -894,7 +894,7 @@ class DicoGIS(Tk):
                     georeader_vector.infos_dataset(
                         path.abspath(gml), self.dico_layer, self.blabla
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -902,7 +902,7 @@ class DicoGIS(Tk):
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_vector(self.dico_layer)
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info("\tIgnoring {0} GML".format(len(self.li_gml)))
             pass
@@ -924,7 +924,7 @@ class DicoGIS(Tk):
                     georeader_vector.infos_dataset(
                         path.abspath(geojson), self.dico_layer, self.blabla
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -932,7 +932,7 @@ class DicoGIS(Tk):
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_vector(self.dico_layer)
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info("\tIgnoring {0} GeoJSON".format(len(self.li_geoj)))
             pass
@@ -957,7 +957,7 @@ class DicoGIS(Tk):
                         "Geoconcept eXport Text",
                         self.blabla,
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -965,7 +965,7 @@ class DicoGIS(Tk):
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_vector(self.dico_layer)
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info(
                 "\tIgnoring {0} Geoconcept eXport Text".format(len(self.li_gxt))
@@ -993,7 +993,7 @@ class DicoGIS(Tk):
                         path.splitext(raster)[1],
                         self.blabla,
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -1001,7 +1001,7 @@ class DicoGIS(Tk):
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_raster(self.dico_raster, self.dico_bands)
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info("\tIgnoring {0} rasters".format(len(self.li_raster)))
             pass
@@ -1026,7 +1026,7 @@ class DicoGIS(Tk):
                         self.blabla,
                         tipo="Esri FileGDB",
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -1034,7 +1034,7 @@ class DicoGIS(Tk):
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_fdb(self.dico_fdb)
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info("\tIgnoring {0} Esri FileGDB".format(len(self.li_egdb)))
             pass
@@ -1056,7 +1056,7 @@ class DicoGIS(Tk):
                     ReadSpaDB(
                         path.abspath(spadb), self.dico_fdb, "Spatialite", self.blabla
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -1064,7 +1064,7 @@ class DicoGIS(Tk):
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_fdb(self.dico_fdb)
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info("\tIgnoring {0} Spatialite DB".format(len(self.li_spadb)))
             pass
@@ -1085,7 +1085,7 @@ class DicoGIS(Tk):
                     ReadDXF(
                         path.abspath(dxf), self.dico_cdao, "AutoCAD DXF", self.blabla
                     )
-                    logger.info("\t Infos OK")
+                    logger.debug("Infos OK")
                 except (AttributeError, RuntimeError, Exception) as e:
                     """ empty files """
                     logger.error(e)
@@ -1093,7 +1093,7 @@ class DicoGIS(Tk):
                     continue
                 # writing to the Excel dictionary
                 self.wb.store_md_cad(self.dico_cdao)
-                logger.info("\t Wrote into the dictionary")
+                logger.debug("Wrote into the dictionary")
         else:
             logger.info("\tIgnoring {0} CAO/DAO files".format(len(self.li_cdao)))
             pass
@@ -1132,7 +1132,7 @@ class DicoGIS(Tk):
             sgbd_reader.infos_dataset(layer)
             logger.info("Table examined: {}".format(layer.GetName()))
             self.wb.store_md_sgdb(self.dico_dataset)
-            logger.info("\t Wrote into the dictionary")
+            logger.debug("Wrote into the dictionary")
             # increment the progress bar
             self.prog_layers["value"] = self.prog_layers["value"] + 1
             self.update()

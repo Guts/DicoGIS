@@ -61,7 +61,7 @@ class GeoInfosGenericReader(object):
     def get_geometry_type(self, layer: ogr.Layer) -> str:
         """Get geometry type human readable."""
         try:
-            logger.warning(ogr.GeometryTypeToName(layer.GetGeomType()))
+            logger.debug(ogr.GeometryTypeToName(layer.GetGeomType()))
             # if layer.GetGeomType():
             #     geom_type = layer.GetGeomType()
             #     layer.ResetReading()
