@@ -1,26 +1,24 @@
-name: "Tester 🎳"
+name: Ubuntu Builder 📦
 
 on:
   push:
     branches: [ master ]
     paths:
-      - '**/*.py'
-      - '.github/workflows/tester_ubuntu.yml'
-  pull_request:
-    branches: [ master ]
-    paths:
-      - '**/*.py'
-      - '.github/workflows/tester_ubuntu.yml'
+      - '.github/workflows/builder_ubuntu.yml'
+      - 'builder/**/*'
+      - 'dicogis/**/*.py'
 
 env:
   GDAL_VERSION: 3.*
   PROJECT_FOLDER: "dicogis"
+  PYINSTALLER_LOG_LEVEL: "DEBUG"
   PYTHON_VERSION: 3.8
 
 jobs:
-  test-ubuntu:
+  build-ubuntu:
 
     runs-on: ubuntu-20.04
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
     steps:
     - name: Get source code
@@ -59,14 +57,10 @@ jobs:
         python -m pip install GDAL=="`gdal-config --version`.*"
         python -m pip install -e .
 
-    - name: Install project as a package
-      run: python -m pip install -e .
+    - name: Generates Executable
+      run: python -O ./builder/pyinstaller_build_ubuntu.py
 
-    - name: Install tests fixtures
-      run: python -m pip install -U gisdata -t ./tests/fixtures
-
-    - name: Unit tests
-      run: pytest
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+    - uses: actions/upload-artifact@v2
+      with:
+        name: DicoGIS_ubuntu_executable
+        path: dist/DicoGIS*/
