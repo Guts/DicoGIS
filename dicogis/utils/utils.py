@@ -14,10 +14,11 @@
 # ################################
 
 # Standard library
-from os import path, access, R_OK
-from sys import exit, platform as opersys
+import logging
 import subprocess
-
+from os import R_OK, access, path
+from sys import exit
+from sys import platform as opersys
 from tkinter import ACTIVE, DISABLED
 from tkinter.filedialog import asksaveasfilename  # dialogs
 from tkinter.messagebox import showerror as avert
@@ -28,6 +29,14 @@ if opersys == "win32":
     from os import startfile  # to open a folder/file
 else:
     pass
+
+
+# ##############################################################################
+# ############ Globals ############
+# #################################
+
+# LOG
+logger = logging.getLogger(__name__)
 
 # ############################################################################
 # ######### Classes #############
@@ -106,6 +115,12 @@ class Utilities(object):
                     message="Please close Microsoft Excel before saving.",
                 )
                 return out_name
+            except Exception as err:
+                logger.critical(
+                    "Something happened during workbook saving operations. Trace: {}".format(
+                        err
+                    )
+                )
         else:
             avert(title="Not saved", message="You cancelled saving operation")
             exit()
