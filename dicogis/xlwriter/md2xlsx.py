@@ -6,7 +6,7 @@
 
 # Standard library
 import logging
-from collections import OrderedDict  # ordered dictionary
+from collections import OrderedDict
 from os import path
 
 # 3rd party library
@@ -20,6 +20,34 @@ from openpyxl.utils import get_column_letter
 
 # LOG
 logger = logging.getLogger(__name__)
+
+# ##############################################################################
+# ########## Functions #############
+# ##################################
+
+
+def secure_encoding(layer_dict: dict, key_str: str) -> str:
+    """Check if dictionary value is compatible with XML encoding.
+
+    Args:
+        layer_dict (dict): layer metadata dictionary
+        key_str (str): key fo dictionary to check
+
+    Returns:
+        str: clean string
+    """
+    try:
+        out_str = layer_dict.get(key_str, "").encode("utf-8", "strict")
+        return out_str
+    except UnicodeError as err:
+        err_msg = "Encoding error spotted in '{}' for layer {}".format(
+            key_str, layer_dict.get("name")
+        )
+        logger.warning(
+            "{}. Layer: {}. Trace: {}".format(err_msg, layer_dict.get("name"), err)
+        )
+        return layer_dict.get(key_str, "").encode("utf8", "xmlcharrefreplace")
+
 
 # ##############################################################################
 # ########## Classes ###############
@@ -323,7 +351,9 @@ class MetadataToXlsx(Workbook):
         if "error" in layer:
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(layer.get("error"))
-            logger.warning("\tproblem detected")
+            logger.warning(
+                "Problem detected: " "{0} in {1}".format(err_mess, layer.get("name"))
+            )
             self.ws_v["A{}".format(self.idx_v)] = layer.get("name")
             self.ws_v["A{}".format(self.idx_v)].style = "Warning Text"
             link = r'=HYPERLINK("{0}","{1}")'.format(
@@ -335,7 +365,10 @@ class MetadataToXlsx(Workbook):
             self.ws_v["C{}".format(self.idx_v)].style = "Warning Text"
             # gdal info
             if "err_gdal" in layer:
-                logger.warning("\tproblem detected")
+                logger.warning(
+                    "Problem detected by GDAL: "
+                    "{0} in {1}".format(err_mess, layer.get("name"))
+                )
                 self.ws_v["Q{}".format(self.idx_v)] = "{0} : {1}".format(
                     layer.get("err_gdal")[0], layer.get("err_gdal")[1]
                 )
@@ -348,7 +381,7 @@ class MetadataToXlsx(Workbook):
             pass
 
         # Name
-        self.ws_v["A{}".format(self.idx_v)] = layer.get("name")
+        self.ws_v["A{}".format(self.idx_v)] = secure_encoding(layer, "name")
 
         # Path of parent folder formatted to be a hyperlink
         link = r'=HYPERLINK("{0}","{1}")'.format(
@@ -368,21 +401,7 @@ class MetadataToXlsx(Workbook):
         self.ws_v["F{}".format(self.idx_v)] = layer.get("type_geom", "")
 
         # Name of srs
-        try:
-            self.ws_v["G{}".format(self.idx_v)] = layer.get("srs", "").encode(
-                "utf-8", "surrogatepass"
-            )
-        except UnicodeError as err:
-            err_msg = "Encoding error into the PRJ file."
-            logger.warning(
-                "{}. Layer: {}. Trace: {}".format(err_msg, layer.get("name"), err)
-            )
-            self.ws_v["Q{}".format(self.idx_v)] = " ".join(
-                [self.ws_v["Q{}".format(self.idx_v)].value or "", str(err_msg)]
-            ).strip()
-            self.ws_v["G{}".format(self.idx_v)] = layer.get("srs", "").encode(
-                "utf8", "xmlcharrefreplace"
-            )
+        self.ws_v["G{}".format(self.idx_v)] = secure_encoding(layer, "srs")
 
         # Type of SRS
         self.ws_v["H{}".format(self.idx_v)] = layer.get("srs_type", "")
@@ -432,7 +451,7 @@ class MetadataToXlsx(Workbook):
             try:
                 champs = "{} {} ({}{}{}{}{}) ; ".format(
                     champs,
-                    chp,
+                    chp.encode("utf8", "replace"),
                     tipo,
                     self.txt.get("longueur"),
                     fields[chp][1],
@@ -440,18 +459,7 @@ class MetadataToXlsx(Workbook):
                     fields[chp][2],
                 )
             except UnicodeDecodeError:
-                logger.warning(
-                    "Field name with special letters: {}".format(chp.decode("latin1"))
-                )
-                # decode the fucking field name
-                champs = (
-                    champs
-                    + chp.decode("latin1")
-                    + " ({}, Lg. = {}, Pr. = {}) ;".format(
-                        tipo, fields[chp][1], fields[chp][2]
-                    )
-                )
-                # then continue
+                logger.warning("Field name with special letters: {}".format(chp))
                 continue
 
         # Once all fieds explored, write them
@@ -469,7 +477,9 @@ class MetadataToXlsx(Workbook):
         if "error" in layer:
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(layer.get("error"))
-            logger.warning("\tproblem detected")
+            logger.warning(
+                "Problem detected: " "{0} in {1}".format(err_mess, layer.get("name"))
+            )
             self.ws_r["A{}".format(self.idx_r)] = layer.get("name")
             link = r'=HYPERLINK("{0}","{1}")'.format(
                 layer.get("folder"), self.txt.get("browse")
@@ -540,7 +550,10 @@ class MetadataToXlsx(Workbook):
 
         # in case of a source error
         if layer.get("err_gdal", [0])[0] != 0:
-            logger.warning("\tproblem detected")
+            logger.warning(
+                "Problem detected by GDAL: "
+                "{0} in {1}".format(err_mess, layer.get("name"))
+            )
             self.ws_r["U{}".format(self.idx_r)] = "{0} : {1}".format(
                 layer.get("err_gdal")[0], layer.get("err_gdal")[1]
             )
@@ -560,7 +573,9 @@ class MetadataToXlsx(Workbook):
         if "error" in filedb:
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(filedb.get("error"))
-            logger.warning("\tproblem detected")
+            logger.warning(
+                "Problem detected: " "{0} in {1}".format(err_mess, filedb.get("name"))
+            )
             self.ws_fdb["A{}".format(self.idx_f)] = filedb.get("name")
             link = r'=HYPERLINK("{0}","{1}")'.format(
                 filedb.get("folder"), self.txt.get("browse")
@@ -571,7 +586,10 @@ class MetadataToXlsx(Workbook):
             self.ws_fdb["C{}".format(self.idx_f)].style = "Warning Text"
             # gdal info
             if "err_gdal" in filedb:
-                logger.warning("\tproblem detected")
+                logger.warning(
+                    "Problem detected by GDAL: "
+                    "{0} in {1}".format(err_mess, filedb.get("name"))
+                )
                 self.ws_fdb["Q{}".format(self.idx_v)] = "{0} : {1}".format(
                     filedb.get("err_gdal")[0], filedb.get("err_gdal")[1]
                 )
@@ -611,16 +629,14 @@ class MetadataToXlsx(Workbook):
             # get the layer informations
             try:
                 gdb_layer = filedb.get("{0}_{1}".format(layer_idx, layer_name))
-            except UnicodeDecodeError:
-                gdb_layer = filedb.get(
-                    "{0}_{1}".format(layer_idx, layer_name.decode("latin1"))
-                )
+            except UnicodeError as err:
+                logger.error("Encoding error. Trace: {}".format(err))
+                continue
             # in case of a source error
             if gdb_layer.get("error"):
                 err_mess = self.txt.get(gdb_layer.get("error"))
                 logger.warning(
-                    "\tproblem detected: \
-                                  {0} in {1}".format(
+                    "Problem detected: {0} in {1}".format(
                         err_mess, gdb_layer.get("title")
                     )
                 )
@@ -637,7 +653,7 @@ class MetadataToXlsx(Workbook):
             self.ws_fdb["H{}".format(self.idx_f)] = gdb_layer.get("num_fields")
             self.ws_fdb["I{}".format(self.idx_f)] = gdb_layer.get("num_obj")
             self.ws_fdb["J{}".format(self.idx_f)] = gdb_layer.get("type_geom")
-            self.ws_fdb["K{}".format(self.idx_f)] = gdb_layer.get("srs")
+            self.ws_fdb["K{}".format(self.idx_f)] = secure_encoding(gdb_layer, "srs")
             self.ws_fdb["L{}".format(self.idx_f)] = gdb_layer.get("srs_type")
             self.ws_fdb["M{}".format(self.idx_f)] = gdb_layer.get("epsg")
 
@@ -671,7 +687,7 @@ class MetadataToXlsx(Workbook):
                 try:
                     champs = "{} {} ({}{}{}{}{}) ; ".format(
                         champs,
-                        chp,
+                        chp.encode("utf8", "replace"),
                         tipo,
                         self.txt.get("longueur"),
                         fields[chp][1],
@@ -679,20 +695,7 @@ class MetadataToXlsx(Workbook):
                         fields[chp][2],
                     )
                 except UnicodeDecodeError:
-                    logger.warning(
-                        "Field name with special letters: {}".format(
-                            chp.decode("latin1")
-                        )
-                    )
-                    # decode the fucking field name
-                    champs = (
-                        champs
-                        + chp.decode("latin1")
-                        + " ({}, Lg. = {}, Pr. = {}) ;".format(
-                            tipo, fields[chp][1], fields[chp][2]
-                        )
-                    )
-                    # then continue
+                    logger.warning("Field name with special letters: {}".format(chp))
                     continue
 
             # Once all fieds explored, write them
@@ -713,7 +716,9 @@ class MetadataToXlsx(Workbook):
         if "error" in mapdoc:
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(mapdoc.get("error"))
-            logger.warning("\tproblem detected")
+            logger.warning(
+                "Problem detected: " "{0} in {1}".format(err_mess, mapdoc.get("name"))
+            )
             self.ws_mdocs["A{}".format(self.idx_m)] = mapdoc.get("name")
             self.ws_mdocs["A{}".format(self.idx_m)].style = "Warning Text"
             link = r'=HYPERLINK("{0}","{1}")'.format(
@@ -748,7 +753,7 @@ class MetadataToXlsx(Workbook):
         self.ws_mdocs["K{}".format(self.idx_m)] = mapdoc.get("date_actu")
         self.ws_mdocs["L{}".format(self.idx_m)] = mapdoc.get("xOrigin")
         self.ws_mdocs["M{}".format(self.idx_m)] = mapdoc.get("yOrigin")
-        self.ws_mdocs["N{}".format(self.idx_m)] = mapdoc.get("srs")
+        self.ws_mdocs["N{}".format(self.idx_m)] = secure_encoding(mapdoc, "srs")
         self.ws_mdocs["O{}".format(self.idx_m)] = mapdoc.get("srs_type")
         self.ws_mdocs["P{}".format(self.idx_m)] = mapdoc.get("epsg")
         self.ws_mdocs["Q{}".format(self.idx_m)] = mapdoc.get("layers_count")
@@ -767,14 +772,13 @@ class MetadataToXlsx(Workbook):
                 mdoc_layer = mapdoc.get("{0}_{1}".format(layer_idx, layer_name))
             except UnicodeDecodeError:
                 mdoc_layer = mapdoc.get(
-                    "{0}_{1}".format(layer_idx, layer_name.decode("latin1"))
+                    "{0}_{1}".format(layer_idx, layer_name.encode("utf8", "replace"))
                 )
             # in case of a source error
             if mdoc_layer.get("error"):
                 err_mess = self.txt.get(mdoc_layer.get("error"))
                 logger.warning(
-                    "\tproblem detected: \
-                                  {0} in {1}".format(
+                    "Problem detected: {0} in {1}".format(
                         err_mess, mdoc_layer.get("title")
                     )
                 )
@@ -811,7 +815,7 @@ class MetadataToXlsx(Workbook):
                 try:
                     champs = "{} {} ({}{}{}{}{}) ; ".format(
                         champs,
-                        chp,
+                        chp.decode("utf8", "replace"),
                         tipo,
                         self.txt.get("longueur"),
                         fields[chp][1],
@@ -853,7 +857,9 @@ class MetadataToXlsx(Workbook):
         if "error" in cad:
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(cad.get("error"))
-            logger.warning("\tproblem detected")
+            logger.warning(
+                "Problem detected: {0} in {1}".format(err_mess, cad.get("name"))
+            )
             self.ws_cad["A{}".format(self.idx_c)] = cad.get("name")
             self.ws_cad["A{}".format(self.idx_c)].style = "Warning Text"
             link = r'=HYPERLINK("{0}","{1}")'.format(
@@ -908,7 +914,7 @@ class MetadataToXlsx(Workbook):
             if layer.get("error"):
                 err_mess = self.txt.get(layer.get("error"))
                 logger.warning(
-                    "\tproblem detected: "
+                    "Problem detected: "
                     "{0} in {1}".format(err_mess, layer.get("title"))
                 )
                 self.ws_cad["G{}".format(self.idx_c)] = layer.get("title")
