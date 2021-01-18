@@ -73,14 +73,14 @@ utils_global = Utilities()
 # LOG
 logger = logging.getLogger("DicoGIS")
 logging.captureWarnings(True)
-logger.setLevel(logging.INFO)  # all errors will be get
+logger.setLevel(logging.WARNING)  # all errors will be get
 log_form = logging.Formatter(
     "%(asctime)s || %(levelname)s "
     "|| %(module)s - %(lineno)d ||"
     " %(funcName)s || %(message)s"
 )
 logfile = RotatingFileHandler("LOG_DicoGIS.log", "a", 5000000, 1)
-logfile.setLevel(logging.INFO)
+logfile.setLevel(logging.WARNING)
 logfile.setFormatter(log_form)
 logger.addHandler(logfile)
 
