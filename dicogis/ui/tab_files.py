@@ -171,8 +171,8 @@ class TabFiles(Frame):
             try:
                 self.ent_target.delete(0, END)
                 self.ent_target.insert(0, foldername)
-            except Exception as e:
-                logger.info(e)
+            except Exception as err:
+                logger.warning(err)
                 showinfo(
                     title=self.txt.get("nofolder"), message=self.txt.get("nofolder")
                 )

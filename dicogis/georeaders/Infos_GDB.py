@@ -73,17 +73,13 @@ class ReadGDB:
         try:
             driver = ogr.GetDriverByName(str("OpenFileGDB"))
             src = driver.Open(source_path, 0)
-            print(driver.GetName())
-            # print(type(src), dir(src.GetDriver()), len(dir(src)))
-            # src = gdal.OpenEx(source_path, 0)  # GDAL driver
-            # print(type(src), dir(src), len(dir(src)))
             if not tipo:
                 dico_dataset["format"] = driver.GetName()
             else:
                 dico_dataset["format"] = tipo
                 pass
-        except Exception as e:
-            logger.error(e)
+        except Exception as err:
+            logger.error(err)
             youtils.erratum(dico_dataset, source_path, "err_corrupt")
             self.alert = self.alert + 1
             return None
@@ -220,9 +216,9 @@ if __name__ == "__main__":
             try:
                 path.join(root, d)
                 full_path = path.join(root, d)
-            except UnicodeDecodeError as e:
+            except UnicodeDecodeError as err:
                 full_path = path.join(root, d.decode("latin1"))
-                logger.error(full_path), e
+                logger.error("Failed with: {}. Trace: {}".format(full_path, err))
             if full_path[-4:].lower() == ".gdb":
                 # add complete path of shapefile
                 li_gdb.append(path.abspath(full_path))
@@ -237,17 +233,12 @@ if __name__ == "__main__":
     for source_path in li_gdb:
         dico_dataset.clear()
         source_path = path.abspath(source_path)
-        print(path.isdir(source_path), source_path)
         if path.isdir(source_path):
-            print("\n{0}: ".format(path.realpath(source_path)))
             gdbReader.infos_dataset(
                 source_path=source_path,
                 dico_dataset=dico_dataset,
                 txt=textos,
                 tipo="Esri FileGDB",
             )
-            # print results
-            print(dico_dataset)
         else:
-            print(path.isfile(source_path), source_path)
             pass

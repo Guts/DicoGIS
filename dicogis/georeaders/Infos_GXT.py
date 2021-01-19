@@ -77,7 +77,7 @@ class ReadGXT:
         # raising corrupt files
         try:
             source = ogr.Open(layerpath)  # OGR driver
-        except Exception as e:
+        except Exception as err:
             logging.error(e)
             self.alert = self.alert + 1
             youtils.erratum(dico_layer, layerpath, "err_corrupt")

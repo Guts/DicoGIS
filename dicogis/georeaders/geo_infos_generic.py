@@ -90,7 +90,7 @@ class GeoInfosGenericReader(object):
         #     first_obj = layer.GetNextFeature()
         #     layer_geom = first_obj.GetGeometryRef()
         #     print("GOT IT")
-        # except AttributeError as e:
+        # except AttributeError as err:
         #     logger.error("{}: {}".format(layer.GetName(), e))
         #     first_obj = layer.GetNextFeature()
         #     if hasattr(first_obj, "GetGeometryRef"):

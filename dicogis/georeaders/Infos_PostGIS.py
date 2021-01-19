@@ -125,9 +125,9 @@ class ReadPostGIS:
                 "Access granted : connecting people to {} tables!".format(len(conn))
             )
             return conn
-        except Exception as e:
-            self.dico_dataset["conn_state"] = e
-            logging.error("Connection failed. Check settings: {0}".format(str(e)))
+        except Exception as err:
+            self.dico_dataset["conn_state"] = err
+            logging.error("Connection failed. Check settings: {0}".format(str(err)))
             return 0
 
     def get_version(self):
@@ -185,8 +185,8 @@ class ReadPostGIS:
                 return None
             else:
                 pass
-        except Exception as e:
-            logging.error(e)
+        except Exception as err:
+            logging.error(err)
             return None
 
         # schema name
