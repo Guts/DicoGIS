@@ -552,7 +552,7 @@ class MetadataToXlsx(Workbook):
         if layer.get("err_gdal", [0])[0] != 0:
             logger.warning(
                 "Problem detected by GDAL: "
-                "{0} in {1}".format(err_mess, layer.get("name"))
+                "{0} in {1}".format(layer.get("err_gdal"), layer.get("name"))
             )
             self.ws_r["U{}".format(self.idx_r)] = "{0} : {1}".format(
                 layer.get("err_gdal")[0], layer.get("err_gdal")[1]
