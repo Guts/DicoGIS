@@ -78,7 +78,7 @@ class ReadGXT:
         try:
             source = ogr.Open(layerpath)  # OGR driver
         except Exception as err:
-            logging.error(e)
+            logging.error(err)
             self.alert = self.alert + 1
             youtils.erratum(dico_layer, layerpath, "err_corrupt")
             dico_layer["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
