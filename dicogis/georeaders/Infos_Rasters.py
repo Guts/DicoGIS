@@ -108,8 +108,8 @@ class ReadRasters(object):
         # opening file
         try:
             self.rast = gdal.Open(rasterpath, GA_ReadOnly)
-        except Exception as e:
-            print(e)
+        except Exception as err:
+            logger.error(err)
             self.alert += 1
             self.erratum(dico_raster, rasterpath, "err_incomp")
             return

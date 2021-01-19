@@ -76,8 +76,8 @@ class ReadDXF:
             # driver_dxf = ogr.GetDriverByName(str("DXF"))
             # dxf = driver_dxf.Open(source_path, 0)
             src = gdal.OpenEx(source_path, 0)
-        except Exception as e:
-            logging.error(e)
+        except Exception as err:
+            logging.error(err)
             youtils.erratum(dico_dataset, source_path, "err_corrupt")
             self.alert = self.alert + 1
             return None
@@ -240,9 +240,6 @@ if __name__ == "__main__":
         dico_dataset.clear()
         source_path = path.abspath(source_path)
         if path.isfile(source_path):
-            print("\n{0}: ".format(source_path))
             ReadDXF(source_path, dico_dataset, "AutoCAD DXF", textos)
-            # print results
-            print(dico_dataset)
         else:
             pass

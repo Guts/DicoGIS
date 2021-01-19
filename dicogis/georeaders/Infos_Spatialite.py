@@ -250,8 +250,12 @@ class ReadSpaDB:
         try:
             first_obj = layer_obj.GetNextFeature()
             geom = first_obj.GetGeometryRef()
-        except AttributeError as e:
-            print(e, layer_obj.GetName(), layer_obj.GetFeatureCount())
+        except AttributeError as err:
+            logger.error(
+                "Get geomtry ref failed on layer {}. Trace: {}".format(
+                    layer_obj.GetName(), err
+                )
+            )
             first_obj = layer_obj.GetNextFeature()
             geom = first_obj.GetGeometryRef()
 

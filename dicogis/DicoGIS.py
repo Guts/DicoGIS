@@ -393,8 +393,8 @@ class DicoGIS(Tk):
             try:
                 self.tab_files.ent_target.delete(0, END)
                 self.tab_files.ent_target.insert(0, foldername)
-            except Exception as e:
-                logger.debug(e)
+            except Exception as err:
+                logger.debug(err)
                 info(
                     title=self.blabla.get("nofolder"),
                     message=self.blabla.get("nofolder"),

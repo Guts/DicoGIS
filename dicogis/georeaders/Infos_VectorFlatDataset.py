@@ -84,8 +84,8 @@ class ReadVectorFlatDataset:
             else:
                 dico_dataset["format"] = tipo
                 pass
-        except Exception as e:
-            logger.error(e)
+        except Exception as err:
+            logger.error(err)
             self.alert = self.alert + 1
             dico_dataset["format"] = tipo
             youtils.erratum(dico_dataset, source_path, "err_corrupt")
