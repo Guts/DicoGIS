@@ -10,5 +10,5 @@ dxfgrabber>=1.0,<1.1
 geoserver-restconfig>=2.0.4,<2.0.5
 lxml>=4.6,<4.7
 openpyxl>=3.0,<3.1
-numpy>=1.19.5
+numpy>=1.19.5,<1.20
 xmltodict>=0.12,<1
