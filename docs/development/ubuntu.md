@@ -57,7 +57,7 @@ python -m pip install pygdal=="`gdal-config --version`.*"
 ```eval_rst
 .. note::
     If you want to work outsite a virtual environment, you should install GDAL Python bindings using:
-    
+
         python -m pip install GDAL=="`gdal-config --version`.*"
 ```
 
