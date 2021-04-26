@@ -201,7 +201,7 @@ class ReadPostGIS:
         layer_feat_count = layer.GetFeatureCount()
         dico_dataset["num_obj"] = layer_feat_count
         if layer_feat_count == 0:
-            """ if layer doesn't have any object, return an error """
+            """if layer doesn't have any object, return an error"""
             self.alert += 1
             youtils.erratum(ctner=dico_dataset, ds_lyr=layer, mess="err_nobjet")
             return None

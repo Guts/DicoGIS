@@ -25,7 +25,7 @@ from tkinter.messagebox import showerror as avert
 
 # Imports depending on operating system
 if opersys == "win32":
-    """ windows """
+    """windows"""
     from os import startfile  # to open a folder/file
 else:
     pass
@@ -149,5 +149,5 @@ class Utilities(object):
 # #################################
 
 if __name__ == "__main__":
-    """ standalone execution """
+    """standalone execution"""
     utils = Utilities()

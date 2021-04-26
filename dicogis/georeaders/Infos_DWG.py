@@ -147,7 +147,7 @@ class ReadDWG:
         dico_dxf["total_objs"] = total_objs
 
     def infos_basics(self, layer_obj, dico_layer, txt):
-        """ get the global informations about the layer """
+        """get the global informations about the layer"""
         # title and features count
         dico_layer["title"] = layer_obj.GetName()
         dico_layer["num_obj"] = layer_obj.GetFeatureCount()
@@ -167,7 +167,7 @@ class ReadDWG:
         return dico_layer
 
     def infos_geos(self, layer_obj, srs, dico_layer, txt):
-        """ get the informations about geography and geometry """
+        """get the informations about geography and geometry"""
         if srs:
             # SRS
             srs.AutoIdentifyEPSG()
@@ -251,7 +251,7 @@ class ReadDWG:
         return dico_layer
 
     def infos_fields(self, layer_def, dico_fields):
-        """ get the informations about fields definitions """
+        """get the informations about fields definitions"""
         for i in range(layer_def.GetFieldCount()):
             champomy = layer_def.GetFieldDefn(i)  # fields ordered
             dico_fields[champomy.GetName()] = champomy.GetTypeName()
@@ -268,7 +268,7 @@ class ReadDWG:
         return "%3.1f %s" % (os_size, " To")
 
     def erratum(self, dico_dxf, dxfpath, mess):
-        """ errors handling """
+        """errors handling"""
         # storing minimal informations to give clues to solve later
         dico_dxf["name"] = path.basename(dxfpath)
         dico_dxf["folder"] = path.dirname(dxfpath)

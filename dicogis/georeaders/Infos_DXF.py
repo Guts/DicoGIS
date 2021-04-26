@@ -84,7 +84,7 @@ class ReadDXF:
 
         # raising incompatible files
         if not src:
-            """ if file is not compatible """
+            """if file is not compatible"""
             self.alert += 1
             dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
             youtils.erratum(dico_dataset, source_path, "err_nobjet")
@@ -157,7 +157,7 @@ class ReadDXF:
             layer_feat_count = layer.GetFeatureCount()
             dico_layer["num_obj"] = layer_feat_count
             if layer_feat_count == 0:
-                """ if layer doesn't have any object, return an error """
+                """if layer doesn't have any object, return an error"""
                 dico_layer["error"] = "err_nobjet"
                 self.alert = self.alert + 1
             else:

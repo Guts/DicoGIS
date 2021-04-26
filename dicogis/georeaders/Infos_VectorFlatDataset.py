@@ -94,7 +94,7 @@ class ReadVectorFlatDataset:
 
         # raising incompatible files
         if not src:
-            """ if file is not compatible """
+            """if file is not compatible"""
             self.alert += 1
             dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
             youtils.erratum(dico_dataset, source_path, "err_nobjet")
@@ -128,7 +128,7 @@ class ReadVectorFlatDataset:
         layer_feat_count = layer.GetFeatureCount()
         dico_dataset["num_obj"] = layer_feat_count
         if layer_feat_count == 0:
-            """ if layer doesn't have any object, return an error """
+            """if layer doesn't have any object, return an error"""
             self.alert += 1
             youtils.erratum(dico_dataset, source_path, "err_nobjet")
             return 0
@@ -203,7 +203,7 @@ if __name__ == "__main__":
     dico_dataset = OrderedDict()  # dictionary where will be stored info
     # execution
     for vector in li_vectors:
-        """ looping on shapefiles list """
+        """looping on shapefiles list"""
         # reset recipient data
         dico_dataset.clear()
         # getting the informations

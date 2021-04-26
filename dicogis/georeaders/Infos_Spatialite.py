@@ -174,7 +174,7 @@ class ReadSpaDB:
         dico_layer["num_obj"] = layer_obj.GetFeatureCount()
 
         if layer_obj.GetFeatureCount() == 0:
-            """ if layer doesn't have any object, return an error """
+            """if layer doesn't have any object, return an error"""
             dico_layer["error"] = "err_nobjet"
             self.alert = self.alert + 1
         else:
