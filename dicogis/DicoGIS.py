@@ -444,7 +444,7 @@ class DicoGIS(Tk):
         for root, dirs, files in walk(foldertarget):
             self.num_folders = self.num_folders + len(dirs)
             for d in dirs:
-                """ looking for File Geodatabase among directories """
+                """looking for File Geodatabase among directories"""
                 try:
                     path.join(root, d)
                     full_path = path.join(root, d)
@@ -456,7 +456,7 @@ class DicoGIS(Tk):
                 else:
                     pass
             for f in files:
-                """ looking for files with geographic data """
+                """looking for files with geographic data"""
                 try:
                     path.join(root, f)
                     full_path = path.join(root, f)
@@ -474,7 +474,7 @@ class DicoGIS(Tk):
                         or path.isfile("{0}.SHX".format(full_path[:-4]))
                     )
                 ):
-                    """ listing compatible shapefiles """
+                    """listing compatible shapefiles"""
                     # add complete path of shapefile
                     self.li_shp.append(full_path)
                 elif (
@@ -492,46 +492,46 @@ class DicoGIS(Tk):
                         or path.isfile(full_path[:-4] + ".ID")
                     )
                 ):
-                    """ listing MapInfo tables """
+                    """listing MapInfo tables"""
                     # add complete path of MapInfo file
                     self.li_tab.append(full_path)
                 elif (
                     path.splitext(full_path.lower())[1] == ".kml"
                     or path.splitext(full_path.lower())[1] == ".kmz"
                 ):
-                    """ listing KML and KMZ """
+                    """listing KML and KMZ"""
                     # add complete path of KML file
                     self.li_kml.append(full_path)
                 elif path.splitext(full_path.lower())[1] == ".gml":
-                    """ listing GML """
+                    """listing GML"""
                     # add complete path of GML file
                     self.li_gml.append(full_path)
                 elif path.splitext(full_path.lower())[1] == ".geojson":
-                    """ listing GeoJSON """
+                    """listing GeoJSON"""
                     # add complete path of GeoJSON file
                     self.li_geoj.append(full_path)
                 elif path.splitext(full_path.lower())[1] == ".gxt":
-                    """ listing Geoconcept eXport Text (GXT) """
+                    """listing Geoconcept eXport Text (GXT)"""
                     # add complete path of GXT file
                     self.li_gxt.append(full_path)
                 elif path.splitext(full_path.lower())[1] in self.li_raster_formats:
-                    """ listing compatible rasters """
+                    """listing compatible rasters"""
                     # add complete path of raster file
                     self.li_raster.append(full_path)
                 elif path.splitext(full_path.lower())[1] == ".dxf":
-                    """ listing DXF """
+                    """listing DXF"""
                     # add complete path of DXF file
                     self.li_dxf.append(full_path)
                 elif path.splitext(full_path.lower())[1] == ".dwg":
-                    """ listing DWG """
+                    """listing DWG"""
                     # add complete path of DWG file
                     self.li_dwg.append(full_path)
                 elif path.splitext(full_path.lower())[1] == ".dgn":
-                    """ listing MicroStation DGN """
+                    """listing MicroStation DGN"""
                     # add complete path of DGN file
                     self.li_dgn.append(full_path)
                 elif path.splitext(full_path.lower())[1] == ".sqlite":
-                    """ listing Spatialite DB """
+                    """listing Spatialite DB"""
                     # add complete path of DGN file
                     self.li_spadb.append(full_path)
                 else:
@@ -787,7 +787,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_shp.get() and len(self.li_shp) > 0:
             logger.info("Processing shapefiles: start")
             for shp in self.li_shp:
-                """ looping on shapefiles list """
+                """looping on shapefiles list"""
                 self.status.set(path.basename(shp))
                 logger.info("Processing: {}".format(shp))
                 # increment the progress bar
@@ -802,7 +802,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             shp, err
@@ -822,7 +822,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_tab.get() and len(self.li_tab) > 0:
             logger.info("Processing MapInfo tables: start")
             for tab in self.li_tab:
-                """ looping on MapInfo tables list """
+                """looping on MapInfo tables list"""
                 self.status.set(path.basename(tab))
                 logger.info(tab)
                 # increment the progress bar
@@ -837,7 +837,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             tab, err
@@ -856,7 +856,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_kml.get() and len(self.li_kml) > 0:
             logger.info("Processing KML-KMZ: start")
             for kml in self.li_kml:
-                """ looping on KML/KMZ list """
+                """looping on KML/KMZ list"""
                 self.status.set(path.basename(kml))
                 logger.info(kml)
                 # increment the progress bar
@@ -872,7 +872,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             kml, err
@@ -890,7 +890,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_gml.get() and len(self.li_gml) > 0:
             logger.info("Processing GML: start")
             for gml in self.li_gml:
-                """ looping on GML list """
+                """looping on GML list"""
                 self.status.set(path.basename(gml))
                 logger.info(gml)
                 # increment the progress bar
@@ -906,7 +906,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             gml, err
@@ -924,7 +924,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_geoj.get() and len(self.li_geoj) > 0:
             logger.info("Processing GeoJSON: start")
             for geojson in self.li_geoj:
-                """ looping on GeoJSON list """
+                """looping on GeoJSON list"""
                 self.status.set(path.basename(geojson))
                 logger.info(geojson)
                 # increment the progress bar
@@ -940,7 +940,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             geojson, err
@@ -958,7 +958,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_gxt.get() and len(self.li_gxt) > 0:
             logger.info("Processing GXT: start")
             for gxtpath in self.li_gxt:
-                """ looping on gxt list """
+                """looping on gxt list"""
                 self.status.set(path.basename(gxtpath))
                 logger.info(gxtpath)
                 # increment the progress bar
@@ -977,7 +977,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             gxtpath, err
@@ -997,7 +997,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_rast.get() and len(self.li_raster) > 0:
             logger.info("Processing rasters: start")
             for raster in self.li_raster:
-                """ looping on rasters list """
+                """looping on rasters list"""
                 self.status.set(path.basename(raster))
                 logger.info(raster)
                 # increment the progress bar
@@ -1017,7 +1017,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             raster, err
@@ -1035,7 +1035,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_egdb.get() and len(self.li_egdb) > 0:
             logger.info("Processing Esri FileGDB: start")
             for gdb in self.li_egdb:
-                """ looping on FileGDB list """
+                """looping on FileGDB list"""
                 self.status.set(path.basename(gdb))
                 logger.info(gdb)
                 # increment the progress bar
@@ -1054,7 +1054,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             gdb, err
@@ -1072,7 +1072,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_spadb.get() and len(self.li_spadb) > 0:
             logger.info("Processing Spatialite DB: start")
             for spadb in self.li_spadb:
-                """ looping on Spatialite DBs list """
+                """looping on Spatialite DBs list"""
                 self.status.set(path.basename(spadb))
                 logger.info(spadb)
                 # increment the progress bar
@@ -1088,7 +1088,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             spadb, err
@@ -1106,7 +1106,7 @@ class DicoGIS(Tk):
         if self.tab_files.opt_cdao.get() and len(self.li_cdao) > 0:
             logger.info("Processing CAO/DAO: start")
             for dxf in self.li_dxf:
-                """ looping on DXF list """
+                """looping on DXF list"""
                 self.status.set(path.basename(dxf))
                 logger.info(dxf)
                 # increment the progress bar
@@ -1121,7 +1121,7 @@ class DicoGIS(Tk):
                     )
                     logger.debug("Dataset metadata extracted")
                 except (AttributeError, RuntimeError, Exception) as err:
-                    """ empty files """
+                    """empty files"""
                     logger.error(
                         "Metadata extraction failed on dataset: {}. Trace: {}".format(
                             dxf, err
@@ -1196,7 +1196,7 @@ class DicoGIS(Tk):
         return
 
     def check_fields(self):
-        """ Check if required fields are not empty """
+        """Check if required fields are not empty"""
         # error counter
         # checking empty fields
         if (
@@ -1318,6 +1318,6 @@ class DicoGIS(Tk):
 # #################################
 
 if __name__ == "__main__":
-    """ standalone execution """
+    """standalone execution"""
     app = DicoGIS()
     app.mainloop()

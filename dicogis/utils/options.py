@@ -45,7 +45,7 @@ class OptionsManager(object):
         self.config.read(confile)
 
     def load_settings(self, parent):
-        """ load settings from last execution """
+        """load settings from last execution"""
         # basics
         parent.def_lang = self.config.get("basics", "def_codelang")
         parent.def_rep = self.config.get("basics", "def_rep")
@@ -83,7 +83,7 @@ class OptionsManager(object):
         return
 
     def save_settings(self, parent):
-        """ save last options in order to make the next excution more easy """
+        """save last options in order to make the next excution more easy"""
 
         # add sections
         if self.first_use:
@@ -153,5 +153,5 @@ class OptionsManager(object):
 # ##### Stand alone program ########
 # ##################################
 if __name__ == "__main__":
-    """ standalone execution """
+    """standalone execution"""
     pass

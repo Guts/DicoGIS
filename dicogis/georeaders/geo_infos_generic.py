@@ -100,7 +100,7 @@ class GeoInfosGenericReader(object):
         #         return None
 
     def get_srs_details(self, layer, txt):
-        """ get the informations about geography and geometry """
+        """get the informations about geography and geometry"""
         # SRS
         srs = layer.GetSpatialRef()
         if not srs:

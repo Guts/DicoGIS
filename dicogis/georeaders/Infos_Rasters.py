@@ -343,7 +343,7 @@ class ReadRasters(object):
         return "%3.1f %s" % (os_size, " To")
 
     def erratum(self, dico_raster, rasterpath, mess):
-        """ errors handling """
+        """errors handling"""
         # storing minimal informations to give clues to solve later
         dico_raster["name"] = path.basename(rasterpath)
         dico_raster["folder"] = path.dirname(rasterpath)
@@ -391,7 +391,7 @@ if __name__ == "__main__":
 
     # execution
     for raster in li_rasters:
-        """ looping on raster files """
+        """looping on raster files"""
         # recipient datas
         dico_raster = OrderedDict()  # dictionary where will be stored informations
         dico_bands = OrderedDict()  # dictionary for fields information

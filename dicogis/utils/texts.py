@@ -83,5 +83,5 @@ class TextsManager:
 # #################################
 
 if __name__ == "__main__":
-    """ standalone execution """
+    """standalone execution"""
     pass
