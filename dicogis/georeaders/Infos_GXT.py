@@ -21,8 +21,8 @@ from time import localtime, strftime
 
 # 3rd party libraries
 try:
-    from osgeo import gdal
     from osgeo import ogr  # handler for vector spatial files
+    from osgeo import gdal
 except ImportError:
     import gdal
     import ogr  # handler for vector spatial files

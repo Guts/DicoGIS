@@ -21,8 +21,7 @@ from time import localtime, strftime
 
 # 3rd party libraries
 try:
-    from osgeo import gdal
-    from osgeo import ogr
+    from osgeo import gdal, ogr
 except ImportError:
     import gdal
     import ogr

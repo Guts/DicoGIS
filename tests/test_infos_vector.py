@@ -9,13 +9,13 @@
 # ########## Libraries #############
 # ##################################
 
+import unittest
+
 # Standard library
 from pathlib import Path
-import unittest
 
 # package
 from dicogis.georeaders import ReadVectorFlatDataset
-
 
 # #############################################################################
 # ######## Globals #################

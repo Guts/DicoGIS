@@ -14,14 +14,14 @@
 # ######### Libraries #############
 # #################################
 
+import logging
+
 # Standard library
 from collections import OrderedDict
-import logging
 
 # 3rd party libraries
 try:
-    from osgeo import gdal
-    from osgeo import ogr
+    from osgeo import gdal, ogr
 except ImportError:
     import gdal
     import ogr

@@ -22,8 +22,7 @@ from time import localtime, strftime
 
 # 3rd party libraries
 try:
-    from osgeo import gdal
-    from osgeo import osr
+    from osgeo import gdal, osr
     from osgeo.gdalconst import GA_ReadOnly
 except ImportError:
     import gdal

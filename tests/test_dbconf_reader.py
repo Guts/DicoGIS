@@ -9,13 +9,13 @@
 # ########## Libraries #############
 # ##################################
 
+import unittest
+
 # Standard library
 from pathlib import Path
-import unittest
 
 # package
 from dicogis.utils.db_conf_reader import read_db_conf
-
 
 # #############################################################################
 # ######## Globals #################

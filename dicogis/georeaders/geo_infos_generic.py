@@ -13,7 +13,8 @@ from collections import OrderedDict
 try:
     from osgeo import ogr, osr
 except ImportError:
-    import ogr, osr
+    import ogr
+    import osr
 
 # ############################################################################
 # ######### Globals ############

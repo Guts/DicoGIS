@@ -19,8 +19,8 @@ import recommonmark
 import sphinx_rtd_theme  # noqa: F401 theme of Read the Docs
 from recommonmark.transform import AutoStructify
 
-from dicogis import __about__
 from dicogis import *
+from dicogis import __about__
 
 # -- Build environment -----------------------------------------------------
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"

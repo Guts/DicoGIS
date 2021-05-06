@@ -12,11 +12,11 @@
 # ########## Libraries #############
 # ##################################
 
+import logging
+
 # Standard library
 from tkinter import ACTIVE, DISABLED, IntVar, StringVar, Tk
 from tkinter.ttk import Checkbutton, Entry, Frame, Label
-
-import logging
 
 # ##############################################################################
 # ############ Globals ############

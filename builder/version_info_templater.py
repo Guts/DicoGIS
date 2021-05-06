@@ -15,9 +15,9 @@
 
 # Standard library
 import argparse
-from os import access, path, W_OK
-from pathlib import Path
 import sys
+from os import W_OK, access, path
+from pathlib import Path
 
 sys.path.insert(0, path.abspath(r"."))
 

@@ -20,8 +20,7 @@ from os import path, walk
 from time import localtime, strftime
 
 try:
-    from osgeo import gdal
-    from osgeo import ogr
+    from osgeo import gdal, ogr
 except ImportError:
     import gdal
     import ogr

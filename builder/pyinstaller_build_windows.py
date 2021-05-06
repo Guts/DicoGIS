@@ -8,11 +8,12 @@
 # ########## Libraries #############
 # ##################################
 
+import platform
+import sys
+
 # Standard library
 from os import getenv
 from pathlib import Path
-import platform
-import sys
 
 # 3rd party
 import PyInstaller.__main__
@@ -20,7 +21,6 @@ import PyInstaller.__main__
 # package
 sys.path.insert(0, str(Path(".").resolve()))
 from dicogis import __about__  # noqa: E402
-
 
 # #############################################################################
 # ########### MAIN #################

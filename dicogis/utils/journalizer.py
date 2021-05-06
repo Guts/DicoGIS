@@ -12,10 +12,11 @@
 # ########## Libraries #############
 # ##################################
 
+import getpass
+
 # Standard library
 import gettext
 import logging
-import getpass
 from logging.handlers import RotatingFileHandler
 from os import environ
 from pathlib import Path
