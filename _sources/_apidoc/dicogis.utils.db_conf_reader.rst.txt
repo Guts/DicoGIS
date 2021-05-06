@@ -1,0 +1,7 @@
+dicogis.utils.db\_conf\_reader module
+=====================================
+
+.. automodule:: dicogis.utils.db_conf_reader
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+dicogis.ui.tab\_settings module
+===============================
+
+.. automodule:: dicogis.ui.tab_settings
+   :members:
+   :undoc-members:
+   :show-inheritance:

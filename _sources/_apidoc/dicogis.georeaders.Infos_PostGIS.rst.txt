@@ -1,0 +1,7 @@
+dicogis.georeaders.Infos\_PostGIS module
+========================================
+
+.. automodule:: dicogis.georeaders.Infos_PostGIS
+   :members:
+   :undoc-members:
+   :show-inheritance:

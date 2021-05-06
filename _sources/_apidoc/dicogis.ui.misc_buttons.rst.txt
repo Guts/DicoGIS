@@ -1,0 +1,7 @@
+dicogis.ui.misc\_buttons module
+===============================
+
+.. automodule:: dicogis.ui.misc_buttons
+   :members:
+   :undoc-members:
+   :show-inheritance:

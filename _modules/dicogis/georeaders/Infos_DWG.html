@@ -1,0 +1,617 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>dicogis.georeaders.Infos_DWG &mdash; DicoGIS 3.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/DicoGIS_logo_200px.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: SteelBlue" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> DicoGIS
+          
+
+          
+            
+            <img src="../../../_static/DicoGIS_logo_200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/en.html">DicoGIS: the 3-clic geodata dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#in-a-nutshell">In a nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#technical-specifications">Technical specifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#how-to-use-it">How to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#what-about-the-results">What about the results?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/fr.html">DicoGIS : le dictionnaire de données SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#presentation-de-loutil">Présentation de l’outil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#caracteristiques-techniques">Caractéristiques techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#comment-l-utiliser">Comment l’utiliser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#resultats">Résultats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/es.html">DicoGIS: el diccionario de datos SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#presentacion">Presentación</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#caracteristicas-tecnicas">Características técnicas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#como-usarlo">Como usarlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#que-tipo-de-informaciones-para-que-tipo-de-datos">¿que tipo de informaciones para que tipo de datos?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/windows.html">Develop on Windows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#common">Common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#enable-remote-scripts-for-virtual-environment">Enable remote scripts (for virtual environment)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-pre-built-wheel">Using pre-built wheel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#download-gdal-wheel">Download GDAL wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#installation-steps">Installation steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-conda">Using conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id1">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id2">Installation steps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ubuntu.html">Develop on Ubuntu</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-gdal">Install GDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-python-and-git">Install Python and Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project-requirements">Install project requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project">Install project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/tests.html">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#run">Run</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#build-documentation-website">Build documentation website</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#deploy-documentation-website">Deploy documentation website</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/packaging.html">Packaging into an executable</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#ubuntu">Ubuntu</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/formats_matrix.html">Informations gathered depending on format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/compatibility.html">Platform compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/credits.html">Credits</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Documentation du code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_apidoc/modules.html">dicogis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_apidoc/dicogis.html">dicogis package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.html">dicogis.georeaders package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html">dicogis.georeaders.Infos_DWG module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DXF.html">dicogis.georeaders.Infos_DXF module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GDB.html">dicogis.georeaders.Infos_GDB module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GXT.html">dicogis.georeaders.Infos_GXT module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_PostGIS.html">dicogis.georeaders.Infos_PostGIS module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html">dicogis.georeaders.Infos_Rasters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Spatialite.html">dicogis.georeaders.Infos_Spatialite module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_VectorFlatDataset.html">dicogis.georeaders.Infos_VectorFlatDataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.gdal_exceptions_handler.html">dicogis.georeaders.gdal_exceptions_handler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geo_infos_generic.html">dicogis.georeaders.geo_infos_generic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geoutils.html">dicogis.georeaders.geoutils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.ui.html">dicogis.ui package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.misc_buttons.html">dicogis.ui.misc_buttons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_credits.html">dicogis.ui.tab_credits module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_database.html">dicogis.ui.tab_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_files.html">dicogis.ui.tab_files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_settings.html">dicogis.ui.tab_settings module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.utils.html">dicogis.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.checknorris.html">dicogis.utils.checknorris module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.db_conf_reader.html">dicogis.utils.db_conf_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.journalizer.html">dicogis.utils.journalizer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.options.html">dicogis.utils.options module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.texts.html">dicogis.utils.texts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.utils.html">dicogis.utils.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.html">dicogis.xlwriter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.md2xlsx.html">dicogis.xlwriter.md2xlsx module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.DicoGIS.html">dicogis.DicoGIS module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DicoGIS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>dicogis.georeaders.Infos_DWG</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dicogis.georeaders.Infos_DWG</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! python3  # noqa: E265</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># Name:         Infos DWG</span>
+<span class="sd"># Purpose:      Use GDAL/OGR to read into AutoCAD exchanges file format.</span>
+<span class="sd">#</span>
+<span class="sd"># Author:       Julien Moura (https://github.com/Guts/)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1"># #############################################################################</span>
+<span class="c1"># ######### Libraries #############</span>
+<span class="c1"># #################################</span>
+<span class="c1"># Standard library</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span> <span class="k">as</span> <span class="n">OD</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">chdir</span><span class="p">,</span> <span class="n">listdir</span><span class="p">,</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span>
+
+<span class="c1"># 3rd party libraries</span>
+<span class="kn">import</span> <span class="nn">dxfgrabber</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">ogr</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">ogr</span>
+
+<span class="c1"># ############################################################################</span>
+<span class="c1"># ######### Globals ############</span>
+<span class="c1"># ##############################</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="c1"># ##############################################################################</span>
+<span class="c1"># ########## Classes #############</span>
+<span class="c1"># ################################</span>
+
+
+<div class="viewcode-block" id="ReadDWG"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html#dicogis.georeaders.Infos_DWG.ReadDWG">[docs]</a><span class="k">class</span> <span class="nc">ReadDWG</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dxfpath</span><span class="p">,</span> <span class="n">dico_dxf</span><span class="p">,</span> <span class="n">tipo</span><span class="p">,</span> <span class="n">txt</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Uses OGR functions to extract basic informations about</span>
+<span class="sd">        geographic vector file (handles shapefile or MapInfo tables)</span>
+<span class="sd">        and store into dictionaries.</span>
+
+<span class="sd">        dxfpath = path to the DXF file</span>
+<span class="sd">        dico_dxf = dictionary for global informations</span>
+<span class="sd">        tipo = format</span>
+<span class="sd">        text = dictionary of text in the selected language</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># changing working directory to layer folder</span>
+        <span class="n">chdir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">))</span>
+
+        <span class="c1"># raising GDAL/OGR specific exceptions</span>
+        <span class="n">ogr</span><span class="o">.</span><span class="n">UseExceptions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alert</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># opening DXF</span>
+        <span class="n">dr_dxf</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="s2">&quot;DXF&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dxf</span> <span class="o">=</span> <span class="n">dr_dxf</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># check if DXF is OGR friendly</span>
+        <span class="k">if</span> <span class="n">dxf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">erratum</span><span class="p">(</span><span class="n">dico_dxf</span><span class="p">,</span> <span class="n">dxfpath</span><span class="p">,</span> <span class="s2">&quot;err_incomp&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># DXF name and parent folder</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dxf</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dxf</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+
+        <span class="c1"># opening</span>
+        <span class="n">douxef</span> <span class="o">=</span> <span class="n">dxfgrabber</span><span class="o">.</span><span class="n">readfile</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">)</span>
+
+        <span class="c1"># AutoCAD version</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;version_code&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">douxef</span><span class="o">.</span><span class="n">dxfversion</span>
+        <span class="c1"># see: http://dxfgrabber.readthedocs.org/en/latest/#Drawing.dxfversion</span>
+        <span class="k">if</span> <span class="n">douxef</span><span class="o">.</span><span class="n">dxfversion</span> <span class="o">==</span> <span class="s2">&quot;AC1009&quot;</span><span class="p">:</span>
+            <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;version_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoCAD R12&quot;</span>
+        <span class="k">elif</span> <span class="n">douxef</span><span class="o">.</span><span class="n">dxfversion</span> <span class="o">==</span> <span class="s2">&quot;AC1015&quot;</span><span class="p">:</span>
+            <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;version_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoCAD R2000&quot;</span>
+        <span class="k">elif</span> <span class="n">douxef</span><span class="o">.</span><span class="n">dxfversion</span> <span class="o">==</span> <span class="s2">&quot;AC1018&quot;</span><span class="p">:</span>
+            <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;version_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoCAD R2004&quot;</span>
+        <span class="k">elif</span> <span class="n">douxef</span><span class="o">.</span><span class="n">dxfversion</span> <span class="o">==</span> <span class="s2">&quot;AC1021&quot;</span><span class="p">:</span>
+            <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;version_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoCAD R2007&quot;</span>
+        <span class="k">elif</span> <span class="n">douxef</span><span class="o">.</span><span class="n">dxfversion</span> <span class="o">==</span> <span class="s2">&quot;AC1024&quot;</span><span class="p">:</span>
+            <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;version_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoCAD R2010&quot;</span>
+        <span class="k">elif</span> <span class="n">douxef</span><span class="o">.</span><span class="n">dxfversion</span> <span class="o">==</span> <span class="s2">&quot;AC1027&quot;</span><span class="p">:</span>
+            <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;version_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;AutoCAD R2013&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;version_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;NR&quot;</span>
+
+        <span class="c1"># layers count and names</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;layers_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dxf</span><span class="o">.</span><span class="n">GetLayerCount</span><span class="p">()</span>
+        <span class="n">li_layers_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">li_layers_idx</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;layers_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">li_layers_names</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;layers_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">li_layers_idx</span>
+
+        <span class="c1"># dependencies</span>
+        <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">f</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">f</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.dxf&quot;</span>
+        <span class="p">]</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;dependencies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dependencies</span>
+
+        <span class="c1"># cumulated size</span>
+        <span class="n">dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">)</span>
+        <span class="n">total_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dependencies</span><span class="p">])</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;total_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sizeof</span><span class="p">(</span><span class="n">total_size</span><span class="p">)</span>
+        <span class="n">dependencies</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># global dates</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;date_actu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/%m/%Y&quot;</span><span class="p">,</span> <span class="n">localtime</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">)))</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;date_crea&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/%m/%Y&quot;</span><span class="p">,</span> <span class="n">localtime</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">)))</span>
+        <span class="c1"># total fields count</span>
+        <span class="n">total_fields</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;total_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_fields</span>
+        <span class="c1"># total objects count</span>
+        <span class="n">total_objs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;total_objs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_objs</span>
+        <span class="c1"># parsing layers</span>
+        <span class="k">for</span> <span class="n">layer_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dxf</span><span class="o">.</span><span class="n">GetLayerCount</span><span class="p">()):</span>
+            <span class="c1"># dictionary where will be stored informations</span>
+            <span class="n">dico_layer</span> <span class="o">=</span> <span class="n">OD</span><span class="p">()</span>
+            <span class="c1"># parent DXF</span>
+            <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;dxf_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dxf</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+            <span class="c1"># getting layer object</span>
+            <span class="n">layer</span> <span class="o">=</span> <span class="n">dxf</span><span class="o">.</span><span class="n">GetLayerByIndex</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span>
+            <span class="c1"># layer name</span>
+            <span class="n">li_layers_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+            <span class="c1"># layer index</span>
+            <span class="n">li_layers_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">)</span>
+            <span class="c1"># getting layer globlal informations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infos_basics</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">dico_layer</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
+            <span class="c1"># storing layer into the DXF dictionary</span>
+            <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">layer_idx</span><span class="p">,</span> <span class="n">layer</span><span class="o">.</span><span class="n">GetName</span><span class="p">())]</span> <span class="o">=</span> <span class="n">dico_layer</span>
+            <span class="c1"># summing fields number</span>
+            <span class="n">total_fields</span> <span class="o">+=</span> <span class="n">dico_layer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;num_fields&quot;</span><span class="p">)</span>
+            <span class="c1"># summing objects number</span>
+            <span class="n">total_objs</span> <span class="o">+=</span> <span class="n">dico_layer</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;num_obj&quot;</span><span class="p">)</span>
+            <span class="c1"># deleting dictionary to ensure having cleared space</span>
+            <span class="k">del</span> <span class="n">dico_layer</span>
+        <span class="c1"># storing fileds and objects sum</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;total_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_fields</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;total_objs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_objs</span>
+
+<div class="viewcode-block" id="ReadDWG.infos_basics"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html#dicogis.georeaders.Infos_DWG.ReadDWG.infos_basics">[docs]</a>    <span class="k">def</span> <span class="nf">infos_basics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer_obj</span><span class="p">,</span> <span class="n">dico_layer</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get the global informations about the layer&quot;&quot;&quot;</span>
+        <span class="c1"># title and features count</span>
+        <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer_obj</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
+        <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;num_obj&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer_obj</span><span class="o">.</span><span class="n">GetFeatureCount</span><span class="p">()</span>
+
+        <span class="c1"># getting geography and geometry informations</span>
+        <span class="n">srs</span> <span class="o">=</span> <span class="n">layer_obj</span><span class="o">.</span><span class="n">GetSpatialRef</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infos_geos</span><span class="p">(</span><span class="n">layer_obj</span><span class="p">,</span> <span class="n">srs</span><span class="p">,</span> <span class="n">dico_layer</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
+
+        <span class="c1"># getting fields informations</span>
+        <span class="n">dico_fields</span> <span class="o">=</span> <span class="n">OD</span><span class="p">()</span>
+        <span class="n">layer_def</span> <span class="o">=</span> <span class="n">layer_obj</span><span class="o">.</span><span class="n">GetLayerDefn</span><span class="p">()</span>
+        <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;num_fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer_def</span><span class="o">.</span><span class="n">GetFieldCount</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infos_fields</span><span class="p">(</span><span class="n">layer_def</span><span class="p">,</span> <span class="n">dico_fields</span><span class="p">)</span>
+        <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dico_fields</span>
+
+        <span class="c1"># end of function</span>
+        <span class="k">return</span> <span class="n">dico_layer</span></div>
+
+<div class="viewcode-block" id="ReadDWG.infos_geos"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html#dicogis.georeaders.Infos_DWG.ReadDWG.infos_geos">[docs]</a>    <span class="k">def</span> <span class="nf">infos_geos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer_obj</span><span class="p">,</span> <span class="n">srs</span><span class="p">,</span> <span class="n">dico_layer</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get the informations about geography and geometry&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">srs</span><span class="p">:</span>
+            <span class="c1"># SRS</span>
+            <span class="n">srs</span><span class="o">.</span><span class="n">AutoIdentifyEPSG</span><span class="p">()</span>
+            <span class="c1"># srs type</span>
+            <span class="n">srsmetod</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsCompound</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_comp&quot;</span><span class="p">)),</span>
+                <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsGeocentric</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_geoc&quot;</span><span class="p">)),</span>
+                <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsGeographic</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_geog&quot;</span><span class="p">)),</span>
+                <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsLocal</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_loca&quot;</span><span class="p">)),</span>
+                <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsProjected</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_proj&quot;</span><span class="p">)),</span>
+                <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsVertical</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_vert&quot;</span><span class="p">)),</span>
+            <span class="p">]</span>
+            <span class="c1"># searching for a match with one of srs types</span>
+            <span class="k">for</span> <span class="n">srsmet</span> <span class="ow">in</span> <span class="n">srsmetod</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">srsmet</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">typsrs</span> <span class="o">=</span> <span class="n">srsmet</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="c1"># in case of not match</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typsrs</span>
+            <span class="k">except</span> <span class="ne">UnboundLocalError</span><span class="p">:</span>
+                <span class="n">typsrs</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_nr&quot;</span><span class="p">)</span>
+                <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typsrs</span>
+
+            <span class="c1"># handling exceptions in srs names&#39;encoding</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJCS&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;unnamed&quot;</span><span class="p">:</span>
+                    <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJCS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJECTION&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJCS&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;unnamed&quot;</span><span class="p">:</span>
+                    <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJCS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;latin1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJECTION&quot;</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;latin1&quot;</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;epsg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;AUTHORITY&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># World SRS default</span>
+            <span class="k">if</span> <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;epsg&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;4326&quot;</span> <span class="ow">and</span> <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;None&quot;</span><span class="p">:</span>
+                <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">typsrs</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_nr&quot;</span><span class="p">)</span>
+            <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;srs_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typsrs</span>
+
+        <span class="c1"># first feature and geometry type</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">first_obj</span> <span class="o">=</span> <span class="n">layer_obj</span><span class="o">.</span><span class="n">GetNextFeature</span><span class="p">()</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">first_obj</span><span class="o">.</span><span class="n">GetGeometryRef</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="n">first_obj</span> <span class="o">=</span> <span class="n">layer_obj</span><span class="o">.</span><span class="n">GetNextFeature</span><span class="p">()</span>
+            <span class="n">geom</span> <span class="o">=</span> <span class="n">first_obj</span><span class="o">.</span><span class="n">GetGeometryRef</span><span class="p">()</span>
+
+        <span class="c1"># geometry type human readable</span>
+        <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">GetGeometryName</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;POINT&quot;</span><span class="p">:</span>
+            <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;type_geom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;geom_point&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;LINESTRING&quot;</span> <span class="ow">in</span> <span class="n">geom</span><span class="o">.</span><span class="n">GetGeometryName</span><span class="p">():</span>
+            <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;type_geom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;geom_ligne&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;POLYGON&quot;</span> <span class="ow">in</span> <span class="n">geom</span><span class="o">.</span><span class="n">GetGeometryName</span><span class="p">():</span>
+            <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;type_geom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;geom_polyg&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;type_geom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">GetGeometryName</span><span class="p">()</span>
+
+        <span class="c1"># spatial extent (bounding box)</span>
+        <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;xmin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">layer_obj</span><span class="o">.</span><span class="n">GetExtent</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;xmax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">layer_obj</span><span class="o">.</span><span class="n">GetExtent</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;ymin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">layer_obj</span><span class="o">.</span><span class="n">GetExtent</span><span class="p">()[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">dico_layer</span><span class="p">[</span><span class="s2">&quot;ymax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">layer_obj</span><span class="o">.</span><span class="n">GetExtent</span><span class="p">()[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># end of function</span>
+        <span class="k">return</span> <span class="n">dico_layer</span></div>
+
+<div class="viewcode-block" id="ReadDWG.infos_fields"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html#dicogis.georeaders.Infos_DWG.ReadDWG.infos_fields">[docs]</a>    <span class="k">def</span> <span class="nf">infos_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer_def</span><span class="p">,</span> <span class="n">dico_fields</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get the informations about fields definitions&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layer_def</span><span class="o">.</span><span class="n">GetFieldCount</span><span class="p">()):</span>
+            <span class="n">champomy</span> <span class="o">=</span> <span class="n">layer_def</span><span class="o">.</span><span class="n">GetFieldDefn</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>  <span class="c1"># fields ordered</span>
+            <span class="n">dico_fields</span><span class="p">[</span><span class="n">champomy</span><span class="o">.</span><span class="n">GetName</span><span class="p">()]</span> <span class="o">=</span> <span class="n">champomy</span><span class="o">.</span><span class="n">GetTypeName</span><span class="p">()</span>
+        <span class="c1"># end of function</span>
+        <span class="k">return</span> <span class="n">dico_fields</span></div>
+
+<div class="viewcode-block" id="ReadDWG.sizeof"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html#dicogis.georeaders.Infos_DWG.ReadDWG.sizeof">[docs]</a>    <span class="k">def</span> <span class="nf">sizeof</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">os_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return size in different units depending on size</span>
+<span class="sd">        see http://stackoverflow.com/a/1094933&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">size_cat</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;octets&quot;</span><span class="p">,</span> <span class="s2">&quot;Ko&quot;</span><span class="p">,</span> <span class="s2">&quot;Mo&quot;</span><span class="p">,</span> <span class="s2">&quot;Go&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">os_size</span> <span class="o">&lt;</span> <span class="mf">1024.0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%3.1f</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os_size</span><span class="p">,</span> <span class="n">size_cat</span><span class="p">)</span>
+            <span class="n">os_size</span> <span class="o">/=</span> <span class="mf">1024.0</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%3.1f</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os_size</span><span class="p">,</span> <span class="s2">&quot; To&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReadDWG.erratum"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html#dicogis.georeaders.Infos_DWG.ReadDWG.erratum">[docs]</a>    <span class="k">def</span> <span class="nf">erratum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dico_dxf</span><span class="p">,</span> <span class="n">dxfpath</span><span class="p">,</span> <span class="n">mess</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;errors handling&quot;&quot;&quot;</span>
+        <span class="c1"># storing minimal informations to give clues to solve later</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">)</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dxfpath</span><span class="p">)</span>
+        <span class="n">dico_dxf</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mess</span>
+        <span class="c1"># End of function</span>
+        <span class="k">return</span> <span class="n">dico_dxf</span></div></div>
+
+
+<span class="c1"># #############################################################################</span>
+<span class="c1"># ##### Stand alone program ########</span>
+<span class="c1"># ##################################</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Standalone execution.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014 - 2021, Julien Moura.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+dicogis.utils.journalizer module
+================================
+
+.. automodule:: dicogis.utils.journalizer
+   :members:
+   :undoc-members:
+   :show-inheritance:

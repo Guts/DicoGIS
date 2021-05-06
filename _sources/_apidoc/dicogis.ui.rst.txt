@@ -1,0 +1,19 @@
+dicogis.ui package
+==================
+
+.. automodule:: dicogis.ui
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   dicogis.ui.misc_buttons
+   dicogis.ui.tab_credits
+   dicogis.ui.tab_database
+   dicogis.ui.tab_files
+   dicogis.ui.tab_settings

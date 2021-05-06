@@ -1,0 +1,473 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>dicogis.utils.checknorris &mdash; DicoGIS 3.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/DicoGIS_logo_200px.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: SteelBlue" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> DicoGIS
+          
+
+          
+            
+            <img src="../../../_static/DicoGIS_logo_200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/en.html">DicoGIS: the 3-clic geodata dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#in-a-nutshell">In a nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#technical-specifications">Technical specifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#how-to-use-it">How to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#what-about-the-results">What about the results?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/fr.html">DicoGIS : le dictionnaire de données SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#presentation-de-loutil">Présentation de l’outil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#caracteristiques-techniques">Caractéristiques techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#comment-l-utiliser">Comment l’utiliser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#resultats">Résultats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/es.html">DicoGIS: el diccionario de datos SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#presentacion">Presentación</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#caracteristicas-tecnicas">Características técnicas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#como-usarlo">Como usarlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#que-tipo-de-informaciones-para-que-tipo-de-datos">¿que tipo de informaciones para que tipo de datos?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/windows.html">Develop on Windows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#common">Common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#enable-remote-scripts-for-virtual-environment">Enable remote scripts (for virtual environment)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-pre-built-wheel">Using pre-built wheel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#download-gdal-wheel">Download GDAL wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#installation-steps">Installation steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-conda">Using conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id1">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id2">Installation steps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ubuntu.html">Develop on Ubuntu</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-gdal">Install GDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-python-and-git">Install Python and Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project-requirements">Install project requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project">Install project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/tests.html">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#run">Run</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#build-documentation-website">Build documentation website</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#deploy-documentation-website">Deploy documentation website</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/packaging.html">Packaging into an executable</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#ubuntu">Ubuntu</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/formats_matrix.html">Informations gathered depending on format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/compatibility.html">Platform compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/credits.html">Credits</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Documentation du code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_apidoc/modules.html">dicogis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_apidoc/dicogis.html">dicogis package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.html">dicogis.georeaders package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html">dicogis.georeaders.Infos_DWG module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DXF.html">dicogis.georeaders.Infos_DXF module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GDB.html">dicogis.georeaders.Infos_GDB module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GXT.html">dicogis.georeaders.Infos_GXT module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_PostGIS.html">dicogis.georeaders.Infos_PostGIS module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html">dicogis.georeaders.Infos_Rasters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Spatialite.html">dicogis.georeaders.Infos_Spatialite module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_VectorFlatDataset.html">dicogis.georeaders.Infos_VectorFlatDataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.gdal_exceptions_handler.html">dicogis.georeaders.gdal_exceptions_handler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geo_infos_generic.html">dicogis.georeaders.geo_infos_generic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geoutils.html">dicogis.georeaders.geoutils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.ui.html">dicogis.ui package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.misc_buttons.html">dicogis.ui.misc_buttons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_credits.html">dicogis.ui.tab_credits module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_database.html">dicogis.ui.tab_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_files.html">dicogis.ui.tab_files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_settings.html">dicogis.ui.tab_settings module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.utils.html">dicogis.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.checknorris.html">dicogis.utils.checknorris module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.db_conf_reader.html">dicogis.utils.db_conf_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.journalizer.html">dicogis.utils.journalizer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.options.html">dicogis.utils.options module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.texts.html">dicogis.utils.texts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.utils.html">dicogis.utils.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.html">dicogis.xlwriter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.md2xlsx.html">dicogis.xlwriter.md2xlsx module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.DicoGIS.html">dicogis.DicoGIS module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DicoGIS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>dicogis.utils.checknorris</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dicogis.utils.checknorris</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! python3  # noqa: E265</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Name:         Check Norris</span>
+<span class="sd">    Purpose:      A class dedicated to perform system test to ensure another \</span>
+<span class="sd">        program works fine</span>
+
+<span class="sd">    Author:       Julien Moura (@geojulien)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># #############################################################################</span>
+<span class="c1"># ###### Libraries ########</span>
+<span class="c1"># #########################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">environ</span> <span class="k">as</span> <span class="n">env</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ProxyHandler</span><span class="p">,</span>
+    <span class="n">build_opener</span><span class="p">,</span>
+    <span class="n">getproxies</span><span class="p">,</span>
+    <span class="n">install_opener</span><span class="p">,</span>
+    <span class="n">urlopen</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># #############################################################################</span>
+<span class="c1"># ########## Globals ###############</span>
+<span class="c1"># ##################################</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># #############################################################################</span>
+<span class="c1"># ########## Classes ###############</span>
+<span class="c1"># ##################################</span>
+
+
+<div class="viewcode-block" id="CheckNorris"><a class="viewcode-back" href="../../../_apidoc/dicogis.utils.checknorris.html#dicogis.utils.checknorris.CheckNorris">[docs]</a><span class="k">class</span> <span class="nc">CheckNorris</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check Norris never fails, always tests.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check Norris welcomes you.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CheckNorris</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="c1"># -- 1 method, 1 check ----------------------------------------------------</span>
+
+<div class="viewcode-block" id="CheckNorris.check_gdal"><a class="viewcode-back" href="../../../_apidoc/dicogis.utils.checknorris.html#dicogis.utils.checknorris.CheckNorris.check_gdal">[docs]</a>    <span class="k">def</span> <span class="nf">check_gdal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if OSGeo libs work and if GDAL_DATA is well refrenced.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        -- 1: GDAL_DATA already exists as environment variable</span>
+<span class="sd">        -- 2: GDAL_DATA didn&#39;t exist as env variable then has been added</span>
+<span class="sd">        -- 3: GDAL_DATA didn&#39;t exist as env variable and could&#39;nt be added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># GDAL install</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">gdal</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">gdal</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;GDAL version: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gdal</span><span class="o">.</span><span class="n">__version__</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;GDAL is not installed or not reachable.&quot;</span>
+                <span class="s2">&quot; DicoGIS is going to close. Trace: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="mi">1</span>
+
+        <span class="c1"># GDAL_DATA variable</span>
+        <span class="k">if</span> <span class="s2">&quot;GDAL_DATA&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">gdal</span><span class="o">.</span><span class="n">SetConfigOption</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s2">&quot;GDAL_DATA&quot;</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;data/gdal&quot;</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;GDAL_DATA path not found in environment variable.&quot;</span>
+                    <span class="s2">&quot; DicoGIS&#39;ll use its own: &quot;</span> <span class="o">+</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;data/gdal&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="mi">2</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Oups! Something&#39;s wrong with GDAL_DATA path: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;GDAL_DATA path found in environment variable: </span><span class="si">{}</span><span class="s2">.&quot;</span>
+                <span class="s2">&quot; DicoGIS&#39;ll use it.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;GDAL_DATA&quot;</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="c1"># end of method</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="CheckNorris.check_internet_connection"><a class="viewcode-back" href="../../../_apidoc/dicogis.utils.checknorris.html#dicogis.utils.checknorris.CheckNorris.check_internet_connection">[docs]</a>    <span class="k">def</span> <span class="nf">check_internet_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remote_server</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;www.google.com&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if an internet connection is operational.</span>
+
+<span class="sd">        source: http://stackoverflow.com/a/20913928/2556577</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># see if we can resolve the host name -- tells us if there is</span>
+            <span class="c1"># a DNS listening</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">remote_server</span><span class="p">)</span>
+            <span class="c1"># connect to the host -- tells us if the host is actually</span>
+            <span class="c1"># reachable</span>
+            <span class="n">socket</span><span class="o">.</span><span class="n">create_connection</span><span class="p">((</span><span class="n">host</span><span class="p">,</span> <span class="mi">80</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Internet connection OK.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Internet connection failed. Trace: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+            <span class="k">pass</span>
+        <span class="c1"># end of method</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="CheckNorris.check_proxy"><a class="viewcode-back" href="../../../_apidoc/dicogis.utils.checknorris.html#dicogis.utils.checknorris.CheckNorris.check_proxy">[docs]</a>    <span class="k">def</span> <span class="nf">check_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">specific</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;Check if proxy settings are set on the OS.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        -- 1 when direct connection works fine</span>
+<span class="sd">        -- 2 when direct connection fails and any proxy is set in the OS</span>
+<span class="sd">        -- 3 and settings when direct connection fails but a proxy is set</span>
+<span class="sd">        see: https://docs.python.org/2/library/urllib.html#urllib.getproxies</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">os_proxies</span> <span class="o">=</span> <span class="n">getproxies</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">os_proxies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_internet_connection</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No proxy needed nor set. Direct connection works.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">os_proxies</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_internet_connection</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Proxy not set in the OS. Needs to be specified&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#</span>
+            <span class="n">env</span><span class="p">[</span><span class="s2">&quot;http_proxy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os_proxies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;http&quot;</span><span class="p">)</span>
+            <span class="n">env</span><span class="p">[</span><span class="s2">&quot;https_proxy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os_proxies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https&quot;</span><span class="p">)</span>
+            <span class="c1">#</span>
+            <span class="n">proxy</span> <span class="o">=</span> <span class="n">ProxyHandler</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="n">os_proxies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;http&quot;</span><span class="p">),</span> <span class="s2">&quot;https&quot;</span><span class="p">:</span> <span class="n">os_proxies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https&quot;</span><span class="p">)}</span>
+            <span class="p">)</span>
+            <span class="n">opener</span> <span class="o">=</span> <span class="n">build_opener</span><span class="p">(</span><span class="n">proxy</span><span class="p">)</span>
+            <span class="n">install_opener</span><span class="p">(</span><span class="n">opener</span><span class="p">)</span>
+            <span class="n">urlopen</span><span class="p">(</span><span class="s2">&quot;http://www.google.com&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">3</span><span class="p">,</span> <span class="n">os_proxies</span></div></div>
+
+
+<span class="c1"># ##############################################################################</span>
+<span class="c1"># ##### Stand alone program ########</span>
+<span class="c1"># ##################################</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Standalone execution.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014 - 2021, Julien Moura.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

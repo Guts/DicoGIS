@@ -1,0 +1,7 @@
+dicogis.georeaders.geo\_infos\_generic module
+=============================================
+
+.. automodule:: dicogis.georeaders.geo_infos_generic
+   :members:
+   :undoc-members:
+   :show-inheritance:

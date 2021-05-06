@@ -1,0 +1,7 @@
+dicogis.georeaders.Infos\_GXT module
+====================================
+
+.. automodule:: dicogis.georeaders.Infos_GXT
+   :members:
+   :undoc-members:
+   :show-inheritance:

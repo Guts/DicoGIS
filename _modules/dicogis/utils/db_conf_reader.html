@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>dicogis.utils.db_conf_reader &mdash; DicoGIS 3.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/DicoGIS_logo_200px.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: SteelBlue" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> DicoGIS
+          
+
+          
+            
+            <img src="../../../_static/DicoGIS_logo_200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/en.html">DicoGIS: the 3-clic geodata dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#in-a-nutshell">In a nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#technical-specifications">Technical specifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#how-to-use-it">How to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#what-about-the-results">What about the results?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/fr.html">DicoGIS : le dictionnaire de données SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#presentation-de-loutil">Présentation de l’outil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#caracteristiques-techniques">Caractéristiques techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#comment-l-utiliser">Comment l’utiliser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#resultats">Résultats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/es.html">DicoGIS: el diccionario de datos SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#presentacion">Presentación</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#caracteristicas-tecnicas">Características técnicas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#como-usarlo">Como usarlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#que-tipo-de-informaciones-para-que-tipo-de-datos">¿que tipo de informaciones para que tipo de datos?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/windows.html">Develop on Windows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#common">Common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#enable-remote-scripts-for-virtual-environment">Enable remote scripts (for virtual environment)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-pre-built-wheel">Using pre-built wheel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#download-gdal-wheel">Download GDAL wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#installation-steps">Installation steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-conda">Using conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id1">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id2">Installation steps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ubuntu.html">Develop on Ubuntu</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-gdal">Install GDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-python-and-git">Install Python and Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project-requirements">Install project requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project">Install project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/tests.html">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#run">Run</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#build-documentation-website">Build documentation website</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#deploy-documentation-website">Deploy documentation website</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/packaging.html">Packaging into an executable</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#ubuntu">Ubuntu</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/formats_matrix.html">Informations gathered depending on format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/compatibility.html">Platform compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/credits.html">Credits</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Documentation du code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_apidoc/modules.html">dicogis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_apidoc/dicogis.html">dicogis package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.html">dicogis.georeaders package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html">dicogis.georeaders.Infos_DWG module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DXF.html">dicogis.georeaders.Infos_DXF module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GDB.html">dicogis.georeaders.Infos_GDB module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GXT.html">dicogis.georeaders.Infos_GXT module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_PostGIS.html">dicogis.georeaders.Infos_PostGIS module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html">dicogis.georeaders.Infos_Rasters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Spatialite.html">dicogis.georeaders.Infos_Spatialite module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_VectorFlatDataset.html">dicogis.georeaders.Infos_VectorFlatDataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.gdal_exceptions_handler.html">dicogis.georeaders.gdal_exceptions_handler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geo_infos_generic.html">dicogis.georeaders.geo_infos_generic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geoutils.html">dicogis.georeaders.geoutils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.ui.html">dicogis.ui package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.misc_buttons.html">dicogis.ui.misc_buttons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_credits.html">dicogis.ui.tab_credits module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_database.html">dicogis.ui.tab_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_files.html">dicogis.ui.tab_files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_settings.html">dicogis.ui.tab_settings module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.utils.html">dicogis.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.checknorris.html">dicogis.utils.checknorris module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.db_conf_reader.html">dicogis.utils.db_conf_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.journalizer.html">dicogis.utils.journalizer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.options.html">dicogis.utils.options module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.texts.html">dicogis.utils.texts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.utils.html">dicogis.utils.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.html">dicogis.xlwriter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.md2xlsx.html">dicogis.xlwriter.md2xlsx module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.DicoGIS.html">dicogis.DicoGIS module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DicoGIS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>dicogis.utils.db_conf_reader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dicogis.utils.db_conf_reader</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! python3  # noqa: E265</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple function to load database configuration files (= ini structure).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># #############################################################################</span>
+<span class="c1"># ########## Libraries #############</span>
+<span class="c1"># ##################################</span>
+
+<span class="c1"># Standard library</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="c1"># #############################################################################</span>
+<span class="c1"># ########## Globals ###############</span>
+<span class="c1"># ##################################</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="c1"># ##############################################################################</span>
+<span class="c1"># ######### Functions ##############</span>
+<span class="c1"># ##################################</span>
+
+
+<div class="viewcode-block" id="read_db_conf"><a class="viewcode-back" href="../../../_apidoc/dicogis.utils.db_conf_reader.html#dicogis.utils.db_conf_reader.read_db_conf">[docs]</a><span class="k">def</span> <span class="nf">read_db_conf</span><span class="p">(</span><span class="n">dbconf_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Read databases configuration files and return parameters as list of dictionaries.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dbconf_path (Path): filepath to *.dbconf file</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: if input filepath is not an instance of pathlib.Path</span>
+<span class="sd">        FileExistsError: if input file is not reachable</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[list, dict]: list of dictionary/ies with database parameters</span>
+
+<span class="sd">    :Example:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        # here comes an example in Python</span>
+<span class="sd">        pprint(read_db_conf(&quot;./sample.dbconf&quot;))</span>
+<span class="sd">        {</span>
+<span class="sd">            &quot;name&quot;: &quot;database_name&quot;,</span>
+<span class="sd">            &quot;host&quot;: &quot;database_server_url&quot;,</span>
+<span class="sd">            &quot;port&quot;: &quot;5432&quot;,</span>
+<span class="sd">            &quot;username&quot;: &quot;db_user_name&quot;,</span>
+<span class="sd">            &quot;password&quot;: &quot;db_user_password&quot;,</span>
+<span class="sd">            &quot;schemas&quot;: &quot;db_schemas&quot;,</span>
+<span class="sd">            &quot;esri_sde&quot;: False</span>
+<span class="sd">        }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># checks</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dbconf_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;dbconf_path must be a </span><span class="si">{}</span><span class="s2"> instance, not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">type</span><span class="p">(</span><span class="n">Path</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">dbconf_path</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dbconf_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> doesn&#39;t exist.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># prepare output var</span>
+    <span class="n">li_dabatases</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># open the file</span>
+    <span class="n">conf_reader</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">()</span>
+    <span class="n">conf_reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dbconf_path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()))</span>
+
+    <span class="k">for</span> <span class="n">db</span> <span class="ow">in</span> <span class="n">conf_reader</span><span class="o">.</span><span class="n">sections</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">database</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">db</span><span class="p">,</span>
+                <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">conf_reader</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="s2">&quot;host&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="n">conf_reader</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="s2">&quot;port&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">conf_reader</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="n">conf_reader</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;schemas&quot;</span><span class="p">:</span> <span class="n">conf_reader</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="s2">&quot;schemas&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;esri_sde&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="n">li_dabatases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;Configuration for database </span><span class="si">{}</span><span class="s2"> found into </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">database</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span> <span class="n">dbconf_path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+    <span class="k">return</span> <span class="n">li_dabatases</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014 - 2021, Julien Moura.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

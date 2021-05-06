@@ -1,0 +1,740 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>dicogis.georeaders.Infos_Rasters &mdash; DicoGIS 3.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/DicoGIS_logo_200px.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: SteelBlue" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> DicoGIS
+          
+
+          
+            
+            <img src="../../../_static/DicoGIS_logo_200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/en.html">DicoGIS: the 3-clic geodata dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#in-a-nutshell">In a nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#technical-specifications">Technical specifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#how-to-use-it">How to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#what-about-the-results">What about the results?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/fr.html">DicoGIS : le dictionnaire de données SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#presentation-de-loutil">Présentation de l’outil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#caracteristiques-techniques">Caractéristiques techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#comment-l-utiliser">Comment l’utiliser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#resultats">Résultats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/es.html">DicoGIS: el diccionario de datos SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#presentacion">Presentación</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#caracteristicas-tecnicas">Características técnicas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#como-usarlo">Como usarlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#que-tipo-de-informaciones-para-que-tipo-de-datos">¿que tipo de informaciones para que tipo de datos?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/windows.html">Develop on Windows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#common">Common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#enable-remote-scripts-for-virtual-environment">Enable remote scripts (for virtual environment)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-pre-built-wheel">Using pre-built wheel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#download-gdal-wheel">Download GDAL wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#installation-steps">Installation steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-conda">Using conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id1">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id2">Installation steps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ubuntu.html">Develop on Ubuntu</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-gdal">Install GDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-python-and-git">Install Python and Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project-requirements">Install project requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project">Install project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/tests.html">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#run">Run</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#build-documentation-website">Build documentation website</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#deploy-documentation-website">Deploy documentation website</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/packaging.html">Packaging into an executable</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#ubuntu">Ubuntu</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/formats_matrix.html">Informations gathered depending on format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/compatibility.html">Platform compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/credits.html">Credits</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Documentation du code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_apidoc/modules.html">dicogis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_apidoc/dicogis.html">dicogis package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.html">dicogis.georeaders package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html">dicogis.georeaders.Infos_DWG module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DXF.html">dicogis.georeaders.Infos_DXF module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GDB.html">dicogis.georeaders.Infos_GDB module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GXT.html">dicogis.georeaders.Infos_GXT module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_PostGIS.html">dicogis.georeaders.Infos_PostGIS module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html">dicogis.georeaders.Infos_Rasters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Spatialite.html">dicogis.georeaders.Infos_Spatialite module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_VectorFlatDataset.html">dicogis.georeaders.Infos_VectorFlatDataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.gdal_exceptions_handler.html">dicogis.georeaders.gdal_exceptions_handler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geo_infos_generic.html">dicogis.georeaders.geo_infos_generic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geoutils.html">dicogis.georeaders.geoutils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.ui.html">dicogis.ui package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.misc_buttons.html">dicogis.ui.misc_buttons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_credits.html">dicogis.ui.tab_credits module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_database.html">dicogis.ui.tab_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_files.html">dicogis.ui.tab_files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_settings.html">dicogis.ui.tab_settings module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.utils.html">dicogis.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.checknorris.html">dicogis.utils.checknorris module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.db_conf_reader.html">dicogis.utils.db_conf_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.journalizer.html">dicogis.utils.journalizer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.options.html">dicogis.utils.options module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.texts.html">dicogis.utils.texts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.utils.html">dicogis.utils.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.html">dicogis.xlwriter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.md2xlsx.html">dicogis.xlwriter.md2xlsx module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.DicoGIS.html">dicogis.DicoGIS module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DicoGIS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>dicogis.georeaders.Infos_Rasters</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dicogis.georeaders.Infos_Rasters</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! python3  # noqa: E265</span>
+
+
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># Name:         Infos Rasters</span>
+<span class="c1"># Purpose:      Use GDAL library to extract informations about</span>
+<span class="c1">#                   geographic rasters data. It permits a more friendly use as</span>
+<span class="c1">#                   submodule.</span>
+<span class="c1">#</span>
+<span class="c1"># Author:       Julien Moura (https://github.com/Guts/)</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+
+<span class="c1"># ############################################################################</span>
+<span class="c1"># ######### Libraries #############</span>
+<span class="c1"># #################################</span>
+<span class="c1"># Standard library</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">chdir</span><span class="p">,</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span>
+
+<span class="c1"># 3rd party libraries</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">gdal</span><span class="p">,</span> <span class="n">osr</span>
+    <span class="kn">from</span> <span class="nn">osgeo.gdalconst</span> <span class="kn">import</span> <span class="n">GA_ReadOnly</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">gdal</span>
+    <span class="kn">import</span> <span class="nn">osr</span>
+    <span class="kn">from</span> <span class="nn">gdalconst</span> <span class="kn">import</span> <span class="n">GA_ReadOnly</span>
+
+<span class="c1"># ############################################################################</span>
+<span class="c1"># ######### Globals ############</span>
+<span class="c1"># ##############################</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># ############################################################################</span>
+<span class="c1"># ######### Classes #############</span>
+<span class="c1"># #################################</span>
+
+
+<div class="viewcode-block" id="GdalErrorHandler"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html#dicogis.georeaders.Infos_Rasters.GdalErrorHandler">[docs]</a><span class="k">class</span> <span class="nc">GdalErrorHandler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callable error handler.</span>
+
+<span class="sd">        see: http://trac.osgeo.org/gdal/wiki/PythonGotchas#Exceptionsraisedincustomerrorhandlersdonotgetcaught</span>
+<span class="sd">        and http://pcjericks.github.io/py-gdalogr-cookbook/gdal_general.html#install-gdal-ogr-error-handler</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">err_level</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">CE_None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">err_type</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+<div class="viewcode-block" id="GdalErrorHandler.handler"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html#dicogis.georeaders.Infos_Rasters.GdalErrorHandler.handler">[docs]</a>    <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">err_level</span><span class="p">,</span> <span class="n">err_type</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make errors messages more readable.&quot;&quot;&quot;</span>
+        <span class="c1"># available types</span>
+        <span class="n">err_class</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">gdal</span><span class="o">.</span><span class="n">CE_None</span><span class="p">:</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span>
+            <span class="n">gdal</span><span class="o">.</span><span class="n">CE_Debug</span><span class="p">:</span> <span class="s2">&quot;Debug&quot;</span><span class="p">,</span>
+            <span class="n">gdal</span><span class="o">.</span><span class="n">CE_Warning</span><span class="p">:</span> <span class="s2">&quot;Warning&quot;</span><span class="p">,</span>
+            <span class="n">gdal</span><span class="o">.</span><span class="n">CE_Failure</span><span class="p">:</span> <span class="s2">&quot;Failure&quot;</span><span class="p">,</span>
+            <span class="n">gdal</span><span class="o">.</span><span class="n">CE_Fatal</span><span class="p">:</span> <span class="s2">&quot;Fatal&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># getting type</span>
+        <span class="n">err_type</span> <span class="o">=</span> <span class="n">err_class</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">err_type</span><span class="p">,</span> <span class="s2">&quot;None&quot;</span><span class="p">)</span>
+
+        <span class="c1"># cleaning message</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="n">err_msg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="c1"># disabling GDAL exceptions raising to avoid future troubles</span>
+        <span class="n">gdal</span><span class="o">.</span><span class="n">DontUseExceptions</span><span class="p">()</span>
+
+        <span class="c1"># propagating</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">err_level</span> <span class="o">=</span> <span class="n">err_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">err_type</span> <span class="o">=</span> <span class="n">err_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">err_msg</span> <span class="o">=</span> <span class="n">err_msg</span>
+
+        <span class="c1"># end of function</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">err_level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">err_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">err_msg</span></div></div>
+
+
+<div class="viewcode-block" id="ReadRasters"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html#dicogis.georeaders.Infos_Rasters.ReadRasters">[docs]</a><span class="k">class</span> <span class="nc">ReadRasters</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rasterpath</span><span class="p">,</span> <span class="n">dico_raster</span><span class="p">,</span> <span class="n">dico_bands</span><span class="p">,</span> <span class="n">tipo</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use GDAL functions to extract basic informations about</span>
+<span class="sd">        geographic raster file (handles ECW, GeoTIFF, JPEG2000)</span>
+<span class="sd">        and store into dictionaries.</span>
+
+<span class="sd">        layerpath = path to the geographic file</span>
+<span class="sd">        dico_raster = dictionary for global informations</span>
+<span class="sd">        dico_bands = dictionary for the bands informations</span>
+<span class="sd">        tipo = format</span>
+<span class="sd">        text = dictionary of text in the selected language</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># gdal specific</span>
+        <span class="n">gdal</span><span class="o">.</span><span class="n">AllRegister</span><span class="p">()</span>
+        <span class="c1"># changing working directory to layer folder</span>
+        <span class="n">chdir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">))</span>
+
+        <span class="c1"># handling specific exceptions</span>
+        <span class="n">gdalerr</span> <span class="o">=</span> <span class="n">GdalErrorHandler</span><span class="p">()</span>
+        <span class="n">errhandler</span> <span class="o">=</span> <span class="n">gdalerr</span><span class="o">.</span><span class="n">handler</span>
+        <span class="n">gdal</span><span class="o">.</span><span class="n">PushErrorHandler</span><span class="p">(</span><span class="n">errhandler</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alert</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># gdal.SetConfigOption(str(&quot;GTIFF_IGNORE_READ_ERRORS&quot;), str(&quot;TRUE&quot;))</span>
+        <span class="n">gdal</span><span class="o">.</span><span class="n">UseExceptions</span><span class="p">()</span>
+
+        <span class="c1"># opening file</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rast</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">,</span> <span class="n">GA_ReadOnly</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">erratum</span><span class="p">(</span><span class="n">dico_raster</span><span class="p">,</span> <span class="n">rasterpath</span><span class="p">,</span> <span class="s2">&quot;err_incomp&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># check if raster is GDAL friendly</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">erratum</span><span class="p">(</span><span class="n">dico_raster</span><span class="p">,</span> <span class="n">rasterpath</span><span class="p">,</span> <span class="s2">&quot;err_incomp&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c1"># basic informations</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tipo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infos_basics</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">,</span> <span class="n">dico_raster</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="c1"># geometry information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infos_geom</span><span class="p">(</span><span class="n">dico_raster</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="c1"># bands information</span>
+        <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">RasterCount</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infos_bands</span><span class="p">(</span><span class="n">band</span><span class="p">,</span> <span class="n">dico_bands</span><span class="p">)</span>
+            <span class="n">band</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># safe close (see: http://pcjericks.github.io/py-gdalogr-cookbook/)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span>
+        <span class="c1"># warnings messages</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;err_gdal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdalerr</span><span class="o">.</span><span class="n">err_type</span><span class="p">,</span> <span class="n">gdalerr</span><span class="o">.</span><span class="n">err_msg</span>
+
+<div class="viewcode-block" id="ReadRasters.infos_basics"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html#dicogis.georeaders.Infos_Rasters.ReadRasters.infos_basics">[docs]</a>    <span class="k">def</span> <span class="nf">infos_basics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rasterpath</span><span class="p">,</span> <span class="n">dico_raster</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the global informations about the raster.&quot;&quot;&quot;</span>
+        <span class="c1"># files and folder</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">)</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">)</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">][:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+
+        <span class="c1"># dependencies</span>
+        <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filedepend</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">filedepend</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">GetFileList</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">filedepend</span> <span class="o">!=</span> <span class="n">rasterpath</span>
+        <span class="p">]</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;dependencies&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dependencies</span>
+
+        <span class="c1"># total size</span>
+        <span class="n">dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">)</span>
+        <span class="n">total_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dependencies</span><span class="p">])</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;total_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sizeof</span><span class="p">(</span><span class="n">total_size</span><span class="p">)</span>
+        <span class="n">dependencies</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># format</span>
+        <span class="n">rastMD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">GetMetadata</span><span class="p">()</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;compr_rate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rastMD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;COMPRESSION_RATE_TARGET&quot;</span><span class="p">)</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;color_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rastMD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;COLORSPACE&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rastMD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;VERSION&quot;</span><span class="p">):</span>
+            <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;format_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(v</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rastMD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;VERSION&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;format_version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1"># image specifications</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;num_cols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">RasterXSize</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;num_rows&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">RasterYSize</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;num_bands&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">RasterCount</span>
+
+        <span class="c1"># data type</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GetDataTypeName</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">DataType</span>
+        <span class="p">)</span>
+
+        <span class="c1"># basic dates</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;date_actu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/%m/%Y&quot;</span><span class="p">,</span> <span class="n">localtime</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;date_crea&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/%m/%Y&quot;</span><span class="p">,</span> <span class="n">localtime</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="c1"># end of function</span>
+        <span class="k">return</span> <span class="n">dico_raster</span></div>
+
+<div class="viewcode-block" id="ReadRasters.infos_geom"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html#dicogis.georeaders.Infos_Rasters.ReadRasters.infos_geom">[docs]</a>    <span class="k">def</span> <span class="nf">infos_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dico_raster</span><span class="p">,</span> <span class="n">txt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the informations about geometry.&quot;&quot;&quot;</span>
+        <span class="c1"># Spatial extent (bounding box)</span>
+        <span class="n">geotransform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">GetGeoTransform</span><span class="p">()</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;xOrigin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;yOrigin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;pixelWidth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">geotransform</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;pixelHeight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">geotransform</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># -- SRS</span>
+        <span class="c1"># using osr to get the srs</span>
+        <span class="n">srs</span> <span class="o">=</span> <span class="n">osr</span><span class="o">.</span><span class="n">SpatialReference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">())</span>
+        <span class="c1"># srs.ImportFromWkt(self.rast.GetProjection())</span>
+        <span class="n">srs</span><span class="o">.</span><span class="n">AutoIdentifyEPSG</span><span class="p">()</span>
+
+        <span class="c1"># srs types</span>
+        <span class="n">srsmetod</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsCompound</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_comp&quot;</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsGeocentric</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_geoc&quot;</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsGeographic</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_geog&quot;</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsLocal</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_loca&quot;</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsProjected</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_proj&quot;</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">srs</span><span class="o">.</span><span class="n">IsVertical</span><span class="p">(),</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_vert&quot;</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="c1"># searching for a match with one of srs types</span>
+        <span class="k">for</span> <span class="n">srsmet</span> <span class="ow">in</span> <span class="n">srsmetod</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">srsmet</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">typsrs</span> <span class="o">=</span> <span class="n">srsmet</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="c1"># in case of not match</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typsrs</span>
+        <span class="k">except</span> <span class="ne">UnboundLocalError</span><span class="p">:</span>
+            <span class="n">typsrs</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;srs_nr&quot;</span><span class="p">)</span>
+            <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">typsrs</span>
+
+        <span class="c1"># Handling exception in srs names&#39;encoding</span>
+        <span class="k">if</span> <span class="n">srs</span><span class="o">.</span><span class="n">IsProjected</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJCS&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJCS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJECTION&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                        <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span>
+                    <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJCS&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;unnamed&quot;</span><span class="p">:</span>
+                    <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJCS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;latin1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJECTION&quot;</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;latin1&quot;</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;GEOGCS&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;GEOGCS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span>
+                        <span class="s2">&quot;PROJECTION&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;GEOGCS&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;unnamed&quot;</span><span class="p">:</span>
+                    <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;GEOGCS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;latin1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;srs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;PROJECTION&quot;</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;latin1&quot;</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;epsg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srs</span><span class="o">.</span><span class="n">GetAttrValue</span><span class="p">(</span><span class="s2">&quot;AUTHORITY&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># end of function</span>
+        <span class="k">return</span> <span class="n">dico_raster</span></div>
+
+<div class="viewcode-block" id="ReadRasters.infos_bands"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html#dicogis.georeaders.Infos_Rasters.ReadRasters.infos_bands">[docs]</a>    <span class="k">def</span> <span class="nf">infos_bands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">dico_bands</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the informations about fields definitions.&quot;&quot;&quot;</span>
+        <span class="c1"># getting band object</span>
+        <span class="n">band_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rast</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="n">band</span><span class="p">)</span>
+
+        <span class="c1"># band statistics</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stats</span> <span class="o">=</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetStatistics</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">stats</span><span class="p">:</span>
+            <span class="c1"># band minimum value</span>
+            <span class="k">if</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetMinimum</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_Min&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_Min&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetMinimum</span><span class="p">()</span>
+
+            <span class="c1"># band maximum value</span>
+            <span class="k">if</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetMinimum</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_Max&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_Max&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetMaximum</span><span class="p">()</span>
+
+            <span class="c1"># band mean value</span>
+            <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_Mean&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># band standard deviation value</span>
+            <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_Sdev&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># band no data value</span>
+        <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_NoData&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetNoDataValue</span><span class="p">()</span>
+
+        <span class="c1"># band scale value</span>
+        <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_Scale&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetScale</span><span class="p">()</span>
+
+        <span class="c1"># band unit type value</span>
+        <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_UnitType&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetUnitType</span><span class="p">()</span>
+
+        <span class="c1"># color table</span>
+        <span class="n">coul_table</span> <span class="o">=</span> <span class="n">band_info</span><span class="o">.</span><span class="n">GetColorTable</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">coul_table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_CTabCount&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dico_bands</span><span class="p">[</span><span class="s2">&quot;band</span><span class="si">{}</span><span class="s2">_CTabCount&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">)]</span> <span class="o">=</span> <span class="n">coul_table</span><span class="o">.</span><span class="n">GetCount</span><span class="p">()</span>
+            <span class="c1"># -- COMENTED BECAUSE IT&#39;S TOO MUCH INFORMATIONS</span>
+            <span class="c1"># for ctab_idx in range(0, coul_table.GetCount()):</span>
+            <span class="c1">#     entry = coul_table.GetColorEntry(ctab_idx)</span>
+            <span class="c1">#     if not entry:</span>
+            <span class="c1">#         continue</span>
+            <span class="c1">#     else:</span>
+            <span class="c1">#         pass</span>
+            <span class="c1">#     dico_bands[&quot;band{0}_CTab{1}_RGB&quot;.format(band, ctab_idx)] = \</span>
+            <span class="c1">#                   coul_table.GetColorEntryAsRGB(ctab_idx, entry)</span>
+
+        <span class="c1"># safe close (quite useless but good practice to have)</span>
+        <span class="k">del</span> <span class="n">stats</span>
+        <span class="k">del</span> <span class="n">band_info</span>
+
+        <span class="c1"># end of function</span>
+        <span class="k">return</span> <span class="n">dico_bands</span></div>
+
+<div class="viewcode-block" id="ReadRasters.sizeof"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html#dicogis.georeaders.Infos_Rasters.ReadRasters.sizeof">[docs]</a>    <span class="k">def</span> <span class="nf">sizeof</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">os_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return size in different units depending on size</span>
+<span class="sd">        see http://stackoverflow.com/a/1094933&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">size_cat</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;octets&quot;</span><span class="p">,</span> <span class="s2">&quot;Ko&quot;</span><span class="p">,</span> <span class="s2">&quot;Mo&quot;</span><span class="p">,</span> <span class="s2">&quot;Go&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">os_size</span> <span class="o">&lt;</span> <span class="mf">1024.0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%3.1f</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os_size</span><span class="p">,</span> <span class="n">size_cat</span><span class="p">)</span>
+            <span class="n">os_size</span> <span class="o">/=</span> <span class="mf">1024.0</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%3.1f</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os_size</span><span class="p">,</span> <span class="s2">&quot; To&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReadRasters.erratum"><a class="viewcode-back" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html#dicogis.georeaders.Infos_Rasters.ReadRasters.erratum">[docs]</a>    <span class="k">def</span> <span class="nf">erratum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dico_raster</span><span class="p">,</span> <span class="n">rasterpath</span><span class="p">,</span> <span class="n">mess</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;errors handling&quot;&quot;&quot;</span>
+        <span class="c1"># storing minimal informations to give clues to solve later</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">)</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">rasterpath</span><span class="p">)</span>
+        <span class="n">dico_raster</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mess</span>
+        <span class="c1"># End of function</span>
+        <span class="k">return</span> <span class="n">dico_raster</span></div></div>
+
+
+<span class="c1"># ############################################################################</span>
+<span class="c1"># #### Stand alone program ########</span>
+<span class="c1"># #################################</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;standalone execution for tests. Paths are relative considering a test</span>
+<span class="sd">    within the official repository (https://github.com/Guts/DicoShapes/)&quot;&quot;&quot;</span>
+    <span class="c1"># listing test files by formats</span>
+    <span class="n">li_ecw</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;..\..\test\datatest\rasters\ECW\0468_6740.ecw&quot;</span><span class="p">]</span>  <span class="c1"># ECW</span>
+    <span class="n">li_gtif</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">r</span><span class="s2">&quot;..\..\test\datatest\rasters\GeoTiff\BDP_07_0621_0049_020_LZ1.tif&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;..\..\test\datatest\rasters\GeoTiff\TrueMarble_16km_2700x1350.tif&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;..\..\test\datatest\rasters\GeoTiff\ASTGTM_S17W069_dem.tif&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;..\..\test\datatest\rasters\GeoTiff\completo1-2.tif&quot;</span><span class="p">,</span>
+    <span class="p">]</span>  <span class="c1"># GeoTIFF</span>
+    <span class="n">li_jpg2</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;..\..\test\datatest\rasters\JPEG2000\image_jpg2000.jp2&quot;</span><span class="p">]</span>  <span class="c1"># JPEG2000</span>
+    <span class="n">li_rasters</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">li_ecw</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">li_gtif</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">li_gtif</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">li_gtif</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">li_gtif</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">li_jpg2</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># test text dictionary</span>
+    <span class="n">textos</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;srs_comp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Compound&quot;</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;srs_geoc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Geocentric&quot;</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;srs_geog&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Geographic&quot;</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;srs_loca&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Local&quot;</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;srs_proj&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Projected&quot;</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;srs_vert&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Vertical&quot;</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;geom_point&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Point&quot;</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;geom_ligne&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Line&quot;</span>
+    <span class="n">textos</span><span class="p">[</span><span class="s2">&quot;geom_polyg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Polygon&quot;</span>
+
+    <span class="c1"># execution</span>
+    <span class="k">for</span> <span class="n">raster</span> <span class="ow">in</span> <span class="n">li_rasters</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;looping on raster files&quot;&quot;&quot;</span>
+        <span class="c1"># recipient datas</span>
+        <span class="n">dico_raster</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>  <span class="c1"># dictionary where will be stored informations</span>
+        <span class="n">dico_bands</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>  <span class="c1"># dictionary for fields information</span>
+        <span class="c1"># getting the informations</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">==&gt; File doesn&#39;t exist: &quot;</span> <span class="o">+</span> <span class="n">raster</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">======================</span><span class="se">\n\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">raster</span><span class="p">)))</span>
+        <span class="c1"># handling odd warnings</span>
+        <span class="n">info_raster</span> <span class="o">=</span> <span class="n">ReadRasters</span><span class="p">(</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">raster</span><span class="p">),</span>
+            <span class="n">dico_raster</span><span class="p">,</span>
+            <span class="n">dico_bands</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">raster</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">textos</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="si">{0}</span><span class="se">\n</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dico_raster</span><span class="p">,</span> <span class="n">dico_bands</span><span class="p">))</span>
+
+        <span class="c1"># deleting dictionaries</span>
+        <span class="k">del</span> <span class="n">dico_raster</span><span class="p">,</span> <span class="n">dico_bands</span><span class="p">,</span> <span class="n">raster</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014 - 2021, Julien Moura.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

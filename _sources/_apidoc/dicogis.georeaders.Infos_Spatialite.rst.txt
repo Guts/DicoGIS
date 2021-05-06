@@ -1,0 +1,7 @@
+dicogis.georeaders.Infos\_Spatialite module
+===========================================
+
+.. automodule:: dicogis.georeaders.Infos_Spatialite
+   :members:
+   :undoc-members:
+   :show-inheritance:

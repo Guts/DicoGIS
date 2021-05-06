@@ -1,0 +1,20 @@
+dicogis.utils package
+=====================
+
+.. automodule:: dicogis.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   dicogis.utils.checknorris
+   dicogis.utils.db_conf_reader
+   dicogis.utils.journalizer
+   dicogis.utils.options
+   dicogis.utils.texts
+   dicogis.utils.utils

@@ -1,0 +1,7 @@
+dicogis.georeaders.Infos\_GDB module
+====================================
+
+.. automodule:: dicogis.georeaders.Infos_GDB
+   :members:
+   :undoc-members:
+   :show-inheritance:

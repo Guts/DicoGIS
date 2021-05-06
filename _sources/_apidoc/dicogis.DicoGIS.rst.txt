@@ -1,0 +1,7 @@
+dicogis.DicoGIS module
+======================
+
+.. automodule:: dicogis.DicoGIS
+   :members:
+   :undoc-members:
+   :show-inheritance:

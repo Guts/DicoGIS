@@ -1,0 +1,7 @@
+dicogis.georeaders.Infos\_DXF module
+====================================
+
+.. automodule:: dicogis.georeaders.Infos_DXF
+   :members:
+   :undoc-members:
+   :show-inheritance:

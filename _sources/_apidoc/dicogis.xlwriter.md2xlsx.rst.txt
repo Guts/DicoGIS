@@ -1,0 +1,7 @@
+dicogis.xlwriter.md2xlsx module
+===============================
+
+.. automodule:: dicogis.xlwriter.md2xlsx
+   :members:
+   :undoc-members:
+   :show-inheritance:

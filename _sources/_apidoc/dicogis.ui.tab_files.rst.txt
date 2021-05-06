@@ -1,0 +1,7 @@
+dicogis.ui.tab\_files module
+============================
+
+.. automodule:: dicogis.ui.tab_files
+   :members:
+   :undoc-members:
+   :show-inheritance:

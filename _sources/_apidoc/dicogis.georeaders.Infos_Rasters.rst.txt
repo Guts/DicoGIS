@@ -1,0 +1,7 @@
+dicogis.georeaders.Infos\_Rasters module
+========================================
+
+.. automodule:: dicogis.georeaders.Infos_Rasters
+   :members:
+   :undoc-members:
+   :show-inheritance:

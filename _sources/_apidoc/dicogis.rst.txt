@@ -1,0 +1,26 @@
+dicogis package
+===============
+
+.. automodule:: dicogis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   dicogis.georeaders
+   dicogis.ui
+   dicogis.utils
+   dicogis.xlwriter
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   dicogis.DicoGIS

@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>dicogis.xlwriter.md2xlsx module &mdash; DicoGIS 3.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/DicoGIS_logo_200px.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dicogis.DicoGIS module" href="dicogis.DicoGIS.html" />
+    <link rel="prev" title="dicogis.xlwriter package" href="dicogis.xlwriter.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: SteelBlue" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> DicoGIS
+          
+
+          
+            
+            <img src="../_static/DicoGIS_logo_200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/en.html">DicoGIS: the 3-clic geodata dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/en.html#in-a-nutshell">In a nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/en.html#technical-specifications">Technical specifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/en.html#how-to-use-it">How to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/en.html#what-about-the-results">What about the results?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/fr.html">DicoGIS : le dictionnaire de données SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/fr.html#presentation-de-loutil">Présentation de l’outil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/fr.html#caracteristiques-techniques">Caractéristiques techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/fr.html#comment-l-utiliser">Comment l’utiliser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/fr.html#resultats">Résultats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction/es.html">DicoGIS: el diccionario de datos SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/es.html#presentacion">Presentación</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/es.html#caracteristicas-tecnicas">Características técnicas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/es.html#como-usarlo">Como usarlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/es.html#que-tipo-de-informaciones-para-que-tipo-de-datos">¿que tipo de informaciones para que tipo de datos?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/windows.html">Develop on Windows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/windows.html#common">Common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../development/windows.html#enable-remote-scripts-for-virtual-environment">Enable remote scripts (for virtual environment)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../development/windows.html#using-pre-built-wheel">Using pre-built wheel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../development/windows.html#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../development/windows.html#download-gdal-wheel">Download GDAL wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../development/windows.html#installation-steps">Installation steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../development/windows.html#using-conda">Using conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../development/windows.html#id1">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../development/windows.html#id2">Installation steps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../development/ubuntu.html">Develop on Ubuntu</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/ubuntu.html#install-gdal">Install GDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/ubuntu.html#install-python-and-git">Install Python and Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/ubuntu.html#install-project-requirements">Install project requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/ubuntu.html#install-project">Install project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../development/tests.html">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/tests.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/tests.html#run">Run</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../development/documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/documentation.html#build-documentation-website">Build documentation website</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/documentation.html#deploy-documentation-website">Deploy documentation website</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../development/packaging.html">Packaging into an executable</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../development/packaging.html#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development/packaging.html#ubuntu">Ubuntu</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/formats_matrix.html">Informations gathered depending on format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/compatibility.html">Platform compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/credits.html">Credits</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Documentation du code</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">dicogis</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="dicogis.html">dicogis package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dicogis.georeaders.html">dicogis.georeaders package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.Infos_DWG.html">dicogis.georeaders.Infos_DWG module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.Infos_DXF.html">dicogis.georeaders.Infos_DXF module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.Infos_GDB.html">dicogis.georeaders.Infos_GDB module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.Infos_GXT.html">dicogis.georeaders.Infos_GXT module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.Infos_PostGIS.html">dicogis.georeaders.Infos_PostGIS module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.Infos_Rasters.html">dicogis.georeaders.Infos_Rasters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.Infos_Spatialite.html">dicogis.georeaders.Infos_Spatialite module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.Infos_VectorFlatDataset.html">dicogis.georeaders.Infos_VectorFlatDataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.gdal_exceptions_handler.html">dicogis.georeaders.gdal_exceptions_handler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.geo_infos_generic.html">dicogis.georeaders.geo_infos_generic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.georeaders.geoutils.html">dicogis.georeaders.geoutils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dicogis.ui.html">dicogis.ui package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.ui.misc_buttons.html">dicogis.ui.misc_buttons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.ui.tab_credits.html">dicogis.ui.tab_credits module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.ui.tab_database.html">dicogis.ui.tab_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.ui.tab_files.html">dicogis.ui.tab_files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.ui.tab_settings.html">dicogis.ui.tab_settings module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dicogis.utils.html">dicogis.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.utils.checknorris.html">dicogis.utils.checknorris module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.utils.db_conf_reader.html">dicogis.utils.db_conf_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.utils.journalizer.html">dicogis.utils.journalizer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.utils.options.html">dicogis.utils.options module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.utils.texts.html">dicogis.utils.texts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dicogis.utils.utils.html">dicogis.utils.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="dicogis.xlwriter.html">dicogis.xlwriter package</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">dicogis.xlwriter.md2xlsx module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dicogis.DicoGIS.html">dicogis.DicoGIS module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DicoGIS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">dicogis</a> &raquo;</li>
+        
+          <li><a href="dicogis.html">dicogis package</a> &raquo;</li>
+        
+          <li><a href="dicogis.xlwriter.html">dicogis.xlwriter package</a> &raquo;</li>
+        
+      <li>dicogis.xlwriter.md2xlsx module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/_apidoc/dicogis.xlwriter.md2xlsx.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+        <a href="dicogis.DicoGIS.html" class="btn btn-neutral float-right" title="dicogis.DicoGIS module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+      
+      
+        <a href="dicogis.xlwriter.html" class="btn btn-neutral float-left" title="dicogis.xlwriter package" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-dicogis.xlwriter.md2xlsx">
+<span id="dicogis-xlwriter-md2xlsx-module"></span><h1>dicogis.xlwriter.md2xlsx module<a class="headerlink" href="#module-dicogis.xlwriter.md2xlsx" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">dicogis.xlwriter.md2xlsx.</span></code><code class="sig-name descname"><span class="pre">MetadataToXlsx</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lang</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EN'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">openpyxl.workbook.workbook.Workbook</span></code></p>
+<p>Export into a XLSX worksheet.</p>
+<dl class="py attribute">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_caodao">
+<code class="sig-name descname"><span class="pre">li_cols_caodao</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['nomfic',</span> <span class="pre">'path',</span> <span class="pre">'theme',</span> <span class="pre">'tot_size',</span> <span class="pre">'date_crea',</span> <span class="pre">'date_actu',</span> <span class="pre">'sub_layers',</span> <span class="pre">'num_attrib',</span> <span class="pre">'num_objets',</span> <span class="pre">'geometrie',</span> <span class="pre">'srs',</span> <span class="pre">'srs_type',</span> <span class="pre">'codepsg',</span> <span class="pre">'emprise',</span> <span class="pre">'li_chps']</span></em><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_caodao" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_filedb">
+<code class="sig-name descname"><span class="pre">li_cols_filedb</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['nomfic',</span> <span class="pre">'path',</span> <span class="pre">'theme',</span> <span class="pre">'tot_size',</span> <span class="pre">'date_crea',</span> <span class="pre">'date_actu',</span> <span class="pre">'feats_class',</span> <span class="pre">'num_attrib',</span> <span class="pre">'num_objets',</span> <span class="pre">'geometrie',</span> <span class="pre">'srs',</span> <span class="pre">'srs_type',</span> <span class="pre">'codepsg',</span> <span class="pre">'emprise',</span> <span class="pre">'li_chps']</span></em><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_filedb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_mapdocs">
+<code class="sig-name descname"><span class="pre">li_cols_mapdocs</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['nomfic',</span> <span class="pre">'path',</span> <span class="pre">'theme',</span> <span class="pre">'custom_title',</span> <span class="pre">'creator_prod',</span> <span class="pre">'keywords',</span> <span class="pre">'subject',</span> <span class="pre">'res_image',</span> <span class="pre">'tot_size',</span> <span class="pre">'date_crea',</span> <span class="pre">'date_actu',</span> <span class="pre">'origin_x',</span> <span class="pre">'origin_y',</span> <span class="pre">'srs',</span> <span class="pre">'srs_type',</span> <span class="pre">'codepsg',</span> <span class="pre">'sub_layers',</span> <span class="pre">'num_attrib',</span> <span class="pre">'num_objets',</span> <span class="pre">'li_chps']</span></em><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_mapdocs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_raster">
+<code class="sig-name descname"><span class="pre">li_cols_raster</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['nomfic',</span> <span class="pre">'path',</span> <span class="pre">'theme',</span> <span class="pre">'size_Y',</span> <span class="pre">'size_X',</span> <span class="pre">'pixel_w',</span> <span class="pre">'pixel_h',</span> <span class="pre">'origin_x',</span> <span class="pre">'origin_y',</span> <span class="pre">'srs_type',</span> <span class="pre">'codepsg',</span> <span class="pre">'emprise',</span> <span class="pre">'date_crea',</span> <span class="pre">'date_actu',</span> <span class="pre">'num_bands',</span> <span class="pre">'format',</span> <span class="pre">'compression',</span> <span class="pre">'coloref',</span> <span class="pre">'li_depends',</span> <span class="pre">'tot_size',</span> <span class="pre">'gdal_warn']</span></em><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_raster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_sgbd">
+<code class="sig-name descname"><span class="pre">li_cols_sgbd</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['nomfic',</span> <span class="pre">'conn_chain',</span> <span class="pre">'schema',</span> <span class="pre">'num_attrib',</span> <span class="pre">'num_objets',</span> <span class="pre">'geometrie',</span> <span class="pre">'srs',</span> <span class="pre">'srs_type',</span> <span class="pre">'codepsg',</span> <span class="pre">'emprise',</span> <span class="pre">'format',</span> <span class="pre">'li_chps',</span> <span class="pre">'gdal_err']</span></em><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_sgbd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_vector">
+<code class="sig-name descname"><span class="pre">li_cols_vector</span></code><em class="property"> <span class="pre">=</span> <span class="pre">['nomfic',</span> <span class="pre">'path',</span> <span class="pre">'theme',</span> <span class="pre">'num_attrib',</span> <span class="pre">'num_objets',</span> <span class="pre">'geometrie',</span> <span class="pre">'srs',</span> <span class="pre">'srs_type',</span> <span class="pre">'codepsg',</span> <span class="pre">'emprise',</span> <span class="pre">'date_crea',</span> <span class="pre">'date_actu',</span> <span class="pre">'format',</span> <span class="pre">'li_depends',</span> <span class="pre">'tot_size',</span> <span class="pre">'li_chps',</span> <span class="pre">'gdal_warn']</span></em><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.li_cols_vector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.set_worksheets">
+<code class="sig-name descname"><span class="pre">set_worksheets</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">has_vector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_raster</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_filedb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_mapdocs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_cad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_sgbd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx.set_worksheets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.set_worksheets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add news sheets depending on present metadata types.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_cad">
+<code class="sig-name descname"><span class="pre">store_md_cad</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cad</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx.store_md_cad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_cad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store metadata about CAD dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_fdb">
+<code class="sig-name descname"><span class="pre">store_md_fdb</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filedb</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx.store_md_fdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_fdb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Storing metadata about a file database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_mapdoc">
+<code class="sig-name descname"><span class="pre">store_md_mapdoc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapdoc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx.store_md_mapdoc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_mapdoc" title="Permalink to this definition">¶</a></dt>
+<dd><p>To store mapdocs information from DicoGIS.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_raster">
+<code class="sig-name descname"><span class="pre">store_md_raster</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bands</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx.store_md_raster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_raster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store metadata about a raster dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_sgdb">
+<code class="sig-name descname"><span class="pre">store_md_sgdb</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx.store_md_sgdb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_sgdb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Storing metadata about a file database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_vector">
+<code class="sig-name descname"><span class="pre">store_md_vector</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx.store_md_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.store_md_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store metadata about a vector dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="dicogis.xlwriter.md2xlsx.MetadataToXlsx.tunning_worksheets">
+<code class="sig-name descname"><span class="pre">tunning_worksheets</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#MetadataToXlsx.tunning_worksheets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.MetadataToXlsx.tunning_worksheets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean up and tunning worksheet.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="dicogis.xlwriter.md2xlsx.secure_encoding">
+<code class="sig-prename descclassname"><span class="pre">dicogis.xlwriter.md2xlsx.</span></code><code class="sig-name descname"><span class="pre">secure_encoding</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dicogis/xlwriter/md2xlsx.html#secure_encoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dicogis.xlwriter.md2xlsx.secure_encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if dictionary value is compatible with XML encoding.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>layer_dict (dict): layer metadata dictionary
+key_str (str): key fo dictionary to check</p>
+</dd>
+<dt>Returns:</dt><dd><p>str: clean string</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="dicogis.DicoGIS.html" class="btn btn-neutral float-right" title="dicogis.DicoGIS module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dicogis.xlwriter.html" class="btn btn-neutral float-left" title="dicogis.xlwriter package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014 - 2021, Julien Moura.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

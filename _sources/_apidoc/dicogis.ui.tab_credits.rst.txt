@@ -1,0 +1,7 @@
+dicogis.ui.tab\_credits module
+==============================
+
+.. automodule:: dicogis.ui.tab_credits
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+dicogis.georeaders.Infos\_DWG module
+====================================
+
+.. automodule:: dicogis.georeaders.Infos_DWG
+   :members:
+   :undoc-members:
+   :show-inheritance:

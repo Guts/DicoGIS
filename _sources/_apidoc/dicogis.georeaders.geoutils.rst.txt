@@ -1,0 +1,7 @@
+dicogis.georeaders.geoutils module
+==================================
+
+.. automodule:: dicogis.georeaders.geoutils
+   :members:
+   :undoc-members:
+   :show-inheritance:

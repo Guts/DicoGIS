@@ -1,0 +1,7 @@
+dicogis.georeaders.Infos\_VectorFlatDataset module
+==================================================
+
+.. automodule:: dicogis.georeaders.Infos_VectorFlatDataset
+   :members:
+   :undoc-members:
+   :show-inheritance:

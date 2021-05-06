@@ -1,0 +1,7 @@
+dicogis.utils.checknorris module
+================================
+
+.. automodule:: dicogis.utils.checknorris
+   :members:
+   :undoc-members:
+   :show-inheritance:

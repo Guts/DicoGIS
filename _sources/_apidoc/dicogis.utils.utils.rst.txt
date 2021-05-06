@@ -1,0 +1,7 @@
+dicogis.utils.utils module
+==========================
+
+.. automodule:: dicogis.utils.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

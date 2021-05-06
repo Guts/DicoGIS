@@ -1,0 +1,7 @@
+dicogis.georeaders.gdal\_exceptions\_handler module
+===================================================
+
+.. automodule:: dicogis.georeaders.gdal_exceptions_handler
+   :members:
+   :undoc-members:
+   :show-inheritance:

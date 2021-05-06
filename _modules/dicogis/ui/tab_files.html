@@ -1,0 +1,540 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>dicogis.ui.tab_files &mdash; DicoGIS 3.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/DicoGIS_logo_200px.png"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: SteelBlue" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> DicoGIS
+          
+
+          
+            
+            <img src="../../../_static/DicoGIS_logo_200px.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                3.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/en.html">DicoGIS: the 3-clic geodata dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#in-a-nutshell">In a nutshell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#technical-specifications">Technical specifications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#how-to-use-it">How to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/en.html#what-about-the-results">What about the results?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/fr.html">DicoGIS : le dictionnaire de données SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#presentation-de-loutil">Présentation de l’outil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#caracteristiques-techniques">Caractéristiques techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#comment-l-utiliser">Comment l’utiliser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/fr.html#resultats">Résultats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/es.html">DicoGIS: el diccionario de datos SIG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#presentacion">Presentación</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#caracteristicas-tecnicas">Características técnicas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#como-usarlo">Como usarlo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../introduction/es.html#que-tipo-de-informaciones-para-que-tipo-de-datos">¿que tipo de informaciones para que tipo de datos?</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/windows.html">Develop on Windows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#common">Common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#enable-remote-scripts-for-virtual-environment">Enable remote scripts (for virtual environment)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-pre-built-wheel">Using pre-built wheel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#requirements">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#download-gdal-wheel">Download GDAL wheel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#installation-steps">Installation steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/windows.html#using-conda">Using conda</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id1">Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../development/windows.html#id2">Installation steps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/ubuntu.html">Develop on Ubuntu</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-gdal">Install GDAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-python-and-git">Install Python and Git</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project-requirements">Install project requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/ubuntu.html#install-project">Install project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/tests.html">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/tests.html#run">Run</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/documentation.html">Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#build-documentation-website">Build documentation website</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/documentation.html#deploy-documentation-website">Deploy documentation website</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development/packaging.html">Packaging into an executable</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/packaging.html#ubuntu">Ubuntu</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/formats_matrix.html">Informations gathered depending on format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/compatibility.html">Platform compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc/credits.html">Credits</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Documentation du code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_apidoc/modules.html">dicogis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_apidoc/dicogis.html">dicogis package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.html">dicogis.georeaders package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DWG.html">dicogis.georeaders.Infos_DWG module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_DXF.html">dicogis.georeaders.Infos_DXF module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GDB.html">dicogis.georeaders.Infos_GDB module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_GXT.html">dicogis.georeaders.Infos_GXT module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_PostGIS.html">dicogis.georeaders.Infos_PostGIS module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Rasters.html">dicogis.georeaders.Infos_Rasters module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_Spatialite.html">dicogis.georeaders.Infos_Spatialite module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.Infos_VectorFlatDataset.html">dicogis.georeaders.Infos_VectorFlatDataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.gdal_exceptions_handler.html">dicogis.georeaders.gdal_exceptions_handler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geo_infos_generic.html">dicogis.georeaders.geo_infos_generic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.georeaders.geoutils.html">dicogis.georeaders.geoutils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.ui.html">dicogis.ui package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.misc_buttons.html">dicogis.ui.misc_buttons module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_credits.html">dicogis.ui.tab_credits module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_database.html">dicogis.ui.tab_database module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_files.html">dicogis.ui.tab_files module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.ui.tab_settings.html">dicogis.ui.tab_settings module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.utils.html">dicogis.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.checknorris.html">dicogis.utils.checknorris module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.db_conf_reader.html">dicogis.utils.db_conf_reader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.journalizer.html">dicogis.utils.journalizer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.options.html">dicogis.utils.options module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.texts.html">dicogis.utils.texts module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.utils.utils.html">dicogis.utils.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.html">dicogis.xlwriter package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_apidoc/dicogis.xlwriter.md2xlsx.html">dicogis.xlwriter.md2xlsx module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_apidoc/dicogis.DicoGIS.html">dicogis.DicoGIS module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">DicoGIS</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>dicogis.ui.tab_files</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for dicogis.ui.tab_files</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! python3  # noqa: E265</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Name:         TabFiles</span>
+<span class="sd">    Purpose:      Tab containing files widgets in DicoGIS Notebook.</span>
+
+<span class="sd">    Author:       Julien Moura (@geojulien)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># ##############################################################################</span>
+<span class="c1"># ########## Libraries #############</span>
+<span class="c1"># ##################################</span>
+
+<span class="c1"># Standard library</span>
+<span class="kn">import</span> <span class="nn">gettext</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">strftime</span>
+
+<span class="c1"># GUI</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">END</span><span class="p">,</span> <span class="n">IntVar</span><span class="p">,</span> <span class="n">StringVar</span><span class="p">,</span> <span class="n">Tk</span>
+<span class="kn">from</span> <span class="nn">tkinter.filedialog</span> <span class="kn">import</span> <span class="n">askdirectory</span>
+<span class="kn">from</span> <span class="nn">tkinter.messagebox</span> <span class="kn">import</span> <span class="n">showinfo</span>
+<span class="kn">from</span> <span class="nn">tkinter.ttk</span> <span class="kn">import</span> <span class="n">Button</span><span class="p">,</span> <span class="n">Checkbutton</span><span class="p">,</span> <span class="n">Entry</span><span class="p">,</span> <span class="n">Frame</span><span class="p">,</span> <span class="n">Label</span><span class="p">,</span> <span class="n">Labelframe</span>
+
+<span class="c1"># ##############################################################################</span>
+<span class="c1"># ############ Globals ############</span>
+<span class="c1"># #################################</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">gettext</span><span class="o">.</span><span class="n">gettext</span>
+<span class="n">today</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>  <span class="c1"># LOG</span>
+
+<span class="c1"># ##############################################################################</span>
+<span class="c1"># ########## Classes ###############</span>
+<span class="c1"># ##################################</span>
+
+
+<div class="viewcode-block" id="TabFiles"><a class="viewcode-back" href="../../../_apidoc/dicogis.ui.tab_files.html#dicogis.ui.tab_files.TabFiles">[docs]</a><span class="k">class</span> <span class="nc">TabFiles</span><span class="p">(</span><span class="n">Frame</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">txt</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span> <span class="n">path_browser</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path_var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Instanciating the output workbook.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">txt</span> <span class="o">=</span> <span class="n">txt</span>
+        <span class="n">Frame</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># -- VARIABLES -------------------------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_path</span> <span class="o">=</span> <span class="n">StringVar</span><span class="p">()</span>
+        <span class="c1"># formats / type: vectors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_vectors_formats</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;.shp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;.tab&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;.kml&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;.gml&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;.geojson&quot;</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># vectors handled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_shp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for shapefiles path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_tab</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for MapInfo tables path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_kml</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for KML path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_gml</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for GML path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_geoj</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for GeoJSON paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_gxt</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for GXT paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_vectors</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for all vectors</span>
+        <span class="c1"># formats / type: rasters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_raster</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for rasters paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_raster_formats</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;.ecw&quot;</span><span class="p">,</span> <span class="s2">&quot;.tif&quot;</span><span class="p">,</span> <span class="s2">&quot;.jp2&quot;</span><span class="p">)</span>  <span class="c1"># raster handled</span>
+        <span class="c1"># formats / type: file databases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_fdb</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for all files databases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_egdb</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for Esri File Geodatabases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_spadb</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for Spatialite Geodatabases</span>
+        <span class="c1"># formats / type: CAO/DAO</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_cdao</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for all CAO/DAO files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_dxf</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for AutoCAD DXF paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_dwg</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for AutoCAD DWG paths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_dgn</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for MicroStation DGN paths</span>
+        <span class="c1"># formats / type: maps documents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_mapdocs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for all map &amp; documents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_qgs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list for QGS path</span>
+
+        <span class="c1"># -- Source path -----------------------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FrPath</span> <span class="o">=</span> <span class="n">Labelframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;files&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gui_fr1&quot;</span><span class="p">,</span> <span class="s2">&quot;Path&quot;</span><span class="p">))</span>
+
+        <span class="c1"># target folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lb_target</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrPath</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gui_path&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ent_target</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span>
+            <span class="n">master</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">FrPath</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">35</span><span class="p">,</span> <span class="n">textvariable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_path</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_browse</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">FrPath</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\U0001F3AF</span><span class="s2"> &quot;</span> <span class="o">+</span> <span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gui_choix&quot;</span><span class="p">,</span> <span class="s2">&quot;Browse&quot;</span><span class="p">),</span>
+            <span class="n">command</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_target_path</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;.&quot;</span><span class="p">),</span>
+            <span class="n">takefocus</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_browse</span><span class="o">.</span><span class="n">focus_force</span><span class="p">()</span>
+
+        <span class="c1"># widgets placement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lb_target</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span>
+            <span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ent_target</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span>
+            <span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_browse</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># -- Format filters --------------------------------------------------</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span> <span class="o">=</span> <span class="n">Labelframe</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;filters&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gui_fr3&quot;</span><span class="p">,</span> <span class="s2">&quot;Filters&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># formats options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_shp</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable shapefiles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_tab</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable MapInfo tables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_kml</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable KML</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_gml</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable GML</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_geoj</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable GeoJSON</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_gxt</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable GXT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_egdb</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable Esri FileGDB</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_spadb</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable Spatalite DB</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_rast</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable rasters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_cdao</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable CAO/DAO files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">opt_qgs</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">)</span>  <span class="c1"># able/disable Geospatial QGS</span>
+
+        <span class="c1"># format choosen: check buttons</span>
+        <span class="n">caz_shp</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;.shp&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_shp</span><span class="p">)</span>
+        <span class="n">caz_tab</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;.tab&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_tab</span><span class="p">)</span>
+        <span class="n">caz_kml</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;.kml&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_kml</span><span class="p">)</span>
+        <span class="n">caz_gml</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;.gml&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_gml</span><span class="p">)</span>
+        <span class="n">caz_geoj</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;.geojson&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_geoj</span><span class="p">)</span>
+        <span class="n">caz_gxt</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;.gxt&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_gxt</span><span class="p">)</span>
+        <span class="n">caz_egdb</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Esri FileGDB&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_egdb</span>
+        <span class="p">)</span>
+        <span class="n">caz_spadb</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Spatialite&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_spadb</span>
+        <span class="p">)</span>
+        <span class="n">caz_rast</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;rasters (</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">li_raster_formats</span><span class="p">)),</span>
+            <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_rast</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">caz_cdao</span> <span class="o">=</span> <span class="n">Checkbutton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;CAO/DAO&quot;</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_cdao</span><span class="p">)</span>
+        <span class="c1"># widgets placement</span>
+        <span class="n">caz_shp</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_tab</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_kml</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_gml</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_geoj</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_gxt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_rast</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_egdb</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_cdao</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">caz_spadb</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">columnspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># frames placement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FrPath</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FrFilters</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padx</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">pady</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sticky</span><span class="o">=</span><span class="s2">&quot;NSWE&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TabFiles.get_target_path"><a class="viewcode-back" href="../../../_apidoc/dicogis.ui.tab_files.html#dicogis.ui.tab_files.TabFiles.get_target_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_target_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">def_rep</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Browse and insert the path of target folder.&quot;&quot;&quot;</span>
+        <span class="n">foldername</span> <span class="o">=</span> <span class="n">askdirectory</span><span class="p">(</span>
+            <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
+            <span class="n">initialdir</span><span class="o">=</span><span class="n">def_rep</span><span class="p">,</span>
+            <span class="n">mustexist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Pick DicoGIS start folder&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># check if a folder has been choosen</span>
+        <span class="k">if</span> <span class="n">foldername</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ent_target</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">END</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ent_target</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">foldername</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                <span class="n">showinfo</span><span class="p">(</span>
+                    <span class="n">title</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nofolder&quot;</span><span class="p">),</span> <span class="n">message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">txt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nofolder&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># set the default output file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">ent_outxl_filename</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">END</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">ent_outxl_filename</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;DicoGIS_</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">.xlsx&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">get</span><span class="p">())[</span><span class="mi">1</span><span class="p">],</span> <span class="n">today</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># count geofiles in a separated thread</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">master</span><span class="o">.</span><span class="n">ligeofiles</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">foldername</span><span class="p">,))</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># end of function</span>
+        <span class="k">return</span> <span class="n">foldername</span></div></div>
+
+
+<span class="c1"># #############################################################################</span>
+<span class="c1"># ##### Stand alone program ########</span>
+<span class="c1"># ##################################</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;To test&quot;&quot;&quot;</span>
+    <span class="c1">#</span>
+    <span class="k">def</span> <span class="nf">browse</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Launch files browser&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Launch files browser&quot;</span><span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Tk</span><span class="p">()</span>
+    <span class="n">target_path</span> <span class="o">=</span> <span class="n">StringVar</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">TabFiles</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">path_browser</span><span class="o">=</span><span class="n">browse</span><span class="p">,</span> <span class="n">path_var</span><span class="o">=</span><span class="n">target_path</span><span class="p">)</span>
+    <span class="n">frame</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2014 - 2021, Julien Moura.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+dicogis.ui.tab\_database module
+===============================
+
+.. automodule:: dicogis.ui.tab_database
+   :members:
+   :undoc-members:
+   :show-inheritance:

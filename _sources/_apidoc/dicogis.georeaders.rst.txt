@@ -1,0 +1,25 @@
+dicogis.georeaders package
+==========================
+
+.. automodule:: dicogis.georeaders
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   dicogis.georeaders.Infos_DWG
+   dicogis.georeaders.Infos_DXF
+   dicogis.georeaders.Infos_GDB
+   dicogis.georeaders.Infos_GXT
+   dicogis.georeaders.Infos_PostGIS
+   dicogis.georeaders.Infos_Rasters
+   dicogis.georeaders.Infos_Spatialite
+   dicogis.georeaders.Infos_VectorFlatDataset
+   dicogis.georeaders.gdal_exceptions_handler
+   dicogis.georeaders.geo_infos_generic
+   dicogis.georeaders.geoutils
