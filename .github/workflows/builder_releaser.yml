@@ -53,7 +53,7 @@ jobs:
       run: |
         sudo apt install python3-tk
 
-    - uses: actions/cache@v2.1.5
+    - uses: actions/cache@v2.1.6
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('requirements/*.txt') }}
@@ -91,7 +91,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Cache conda
-      uses: actions/cache@v2.1.5
+      uses: actions/cache@v2.1.6
       with:
         path: ~/conda_pkgs_dir
         key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('requirements/conda-env-dev.yml') }}
