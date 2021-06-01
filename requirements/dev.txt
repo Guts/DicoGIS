@@ -4,7 +4,7 @@ babel>=2.8,<2.10
 black==21.5b0
 flake8>=3.7,<3.10
 pre-commit>=2.3,<2.13
-pytest-cov>=2.10,<2.12
+pytest-cov>=2.10,<2.13
 
 # Packaging
 # -----------------------
