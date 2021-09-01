@@ -9,6 +9,6 @@ pytest-cov>=2.10,<2.12
 # Packaging
 # -----------------------
 distro==1.5.* ; sys_platform == 'linux'
-pyinstaller>=3.6,<4.2
+pyinstaller>=3.6,<4.6
 pyinstaller-hooks-contrib>=2020.10
 pypiwin32==223 ; sys_platform == 'win32'
