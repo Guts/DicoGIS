@@ -40,7 +40,7 @@ jobs:
       run: |
         sudo apt install python3-tk
 
-    - uses: actions/cache@v2.1.6
+    - uses: actions/cache@v2.1.7
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('requirements/*.txt') }}
