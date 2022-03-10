@@ -54,17 +54,18 @@ python -m pip install -U -r requirements.txt
 python -m pip install pygdal=="`gdal-config --version`.*"
 ```
 
-```eval_rst
-.. note::
-    If you want to work outsite a virtual environment, you should install GDAL Python bindings using:
+````{note}
+If you want to work outsite a virtual environment, you should install GDAL Python bindings using:
 
-        python -m pip install GDAL=="`gdal-config --version`.*"
+```bash
+python -m pip install GDAL=="`gdal-config --version`.*"
 ```
+````
 
 ## Install project
 
 ```bash
-
+python -m pip install -e .
 ```
 
 Try it with:

@@ -1,25 +1,17 @@
-#
-# Configuration file for the Sphinx documentation builder.
-#
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
-# -- Path setup --------------------------------------------------------------
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
+#!python3
+
+"""
+    Configuration for project documentation using Sphinx.
+"""
+
+# standard
 import os
 import sys
+from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(r".."))
 
 # 3rd party
-import recommonmark
-import sphinx_rtd_theme  # noqa: F401 theme of Read the Docs
-from recommonmark.transform import AutoStructify
-
-from dicogis import *
 from dicogis import __about__
 
 # -- Build environment -----------------------------------------------------
@@ -36,11 +28,6 @@ version = __about__.__version__
 # The full version, including alpha/beta/rc tags
 release = __about__.__version__
 
-# replacement variables
-rst_epilog = ".. |title| replace:: %s" % project
-rst_epilog += "\n.. |author| replace:: %s" % author
-rst_epilog += "\n.. |repo_url| replace:: %s" % __about__.__uri__
-
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -51,18 +38,16 @@ rst_epilog += "\n.. |repo_url| replace:: %s" % __about__.__uri__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    # markdown
-    "recommonmark",
     # Sphinx included
     "sphinx.ext.autodoc",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.extlinks",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.viewcode",
     # 3rd party
+    "myst_parser",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
-    "sphinx_markdown_tables",
     "sphinx_rtd_theme",
 ]
 
@@ -76,11 +61,6 @@ source_suffix = {
     ".rst": "restructuredtext",
     ".md": "markdown",
 }
-
-source_parsers = {
-    ".md": "recommonmark.parser.CommonMarkParser",
-}
-
 
 # The master toctree document.
 master_doc = "index"
@@ -166,6 +146,29 @@ intersphinx_mapping = {
 
 # -- Extension configuration -------------------------------------------------
 
+# MyST Parser
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "html_admonition",
+    "html_image",
+    "linkify",
+    "replacements",
+    "smartquotes",
+    "substitution",
+]
+myst_url_schemes = ["http", "https", "mailto"]
+
+# replacement variables
+myst_substitutions = {
+    "author": author,
+    "date_update": datetime.now().strftime("%d %B %Y"),
+    "repo_url": __about__.__uri__,
+    "title": project,
+    "version": version,
+}
+
 
 # -- Options for Sphinx API doc ----------------------------------------------
 # run api doc
@@ -181,10 +184,4 @@ def run_apidoc(_):
 
 # launch setup
 def setup(app):
-    app.add_config_value(
-        "recommonmark_config",
-        {"enable_auto_toc_tree": True, "enable_eval_rst": True},
-        True,
-    )
-    app.add_transform(AutoStructify)
     app.connect("builder-inited", run_apidoc)

@@ -1,13 +1,6 @@
-# Documentation (for devs)
-# -----------------------
-ghp-import>=1.1,<2.1
+myst-parser[linkify]>=0.14,<0.18
 
-sphinx>=3.5,<4.3
-sphinx-autobuild==2021.3.14
-sphinx-autodoc-typehints>=1.11,<1.13
-sphinx-copybutton>=0.2,<1
-sphinx-markdown-tables>=0.0.15,<0.1
+sphinx-autobuild==2021.*
+sphinx-autodoc-typehints>=1.11,<1.18
+sphinx-copybutton<1
 sphinx-rtd-theme>=0.5,<2
-
-recommonmark>=0.6,<1
-rstcheck>=3.3,<3.4
