@@ -40,9 +40,9 @@ setup(
     },
     py_modules=["dicogis"],
     # packaging
-    packages=find_packages(
-        exclude=["contrib", "docs", "*.tests", "*.tests.*", "tests.*", "tests"]
-    ),
+    # packages=find_packages(
+    #     exclude=["contrib", "docs", "*.tests", "*.tests.*", "tests.*", "tests"]
+    # ),
     include_package_data=True,
     # dependencies
     python_requires=">=3.8, <4",
@@ -50,7 +50,7 @@ setup(
         "dxfgrabber>=1.0,<1.1",
         # "gdal>=3,<4" ,
         "geoserver-restconfig>=2.0.4,<2.0.5",
-        "numpy>=1.19,<1.20",
+        "numpy>=1.22,<1.23",
         "openpyxl>=3.0,<3.1",
         "xmltodict>=0.12,<1",
     ],
