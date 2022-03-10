@@ -4,10 +4,3 @@ flake8-builtins>=1.5,<1.6
 flake8-isort>=4.0,<4.2
 isort>=5.7,<5.11
 pre-commit>=2.12,<2.18
-
-# Packaging
-# -----------------------
-distro==1.7.* ; sys_platform == 'linux'
-pyinstaller>=3.6,<4.10
-pyinstaller-hooks-contrib>=2020.10
-pypiwin32==223 ; sys_platform == 'win32'

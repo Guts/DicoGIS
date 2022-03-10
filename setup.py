@@ -45,11 +45,7 @@ setup(
     ),
     include_package_data=True,
     # dependencies
-    python_requires=">=3.6, <4",
-    extras_require={
-        "dev": ["black", "flake8", "pre-commit", "pyinstaller"],
-        "test": ["pytest", "pytest-cov"],
-    },
+    python_requires=">=3.8, <4",
     install_requires=[
         "dxfgrabber>=1.0,<1.1",
         # "gdal>=3,<4" ,
@@ -58,6 +54,7 @@ setup(
         "openpyxl>=3.0,<3.1",
         "xmltodict>=0.12,<1",
     ],
+    setup_requires=["openpyxl>=3.0,<3.1"],
     # metadata
     classifiers=[
         "Intended Audience :: End Users/Desktop",

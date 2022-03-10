@@ -1,8 +1,8 @@
-# Common requirements
-# -------------------
+# Common
+# ------
 setuptools
 wheel
 
-# Project requirements
-# --------------------
+# Project
+# -------
 -e "."
