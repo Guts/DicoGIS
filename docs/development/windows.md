@@ -42,12 +42,12 @@ py -3.7 -m venv .venv
 python -m pip install -U pip
 
 # install dependencies
-python -m pip install -U -r requirements/base.txt
-python -m pip install -U -r requirements/dev.txt
+python -m pip install -U -r requirements.txt
+python -m pip install -U -r requirements/development.txt
 python -m pip install -U -r requirements/windows.txt
 
 # finally, install the package in editable mode
-python -m pip install -e .
+
 ```
 
 ----
@@ -76,7 +76,7 @@ conda env create -f .\requirements\conda-env-dev.yml
 conda activate dicogis-dev
 
 # finally, install the package in editable mode
-python -m pip install -e .
+
 ```
 
 Happy coding!

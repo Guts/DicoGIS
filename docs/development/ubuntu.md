@@ -50,7 +50,7 @@ source ~/pyvenvs/dicogis/bin/activate
 
 ```bash
 python -m pip install -U pip setuptools wheel
-python -m pip install -U -r requirements/base.txt
+python -m pip install -U -r requirements.txt
 python -m pip install pygdal=="`gdal-config --version`.*"
 ```
 
@@ -64,7 +64,7 @@ python -m pip install pygdal=="`gdal-config --version`.*"
 ## Install project
 
 ```bash
-python -m pip install -e .
+
 ```
 
 Try it with:
