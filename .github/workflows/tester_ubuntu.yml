@@ -54,9 +54,11 @@ jobs:
       - name: Install project requirements
         run: |
           python -m pip install -U pip setuptools wheel
+          # Install GDAL first
+          python -m pip install GDAL=="`gdal-config --version`.*"
+          # then project
           python -m pip install -U -r requirements.txt
           python -m pip install -U -r requirements/testing.txt
-          python -m pip install GDAL=="`gdal-config --version`.*"
 
       - name: Install project as a package
         run: python -m pip install -U -r requirements.txt
