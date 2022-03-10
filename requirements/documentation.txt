@@ -4,7 +4,7 @@ ghp-import>=1.1,<2.1
 
 sphinx>=3.5,<4.3
 sphinx-autobuild==2021.3.14
-sphinx-autodoc-typehints>=1.11,<1.13
+sphinx-autodoc-typehints>=1.11,<1.18
 sphinx-copybutton>=0.2,<1
 sphinx-markdown-tables>=0.0.15,<0.1
 sphinx-rtd-theme>=0.5,<2
