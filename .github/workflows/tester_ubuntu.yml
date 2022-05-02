@@ -30,6 +30,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
+          cache-dependency-path: "requirements/testing.txt"
 
       - name: Install GDAL binaries
         run: |
@@ -43,13 +44,6 @@ jobs:
       - name: Install complementary tools
         run: |
           sudo apt install python3-tk
-
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
 
       - name: Install project requirements
         run: |
