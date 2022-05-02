@@ -28,7 +28,7 @@ gdal-config --version
 Install system requirements:
 
 ```bash
-sudo apt install git python3-pip python3-tk python3-virtualenv python3-venv virtualenv
+sudo apt install git python3-pip python3-tk python3-virtualenv python3-venv unifont virtualenv
 ```
 
 Clone the repository where you want:
