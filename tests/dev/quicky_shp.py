@@ -23,4 +23,3 @@ for f in fixtures_shp:
     dico_txt = {}
     georeader_vector.infos_dataset(str(f.resolve()), dico_layer, dico_txt)
     print(dico_layer.keys())
-    

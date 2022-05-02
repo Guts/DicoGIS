@@ -1,4 +1,4 @@
-﻿#! python3  # noqa: E265
+#! python3  # noqa: E265
 
 from .geo_infos_generic import GeoInfosGenericReader  # noqa: E402 F401
 from .geoutils import Utils  # noqa: E402 F401

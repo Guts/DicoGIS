@@ -1,4 +1,4 @@
-﻿# DicoGIS
+# DicoGIS
 
 ![Ubuntu Builder](https://github.com/Guts/DicoGIS/workflows/Ubuntu%20Builder/badge.svg)
 ![Windows Builder](https://github.com/Guts/DicoGIS/workflows/Windows%20Builder/badge.svg)

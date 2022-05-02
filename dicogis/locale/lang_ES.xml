@@ -1,120 +1,120 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <lang iso="ES">
 <!-- Nombre del idioma -->
-	<langue>Español</langue>
+    <langue>Español</langue>
 <!-- Rutas archivos -->
-	<path_lang>locale\lang_ES.xml</path_lang>
+    <path_lang>locale\lang_ES.xml</path_lang>
 <!-- GUI -->
-	<gui_excel>Libros Excel 2003</gui_excel>
-	<hi>Hola </hi>
-	<gui_choix>Explorar</gui_choix>
-	<gui_cible>Seleccionar la carpeta</gui_cible>
-	<gui_cholang>Idioma:</gui_cholang>
-	<gui_go>Iniciar</gui_go>
-	<gui_quit>Salir</gui_quit>
-	<gui_tab1> Archivos </gui_tab1>
-	<gui_tab2> Base de datos </gui_tab2>
-	<gui_tab3> Servicios </gui_tab3>
-	<gui_tab5> Opciones </gui_tab5>
-	<gui_tab6> Créditos </gui_tab6>
-	<gui_fr1> Carpeta </gui_fr1>
-	<gui_fr2> Base de datos </gui_fr2>
-	<gui_fr3> Formatos </gui_fr3>
-	<gui_fr4> Archivo final </gui_fr4>
-	<gui_path>Ruta de la carpeta: </gui_path>
-	<gui_fic>Nombre del diccionario: </gui_fic>
-	<gui_views>Vistas lógicas? </gui_views>
-	<gui_host>Servidor: </gui_host>
-	<gui_port>Puerto: </gui_port>
-	<gui_db>Base de datos: </gui_db>
-	<gui_user>Usuario: </gui_user>
-	<gui_mdp>Contraseña: </gui_mdp>
-	<gui_prog>Progresión</gui_prog>
-	<gui_prox_server>Servidor: </gui_prox_server>
-	<gui_srv_url>URL GetCapabilities : </gui_srv_url>
-	<gui_prog1>Progresión: análisis de los archivos compatibles</gui_prog1>
-	<gui_prog2>Progresión: proceso de los archivos</gui_prog2>
-	<info_end>Fín del programa</info_end>
-	<info_end2>DicoGIS terminó su trabajo.</info_end2>
-	<info_end3>El diccionario se encuentra aquí: </info_end3>
-	<info_err> error(es) encontrado(s). Consultar el archivo log.</info_err>
-	<info_noerr>Ningún erro encontrado.</info_noerr>
-	<info_restart1>Reinicio necesario</info_restart1>
-	<info_restart2>El programa necesita ser reiniciado para aplicar los cambios.</info_restart2>
+    <gui_excel>Libros Excel 2003</gui_excel>
+    <hi>Hola </hi>
+    <gui_choix>Explorar</gui_choix>
+    <gui_cible>Seleccionar la carpeta</gui_cible>
+    <gui_cholang>Idioma:</gui_cholang>
+    <gui_go>Iniciar</gui_go>
+    <gui_quit>Salir</gui_quit>
+    <gui_tab1> Archivos </gui_tab1>
+    <gui_tab2> Base de datos </gui_tab2>
+    <gui_tab3> Servicios </gui_tab3>
+    <gui_tab5> Opciones </gui_tab5>
+    <gui_tab6> Créditos </gui_tab6>
+    <gui_fr1> Carpeta </gui_fr1>
+    <gui_fr2> Base de datos </gui_fr2>
+    <gui_fr3> Formatos </gui_fr3>
+    <gui_fr4> Archivo final </gui_fr4>
+    <gui_path>Ruta de la carpeta: </gui_path>
+    <gui_fic>Nombre del diccionario: </gui_fic>
+    <gui_views>Vistas lógicas? </gui_views>
+    <gui_host>Servidor: </gui_host>
+    <gui_port>Puerto: </gui_port>
+    <gui_db>Base de datos: </gui_db>
+    <gui_user>Usuario: </gui_user>
+    <gui_mdp>Contraseña: </gui_mdp>
+    <gui_prog>Progresión</gui_prog>
+    <gui_prox_server>Servidor: </gui_prox_server>
+    <gui_srv_url>URL GetCapabilities : </gui_srv_url>
+    <gui_prog1>Progresión: análisis de los archivos compatibles</gui_prog1>
+    <gui_prog2>Progresión: proceso de los archivos</gui_prog2>
+    <info_end>Fín del programa</info_end>
+    <info_end2>DicoGIS terminó su trabajo.</info_end2>
+    <info_end3>El diccionario se encuentra aquí: </info_end3>
+    <info_err> error(es) encontrado(s). Consultar el archivo log.</info_err>
+    <info_noerr>Ningún erro encontrado.</info_noerr>
+    <info_restart1>Reinicio necesario</info_restart1>
+    <info_restart2>El programa necesita ser reiniciado para aplicar los cambios.</info_restart2>
 <!-- Log -->
-	<log_dossdest>Carpeta de destinación: </log_dossdest>
-	<log_dossour>Carpeta fuente: </log_dossour>
-	<log_end>Fín: </log_end>
-	<log_entete>DicoGIS - diccionario automatizado de datos geográficos</log_entete>
-	<log_numshp>Número de archivos: </log_numshp>
-	<log_numfold> carpetas.</log_numfold>
-	<log_start>Inicio: </log_start>
-	<log_tps>Tiempo transcurrido: </log_tps>
+    <log_dossdest>Carpeta de destinación: </log_dossdest>
+    <log_dossour>Carpeta fuente: </log_dossour>
+    <log_end>Fín: </log_end>
+    <log_entete>DicoGIS - diccionario automatizado de datos geográficos</log_entete>
+    <log_numshp>Número de archivos: </log_numshp>
+    <log_numfold> carpetas.</log_numfold>
+    <log_start>Inicio: </log_start>
+    <log_tps>Tiempo transcurrido: </log_tps>
 <!-- Output file: commons -->
-	<sheet_vectors>Vectores</sheet_vectors>
-	<sheet_rasters>Gráficos de trama</sheet_rasters>
-	<sheet_filedb>Base de datos archivo</sheet_filedb>
-	<sheet_cdao>CAO y DAO</sheet_cdao>
-	<sheet_maplans>Documentos cartográficos</sheet_maplans>
-	<sheet_lyr>Archivos de capas</sheet_lyr>
-	<nomfic>Nombre del archivo</nomfic>
-	<path>Ruta</path>
-	<browse>Alcanzar la carpeta</browse>
-	<theme>Carpeta</theme>
-	<date_crea>Creación (en esta computadora)</date_crea>
-	<date_actu>Última actualización</date_actu>
-	<srs>Sistema de coordenadas (SRS)</srs>
-	<srs_type>Tipo de SRS</srs_type>
-	<codepsg>EPSG</codepsg>
-	<emprise>Extensión espacial</emprise>
-	<format>Formato</format>
-	<li_depends>Relacionados</li_depends>
-	<tot_size>Tamaño total</tot_size>
+    <sheet_vectors>Vectores</sheet_vectors>
+    <sheet_rasters>Gráficos de trama</sheet_rasters>
+    <sheet_filedb>Base de datos archivo</sheet_filedb>
+    <sheet_cdao>CAO y DAO</sheet_cdao>
+    <sheet_maplans>Documentos cartográficos</sheet_maplans>
+    <sheet_lyr>Archivos de capas</sheet_lyr>
+    <nomfic>Nombre del archivo</nomfic>
+    <path>Ruta</path>
+    <browse>Alcanzar la carpeta</browse>
+    <theme>Carpeta</theme>
+    <date_crea>Creación (en esta computadora)</date_crea>
+    <date_actu>Última actualización</date_actu>
+    <srs>Sistema de coordenadas (SRS)</srs>
+    <srs_type>Tipo de SRS</srs_type>
+    <codepsg>EPSG</codepsg>
+    <emprise>Extensión espacial</emprise>
+    <format>Formato</format>
+    <li_depends>Relacionados</li_depends>
+    <tot_size>Tamaño total</tot_size>
 <!-- Output file: vectors -->
-	<num_objets># objetos</num_objets>
-	<num_attrib># atributos</num_attrib>
-	<geometrie>Tipo de geometría</geometrie>
-	<geom_point>Punto</geom_point>
-	<geom_ligne>Línea</geom_ligne>
-	<geom_polyg>Polígono</geom_polyg>
-	<li_chps>Atributos</li_chps>
-	<entier>Numérico (entero)</entier>
-	<reel>Numérico (real)</reel>
-	<string>Texto</string>
-	<date>Fecha</date>
-	<longueur>, Lg. = </longueur>
-	<precision>, Pr. = </precision>
+    <num_objets># objetos</num_objets>
+    <num_attrib># atributos</num_attrib>
+    <geometrie>Tipo de geometría</geometrie>
+    <geom_point>Punto</geom_point>
+    <geom_ligne>Línea</geom_ligne>
+    <geom_polyg>Polígono</geom_polyg>
+    <li_chps>Atributos</li_chps>
+    <entier>Numérico (entero)</entier>
+    <reel>Numérico (real)</reel>
+    <string>Texto</string>
+    <date>Fecha</date>
+    <longueur>, Lg. = </longueur>
+    <precision>, Pr. = </precision>
 <!-- Output file: rasters -->
-	<num_bands># bandas</num_bands>
-	<size_X># columnas</size_X>
-	<size_Y># lineas</size_Y>
-	<pixel_w>Pixel width</pixel_w>
-	<pixel_h>Pixel height</pixel_h>
-	<origin_x>X origin</origin_x>
-	<origin_y>Y origin</origin_y>
-	<compression>Rato de compresión</compression>
-	<coloref>Sistema de colores</coloref>
-	<gdal_warn>Advertencias GDAL</gdal_warn>
+    <num_bands># bandas</num_bands>
+    <size_X># columnas</size_X>
+    <size_Y># lineas</size_Y>
+    <pixel_w>Pixel width</pixel_w>
+    <pixel_h>Pixel height</pixel_h>
+    <origin_x>X origin</origin_x>
+    <origin_y>Y origin</origin_y>
+    <compression>Rato de compresión</compression>
+    <coloref>Sistema de colores</coloref>
+    <gdal_warn>Advertencias GDAL</gdal_warn>
 <!-- Output file: PostGIS -->
-	<schema>Esquema</schema>
-	<conn_chain>Cadena de conexión</conn_chain>
+    <schema>Esquema</schema>
+    <conn_chain>Cadena de conexión</conn_chain>
 <!-- Output file: FileGDB -->
-	<feats_class>Clases de objetos</feats_class>
+    <feats_class>Clases de objetos</feats_class>
 <!-- Output file: Maps & Docs -->
-	<sub_layers>Capas de información</sub_layers>
-	<custom_title>Título</custom_title>
-	<res_image>Resolución (DPI)</res_image>
-	<creator_prod>Creador - Herramienta</creator_prod>
-	<keywords>Palabras claves</keywords>
-	<subject>Tema</subject>
+    <sub_layers>Capas de información</sub_layers>
+    <custom_title>Título</custom_title>
+    <res_image>Resolución (DPI)</res_image>
+    <creator_prod>Creador - Herramienta</creator_prod>
+    <keywords>Palabras claves</keywords>
+    <subject>Tema</subject>
 <!-- SRS -->
-	<srs_comp>Compuesta (2D +)</srs_comp>
-	<srs_geoc>Geocéntrica</srs_geoc>
-	<srs_geog>Geográfica</srs_geog>
-	<srs_loca>Local</srs_loca>
-	<srs_proj>Projectada</srs_proj>
-	<srs_vert>Vertical</srs_vert>
-	<srs_nr>Sin información</srs_nr>
+    <srs_comp>Compuesta (2D +)</srs_comp>
+    <srs_geoc>Geocéntrica</srs_geoc>
+    <srs_geog>Geográfica</srs_geog>
+    <srs_loca>Local</srs_loca>
+    <srs_proj>Projectada</srs_proj>
+    <srs_vert>Vertical</srs_vert>
+    <srs_nr>Sin información</srs_nr>
 <!-- Esri LYR types -->
     <lyr_featL>Feature</lyr_featL>
     <lyr_rastL>Raster</lyr_rastL>
@@ -123,14 +123,14 @@
     <lyr_servL>Web Service</lyr_servL>
     <lyr_groupL>Group</lyr_groupL>
 <!-- Gestion erreurs -->
-	<nofolder>Ninguna carpeta seleccionada</nofolder>
-	<nodata>Ningún dato compatible encontrado.</nodata>
-	<noformat>Ningún formato seleccionado</noformat>
-	<err_incomp>Tipo de archivo no compatible: algo de geográfico adentro? </err_incomp>
-	<err_encod>El nombre del atributo esta mal formateado. (caracteres especiales) : </err_encod>
-	<err_nobjet> Este dato no tiene ningún objeto. Nopuede ser procesado!</err_nobjet>
-	<err_corrupt> Archivo corupto </err_corrupt>
-	<err_noprj> Ningún referencial encontrado (.prj...) </err_noprj>
-	<err_pg_empty_field>campo requerido</err_pg_empty_field>
-	<err_pg_conn_fail>Conexión fracasó</err_pg_conn_fail>
+    <nofolder>Ninguna carpeta seleccionada</nofolder>
+    <nodata>Ningún dato compatible encontrado.</nodata>
+    <noformat>Ningún formato seleccionado</noformat>
+    <err_incomp>Tipo de archivo no compatible: algo de geográfico adentro? </err_incomp>
+    <err_encod>El nombre del atributo esta mal formateado. (caracteres especiales) : </err_encod>
+    <err_nobjet> Este dato no tiene ningún objeto. Nopuede ser procesado!</err_nobjet>
+    <err_corrupt> Archivo corupto </err_corrupt>
+    <err_noprj> Ningún referencial encontrado (.prj...) </err_noprj>
+    <err_pg_empty_field>campo requerido</err_pg_empty_field>
+    <err_pg_conn_fail>Conexión fracasó</err_pg_conn_fail>
 </lang>

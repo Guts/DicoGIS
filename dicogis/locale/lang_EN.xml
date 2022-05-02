@@ -1,120 +1,120 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <lang iso="EN">
 <!-- Name of language -->
-	<langue>English</langue>
+    <langue>English</langue>
 <!-- Paths -->
-	<path_lang>locale\lang_EN.xml</path_lang>
+    <path_lang>locale\lang_EN.xml</path_lang>
 <!-- GUI -->
-	<gui_excel>Excel 2003 workbooks</gui_excel>
-	<hi>Hello </hi>
-	<gui_choix>Browse</gui_choix>
-	<gui_cible>Select the target folder</gui_cible>
-	<gui_cholang>Language :</gui_cholang>
-	<gui_go>Go!</gui_go>
-	<gui_quit>Quit</gui_quit>
-	<gui_tab1> Files </gui_tab1>
-	<gui_tab2> Database </gui_tab2>
-	<gui_tab3> Services </gui_tab3>
-	<gui_tab5> Settings </gui_tab5>
-	<gui_tab6> Credits </gui_tab6>
-	<gui_fr1> Folders structure target </gui_fr1>
-	<gui_fr2> Database target </gui_fr2>
-	<gui_fr3> Formats </gui_fr3>
-	<gui_fr4> Output file </gui_fr4>
-	<gui_path>Folder path: </gui_path>
-	<gui_fic>Name of output file: </gui_fic>
-	<gui_views>See views? </gui_views>
-	<gui_host>Host: </gui_host>
-	<gui_port>Port: </gui_port>
-	<gui_db>Database: </gui_db>
-	<gui_user>User: </gui_user>
-	<gui_mdp>Password: </gui_mdp>
-	<gui_prox_server>Server: </gui_prox_server>
-	<gui_srv_url>URL GetCapabilities : </gui_srv_url>
-	<gui_prog>Progression</gui_prog>
-	<gui_prog1>Progress: parsing and retrieving compatible files</gui_prog1>
-	<gui_prog2>Progress: processing the files</gui_prog2>
-	<info_end>End of program</info_end>
-	<info_end2>DicoGIS: job done.</info_end2>
-	<info_end3>The dictionary can be found here: </info_end3>
-	<info_err> error(s) encountered. Check the logfile.</info_err>
-	<info_noerr>No error.</info_noerr>
-	<info_restart1>Restart needed.</info_restart1>
-	<info_restart2>DicoGIS needs to restart to apply the changes.</info_restart2>
+    <gui_excel>Excel 2003 workbooks</gui_excel>
+    <hi>Hello </hi>
+    <gui_choix>Browse</gui_choix>
+    <gui_cible>Select the target folder</gui_cible>
+    <gui_cholang>Language :</gui_cholang>
+    <gui_go>Go!</gui_go>
+    <gui_quit>Quit</gui_quit>
+    <gui_tab1> Files </gui_tab1>
+    <gui_tab2> Database </gui_tab2>
+    <gui_tab3> Services </gui_tab3>
+    <gui_tab5> Settings </gui_tab5>
+    <gui_tab6> Credits </gui_tab6>
+    <gui_fr1> Folders structure target </gui_fr1>
+    <gui_fr2> Database target </gui_fr2>
+    <gui_fr3> Formats </gui_fr3>
+    <gui_fr4> Output file </gui_fr4>
+    <gui_path>Folder path: </gui_path>
+    <gui_fic>Name of output file: </gui_fic>
+    <gui_views>See views? </gui_views>
+    <gui_host>Host: </gui_host>
+    <gui_port>Port: </gui_port>
+    <gui_db>Database: </gui_db>
+    <gui_user>User: </gui_user>
+    <gui_mdp>Password: </gui_mdp>
+    <gui_prox_server>Server: </gui_prox_server>
+    <gui_srv_url>URL GetCapabilities : </gui_srv_url>
+    <gui_prog>Progression</gui_prog>
+    <gui_prog1>Progress: parsing and retrieving compatible files</gui_prog1>
+    <gui_prog2>Progress: processing the files</gui_prog2>
+    <info_end>End of program</info_end>
+    <info_end2>DicoGIS: job done.</info_end2>
+    <info_end3>The dictionary can be found here: </info_end3>
+    <info_err> error(s) encountered. Check the logfile.</info_err>
+    <info_noerr>No error.</info_noerr>
+    <info_restart1>Restart needed.</info_restart1>
+    <info_restart2>DicoGIS needs to restart to apply the changes.</info_restart2>
 <!-- Log -->
-	<log_dossdest>Destination folder: </log_dossdest>
-	<log_dossour>Input folder: </log_dossour>
-	<log_end>End: </log_end>
-	<log_entete>DicoGIS - automatized geographic database dictionary</log_entete>
-	<log_numshp>Layers count: </log_numshp>
-	<log_numfold> folders.</log_numfold>
-	<log_start>Start: </log_start>
-	<log_tps>Time elapsed: </log_tps>
+    <log_dossdest>Destination folder: </log_dossdest>
+    <log_dossour>Input folder: </log_dossour>
+    <log_end>End: </log_end>
+    <log_entete>DicoGIS - automatized geographic database dictionary</log_entete>
+    <log_numshp>Layers count: </log_numshp>
+    <log_numfold> folders.</log_numfold>
+    <log_start>Start: </log_start>
+    <log_tps>Time elapsed: </log_tps>
 <!-- Output file: commons -->
-	<sheet_vectors>Vectors</sheet_vectors>
-	<sheet_rasters>Rasters</sheet_rasters>
-	<sheet_filedb>File databases</sheet_filedb>
-	<sheet_cdao>CAD</sheet_cdao>
-	<sheet_maplans>Maps documents</sheet_maplans>
-	<sheet_lyr>Layers files</sheet_lyr>
-	<nomfic>Filename</nomfic>
-	<path>Path</path>
-	<browse>Reach the folder</browse>
-	<theme>Folder</theme>
-	<date_crea>Creation (computer date)</date_crea>
-	<date_actu>Last update</date_actu>
-	<srs>Coordinates system (SRS)</srs>
-	<srs_type>SRS type</srs_type>
-	<codepsg>EPSG</codepsg>
-	<emprise>Spatial extent</emprise>
-	<format>Format</format>
-	<li_depends>Dependencies</li_depends>
-	<tot_size>Total size</tot_size>
+    <sheet_vectors>Vectors</sheet_vectors>
+    <sheet_rasters>Rasters</sheet_rasters>
+    <sheet_filedb>File databases</sheet_filedb>
+    <sheet_cdao>CAD</sheet_cdao>
+    <sheet_maplans>Maps documents</sheet_maplans>
+    <sheet_lyr>Layers files</sheet_lyr>
+    <nomfic>Filename</nomfic>
+    <path>Path</path>
+    <browse>Reach the folder</browse>
+    <theme>Folder</theme>
+    <date_crea>Creation (computer date)</date_crea>
+    <date_actu>Last update</date_actu>
+    <srs>Coordinates system (SRS)</srs>
+    <srs_type>SRS type</srs_type>
+    <codepsg>EPSG</codepsg>
+    <emprise>Spatial extent</emprise>
+    <format>Format</format>
+    <li_depends>Dependencies</li_depends>
+    <tot_size>Total size</tot_size>
 <!-- Output file: vectors -->
-	<num_objets># objects</num_objets>
-	<num_attrib># fields</num_attrib>
-	<geometrie>Geometry type</geometrie>
-	<geom_point>Point</geom_point>
-	<geom_ligne>Line</geom_ligne>
-	<geom_polyg>Polygon</geom_polyg>
-	<li_chps>Fields definition</li_chps>
-	<entier>Numeric (integer)</entier>
-	<reel>Numeric (float)</reel>
-	<string>String</string>
-	<date>Date</date>
-	<longueur>, Lg.=</longueur>
-	<precision>, Pr.=</precision>
+    <num_objets># objects</num_objets>
+    <num_attrib># fields</num_attrib>
+    <geometrie>Geometry type</geometrie>
+    <geom_point>Point</geom_point>
+    <geom_ligne>Line</geom_ligne>
+    <geom_polyg>Polygon</geom_polyg>
+    <li_chps>Fields definition</li_chps>
+    <entier>Numeric (integer)</entier>
+    <reel>Numeric (float)</reel>
+    <string>String</string>
+    <date>Date</date>
+    <longueur>, Lg.=</longueur>
+    <precision>, Pr.=</precision>
 <!-- Output file: rasters -->
-	<num_bands># bands</num_bands>
-	<size_X># columns</size_X>
-	<size_Y># rows</size_Y>
-	<pixel_w>Pixel width</pixel_w>
-	<pixel_h>Pixel height</pixel_h>
-	<origin_x>X origin</origin_x>
-	<origin_y>Y origin</origin_y>
-	<compression>Compression rate</compression>
-	<coloref>Color system</coloref>
-	<gdal_warn>GDAL warnings</gdal_warn>
+    <num_bands># bands</num_bands>
+    <size_X># columns</size_X>
+    <size_Y># rows</size_Y>
+    <pixel_w>Pixel width</pixel_w>
+    <pixel_h>Pixel height</pixel_h>
+    <origin_x>X origin</origin_x>
+    <origin_y>Y origin</origin_y>
+    <compression>Compression rate</compression>
+    <coloref>Color system</coloref>
+    <gdal_warn>GDAL warnings</gdal_warn>
 <!-- Output file: PostGIS -->
-	<schema>Schema</schema>
-	<conn_chain>DB connection</conn_chain>
+    <schema>Schema</schema>
+    <conn_chain>DB connection</conn_chain>
 <!-- Output file: FileGDB -->
-	<feats_class>Features classes</feats_class>
+    <feats_class>Features classes</feats_class>
 <!-- Output file: Maps & Docs -->
-	<sub_layers>Layers</sub_layers>
-	<custom_title>Title</custom_title>
-	<res_image>DPI</res_image>
-	<creator_prod>Creator - Producer</creator_prod>
-	<keywords>Keywords</keywords>
-	<subject>Subject</subject>
+    <sub_layers>Layers</sub_layers>
+    <custom_title>Title</custom_title>
+    <res_image>DPI</res_image>
+    <creator_prod>Creator - Producer</creator_prod>
+    <keywords>Keywords</keywords>
+    <subject>Subject</subject>
 <!-- SRS -->
-	<srs_comp>Compound</srs_comp>
-	<srs_geoc>Geocentric</srs_geoc>
-	<srs_geog>Geographic</srs_geog>
-	<srs_loca>Local</srs_loca>
-	<srs_proj>Projected</srs_proj>
-	<srs_vert>Vertical</srs_vert>
-	<srs_nr>Not specified</srs_nr>
+    <srs_comp>Compound</srs_comp>
+    <srs_geoc>Geocentric</srs_geoc>
+    <srs_geog>Geographic</srs_geog>
+    <srs_loca>Local</srs_loca>
+    <srs_proj>Projected</srs_proj>
+    <srs_vert>Vertical</srs_vert>
+    <srs_nr>Not specified</srs_nr>
 <!-- Esri LYR types -->
     <lyr_featL>Feature</lyr_featL>
     <lyr_rastL>Raster</lyr_rastL>
@@ -123,14 +123,14 @@
     <lyr_servL>Web Service</lyr_servL>
     <lyr_groupL>Group</lyr_groupL>
 <!-- Gestion erreurs -->
-	<nofolder>Any folder selected</nofolder>
-	<nodata>Any compatible geographic data (.shp / .tab) has been found.</nodata>
-	<noformat>Any format selected</noformat>
-	<err_incomp>Not compatible file: is there something geographic there?</err_incomp>
-	<err_encod>Field name is not correctly formatted (encoding issue): </err_encod>
-	<err_nobjet> This data doesn't have any object, so can't be processed!</err_nobjet>
-	<err_corrupt> Corrupt file</err_corrupt>
-	<err_noprj> Any SRS found (eg.: .prj) </err_noprj>
-	<err_pg_empty_field>required field</err_pg_empty_field>
-	<err_pg_conn_fail>Connection failed</err_pg_conn_fail>
+    <nofolder>Any folder selected</nofolder>
+    <nodata>Any compatible geographic data (.shp / .tab) has been found.</nodata>
+    <noformat>Any format selected</noformat>
+    <err_incomp>Not compatible file: is there something geographic there?</err_incomp>
+    <err_encod>Field name is not correctly formatted (encoding issue): </err_encod>
+    <err_nobjet> This data doesn't have any object, so can't be processed!</err_nobjet>
+    <err_corrupt> Corrupt file</err_corrupt>
+    <err_noprj> Any SRS found (eg.: .prj) </err_noprj>
+    <err_pg_empty_field>required field</err_pg_empty_field>
+    <err_pg_conn_fail>Connection failed</err_pg_conn_fail>
 </lang>

@@ -1,4 +1,4 @@
-﻿#! python3  # noqa: E265
+#! python3  # noqa: E265
 
 from .checknorris import CheckNorris  # noqa: E402 F401
 from .options import OptionsManager  # noqa: E402 F401

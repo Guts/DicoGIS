@@ -1,4 +1,4 @@
-﻿#! python3  # noqa: E265
+#! python3  # noqa: E265
 
 from .misc_buttons import MiscButtons  # noqa: E402 F401
 from .tab_credits import TabCredits  # noqa: E402 F401
