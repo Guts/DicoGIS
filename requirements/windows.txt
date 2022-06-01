@@ -1,4 +1,4 @@
 --find-links=../lib
 
 gdal==3.* --no-index ; sys_platform == 'win32'
-numpy==1.19.5 --no-index ; sys_platform == 'win32'
+numpy==1.22.4 --no-index ; sys_platform == 'win32'
