@@ -71,7 +71,7 @@ class TextsManager:
         xml = ET.parse(lang_file)
 
         # Looping and gathering texts from the xml file
-        for elem in xml.getroot().getiterator():
+        for elem in xml.getroot().iter():
             dico_texts[elem.tag] = elem.text
 
         # end of fonction
