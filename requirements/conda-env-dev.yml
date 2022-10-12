@@ -10,5 +10,5 @@ dependencies:
   - setuptools
   - wheel
   - pip:
-      - -r file:base.txt
-      - -r file:development.txt
+      - -r base.txt
+      - -r development.txt
