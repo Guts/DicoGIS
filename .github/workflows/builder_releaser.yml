@@ -123,7 +123,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
 
     steps:
-      - uses: actions/download-artifact@v3
+      - name: Download Ubuntu build
+        uses: actions/download-artifact@v3
         with:
           name: DicoGIS_ubuntu_executable
           path: builds/ubuntu/
