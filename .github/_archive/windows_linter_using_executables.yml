@@ -10,7 +10,7 @@ env:
   PATH_GDAL_INSTALL: ${{ github.workspace }}\GDAL_INSTALL
   PROJECT_FOLDER: "dicogis"
   URL_GDAL_CORE: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/gdal-300-1911-x64-core.msi
-  URL_GDAL_PYTHON: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.7.msi
+  URL_GDAL_PYTHON: https://download.gisinternals.com/sdk/downloads/release-1911-x64-gdal-3-0-4-mapserver-7-4-3/GDAL-3.0.4.win-amd64-py3.8.msi
 
 jobs:
   lint-windows:
@@ -21,10 +21,10 @@ jobs:
         uses: actions/checkout@v2
 
       # -- Python environment ------------------------------------------------------------
-      - name: Set up Python 3.7
+      - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: Cache pip
         # https://github.com/actions/cache/blob/master/examples.md#python---pip

@@ -10,12 +10,13 @@ on:
       - "builder/**/*"
       - "dicogis/**/*.py"
 
-    tags: "*"
+    tags:
+      - "*"
 
 # Globals
 env:
   PROJECT_FOLDER: "dicogis"
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: 3.10
   PYINSTALLER_LOG_LEVEL: "DEBUG"
 
 # Jobs definition
@@ -23,7 +24,7 @@ jobs:
   build-ubuntu:
     name: "Ubuntu packager 📦"
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
     env:
@@ -75,7 +76,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
     env:
-      GDAL_VERSION: 3.1.4
+      GDAL_VERSION: 3.4.3
 
     steps:
       - name: Get source code

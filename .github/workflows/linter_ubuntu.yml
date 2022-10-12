@@ -14,11 +14,11 @@ on:
 env:
   GDAL_VERSION: 3.*
   PROJECT_FOLDER: "dicogis"
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: 3.10
 
 jobs:
   lint-ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Get source code

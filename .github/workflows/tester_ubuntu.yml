@@ -15,11 +15,11 @@ on:
 env:
   GDAL_VERSION: 3.*
   PROJECT_FOLDER: "dicogis"
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: 3.10
 
 jobs:
   test-ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Get source code
@@ -55,7 +55,7 @@ jobs:
           python -m pip install -U -r requirements/testing.txt
 
       - name: Install project as a package
-        run: python -m pip install -U -r requirements.txt
+        run: python -m pip install -e .
 
       - name: Install tests fixtures
         run: python -m pip install -U gisdata -t ./tests/fixtures

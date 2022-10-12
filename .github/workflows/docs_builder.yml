@@ -10,11 +10,11 @@ on:
 
 env:
   GDAL_VERSION: 3.*
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: 3.10
 
 jobs:
   build-docs:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Get source code
@@ -46,6 +46,7 @@ jobs:
           # Install GDAL first
           python -m pip install GDAL=="`gdal-config --version`.*"
           # then project
+          python -m pip install -U -r requirements/base.txt
           python -m pip install -U -r requirements/development.txt
           python -m pip install -U -r requirements/documentation.txt
           python -m pip install -U ghp-import>2
