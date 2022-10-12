@@ -50,8 +50,8 @@ jobs:
           python -m pip install -U pip setuptools wheel
           # Install GDAL first
           python -m pip install GDAL=="`gdal-config --version`.*"
-          # then project
-          python -m pip install -U -r requirements.txt
+          # then other dependencies
+          python -m pip install -U -r requirements/base.txt
           python -m pip install -U -r requirements/testing.txt
 
       - name: Install project as a package
