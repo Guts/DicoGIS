@@ -18,6 +18,7 @@ env:
   PROJECT_FOLDER: "dicogis"
   PYTHON_VERSION: "3.10"
   PYINSTALLER_LOG_LEVEL: "DEBUG"
+  USE_PATH_FOR_GDAL_PYTHON: yes
 
 # Jobs definition
 jobs:
