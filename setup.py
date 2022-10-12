@@ -68,18 +68,24 @@ setup(
     ),
     include_package_data=True,
     # dependencies
-    python_requires=">=3.8, <4",
+    python_requires=">=3.9, <4",
     extras_require={
         "dev": requirements_dev,
         "doc": requirements_docs,
     },
     install_requires=requirements,
+    # run
+    entry_points={
+        "gui_scripts": [
+            "dicogis = dicogis.DicoGIS:__main__",
+        ]
+    },
     # metadata
+    keywords="GIS metadata INSPIRE GDAL",
     classifiers=[
         "Intended Audience :: End Users/Desktop",
         "Intended Audience :: Information Technology",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
