@@ -20,6 +20,28 @@ from dicogis import __about__
 HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
+with open(HERE / "requirements/base.txt") as f:
+    requirements = [
+        line
+        for line in f.read().splitlines()
+        if not line.startswith(("#", "-")) and len(line)
+    ]
+
+with open(HERE / "requirements/development.txt") as f:
+    requirements_dev = [
+        line
+        for line in f.read().splitlines()
+        if not line.startswith(("#", "-")) and len(line)
+    ]
+
+
+with open(HERE / "requirements/documentation.txt") as f:
+    requirements_docs = [
+        line
+        for line in f.read().splitlines()
+        if not line.startswith(("#", "-")) and len(line)
+    ]
+
 # ############################################################################
 # ########## Setup #############
 # ##############################
@@ -35,33 +57,31 @@ setup(
     long_description_content_type="text/markdown",
     url=__about__.__uri__,
     project_urls={
+        "Docs": __about__.__uri_doc__,
         "Bug Reports": "{}issues/".format(__about__.__uri__),
         "Source": __about__.__uri__,
     },
     py_modules=["dicogis"],
     # packaging
-    # packages=find_packages(
-    #     exclude=["contrib", "docs", "*.tests", "*.tests.*", "tests.*", "tests"]
-    # ),
+    packages=find_packages(
+        exclude=["contrib", "docs", "*.tests", "*.tests.*", "tests.*", "tests"]
+    ),
     include_package_data=True,
     # dependencies
     python_requires=">=3.8, <4",
-    install_requires=[
-        "dxfgrabber>=1.0,<1.1",
-        # "gdal>=3,<4" ,
-        "geoserver-restconfig>=2.0.4,<2.0.9",
-        "numpy>=1.22,<1.24",
-        "openpyxl>=3.0,<3.1",
-        "xmltodict>=0.12,<1",
-    ],
-    setup_requires=["openpyxl>=3.0,<3.1"],
+    extras_require={
+        "dev": requirements_dev,
+        "doc": requirements_docs,
+    },
+    install_requires=requirements,
     # metadata
     classifiers=[
         "Intended Audience :: End Users/Desktop",
         "Intended Audience :: Information Technology",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
         "Development Status :: 5 - Production/Stable",
         "Environment :: Win32 (MS Windows)",

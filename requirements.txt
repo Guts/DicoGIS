@@ -5,4 +5,6 @@ wheel
 
 # Project
 # -------
+-r requirements/base.txt
+
 -e "."

@@ -1,0 +1,8 @@
+# Common requirements
+# -----------------------
+
+dxfgrabber>=1.0,<1.1
+geoserver-restconfig>=2.0.4,<2.0.9
+numpy>=1.22,<1.25
+openpyxl>=3.0,<3.1
+xmltodict>=0.12,<1
