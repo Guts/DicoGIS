@@ -73,7 +73,6 @@ jobs:
     name: "Windows packager 📦"
 
     runs-on: windows-latest
-    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
     env:
       GDAL_VERSION: 3.4.3
@@ -134,35 +133,11 @@ jobs:
           name: DicoGIS_windows_executable
           path: builds/windows/
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create/update release on GitHub
+        uses: ncipollo/release-action@v1.11.0
         with:
-          tag_name: ${{ github.ref }}
-          release_name: "Version ${{ github.ref }}"
-          draft: false
-          prerelease: false
-
-      - name: Add Ubuntu executable as release Asset
-        id: upload-release-asset-ubuntu
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: builds/ubuntu/
-          asset_name: DicoGIS_ubuntu_executable.zip
-          asset_content_type: application/zip
-
-      - name: Add Windows executable as release Asset
-        id: upload-release-asset-windows
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: builds/windows/
-          asset_name: DicoGIS_windows_executable.zip
-          asset_content_type: application/zip
+          allowUpdates: true
+          artifacts: "builds/*"
+          generateReleaseNotes: true
+          omitNameDuringUpdate: true
+          token: ${{ secrets.GITHUB_TOKEN }}
