@@ -6,7 +6,7 @@ dependencies:
   - nomkl
   - gdal=3.4.3
   - pip
-  - pyinstaller>=5,6
+  - pyinstaller>=5
   - setuptools
   - wheel
   - pip:
