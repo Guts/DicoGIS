@@ -5,6 +5,7 @@ on:
     branches: [master]
     paths:
       - "**.py"
+      - ".github/workflows/linter_ubuntu.yml"
 
   pull_request:
     branches: [master]

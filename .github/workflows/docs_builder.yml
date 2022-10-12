@@ -10,7 +10,7 @@ on:
 
 env:
   GDAL_VERSION: 3.*
-  PYTHON_VERSION: 3.10
+  PYTHON_VERSION: "3.10"
 
 jobs:
   build-docs:
