@@ -1,5 +1,11 @@
 {
     // Editor
+    "editor.bracketPairColorization.enabled": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    },
+    "editor.formatOnSave": true,
+    "editor.guides.bracketPairs": "active",
     "editor.rulers": [
         88
     ],
@@ -7,13 +13,8 @@
     "files.associations": {
         "./requirements/*.txt": "pip-requirements"
     },
-    // Python environment
-    "python.pythonPath": ".venv/bin/python",
     // Formatter
     "python.formatting.provider": "black",
-    "python.formatting.blackArgs": [
-        "--target-version=py38"
-    ],
     // Linter
     "python.linting.enabled": true,
     "python.linting.flake8Enabled": true,
@@ -25,6 +26,5 @@
     // extensions
     "autoDocstring.guessTypes": true,
     "autoDocstring.docstringFormat": "google",
-    "autoDocstring.generateDocstringOnEnter": false,
-    "restructuredtext.confPath": "${workspaceFolder}\\docs",
+    "autoDocstring.generateDocstringOnEnter": false
 }
