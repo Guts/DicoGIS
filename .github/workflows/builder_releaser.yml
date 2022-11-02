@@ -136,7 +136,7 @@ jobs:
           path: builds/windows/
 
       - name: Create/update release on GitHub
-        uses: ncipollo/release-action@v1.11.0
+        uses: ncipollo/release-action@v1.11.1
         with:
           allowUpdates: true
           artifacts: "builds/*"
