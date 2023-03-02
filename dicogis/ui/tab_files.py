@@ -202,6 +202,7 @@ class TabFiles(Frame):
 
 if __name__ == "__main__":
     """To test"""
+
     #
     def browse():
         print("Launch files browser")

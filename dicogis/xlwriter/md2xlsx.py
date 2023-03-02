@@ -620,7 +620,7 @@ class MetadataToXlsx(Workbook):
         self.ws_fdb["I{}".format(self.idx_f)] = filedb.get("total_objs")
 
         # parsing layers
-        for (layer_idx, layer_name) in zip(
+        for layer_idx, layer_name in zip(
             filedb.get("layers_idx"), filedb.get("layers_names")
         ):
             # increment line
@@ -760,7 +760,7 @@ class MetadataToXlsx(Workbook):
         self.ws_mdocs["R{}".format(self.idx_m)] = mapdoc.get("total_fields")
         self.ws_mdocs["S{}".format(self.idx_m)] = mapdoc.get("total_objs")
 
-        for (layer_idx, layer_name) in zip(
+        for layer_idx, layer_name in zip(
             mapdoc.get("layers_idx"), mapdoc.get("layers_names")
         ):
             # increment line
@@ -897,7 +897,7 @@ class MetadataToXlsx(Workbook):
         self.ws_cad["I{}".format(self.idx_c)] = cad.get("total_objs")
 
         # parsing layers
-        for (layer_idx, layer_name) in zip(
+        for layer_idx, layer_name in zip(
             cad.get("layers_idx"), cad.get("layers_names")
         ):
             # increment line
