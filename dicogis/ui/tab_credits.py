@@ -99,6 +99,7 @@ class TabCredits(Frame):
 # ##################################
 if __name__ == "__main__":
     """To test"""
+
     #
     def ui_switch(cb_value, parent):
         """Change state of  all children widgets within a parent class.
