@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # ###############################
 
 
-class OGRErrorHandler(object):
+class OGRErrorHandler:
     def __init__(self):
         """Callable error handler.
 
@@ -145,9 +145,7 @@ class ReadSpaDB:
             # getting layer globlal informations
             self.infos_basics(layer, dico_layer, txt)
             # storing layer into the GDB dictionary
-            dico_spadb[
-                "{0}_{1}".format(layer_idx, dico_layer.get("title"))
-            ] = dico_layer
+            dico_spadb["{}_{}".format(layer_idx, dico_layer.get("title"))] = dico_layer
             # summing fields number
             total_fields += dico_layer.get("num_fields")
             # summing objects number
@@ -220,25 +218,21 @@ class ReadSpaDB:
 
         # handling exceptions in srs names'encoding
         try:
-            if srs.GetAttrValue(str("PROJCS")) != "unnamed":
-                dico_layer["srs"] = srs.GetAttrValue(str("PROJCS")).replace("_", " ")
+            if srs.GetAttrValue("PROJCS") != "unnamed":
+                dico_layer["srs"] = srs.GetAttrValue("PROJCS").replace("_", " ")
             else:
-                dico_layer["srs"] = srs.GetAttrValue(str("PROJECTION")).replace(
-                    "_", " "
-                )
+                dico_layer["srs"] = srs.GetAttrValue("PROJECTION").replace("_", " ")
         except UnicodeDecodeError:
-            if srs.GetAttrValue(str("PROJCS")) != "unnamed":
+            if srs.GetAttrValue("PROJCS") != "unnamed":
                 dico_layer["srs"] = (
-                    srs.GetAttrValue(str("PROJCS")).decode("latin1").replace("_", " ")
+                    srs.GetAttrValue("PROJCS").decode("latin1").replace("_", " ")
                 )
             else:
                 dico_layer["srs"] = (
-                    srs.GetAttrValue(str("PROJECTION"))
-                    .decode("latin1")
-                    .replace("_", " ")
+                    srs.GetAttrValue("PROJECTION").decode("latin1").replace("_", " ")
                 )
         finally:
-            dico_layer["epsg"] = srs.GetAttrValue(str("AUTHORITY"), 1)
+            dico_layer["epsg"] = srs.GetAttrValue("AUTHORITY", 1)
 
         # World SRS default
         if dico_layer["epsg"] == "4326" and dico_layer["srs"] == "None":
@@ -297,9 +291,9 @@ class ReadSpaDB:
         """
         for size_cat in ["octets", "Ko", "Mo", "Go"]:
             if os_size < 1024.0:
-                return "%3.1f %s" % (os_size, size_cat)
+                return f"{os_size:3.1f} {size_cat}"
             os_size /= 1024.0
-        return "%3.1f %s" % (os_size, " To")
+        return "{:3.1f} {}".format(os_size, " To")
 
     def erratum(self, dico_spadb, spadbpath, mess):
         """Errors handler."""

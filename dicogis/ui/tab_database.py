@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class TabSGBD(Frame):
-    def __init__(self, parent, txt=dict()):
+    def __init__(self, parent, txt={}):
         """Instanciating the output workbook."""
         self.parent = parent
         Frame.__init__(self)

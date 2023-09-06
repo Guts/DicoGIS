@@ -60,7 +60,7 @@ class ReadPostGIS:
         password="postgres",
         views_included=1,
         dico_dataset=OrderedDict(),
-        txt=dict(),
+        txt={},
     ):
         """Uses gdal/ogr functions to extract basic informations about
         geographic file (handles shapefile or MapInfo tables)
@@ -82,10 +82,10 @@ class ReadPostGIS:
         self.txt = txt
         self.alert = 0
         if views_included:
-            gdal.SetConfigOption(str("PG_LIST_ALL_TABLES"), str("YES"))
+            gdal.SetConfigOption("PG_LIST_ALL_TABLES", "YES")
             logger.info("PostgreSQL views enabled.")
         else:
-            gdal.SetConfigOption(str("PG_LIST_ALL_TABLES"), str("NO"))
+            gdal.SetConfigOption("PG_LIST_ALL_TABLES", "NO")
             logger.info("PostgreSQL views disabled.")
 
         # connection infos
@@ -121,27 +121,25 @@ class ReadPostGIS:
         """TO DOC."""
         try:
             conn = ogr.Open(str(self.conn_settings))
-            logging.info(
-                "Access granted : connecting people to {} tables!".format(len(conn))
-            )
+            logging.info(f"Access granted : connecting people to {len(conn)} tables!")
             return conn
         except Exception as err:
             self.dico_dataset["conn_state"] = err
-            logging.error("Connection failed. Check settings: {0}".format(str(err)))
+            logging.error(f"Connection failed. Check settings: {str(err)}")
             return 0
 
     def get_version(self):
         """TO DO."""
-        sql = self.conn.ExecuteSQL(str("SELECT PostGIS_full_version();"))
+        sql = self.conn.ExecuteSQL("SELECT PostGIS_full_version();")
         feat = sql.GetNextFeature()
         return feat.GetField(0)
 
     def get_schemas(self):
         """TO DO."""
-        sql_schemas = str("select nspname from pg_catalog.pg_namespace;")
+        sql_schemas = "select nspname from pg_catalog.pg_namespace;"
         return self.conn.ExecuteSQL(sql_schemas)
 
-    def infos_dataset(self, layer, dico_dataset=dict(), tipo="PostGIS"):
+    def infos_dataset(self, layer, dico_dataset={}, tipo="PostGIS"):
         """TO DO."""
         if not dico_dataset:
             dico_dataset = self.dico_dataset
@@ -181,7 +179,7 @@ class ReadPostGIS:
                 mess = str(e).split("\n")[0]
                 self.alert = self.alert + 1
                 youtils.erratum(ctner=dico_dataset, ds_lyr=layer, mess=mess)
-                logging.error("GDAL: {} - {}".format(layer.GetName(), mess))
+                logging.error(f"GDAL: {layer.GetName()} - {mess}")
                 return None
             else:
                 pass
@@ -286,7 +284,7 @@ if __name__ == "__main__":
         print(dico_dataset)
         exit()
     else:
-        print("{} tables found.".format(len(pgReader.conn)))
+        print(f"{len(pgReader.conn)} tables found.")
 
     # parse layers
     for layer in pgReader.conn:

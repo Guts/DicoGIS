@@ -58,7 +58,7 @@ class ReadGDB:
         gdal.UseExceptions()
         self.alert = 0
 
-    def infos_dataset(self, source_path, dico_dataset, txt=dict(), tipo=None):
+    def infos_dataset(self, source_path, dico_dataset, txt={}, tipo=None):
         """Use OGR functions to extract basic informations.
 
         source_path = path to the File Geodatabase Esri
@@ -70,7 +70,7 @@ class ReadGDB:
 
         # opening GDB
         try:
-            driver = ogr.GetDriverByName(str("OpenFileGDB"))
+            driver = ogr.GetDriverByName("OpenFileGDB")
             src = driver.Open(source_path, 0)
             if not tipo:
                 dico_dataset["format"] = driver.GetName()
@@ -157,7 +157,7 @@ class ReadGDB:
 
             # storing layer into the GDB dictionary
             dico_dataset[
-                "{0}_{1}".format(layer_idx, dico_layer.get("title"))
+                "{}_{}".format(layer_idx, dico_layer.get("title"))
             ] = dico_layer
             # summing fields number
             total_fields += dico_layer.get("num_fields", 0)
@@ -217,7 +217,7 @@ if __name__ == "__main__":
                 full_path = path.join(root, d)
             except UnicodeDecodeError as err:
                 full_path = path.join(root, d.decode("latin1"))
-                logger.error("Failed with: {}. Trace: {}".format(full_path, err))
+                logger.error(f"Failed with: {full_path}. Trace: {err}")
             if full_path[-4:].lower() == ".gdb":
                 # add complete path of shapefile
                 li_gdb.append(path.abspath(full_path))

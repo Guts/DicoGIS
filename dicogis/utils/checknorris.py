@@ -36,12 +36,12 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class CheckNorris(object):
+class CheckNorris:
     """Check Norris never fails, always tests."""
 
     def __init__(self):
         """Check Norris welcomes you."""
-        super(CheckNorris, self).__init__()
+        super().__init__()
 
     # -- 1 method, 1 check ----------------------------------------------------
 
@@ -59,7 +59,7 @@ class CheckNorris(object):
                 from osgeo import gdal
             except ImportError:
                 import gdal
-            logger.info("GDAL version: {}".format(gdal.__version__))
+            logger.info(f"GDAL version: {gdal.__version__}")
         except Exception as err:
             logger.error(
                 "GDAL is not installed or not reachable."
@@ -70,16 +70,14 @@ class CheckNorris(object):
         # GDAL_DATA variable
         if "GDAL_DATA" not in env.keys():
             try:
-                gdal.SetConfigOption(str("GDAL_DATA"), str(path.abspath(r"data/gdal")))
+                gdal.SetConfigOption("GDAL_DATA", str(path.abspath(r"data/gdal")))
                 logger.info(
                     "GDAL_DATA path not found in environment variable."
                     " DicoGIS'll use its own: " + path.abspath(r"data/gdal")
                 )
                 return 2
             except Exception as err:
-                logger.error(
-                    "Oups! Something's wrong with GDAL_DATA path: {}".format(err)
-                )
+                logger.error(f"Oups! Something's wrong with GDAL_DATA path: {err}")
                 return 3
         else:
             logger.info(
@@ -105,7 +103,7 @@ class CheckNorris(object):
             logger.info("Internet connection OK.")
             return True
         except Exception as err:
-            logger.info("Internet connection failed. Trace: {}".format(err))
+            logger.info(f"Internet connection failed. Trace: {err}")
             pass
         # end of method
         return False

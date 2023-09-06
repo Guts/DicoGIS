@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 class TabCredits(Frame):
-    def __init__(self, parent, txt=dict(), switcher=None):
+    def __init__(self, parent, txt={}, switcher=None):
         """Instanciating the output workbook."""
         self.parent = parent
         Frame.__init__(self)

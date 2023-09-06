@@ -39,9 +39,7 @@ logger = logging.getLogger(__name__)  # LOG
 
 
 class TabFiles(Frame):
-    def __init__(
-        self, parent, txt: dict = dict(), path_browser=None, path_var: str = ""
-    ):
+    def __init__(self, parent, txt: dict = {}, path_browser=None, path_var: str = ""):
         """Instanciating the output workbook."""
         self.p = parent
         self.txt = txt
@@ -137,7 +135,7 @@ class TabFiles(Frame):
         )
         caz_rast = Checkbutton(
             self.FrFilters,
-            text="rasters ({0})".format(", ".join(self.li_raster_formats)),
+            text="rasters ({})".format(", ".join(self.li_raster_formats)),
             variable=self.opt_rast,
         )
         caz_cdao = Checkbutton(self.FrFilters, text="CAO/DAO", variable=self.opt_cdao)
@@ -184,7 +182,7 @@ class TabFiles(Frame):
         self.p.master.ent_outxl_filename.delete(0, END)
         self.p.master.ent_outxl_filename.insert(
             0,
-            "DicoGIS_{0}_{1}.xlsx".format(path.split(self.target_path.get())[1], today),
+            f"DicoGIS_{path.split(self.target_path.get())[1]}_{today}.xlsx",
         )
 
         # count geofiles in a separated thread

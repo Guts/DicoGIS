@@ -186,7 +186,7 @@ class ReadDXF:
 
             # storing layer into the GDB dictionary
             dico_dataset[
-                "{0}_{1}".format(layer_idx, dico_layer.get("title"))
+                "{}_{}".format(layer_idx, dico_layer.get("title"))
             ] = dico_layer
             # summing fields number
             total_fields += dico_layer.get("num_fields", 0)

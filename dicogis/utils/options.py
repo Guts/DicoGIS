@@ -23,13 +23,13 @@ from os import path
 # ##################################
 
 
-class OptionsManager(object):
+class OptionsManager:
     def __init__(self, confile=r"..\..\options.ini"):
         """
         Main window constructor
         Creates 1 frame and 2 labelled subframes
         """
-        super(OptionsManager, self).__init__()
+        super().__init__()
         self.confile = path.realpath(confile)
         # first use or not
         if not path.isfile(self.confile):
@@ -142,7 +142,7 @@ class OptionsManager(object):
                 logging.info("Options saved.")
                 return True
             except (UnicodeEncodeError, UnicodeDecodeError) as e:
-                logging.error("Options couldn't be saved because of: {0}".format(e))
+                logging.error(f"Options couldn't be saved because of: {e}")
                 return False
 
         # End of function

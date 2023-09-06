@@ -142,7 +142,7 @@ class ReadDWG:
             # getting layer globlal informations
             self.infos_basics(layer, dico_layer, txt)
             # storing layer into the DXF dictionary
-            dico_dxf["{0}_{1}".format(layer_idx, layer.GetName())] = dico_layer
+            dico_dxf[f"{layer_idx}_{layer.GetName()}"] = dico_layer
             # summing fields number
             total_fields += dico_layer.get("num_fields")
             # summing objects number
@@ -270,9 +270,9 @@ class ReadDWG:
         see http://stackoverflow.com/a/1094933"""
         for size_cat in ["octets", "Ko", "Mo", "Go"]:
             if os_size < 1024.0:
-                return "%3.1f %s" % (os_size, size_cat)
+                return f"{os_size:3.1f} {size_cat}"
             os_size /= 1024.0
-        return "%3.1f %s" % (os_size, " To")
+        return "{:3.1f} {}".format(os_size, " To")
 
     def erratum(self, dico_dxf, dxfpath, mess):
         """errors handling"""

@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 __author__ = "Julien Moura"
-__copyright__ = "2014 - {0}, {1}".format(date.today().year, __author__)
+__copyright__ = f"2014 - {date.today().year}, {__author__}"
 __email__ = "dev@ingeoveritas.com"
 __executable_name__ = "DicoGIS.exe"
 __license__ = "GNU General Public License v3.0"

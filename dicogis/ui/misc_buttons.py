@@ -68,7 +68,7 @@ class MiscButtons(Frame):
         )
 
         # source
-        url_src = "{}issues".format(parent.package_about.__uri__)
+        url_src = f"{parent.package_about.__uri__}issues"
         btn_src = Button(
             self,
             text="\U000026A0 " + _("Report"),
