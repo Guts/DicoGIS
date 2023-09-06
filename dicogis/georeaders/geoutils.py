@@ -69,12 +69,12 @@ class Utils:
         # prettify units
         for size_cat in ("octets", "Ko", "Mo", "Go"):
             if total_size < 1024.0:
-                return "{:3.1f} {}".format(total_size, size_cat)
+                return f"{total_size:3.1f} {size_cat}"
             total_size /= 1024.0
 
         return "{:3.1f} {}".format(total_size, " To")
 
-    def erratum(self, ctner=dict(), src="", ds_lyr=None, mess_type=1, mess=""):
+    def erratum(self, ctner={}, src="", ds_lyr=None, mess_type=1, mess=""):
         """Handle errors message and store it into __dict__.
 
         mess_type allowed values:

@@ -337,7 +337,7 @@ class ReadRasters:
         see http://stackoverflow.com/a/1094933"""
         for size_cat in ["octets", "Ko", "Mo", "Go"]:
             if os_size < 1024.0:
-                return "{:3.1f} {}".format(os_size, size_cat)
+                return f"{os_size:3.1f} {size_cat}"
             os_size /= 1024.0
         return "{:3.1f} {}".format(os_size, " To")
 

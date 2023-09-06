@@ -60,7 +60,7 @@ class ReadPostGIS:
         password="postgres",
         views_included=1,
         dico_dataset=OrderedDict(),
-        txt=dict(),
+        txt={},
     ):
         """Uses gdal/ogr functions to extract basic informations about
         geographic file (handles shapefile or MapInfo tables)
@@ -139,7 +139,7 @@ class ReadPostGIS:
         sql_schemas = "select nspname from pg_catalog.pg_namespace;"
         return self.conn.ExecuteSQL(sql_schemas)
 
-    def infos_dataset(self, layer, dico_dataset=dict(), tipo="PostGIS"):
+    def infos_dataset(self, layer, dico_dataset={}, tipo="PostGIS"):
         """TO DO."""
         if not dico_dataset:
             dico_dataset = self.dico_dataset

@@ -60,9 +60,7 @@ class ReadVectorFlatDataset:
         ogr.UseExceptions()
         self.alert = 0
 
-    def infos_dataset(
-        self, source_path: str, dico_dataset, txt: dict = dict(), tipo=None
-    ):
+    def infos_dataset(self, source_path: str, dico_dataset, txt: dict = {}, tipo=None):
         """Use OGR functions to extract basic informations about
         geographic vector file (handles shapefile or MapInfo tables)
         and store into dictionaries.

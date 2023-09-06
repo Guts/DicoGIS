@@ -39,9 +39,7 @@ logger = logging.getLogger(__name__)  # LOG
 
 
 class TabFiles(Frame):
-    def __init__(
-        self, parent, txt: dict = dict(), path_browser=None, path_var: str = ""
-    ):
+    def __init__(self, parent, txt: dict = {}, path_browser=None, path_var: str = ""):
         """Instanciating the output workbook."""
         self.p = parent
         self.txt = txt

@@ -58,7 +58,7 @@ class ReadGDB:
         gdal.UseExceptions()
         self.alert = 0
 
-    def infos_dataset(self, source_path, dico_dataset, txt=dict(), tipo=None):
+    def infos_dataset(self, source_path, dico_dataset, txt={}, tipo=None):
         """Use OGR functions to extract basic informations.
 
         source_path = path to the File Geodatabase Esri
