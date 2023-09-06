@@ -10,7 +10,6 @@
 # ##################################
 
 # Standard library
-import logging
 import unittest
 from pathlib import Path
 

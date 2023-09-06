@@ -58,7 +58,7 @@ class TextsManager:
         dico_texts.clear()
 
         # check file, if not exists log the error and return the default language
-        lang_file = self.locale_folder / "lang_{}.xml".format(lang)
+        lang_file = self.locale_folder / f"lang_{lang}.xml"
         if not lang_file.is_file():
             logger.error(
                 FileNotFoundError(

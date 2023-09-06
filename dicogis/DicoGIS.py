@@ -101,7 +101,7 @@ class DicoGIS(Tk):
                 self.package_about.__title_clean__
             )
         )
-        logger.info("Version: {0}".format(self.package_about.__version__))
+        logger.info(f"Version: {self.package_about.__version__}")
 
         # store vars as attr
         self.dir_locale = dir_locale
@@ -114,22 +114,22 @@ class DicoGIS(Tk):
 
         # basics settings
         Tk.__init__(self)  # constructor of parent graphic class
-        self.title("DicoGIS {0}".format(self.package_about.__version__))
+        self.title(f"DicoGIS {self.package_about.__version__}")
         self.uzer = getpass.getuser()
         if opersys == "win32":
-            logger.info("Operating system: {0}".format(platform.platform()))
+            logger.info(f"Operating system: {platform.platform()}")
             self.iconbitmap(self.dir_imgs / "DicoGIS.ico")  # windows icon
         elif opersys.startswith("linux"):
-            logger.info("Operating system: {0}".format(platform.platform()))
+            logger.info(f"Operating system: {platform.platform()}")
             icon = Image("photo", file=self.dir_imgs / "DicoGIS_logo.gif")
             self.call("wm", "iconphoto", self._w, icon)
             self.style = Style().theme_use("clam")
 
         elif opersys == "darwin":
-            logger.info("Operating system: {0}".format(platform.platform()))
+            logger.info(f"Operating system: {platform.platform()}")
         else:
             logger.warning("Operating system unknown")
-            logger.info("Operating system: {0}".format(platform.platform()))
+            logger.info(f"Operating system: {platform.platform()}")
         self.resizable(width=False, height=False)
         self.focus_force()
 
@@ -358,20 +358,20 @@ class DicoGIS(Tk):
         try:
             if opersys == "win32":
                 if new_lang.lower() == "fr":
-                    locale.setlocale(locale.LC_ALL, str("fra_fra"))
+                    locale.setlocale(locale.LC_ALL, "fra_fra")
                 elif new_lang.lower() == "es":
-                    locale.setlocale(locale.LC_ALL, str("esp_esp"))
+                    locale.setlocale(locale.LC_ALL, "esp_esp")
                 else:
-                    locale.setlocale(locale.LC_ALL, str("uk_UK"))
+                    locale.setlocale(locale.LC_ALL, "uk_UK")
             else:
                 if new_lang.lower() == "fr":
-                    locale.setlocale(locale.LC_ALL, str("fr_FR.utf8"))
+                    locale.setlocale(locale.LC_ALL, "fr_FR.utf8")
                 elif new_lang.lower() == "es":
-                    locale.setlocale(locale.LC_ALL, str("es_ES.utf8"))
+                    locale.setlocale(locale.LC_ALL, "es_ES.utf8")
                 else:
-                    locale.setlocale(locale.LC_ALL, str("en_GB.utf8"))
+                    locale.setlocale(locale.LC_ALL, "en_GB.utf8")
 
-            logger.info("Language switched to: {0}".format(self.ddl_lang.get()))
+            logger.info(f"Language switched to: {self.ddl_lang.get()}")
         except locale.Error:
             logger.error("Selected locale is not installed")
 
@@ -406,7 +406,7 @@ class DicoGIS(Tk):
         self.ent_outxl_filename.delete(0, END)
         self.ent_outxl_filename.insert(
             0,
-            "DicoGIS_{0}_{1}.xlsx".format(
+            "DicoGIS_{}_{}.xlsx".format(
                 path.split(self.tab_files.ent_target.get())[1], self.today
             ),
         )
@@ -466,12 +466,12 @@ class DicoGIS(Tk):
                 if (
                     path.splitext(full_path.lower())[1].lower() == ".shp"
                     and (
-                        path.isfile("{0}.dbf".format(full_path[:-4]))
-                        or path.isfile("{0}.DBF".format(full_path[:-4]))
+                        path.isfile(f"{full_path[:-4]}.dbf")
+                        or path.isfile(f"{full_path[:-4]}.DBF")
                     )
                     and (
-                        path.isfile("{0}.shx".format(full_path[:-4]))
-                        or path.isfile("{0}.SHX".format(full_path[:-4]))
+                        path.isfile(f"{full_path[:-4]}.shx")
+                        or path.isfile(f"{full_path[:-4]}.SHX")
                     )
                 ):
                     """listing compatible shapefiles"""
@@ -548,16 +548,16 @@ class DicoGIS(Tk):
         # end of listing
         self.prog_layers.stop()
         logger.info(
-            "End of folders parsing: {0} shapefiles - "
-            "{1} tables (MapInfo) - "
-            "{2} KML - "
-            "{3} GML - "
-            "{4} GeoJSON"
-            "{5} rasters - "
-            "{6} Esri FileGDB - "
-            "{7} Spatialite - "
-            "{8} CAO/DAO - "
-            "{9} GXT - in {10}{11}".format(
+            "End of folders parsing: {} shapefiles - "
+            "{} tables (MapInfo) - "
+            "{} KML - "
+            "{} GML - "
+            "{} GeoJSON"
+            "{} rasters - "
+            "{} Esri FileGDB - "
+            "{} Spatialite - "
+            "{} CAO/DAO - "
+            "{} GXT - in {}{}".format(
                 len(self.li_shp),
                 len(self.li_tab),
                 len(self.li_kml),
@@ -612,16 +612,16 @@ class DicoGIS(Tk):
 
         # status message
         self.status.set(
-            "{0} shapefiles - "
-            "{1} tables (MapInfo) - "
-            "{2} KML - "
-            "{3} GML - "
-            "{4} GeoJSON - "
-            "{5} GXT"
-            "\n{6} rasters - "
-            "{7} file databases - "
-            "{8} CAO/DAO - "
-            "in {9}{10}".format(
+            "{} shapefiles - "
+            "{} tables (MapInfo) - "
+            "{} KML - "
+            "{} GML - "
+            "{} GeoJSON - "
+            "{} GXT"
+            "\n{} rasters - "
+            "{} file databases - "
+            "{} CAO/DAO - "
+            "in {}{}".format(
                 len(self.li_shp),
                 len(self.li_tab),
                 len(self.li_kml),
@@ -789,7 +789,7 @@ class DicoGIS(Tk):
             for shp in self.li_shp:
                 """looping on shapefiles list"""
                 self.status.set(path.basename(shp))
-                logger.info("Processing: {}".format(shp))
+                logger.info(f"Processing: {shp}")
                 # increment the progress bar
                 self.prog_layers["value"] = self.prog_layers["value"] + 1
                 self.update()
@@ -816,7 +816,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_shp):
-                logger.info("Ignoring {0} shapefiles".format(len(self.li_shp)))
+                logger.info(f"Ignoring {len(self.li_shp)} shapefiles")
             pass
 
         if self.tab_files.opt_tab.get() and len(self.li_tab) > 0:
@@ -851,7 +851,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_tab):
-                logger.info("Ignoring {0} MapInfo tables".format(len(self.li_tab)))
+                logger.info(f"Ignoring {len(self.li_tab)} MapInfo tables")
 
         if self.tab_files.opt_kml.get() and len(self.li_kml) > 0:
             logger.info("Processing KML-KMZ: start")
@@ -885,7 +885,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_kml):
-                logger.info("Ignoring {0} KML".format(len(self.li_kml)))
+                logger.info(f"Ignoring {len(self.li_kml)} KML")
 
         if self.tab_files.opt_gml.get() and len(self.li_gml) > 0:
             logger.info("Processing GML: start")
@@ -919,7 +919,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_gml):
-                logger.info("Ignoring {0} GML".format(len(self.li_gml)))
+                logger.info(f"Ignoring {len(self.li_gml)} GML")
 
         if self.tab_files.opt_geoj.get() and len(self.li_geoj) > 0:
             logger.info("Processing GeoJSON: start")
@@ -953,7 +953,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_geoj):
-                logger.info("Ignoring {0} GeoJSON".format(len(self.li_geoj)))
+                logger.info(f"Ignoring {len(self.li_geoj)} GeoJSON")
 
         if self.tab_files.opt_gxt.get() and len(self.li_gxt) > 0:
             logger.info("Processing GXT: start")
@@ -990,9 +990,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_gxt):
-                logger.info(
-                    "Ignoring {0} Geoconcept eXport Text".format(len(self.li_gxt))
-                )
+                logger.info(f"Ignoring {len(self.li_gxt)} Geoconcept eXport Text")
 
         if self.tab_files.opt_rast.get() and len(self.li_raster) > 0:
             logger.info("Processing rasters: start")
@@ -1030,7 +1028,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_raster):
-                logger.info("Ignoring {0} rasters".format(len(self.li_raster)))
+                logger.info(f"Ignoring {len(self.li_raster)} rasters")
 
         if self.tab_files.opt_egdb.get() and len(self.li_egdb) > 0:
             logger.info("Processing Esri FileGDB: start")
@@ -1067,7 +1065,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_egdb):
-                logger.info("Ignoring {0} Esri FileGDB".format(len(self.li_egdb)))
+                logger.info(f"Ignoring {len(self.li_egdb)} Esri FileGDB")
 
         if self.tab_files.opt_spadb.get() and len(self.li_spadb) > 0:
             logger.info("Processing Spatialite DB: start")
@@ -1101,7 +1099,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_spadb):
-                logger.info("Ignoring {0} Spatialite DB".format(len(self.li_spadb)))
+                logger.info(f"Ignoring {len(self.li_spadb)} Spatialite DB")
 
         if self.tab_files.opt_cdao.get() and len(self.li_cdao) > 0:
             logger.info("Processing CAO/DAO: start")
@@ -1134,7 +1132,7 @@ class DicoGIS(Tk):
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_cdao):
-                logger.info("Ignoring {0} CAO/DAO files".format(len(self.li_cdao)))
+                logger.info(f"Ignoring {len(self.li_cdao)} CAO/DAO files")
 
         # saving dictionary
         self.bell()
@@ -1168,7 +1166,7 @@ class DicoGIS(Tk):
             # reset recipient data
             self.dico_dataset.clear()
             sgbd_reader.infos_dataset(layer)
-            logger.info("Table examined: {}".format(layer.GetName()))
+            logger.info(f"Table examined: {layer.GetName()}")
             self.wb.store_md_sgdb(self.dico_dataset)
             logger.debug("Layer metadata stored into workbook.")
             # increment the progress bar
@@ -1264,7 +1262,7 @@ class DicoGIS(Tk):
             logger.info("Proxy configured.")
             gdal.SetConfigOption(
                 "GDAL_HTTP_PROXY",
-                "{0}:{1}".format(self.prox_server.get(), self.prox_port.get()),
+                f"{self.prox_server.get()}:{self.prox_port.get()}",
             )
             if self.tab_options.opt_ntlm.get():
                 # if authentication needs ...\
@@ -1291,19 +1289,19 @@ class DicoGIS(Tk):
         # check connection state
         if not sgbd_reader.conn:
             fail_reason = self.dico_dataset.get("conn_state")
-            self.status.set("Connection failed: {0}.".format(fail_reason))
+            self.status.set(f"Connection failed: {fail_reason}.")
             avert(title=self.blabla.get("err_pg_conn_fail"), message=fail_reason)
             return None
         else:
             # connection succeeded
             pass
 
-        self.status.set("{} tables".format(len(sgbd_reader.conn)))
+        self.status.set(f"{len(sgbd_reader.conn)} tables")
         # set the default output file
         self.ent_outxl_filename.delete(0, END)
         self.ent_outxl_filename.insert(
             0,
-            "DicoGIS_{0}-{1}_{2}.xlsx".format(
+            "DicoGIS_{}-{}_{}.xlsx".format(
                 self.tab_sgbd.dbnb.get(), self.tab_sgbd.host.get(), self.today
             ),
         )

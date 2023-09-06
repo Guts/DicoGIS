@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 # #################################
 
 
-class GdalErrorHandler(object):
+class GdalErrorHandler:
     def __init__(self):
         """Callable error handler.
 
@@ -79,7 +79,7 @@ class GdalErrorHandler(object):
         return self.err_level, self.err_type, self.err_msg
 
 
-class ReadRasters(object):
+class ReadRasters:
     def __init__(self, rasterpath, dico_raster, dico_bands, tipo, text=""):
         """Use GDAL functions to extract basic informations about
         geographic raster file (handles ECW, GeoTIFF, JPEG2000)
@@ -282,39 +282,39 @@ class ReadRasters(object):
         if stats:
             # band minimum value
             if band_info.GetMinimum() is None:
-                dico_bands["band{}_Min".format(band)] = stats[0]
+                dico_bands[f"band{band}_Min"] = stats[0]
             else:
-                dico_bands["band{}_Min".format(band)] = band_info.GetMinimum()
+                dico_bands[f"band{band}_Min"] = band_info.GetMinimum()
 
             # band maximum value
             if band_info.GetMinimum() is None:
-                dico_bands["band{}_Max".format(band)] = stats[1]
+                dico_bands[f"band{band}_Max"] = stats[1]
             else:
-                dico_bands["band{}_Max".format(band)] = band_info.GetMaximum()
+                dico_bands[f"band{band}_Max"] = band_info.GetMaximum()
 
             # band mean value
-            dico_bands["band{}_Mean".format(band)] = round(stats[2], 2)
+            dico_bands[f"band{band}_Mean"] = round(stats[2], 2)
 
             # band standard deviation value
-            dico_bands["band{}_Sdev".format(band)] = round(stats[3], 2)
+            dico_bands[f"band{band}_Sdev"] = round(stats[3], 2)
         else:
             pass
 
         # band no data value
-        dico_bands["band{}_NoData".format(band)] = band_info.GetNoDataValue()
+        dico_bands[f"band{band}_NoData"] = band_info.GetNoDataValue()
 
         # band scale value
-        dico_bands["band{}_Scale".format(band)] = band_info.GetScale()
+        dico_bands[f"band{band}_Scale"] = band_info.GetScale()
 
         # band unit type value
-        dico_bands["band{}_UnitType".format(band)] = band_info.GetUnitType()
+        dico_bands[f"band{band}_UnitType"] = band_info.GetUnitType()
 
         # color table
         coul_table = band_info.GetColorTable()
         if coul_table is None:
-            dico_bands["band{}_CTabCount".format(band)] = 0
+            dico_bands[f"band{band}_CTabCount"] = 0
         else:
-            dico_bands["band{}_CTabCount".format(band)] = coul_table.GetCount()
+            dico_bands[f"band{band}_CTabCount"] = coul_table.GetCount()
             # -- COMENTED BECAUSE IT'S TOO MUCH INFORMATIONS
             # for ctab_idx in range(0, coul_table.GetCount()):
             #     entry = coul_table.GetColorEntry(ctab_idx)
@@ -337,9 +337,9 @@ class ReadRasters(object):
         see http://stackoverflow.com/a/1094933"""
         for size_cat in ["octets", "Ko", "Mo", "Go"]:
             if os_size < 1024.0:
-                return "%3.1f %s" % (os_size, size_cat)
+                return "{:3.1f} {}".format(os_size, size_cat)
             os_size /= 1024.0
-        return "%3.1f %s" % (os_size, " To")
+        return "{:3.1f} {}".format(os_size, " To")
 
     def erratum(self, dico_raster, rasterpath, mess):
         """errors handling"""
@@ -409,7 +409,7 @@ if __name__ == "__main__":
             path.splitext(raster)[1],
             textos,
         )
-        print("\n\n{0}\n{1}".format(dico_raster, dico_bands))
+        print(f"\n\n{dico_raster}\n{dico_bands}")
 
         # deleting dictionaries
         del dico_raster, dico_bands, raster

@@ -97,7 +97,7 @@ class LogManager:
 
         # create file handler
         log_file_handler = RotatingFileHandler(
-            filename=self.folder / "{}.log".format(self.label),
+            filename=self.folder / f"{self.label}.log",
             mode="a",
             maxBytes=3000000,
             backupCount=10,
@@ -117,9 +117,7 @@ class LogManager:
     def headers(self):
         """Basic information to log before other message."""
         # initialize the log
-        logger.info(
-            "\t ========== {} - Version {} ==========".format(package_name, __version__)
-        )
+        logger.info(f"\t ========== {package_name} - Version {__version__} ==========")
         logger.info(_("Operating System: {}").format(opersys()))
         logger.info(_("Architecture: {}").format(architecture()[0]))
         logger.info(_("Computer: {}").format(gethostname()))

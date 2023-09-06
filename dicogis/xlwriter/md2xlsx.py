@@ -181,7 +181,7 @@ class MetadataToXlsx(Workbook):
 
         Keyword arguments:
         """
-        super(MetadataToXlsx, self).__init__()
+        super().__init__()
         self.txt = texts
 
         # styles
@@ -319,7 +319,7 @@ class MetadataToXlsx(Workbook):
             wsprops.filterMode = True
 
             # enable filters
-            sheet.auto_filter.ref = str("A1:{}{}").format(
+            sheet.auto_filter.ref = "A1:{}{}".format(
                 get_column_letter(sheet.max_column), sheet.max_row
             )
             # columns width
@@ -352,27 +352,27 @@ class MetadataToXlsx(Workbook):
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(layer.get("error"))
             logger.warning(
-                "Problem detected: " "{0} in {1}".format(err_mess, layer.get("name"))
+                "Problem detected: " "{} in {}".format(err_mess, layer.get("name"))
             )
-            self.ws_v["A{}".format(self.idx_v)] = layer.get("name")
-            self.ws_v["A{}".format(self.idx_v)].style = "Warning Text"
-            link = r'=HYPERLINK("{0}","{1}")'.format(
+            self.ws_v[f"A{self.idx_v}"] = layer.get("name")
+            self.ws_v[f"A{self.idx_v}"].style = "Warning Text"
+            link = r'=HYPERLINK("{}","{}")'.format(
                 layer.get("folder"), self.txt.get("browse")
             )
-            self.ws_v["B{}".format(self.idx_v)] = link
-            self.ws_v["B{}".format(self.idx_v)].style = "Warning Text"
-            self.ws_v["C{}".format(self.idx_v)] = err_mess
-            self.ws_v["C{}".format(self.idx_v)].style = "Warning Text"
+            self.ws_v[f"B{self.idx_v}"] = link
+            self.ws_v[f"B{self.idx_v}"].style = "Warning Text"
+            self.ws_v[f"C{self.idx_v}"] = err_mess
+            self.ws_v[f"C{self.idx_v}"].style = "Warning Text"
             # gdal info
             if "err_gdal" in layer:
                 logger.warning(
                     "Problem detected by GDAL: "
-                    "{0} in {1}".format(err_mess, layer.get("name"))
+                    "{} in {}".format(err_mess, layer.get("name"))
                 )
-                self.ws_v["Q{}".format(self.idx_v)] = "{0} : {1}".format(
+                self.ws_v[f"Q{self.idx_v}"] = "{} : {}".format(
                     layer.get("err_gdal")[0], layer.get("err_gdal")[1]
                 )
-                self.ws_v["Q{}".format(self.idx_v)].style = "Warning Text"
+                self.ws_v[f"Q{self.idx_v}"].style = "Warning Text"
             else:
                 pass
             # Interruption of function
@@ -381,55 +381,53 @@ class MetadataToXlsx(Workbook):
             pass
 
         # Name
-        self.ws_v["A{}".format(self.idx_v)] = secure_encoding(layer, "name")
+        self.ws_v[f"A{self.idx_v}"] = secure_encoding(layer, "name")
 
         # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{0}","{1}")'.format(
+        link = r'=HYPERLINK("{}","{}")'.format(
             layer.get("folder"), self.txt.get("browse")
         )
-        self.ws_v["B{}".format(self.idx_v)] = link
-        self.ws_v["B{}".format(self.idx_v)].style = "Hyperlink"
+        self.ws_v[f"B{self.idx_v}"] = link
+        self.ws_v[f"B{self.idx_v}"].style = "Hyperlink"
 
         # Name of parent folder with an exception if this is the format name
-        self.ws_v["C{}".format(self.idx_v)] = path.basename(layer.get("folder"))
+        self.ws_v[f"C{self.idx_v}"] = path.basename(layer.get("folder"))
 
         # Fields count
-        self.ws_v["D{}".format(self.idx_v)] = layer.get("num_fields", "")
+        self.ws_v[f"D{self.idx_v}"] = layer.get("num_fields", "")
         # Objects count
-        self.ws_v["E{}".format(self.idx_v)] = layer.get("num_obj", "")
+        self.ws_v[f"E{self.idx_v}"] = layer.get("num_obj", "")
         # Geometry type
-        self.ws_v["F{}".format(self.idx_v)] = layer.get("type_geom", "")
+        self.ws_v[f"F{self.idx_v}"] = layer.get("type_geom", "")
 
         # Name of srs
-        self.ws_v["G{}".format(self.idx_v)] = secure_encoding(layer, "srs")
+        self.ws_v[f"G{self.idx_v}"] = secure_encoding(layer, "srs")
 
         # Type of SRS
-        self.ws_v["H{}".format(self.idx_v)] = layer.get("srs_type", "")
+        self.ws_v[f"H{self.idx_v}"] = layer.get("srs_type", "")
         # EPSG code
-        self.ws_v["I{}".format(self.idx_v)] = layer.get("epsg", "")
+        self.ws_v[f"I{self.idx_v}"] = layer.get("epsg", "")
         # Spatial extent
-        emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
+        emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
             layer.get("xmin"),
             layer.get("xmax"),
             layer.get("ymin"),
             layer.get("ymax"),
         )
-        self.ws_v["J{}".format(self.idx_v)].style = "wrap"
-        self.ws_v["J{}".format(self.idx_v)] = emprise
+        self.ws_v[f"J{self.idx_v}"].style = "wrap"
+        self.ws_v[f"J{self.idx_v}"] = emprise
 
         # Creation date
-        self.ws_v["K{}".format(self.idx_v)] = layer.get("date_crea")
+        self.ws_v[f"K{self.idx_v}"] = layer.get("date_crea")
         # Last update date
-        self.ws_v["L{}".format(self.idx_v)] = layer.get("date_actu")
+        self.ws_v[f"L{self.idx_v}"] = layer.get("date_actu")
         # Format of data
-        self.ws_v["M{}".format(self.idx_v)] = layer.get("format")
+        self.ws_v[f"M{self.idx_v}"] = layer.get("format")
         # dependencies
-        self.ws_v["N{}".format(self.idx_v)].style = "wrap"
-        self.ws_v["N{}".format(self.idx_v)] = " |\n ".join(
-            layer.get("dependencies", [])
-        )
+        self.ws_v[f"N{self.idx_v}"].style = "wrap"
+        self.ws_v[f"N{self.idx_v}"] = " |\n ".join(layer.get("dependencies", []))
         # total size
-        self.ws_v["O{}".format(self.idx_v)] = layer.get("total_size")
+        self.ws_v[f"O{self.idx_v}"] = layer.get("total_size")
 
         # Field informations
         fields = layer.get("fields")
@@ -459,11 +457,11 @@ class MetadataToXlsx(Workbook):
                     fields[chp][2],
                 )
             except UnicodeDecodeError:
-                logger.warning("Field name with special letters: {}".format(chp))
+                logger.warning(f"Field name with special letters: {chp}")
                 continue
 
         # Once all fieds explored, write them
-        self.ws_v["P{}".format(self.idx_v)] = champs
+        self.ws_v[f"P{self.idx_v}"] = champs
 
         # end of method
         return
@@ -478,86 +476,86 @@ class MetadataToXlsx(Workbook):
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(layer.get("error"))
             logger.warning(
-                "Problem detected: " "{0} in {1}".format(err_mess, layer.get("name"))
+                "Problem detected: " "{} in {}".format(err_mess, layer.get("name"))
             )
-            self.ws_r["A{}".format(self.idx_r)] = layer.get("name")
-            link = r'=HYPERLINK("{0}","{1}")'.format(
+            self.ws_r[f"A{self.idx_r}"] = layer.get("name")
+            link = r'=HYPERLINK("{}","{}")'.format(
                 layer.get("folder"), self.txt.get("browse")
             )
-            self.ws_r["B{}".format(self.idx_r)] = link
-            self.ws_r["B{}".format(self.idx_r)].style = "Warning Text"
-            self.ws_r["C{}".format(self.idx_r)] = err_mess
-            self.ws_r["C{}".format(self.idx_r)].style = "Warning Text"
+            self.ws_r[f"B{self.idx_r}"] = link
+            self.ws_r[f"B{self.idx_r}"].style = "Warning Text"
+            self.ws_r[f"C{self.idx_r}"] = err_mess
+            self.ws_r[f"C{self.idx_r}"].style = "Warning Text"
             # Interruption of function
             return False
         else:
             pass
 
         # Name
-        self.ws_r["A{}".format(self.idx_r)] = layer.get("name")
+        self.ws_r[f"A{self.idx_r}"] = layer.get("name")
 
         # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{0}","{1}")'.format(
+        link = r'=HYPERLINK("{}","{}")'.format(
             layer.get("folder"), self.txt.get("browse")
         )
-        self.ws_r["B{}".format(self.idx_r)] = link
-        self.ws_r["B{}".format(self.idx_r)].style = "Hyperlink"
+        self.ws_r[f"B{self.idx_r}"] = link
+        self.ws_r[f"B{self.idx_r}"].style = "Hyperlink"
 
         # Name of parent folder with an exception if this is the format name
-        self.ws_r["C{}".format(self.idx_r)] = path.basename(layer.get("folder"))
+        self.ws_r[f"C{self.idx_r}"] = path.basename(layer.get("folder"))
 
         # Image dimensions
-        self.ws_r["D{}".format(self.idx_r)] = layer.get("num_rows")
-        self.ws_r["E{}".format(self.idx_r)] = layer.get("num_cols")
+        self.ws_r[f"D{self.idx_r}"] = layer.get("num_rows")
+        self.ws_r[f"E{self.idx_r}"] = layer.get("num_cols")
 
         # Pixel dimensions
-        self.ws_r["F{}".format(self.idx_r)] = layer.get("pixelWidth")
-        self.ws_r["G{}".format(self.idx_r)] = layer.get("pixelHeight")
+        self.ws_r[f"F{self.idx_r}"] = layer.get("pixelWidth")
+        self.ws_r[f"G{self.idx_r}"] = layer.get("pixelHeight")
 
         # Image dimensions
-        self.ws_r["H{}".format(self.idx_r)] = layer.get("xOrigin")
-        self.ws_r["I{}".format(self.idx_r)] = layer.get("yOrigin")
+        self.ws_r[f"H{self.idx_r}"] = layer.get("xOrigin")
+        self.ws_r[f"I{self.idx_r}"] = layer.get("yOrigin")
 
         # Type of SRS
-        self.ws_r["J{}".format(self.idx_r)] = layer.get("srs_type")
+        self.ws_r[f"J{self.idx_r}"] = layer.get("srs_type")
         # EPSG code
-        self.ws_r["K{}".format(self.idx_r)] = layer.get("epsg")
+        self.ws_r[f"K{self.idx_r}"] = layer.get("epsg")
 
         # Creation date
-        self.ws_r["M{}".format(self.idx_r)] = layer.get("date_crea")
+        self.ws_r[f"M{self.idx_r}"] = layer.get("date_crea")
         # Last update date
-        self.ws_r["N{}".format(self.idx_r)] = layer.get("date_actu")
+        self.ws_r[f"N{self.idx_r}"] = layer.get("date_actu")
 
         # Number of bands
-        self.ws_r["O{}".format(self.idx_r)] = layer.get("num_bands")
+        self.ws_r[f"O{self.idx_r}"] = layer.get("num_bands")
 
         # Format of data
-        self.ws_r["P{}".format(self.idx_r)] = "{0} {1}".format(
+        self.ws_r[f"P{self.idx_r}"] = "{} {}".format(
             layer.get("format"), layer.get("format_version")
         )
         # Compression rate
-        self.ws_r["Q{}".format(self.idx_r)] = layer.get("compr_rate")
+        self.ws_r[f"Q{self.idx_r}"] = layer.get("compr_rate")
 
         # Color referential
-        self.ws_r["R{}".format(self.idx_r)] = layer.get("color_ref")
+        self.ws_r[f"R{self.idx_r}"] = layer.get("color_ref")
 
         # Dependencies
-        self.ws_r["S{}".format(self.idx_v)].style = "wrap"
-        self.ws_r["S{}".format(self.idx_v)] = " |\n ".join(layer.get("dependencies"))
+        self.ws_r[f"S{self.idx_v}"].style = "wrap"
+        self.ws_r[f"S{self.idx_v}"] = " |\n ".join(layer.get("dependencies"))
 
         # total size of file and its dependencies
-        self.ws_r["T{}".format(self.idx_r)] = layer.get("total_size")
+        self.ws_r[f"T{self.idx_r}"] = layer.get("total_size")
 
         # in case of a source error
         if layer.get("err_gdal", [0])[0] != 0:
             logger.warning(
                 "Problem detected by GDAL: "
-                "{0} in {1}".format(layer.get("err_gdal"), layer.get("name"))
+                "{} in {}".format(layer.get("err_gdal"), layer.get("name"))
             )
-            self.ws_r["U{}".format(self.idx_r)] = "{0} : {1}".format(
+            self.ws_r[f"U{self.idx_r}"] = "{} : {}".format(
                 layer.get("err_gdal")[0], layer.get("err_gdal")[1]
             )
-            self.ws_r["U{}".format(self.idx_r)].style = "Warning Text"
+            self.ws_r[f"U{self.idx_r}"].style = "Warning Text"
         else:
             pass
 
@@ -574,26 +572,26 @@ class MetadataToXlsx(Workbook):
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(filedb.get("error"))
             logger.warning(
-                "Problem detected: " "{0} in {1}".format(err_mess, filedb.get("name"))
+                "Problem detected: " "{} in {}".format(err_mess, filedb.get("name"))
             )
-            self.ws_fdb["A{}".format(self.idx_f)] = filedb.get("name")
-            link = r'=HYPERLINK("{0}","{1}")'.format(
+            self.ws_fdb[f"A{self.idx_f}"] = filedb.get("name")
+            link = r'=HYPERLINK("{}","{}")'.format(
                 filedb.get("folder"), self.txt.get("browse")
             )
-            self.ws_fdb["B{}".format(self.idx_f)] = link
-            self.ws_fdb["B{}".format(self.idx_f)].style = "Warning Text"
-            self.ws_fdb["C{}".format(self.idx_f)] = err_mess
-            self.ws_fdb["C{}".format(self.idx_f)].style = "Warning Text"
+            self.ws_fdb[f"B{self.idx_f}"] = link
+            self.ws_fdb[f"B{self.idx_f}"].style = "Warning Text"
+            self.ws_fdb[f"C{self.idx_f}"] = err_mess
+            self.ws_fdb[f"C{self.idx_f}"].style = "Warning Text"
             # gdal info
             if "err_gdal" in filedb:
                 logger.warning(
                     "Problem detected by GDAL: "
-                    "{0} in {1}".format(err_mess, filedb.get("name"))
+                    "{} in {}".format(err_mess, filedb.get("name"))
                 )
-                self.ws_fdb["Q{}".format(self.idx_v)] = "{0} : {1}".format(
+                self.ws_fdb[f"Q{self.idx_v}"] = "{} : {}".format(
                     filedb.get("err_gdal")[0], filedb.get("err_gdal")[1]
                 )
-                self.ws_fdb["Q{}".format(self.idx_v)].style = "Warning Text"
+                self.ws_fdb[f"Q{self.idx_v}"].style = "Warning Text"
             else:
                 pass
             # Interruption of function
@@ -602,22 +600,22 @@ class MetadataToXlsx(Workbook):
             pass
 
         # Name
-        self.ws_fdb["A{}".format(self.idx_f)] = filedb.get("name")
+        self.ws_fdb[f"A{self.idx_f}"] = filedb.get("name")
 
         # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{0}","{1}")'.format(
+        link = r'=HYPERLINK("{}","{}")'.format(
             filedb.get("folder"), self.txt.get("browse")
         )
-        self.ws_fdb["B{}".format(self.idx_f)] = link
-        self.ws_fdb["B{}".format(self.idx_f)].style = "Hyperlink"
+        self.ws_fdb[f"B{self.idx_f}"] = link
+        self.ws_fdb[f"B{self.idx_f}"].style = "Hyperlink"
 
-        self.ws_fdb["C{}".format(self.idx_f)] = path.basename(filedb.get("folder"))
-        self.ws_fdb["D{}".format(self.idx_f)] = filedb.get("total_size")
-        self.ws_fdb["E{}".format(self.idx_f)] = filedb.get("date_crea")
-        self.ws_fdb["F{}".format(self.idx_f)] = filedb.get("date_actu")
-        self.ws_fdb["G{}".format(self.idx_f)] = filedb.get("layers_count")
-        self.ws_fdb["H{}".format(self.idx_f)] = filedb.get("total_fields")
-        self.ws_fdb["I{}".format(self.idx_f)] = filedb.get("total_objs")
+        self.ws_fdb[f"C{self.idx_f}"] = path.basename(filedb.get("folder"))
+        self.ws_fdb[f"D{self.idx_f}"] = filedb.get("total_size")
+        self.ws_fdb[f"E{self.idx_f}"] = filedb.get("date_crea")
+        self.ws_fdb[f"F{self.idx_f}"] = filedb.get("date_actu")
+        self.ws_fdb[f"G{self.idx_f}"] = filedb.get("layers_count")
+        self.ws_fdb[f"H{self.idx_f}"] = filedb.get("total_fields")
+        self.ws_fdb[f"I{self.idx_f}"] = filedb.get("total_objs")
 
         # parsing layers
         for layer_idx, layer_name in zip(
@@ -628,44 +626,44 @@ class MetadataToXlsx(Workbook):
             champs = ""
             # get the layer informations
             try:
-                gdb_layer = filedb.get("{0}_{1}".format(layer_idx, layer_name))
+                gdb_layer = filedb.get(f"{layer_idx}_{layer_name}")
             except UnicodeError as err:
-                logger.error("Encoding error. Trace: {}".format(err))
+                logger.error(f"Encoding error. Trace: {err}")
                 continue
             # in case of a source error
             if gdb_layer.get("error"):
                 err_mess = self.txt.get(gdb_layer.get("error"))
                 logger.warning(
-                    "Problem detected: {0} in {1}".format(
+                    "Problem detected: {} in {}".format(
                         err_mess, gdb_layer.get("title")
                     )
                 )
-                self.ws_fdb["G{}".format(self.idx_f)] = gdb_layer.get("title")
-                self.ws_fdb["G{}".format(self.idx_f)].style = "Warning Text"
-                self.ws_fdb["H{}".format(self.idx_f)] = err_mess
-                self.ws_fdb["H{}".format(self.idx_f)].style = "Warning Text"
+                self.ws_fdb[f"G{self.idx_f}"] = gdb_layer.get("title")
+                self.ws_fdb[f"G{self.idx_f}"].style = "Warning Text"
+                self.ws_fdb[f"H{self.idx_f}"] = err_mess
+                self.ws_fdb[f"H{self.idx_f}"].style = "Warning Text"
                 # Interruption of function
                 continue
             else:
                 pass
 
-            self.ws_fdb["G{}".format(self.idx_f)] = gdb_layer.get("title")
-            self.ws_fdb["H{}".format(self.idx_f)] = gdb_layer.get("num_fields")
-            self.ws_fdb["I{}".format(self.idx_f)] = gdb_layer.get("num_obj")
-            self.ws_fdb["J{}".format(self.idx_f)] = gdb_layer.get("type_geom")
-            self.ws_fdb["K{}".format(self.idx_f)] = secure_encoding(gdb_layer, "srs")
-            self.ws_fdb["L{}".format(self.idx_f)] = gdb_layer.get("srs_type")
-            self.ws_fdb["M{}".format(self.idx_f)] = gdb_layer.get("epsg")
+            self.ws_fdb[f"G{self.idx_f}"] = gdb_layer.get("title")
+            self.ws_fdb[f"H{self.idx_f}"] = gdb_layer.get("num_fields")
+            self.ws_fdb[f"I{self.idx_f}"] = gdb_layer.get("num_obj")
+            self.ws_fdb[f"J{self.idx_f}"] = gdb_layer.get("type_geom")
+            self.ws_fdb[f"K{self.idx_f}"] = secure_encoding(gdb_layer, "srs")
+            self.ws_fdb[f"L{self.idx_f}"] = gdb_layer.get("srs_type")
+            self.ws_fdb[f"M{self.idx_f}"] = gdb_layer.get("epsg")
 
             # Spatial extent
-            emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
+            emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
                 gdb_layer.get("xmin"),
                 gdb_layer.get("xmax"),
                 gdb_layer.get("ymin"),
                 gdb_layer.get("ymax"),
             )
-            self.ws_fdb["N{}".format(self.idx_f)].style = "wrap"
-            self.ws_fdb["N{}".format(self.idx_f)] = emprise
+            self.ws_fdb[f"N{self.idx_f}"].style = "wrap"
+            self.ws_fdb[f"N{self.idx_f}"] = emprise
 
             # Field informations
             fields = gdb_layer.get("fields")
@@ -695,11 +693,11 @@ class MetadataToXlsx(Workbook):
                         fields[chp][2],
                     )
                 except UnicodeDecodeError:
-                    logger.warning("Field name with special letters: {}".format(chp))
+                    logger.warning(f"Field name with special letters: {chp}")
                     continue
 
             # Once all fieds explored, write them
-            self.ws_fdb["O{}".format(self.idx_f)] = champs
+            self.ws_fdb[f"O{self.idx_f}"] = champs
 
         # end of method
         return
@@ -717,48 +715,48 @@ class MetadataToXlsx(Workbook):
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(mapdoc.get("error"))
             logger.warning(
-                "Problem detected: " "{0} in {1}".format(err_mess, mapdoc.get("name"))
+                "Problem detected: " "{} in {}".format(err_mess, mapdoc.get("name"))
             )
-            self.ws_mdocs["A{}".format(self.idx_m)] = mapdoc.get("name")
-            self.ws_mdocs["A{}".format(self.idx_m)].style = "Warning Text"
-            link = r'=HYPERLINK("{0}","{1}")'.format(
+            self.ws_mdocs[f"A{self.idx_m}"] = mapdoc.get("name")
+            self.ws_mdocs[f"A{self.idx_m}"].style = "Warning Text"
+            link = r'=HYPERLINK("{}","{}")'.format(
                 mapdoc.get("folder"), self.txt.get("browse")
             )
-            self.ws_mdocs["B{}".format(self.idx_m)] = link
-            self.ws_mdocs["B{}".format(self.idx_m)].style = "Warning Text"
-            self.ws_mdocs["C{}".format(self.idx_m)] = err_mess
-            self.ws_mdocs["C{}".format(self.idx_m)].style = "Warning Text"
+            self.ws_mdocs[f"B{self.idx_m}"] = link
+            self.ws_mdocs[f"B{self.idx_m}"].style = "Warning Text"
+            self.ws_mdocs[f"C{self.idx_m}"] = err_mess
+            self.ws_mdocs[f"C{self.idx_m}"].style = "Warning Text"
             # Interruption of function
             return False
         else:
             pass
 
         # Name
-        self.ws_mdocs["A{}".format(self.idx_m)] = mapdoc.get("name")
+        self.ws_mdocs[f"A{self.idx_m}"] = mapdoc.get("name")
 
         # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{0}","{1}")'.format(
+        link = r'=HYPERLINK("{}","{}")'.format(
             mapdoc.get("folder"), self.txt.get("browse")
         )
-        self.ws_mdocs["B{}".format(self.idx_m)] = link
-        self.ws_mdocs["B{}".format(self.idx_m)].style = "Hyperlink"
-        self.ws_mdocs["C{}".format(self.idx_m)] = path.dirname(mapdoc.get("folder"))
-        self.ws_mdocs["D{}".format(self.idx_m)] = mapdoc.get("title")
-        self.ws_mdocs["E{}".format(self.idx_m)] = mapdoc.get("creator_prod")
-        self.ws_mdocs["F{}".format(self.idx_m)] = mapdoc.get("keywords")
-        self.ws_mdocs["G{}".format(self.idx_m)] = mapdoc.get("subject")
-        self.ws_mdocs["H{}".format(self.idx_m)] = mapdoc.get("dpi")
-        self.ws_mdocs["I{}".format(self.idx_m)] = mapdoc.get("total_size")
-        self.ws_mdocs["J{}".format(self.idx_m)] = mapdoc.get("date_crea")
-        self.ws_mdocs["K{}".format(self.idx_m)] = mapdoc.get("date_actu")
-        self.ws_mdocs["L{}".format(self.idx_m)] = mapdoc.get("xOrigin")
-        self.ws_mdocs["M{}".format(self.idx_m)] = mapdoc.get("yOrigin")
-        self.ws_mdocs["N{}".format(self.idx_m)] = secure_encoding(mapdoc, "srs")
-        self.ws_mdocs["O{}".format(self.idx_m)] = mapdoc.get("srs_type")
-        self.ws_mdocs["P{}".format(self.idx_m)] = mapdoc.get("epsg")
-        self.ws_mdocs["Q{}".format(self.idx_m)] = mapdoc.get("layers_count")
-        self.ws_mdocs["R{}".format(self.idx_m)] = mapdoc.get("total_fields")
-        self.ws_mdocs["S{}".format(self.idx_m)] = mapdoc.get("total_objs")
+        self.ws_mdocs[f"B{self.idx_m}"] = link
+        self.ws_mdocs[f"B{self.idx_m}"].style = "Hyperlink"
+        self.ws_mdocs[f"C{self.idx_m}"] = path.dirname(mapdoc.get("folder"))
+        self.ws_mdocs[f"D{self.idx_m}"] = mapdoc.get("title")
+        self.ws_mdocs[f"E{self.idx_m}"] = mapdoc.get("creator_prod")
+        self.ws_mdocs[f"F{self.idx_m}"] = mapdoc.get("keywords")
+        self.ws_mdocs[f"G{self.idx_m}"] = mapdoc.get("subject")
+        self.ws_mdocs[f"H{self.idx_m}"] = mapdoc.get("dpi")
+        self.ws_mdocs[f"I{self.idx_m}"] = mapdoc.get("total_size")
+        self.ws_mdocs[f"J{self.idx_m}"] = mapdoc.get("date_crea")
+        self.ws_mdocs[f"K{self.idx_m}"] = mapdoc.get("date_actu")
+        self.ws_mdocs[f"L{self.idx_m}"] = mapdoc.get("xOrigin")
+        self.ws_mdocs[f"M{self.idx_m}"] = mapdoc.get("yOrigin")
+        self.ws_mdocs[f"N{self.idx_m}"] = secure_encoding(mapdoc, "srs")
+        self.ws_mdocs[f"O{self.idx_m}"] = mapdoc.get("srs_type")
+        self.ws_mdocs[f"P{self.idx_m}"] = mapdoc.get("epsg")
+        self.ws_mdocs[f"Q{self.idx_m}"] = mapdoc.get("layers_count")
+        self.ws_mdocs[f"R{self.idx_m}"] = mapdoc.get("total_fields")
+        self.ws_mdocs[f"S{self.idx_m}"] = mapdoc.get("total_objs")
 
         for layer_idx, layer_name in zip(
             mapdoc.get("layers_idx"), mapdoc.get("layers_names")
@@ -769,31 +767,31 @@ class MetadataToXlsx(Workbook):
 
             # get the layer informations
             try:
-                mdoc_layer = mapdoc.get("{0}_{1}".format(layer_idx, layer_name))
+                mdoc_layer = mapdoc.get(f"{layer_idx}_{layer_name}")
             except UnicodeDecodeError:
                 mdoc_layer = mapdoc.get(
-                    "{0}_{1}".format(layer_idx, layer_name.encode("utf8", "replace"))
+                    "{}_{}".format(layer_idx, layer_name.encode("utf8", "replace"))
                 )
             # in case of a source error
             if mdoc_layer.get("error"):
                 err_mess = self.txt.get(mdoc_layer.get("error"))
                 logger.warning(
-                    "Problem detected: {0} in {1}".format(
+                    "Problem detected: {} in {}".format(
                         err_mess, mdoc_layer.get("title")
                     )
                 )
-                self.ws_mdocs["Q{}".format(self.idx_f)] = mdoc_layer.get("title")
-                self.ws_mdocs["Q{}".format(self.idx_f)].style = "Warning Text"
-                self.ws_mdocs["R{}".format(self.idx_f)] = err_mess
-                self.ws_mdocs["R{}".format(self.idx_f)].style = "Warning Text"
+                self.ws_mdocs[f"Q{self.idx_f}"] = mdoc_layer.get("title")
+                self.ws_mdocs[f"Q{self.idx_f}"].style = "Warning Text"
+                self.ws_mdocs[f"R{self.idx_f}"] = err_mess
+                self.ws_mdocs[f"R{self.idx_f}"].style = "Warning Text"
                 # loop must go on
                 continue
             else:
                 pass
             # layer info
-            self.ws_mdocs["Q{}".format(self.idx_m)] = mdoc_layer.get("title")
-            self.ws_mdocs["R{}".format(self.idx_m)] = mdoc_layer.get("num_fields")
-            self.ws_mdocs["S{}".format(self.idx_m)] = mdoc_layer.get("num_objs")
+            self.ws_mdocs[f"Q{self.idx_m}"] = mdoc_layer.get("title")
+            self.ws_mdocs[f"R{self.idx_m}"] = mdoc_layer.get("num_fields")
+            self.ws_mdocs[f"S{self.idx_m}"] = mdoc_layer.get("num_objs")
 
             # Field informations
             fields = mdoc_layer.get("fields")
@@ -840,7 +838,7 @@ class MetadataToXlsx(Workbook):
                     continue
 
             # Once all fieds explored, write them
-            self.ws_fdb["T{}".format(self.idx_f)] = champs
+            self.ws_fdb[f"T{self.idx_f}"] = champs
 
         # end of method
         return
@@ -858,43 +856,43 @@ class MetadataToXlsx(Workbook):
             # sheet.row(line).set_style(self.xls_erreur)
             err_mess = self.txt.get(cad.get("error"))
             logger.warning(
-                "Problem detected: {0} in {1}".format(err_mess, cad.get("name"))
+                "Problem detected: {} in {}".format(err_mess, cad.get("name"))
             )
-            self.ws_cad["A{}".format(self.idx_c)] = cad.get("name")
-            self.ws_cad["A{}".format(self.idx_c)].style = "Warning Text"
-            link = r'=HYPERLINK("{0}","{1}")'.format(
+            self.ws_cad[f"A{self.idx_c}"] = cad.get("name")
+            self.ws_cad[f"A{self.idx_c}"].style = "Warning Text"
+            link = r'=HYPERLINK("{}","{}")'.format(
                 cad.get("folder"), self.txt.get("browse")
             )
-            self.ws_cad["B{}".format(self.idx_c)] = link
-            self.ws_cad["B{}".format(self.idx_c)].style = "Warning Text"
-            self.ws_cad["C{}".format(self.idx_c)] = err_mess
-            self.ws_cad["C{}".format(self.idx_c)].style = "Warning Text"
+            self.ws_cad[f"B{self.idx_c}"] = link
+            self.ws_cad[f"B{self.idx_c}"].style = "Warning Text"
+            self.ws_cad[f"C{self.idx_c}"] = err_mess
+            self.ws_cad[f"C{self.idx_c}"].style = "Warning Text"
             # Interruption of function
             return False
         else:
             pass
 
         # Name
-        self.ws_cad["A{}".format(self.idx_c)] = cad.get("name")
+        self.ws_cad[f"A{self.idx_c}"] = cad.get("name")
 
         # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{0}","{1}")'.format(
+        link = r'=HYPERLINK("{}","{}")'.format(
             cad.get("folder"), self.txt.get("browse")
         )
-        self.ws_cad["B{}".format(self.idx_c)] = link
-        self.ws_cad["B{}".format(self.idx_c)].style = "Hyperlink"
+        self.ws_cad[f"B{self.idx_c}"] = link
+        self.ws_cad[f"B{self.idx_c}"].style = "Hyperlink"
 
         # Name of parent folder with an exception if this is the format name
-        self.ws_cad["C{}".format(self.idx_c)] = path.basename(cad.get("folder"))
+        self.ws_cad[f"C{self.idx_c}"] = path.basename(cad.get("folder"))
         # total size
-        self.ws_cad["D{}".format(self.idx_c)] = cad.get("total_size")
+        self.ws_cad[f"D{self.idx_c}"] = cad.get("total_size")
         # Creation date
-        self.ws_cad["E{}".format(self.idx_c)] = cad.get("date_crea")
+        self.ws_cad[f"E{self.idx_c}"] = cad.get("date_crea")
         # Last update date
-        self.ws_cad["F{}".format(self.idx_c)] = cad.get("date_actu")
-        self.ws_cad["G{}".format(self.idx_c)] = cad.get("layers_count")
-        self.ws_cad["H{}".format(self.idx_c)] = cad.get("total_fields")
-        self.ws_cad["I{}".format(self.idx_c)] = cad.get("total_objs")
+        self.ws_cad[f"F{self.idx_c}"] = cad.get("date_actu")
+        self.ws_cad[f"G{self.idx_c}"] = cad.get("layers_count")
+        self.ws_cad[f"H{self.idx_c}"] = cad.get("total_fields")
+        self.ws_cad[f"I{self.idx_c}"] = cad.get("total_objs")
 
         # parsing layers
         for layer_idx, layer_name in zip(
@@ -905,44 +903,41 @@ class MetadataToXlsx(Workbook):
             champs = ""
             # get the layer informations
             try:
-                layer = cad.get("{0}_{1}".format(layer_idx, layer_name))
+                layer = cad.get(f"{layer_idx}_{layer_name}")
             except UnicodeDecodeError:
-                layer = cad.get(
-                    "{0}_{1}".format(layer_idx, layer_name.decode("latin1"))
-                )
+                layer = cad.get("{}_{}".format(layer_idx, layer_name.decode("latin1")))
             # in case of a source error
             if layer.get("error"):
                 err_mess = self.txt.get(layer.get("error"))
                 logger.warning(
-                    "Problem detected: "
-                    "{0} in {1}".format(err_mess, layer.get("title"))
+                    "Problem detected: " "{} in {}".format(err_mess, layer.get("title"))
                 )
-                self.ws_cad["G{}".format(self.idx_c)] = layer.get("title")
-                self.ws_cad["G{}".format(self.idx_c)].style = "Warning Text"
-                self.ws_cad["H{}".format(self.idx_c)] = err_mess
-                self.ws_cad["H{}".format(self.idx_c)].style = "Warning Text"
+                self.ws_cad[f"G{self.idx_c}"] = layer.get("title")
+                self.ws_cad[f"G{self.idx_c}"].style = "Warning Text"
+                self.ws_cad[f"H{self.idx_c}"] = err_mess
+                self.ws_cad[f"H{self.idx_c}"].style = "Warning Text"
                 # Interruption of function
                 continue
             else:
                 pass
 
-            self.ws_cad["G{}".format(self.idx_c)] = layer.get("title")
-            self.ws_cad["H{}".format(self.idx_c)] = layer.get("num_fields")
-            self.ws_cad["I{}".format(self.idx_c)] = layer.get("num_obj")
-            self.ws_cad["J{}".format(self.idx_c)] = layer.get("type_geom")
-            self.ws_cad["K{}".format(self.idx_c)] = layer.get("srs")
-            self.ws_cad["L{}".format(self.idx_c)] = layer.get("srs_type")
-            self.ws_cad["M{}".format(self.idx_c)] = layer.get("epsg")
+            self.ws_cad[f"G{self.idx_c}"] = layer.get("title")
+            self.ws_cad[f"H{self.idx_c}"] = layer.get("num_fields")
+            self.ws_cad[f"I{self.idx_c}"] = layer.get("num_obj")
+            self.ws_cad[f"J{self.idx_c}"] = layer.get("type_geom")
+            self.ws_cad[f"K{self.idx_c}"] = layer.get("srs")
+            self.ws_cad[f"L{self.idx_c}"] = layer.get("srs_type")
+            self.ws_cad[f"M{self.idx_c}"] = layer.get("epsg")
 
             # Spatial extent
-            emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
+            emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
                 layer.get("xmin"),
                 layer.get("xmax"),
                 layer.get("ymin"),
                 layer.get("ymax"),
             )
-            self.ws_cad["N{}".format(self.idx_c)].style = "wrap"
-            self.ws_cad["N{}".format(self.idx_c)] = emprise
+            self.ws_cad[f"N{self.idx_c}"].style = "wrap"
+            self.ws_cad[f"N{self.idx_c}"] = emprise
 
             # Field informations
             fields = layer.get("fields")
@@ -989,7 +984,7 @@ class MetadataToXlsx(Workbook):
                     continue
 
             # Once all fieds explored, write them
-            self.ws_cad["O{}".format(self.idx_c)] = champs
+            self.ws_cad[f"O{self.idx_c}"] = champs
 
         # End of method
         return
@@ -1002,32 +997,32 @@ class MetadataToXlsx(Workbook):
         champs = ""
 
         # layer name
-        self.ws_sgbd["A{}".format(self.idx_s)] = layer.get("name")
+        self.ws_sgbd[f"A{self.idx_s}"] = layer.get("name")
 
         # connection string
-        self.ws_sgbd["B{}".format(self.idx_s)] = "{}@{}:{}-{}".format(
+        self.ws_sgbd[f"B{self.idx_s}"] = "{}@{}:{}-{}".format(
             layer.get("user"),
             layer.get("sgbd_host"),
             layer.get("sgbd_port"),
             layer.get("db_name"),
         )
-        self.ws_sgbd["B{}".format(self.idx_s)].style = "Hyperlink"
+        self.ws_sgbd[f"B{self.idx_s}"].style = "Hyperlink"
         # schema
-        self.ws_sgbd["C{}".format(self.idx_s)] = layer.get("folder")
+        self.ws_sgbd[f"C{self.idx_s}"] = layer.get("folder")
 
         # in case of a source error
         if "error" in layer:
-            self.ws_sgbd["D{}".format(self.idx_s)] = layer.get("error")
-            self.ws_sgbd["A{}".format(self.idx_s)].style = "Warning Text"
-            self.ws_sgbd["B{}".format(self.idx_s)].style = "Warning Text"
-            self.ws_sgbd["C{}".format(self.idx_s)].style = "Warning Text"
-            self.ws_sgbd["D{}".format(self.idx_s)].style = "Warning Text"
+            self.ws_sgbd[f"D{self.idx_s}"] = layer.get("error")
+            self.ws_sgbd[f"A{self.idx_s}"].style = "Warning Text"
+            self.ws_sgbd[f"B{self.idx_s}"].style = "Warning Text"
+            self.ws_sgbd[f"C{self.idx_s}"].style = "Warning Text"
+            self.ws_sgbd[f"D{self.idx_s}"].style = "Warning Text"
             # gdal info
             if "err_gdal" in layer:
-                self.ws_v["M{}".format(self.idx_v)] = "{0} : {1}".format(
+                self.ws_v[f"M{self.idx_v}"] = "{} : {}".format(
                     layer.get("err_gdal")[0], layer.get("err_gdal")[1]
                 )
-                self.ws_v["M{}".format(self.idx_v)].style = "Warning Text"
+                self.ws_v[f"M{self.idx_v}"].style = "Warning Text"
             else:
                 pass
             # interruption of function
@@ -1036,27 +1031,27 @@ class MetadataToXlsx(Workbook):
             pass
 
         # structure
-        self.ws_sgbd["D{}".format(self.idx_s)] = layer.get("num_fields")
-        self.ws_sgbd["E{}".format(self.idx_s)] = layer.get("num_obj")
-        self.ws_sgbd["F{}".format(self.idx_s)] = layer.get("type_geom")
+        self.ws_sgbd[f"D{self.idx_s}"] = layer.get("num_fields")
+        self.ws_sgbd[f"E{self.idx_s}"] = layer.get("num_obj")
+        self.ws_sgbd[f"F{self.idx_s}"] = layer.get("type_geom")
 
         # SRS
-        self.ws_sgbd["G{}".format(self.idx_s)] = layer.get("srs")
-        self.ws_sgbd["H{}".format(self.idx_s)] = layer.get("srs_type")
-        self.ws_sgbd["I{}".format(self.idx_s)] = layer.get("epsg")
+        self.ws_sgbd[f"G{self.idx_s}"] = layer.get("srs")
+        self.ws_sgbd[f"H{self.idx_s}"] = layer.get("srs_type")
+        self.ws_sgbd[f"I{self.idx_s}"] = layer.get("epsg")
 
         # Spatial extent
-        emprise = "Xmin : {0} - Xmax : {1} | \nYmin : {2} - Ymax : {3}".format(
+        emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
             layer.get("xmin"),
             layer.get("xmax"),
             layer.get("ymin"),
             layer.get("ymax"),
         )
-        self.ws_sgbd["J{}".format(self.idx_s)].style = "wrap"
-        self.ws_sgbd["J{}".format(self.idx_s)] = emprise
+        self.ws_sgbd[f"J{self.idx_s}"].style = "wrap"
+        self.ws_sgbd[f"J{self.idx_s}"] = emprise
 
         # type
-        self.ws_sgbd["K{}".format(self.idx_s)] = layer.get("format")
+        self.ws_sgbd[f"K{self.idx_s}"] = layer.get("format")
 
         # Field informations
         fields = layer.get("fields")
@@ -1101,7 +1096,7 @@ class MetadataToXlsx(Workbook):
                 continue
 
         # Once all fieds explored, write them
-        self.ws_sgbd["L{}".format(self.idx_s)] = champs
+        self.ws_sgbd[f"L{self.idx_s}"] = champs
 
         # end of method
         return

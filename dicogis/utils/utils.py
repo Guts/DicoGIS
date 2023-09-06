@@ -43,20 +43,20 @@ logger = logging.getLogger(__name__)
 # ###############################
 
 
-class Utilities(object):
+class Utilities:
     def __init__(self):
         """DicoGIS specific utilities"""
-        super(Utilities, self).__init__()
+        super().__init__()
 
     def open_dir_file(self, target):
         """Open a file or directory in the explorer of the operating system."""
         # check if the file or the directory exists
         if not path.exists(target):
-            raise IOError("No such file: {0}".format(target))
+            raise OSError(f"No such file: {target}")
 
         # check the read permission
         if not access(target, R_OK):
-            raise IOError("Cannot access file: {0}".format(target))
+            raise OSError(f"Cannot access file: {target}")
 
         # open the directory or the file according to the os
         if opersys == "win32":  # Windows
@@ -109,7 +109,7 @@ class Utilities(object):
         if out_name != ".xlsx":
             try:
                 wb.save(out_path)
-            except IOError:
+            except OSError:
                 avert(
                     title="Concurrent access",
                     message="Please close Microsoft Excel before saving.",

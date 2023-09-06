@@ -27,12 +27,12 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class GeoInfosGenericReader(object):
+class GeoInfosGenericReader:
     """TO DOC."""
 
     def __init__(self):
         """Instanciate class."""
-        super(GeoInfosGenericReader, self).__init__()
+        super().__init__()
 
     def get_extent_as_tuple(self, layer_obj):
         """Get spatial extent (bounding box)."""
@@ -142,25 +142,21 @@ class GeoInfosGenericReader(object):
         try:
             if srs.GetName() is not None:
                 srs_name = srs.GetName()
-            elif srs.IsGeographic() and srs.GetAttrValue(str("GEOGCS")):
-                srs_name = srs.GetAttrValue(str("GEOGCS")).replace("_", " ")
-            elif srs.IsProjected() and srs.GetAttrValue(str("PROJCS")):
-                srs_name = srs.GetAttrValue(str("PROJCS")).replace("_", " ")
+            elif srs.IsGeographic() and srs.GetAttrValue("GEOGCS"):
+                srs_name = srs.GetAttrValue("GEOGCS").replace("_", " ")
+            elif srs.IsProjected() and srs.GetAttrValue("PROJCS"):
+                srs_name = srs.GetAttrValue("PROJCS").replace("_", " ")
             else:
-                srs_name = srs.GetAttrValue(str("PROJECTION")).replace("_", " ")
+                srs_name = srs.GetAttrValue("PROJECTION").replace("_", " ")
         except UnicodeDecodeError:
-            if srs.GetAttrValue(str("PROJCS")) != "unnamed":
-                srs_name = (
-                    srs.GetAttrValue(str("PROJCS")).decode("latin1").replace("_", " ")
-                )
+            if srs.GetAttrValue("PROJCS") != "unnamed":
+                srs_name = srs.GetAttrValue("PROJCS").decode("latin1").replace("_", " ")
             else:
                 srs_name = (
-                    srs.GetAttrValue(str("PROJECTION"))
-                    .decode("latin1")
-                    .replace("_", " ")
+                    srs.GetAttrValue("PROJECTION").decode("latin1").replace("_", " ")
                 )
         finally:
-            srs_epsg = srs.GetAttrValue(str("AUTHORITY"), 1)
+            srs_epsg = srs.GetAttrValue("AUTHORITY", 1)
 
         # World SRS default
         if srs_epsg == "4326" and srs_name == "None":

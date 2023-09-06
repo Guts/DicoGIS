@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class GdalErrorHandler(object):
+class GdalErrorHandler:
     def __init__(self):
         """Callable error handler.
 

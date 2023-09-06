@@ -20,13 +20,13 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class Utils(object):
+class Utils:
     """TO DOC"""
 
     def __init__(self, ds_type="flat"):
         """Instanciate Utils class."""
         self.ds_type = ds_type
-        super(Utils, self).__init__()
+        super().__init__()
 
     def list_dependencies(self, main_file_path, exclude=""):
         """List dependant files around a main file."""
@@ -69,10 +69,10 @@ class Utils(object):
         # prettify units
         for size_cat in ("octets", "Ko", "Mo", "Go"):
             if total_size < 1024.0:
-                return "%3.1f %s" % (total_size, size_cat)
+                return "{:3.1f} {}".format(total_size, size_cat)
             total_size /= 1024.0
 
-        return "%3.1f %s" % (total_size, " To")
+        return "{:3.1f} {}".format(total_size, " To")
 
     def erratum(self, ctner=dict(), src="", ds_lyr=None, mess_type=1, mess=""):
         """Handle errors message and store it into __dict__.

@@ -58,7 +58,7 @@ setup(
     url=__about__.__uri__,
     project_urls={
         "Docs": __about__.__uri_doc__,
-        "Bug Reports": "{}issues/".format(__about__.__uri__),
+        "Bug Reports": f"{__about__.__uri__}issues/",
         "Source": __about__.__uri__,
     },
     py_modules=["dicogis"],

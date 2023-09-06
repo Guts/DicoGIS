@@ -206,7 +206,7 @@ if __name__ == "__main__":
         # reset recipient data
         dico_dataset.clear()
         # getting the informations
-        print("\n{0}".format(vector))
+        print(f"\n{vector}")
         info_ds = vectorReader.infos_dataset(
             path.abspath(vector), dico_dataset, txt=textos
         )
