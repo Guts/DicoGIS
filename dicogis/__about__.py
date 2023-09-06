@@ -26,12 +26,20 @@ __author__ = "Julien Moura"
 __copyright__ = f"2014 - {date.today().year}, {__author__}"
 __email__ = "dev@ingeoveritas.com"
 __executable_name__ = "DicoGIS.exe"
+__package_name__ = "dicogis"
+__keywords__ = ["GIS", "metadata", "INSPIRE", "GDAL", "OGR", "data management"]
 __license__ = "GNU General Public License v3.0"
-__summary__ = "Create Excel spreadsheet describing geographical data."
+__summary__ = (
+    "Create Excel spreadsheet describing geographical data from a PostGIS "
+    "Database or a file tree structure."
+)
 __title__ = "DicoGIS"
 __title_clean__ = "".join(e for e in __title__ if e.isalnum())
-__uri__ = "https://github.com/Guts/DicoGIS/"
-__uri_doc__ = "https://guts.github.io/DicoGIS/"
+__uri_homepage__ = "https://guts.github.io/DicoGIS/"
+__uri_repository__ = "https://github.com/Guts/DicoGIS/"
+__uri_tracker__ = f"{__uri_repository__}/issues/"
+__uri__ = __uri_repository__
+
 
 __version__ = "3.0.0"
 __version_info__ = tuple(
