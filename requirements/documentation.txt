@@ -1,4 +1,4 @@
-myst-parser[linkify]>=0.14,<0.19
+myst-parser[linkify]>=0.14,<2.1
 
 sphinx-autobuild==2021.*
 sphinx-autodoc-typehints>=1.11,<1.25
