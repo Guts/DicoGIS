@@ -13,21 +13,12 @@
     "files.associations": {
         "./requirements/*.txt": "pip-requirements"
     },
-    // Formatter
-    "python.formatting.provider": "none",
-    // Linter
-    "python.linting.enabled": true,
-    "python.linting.flake8Enabled": true,
-    "python.linting.flake8Args": [
-        "--config=setup.cfg",
-        "--verbose"
-    ],
-    "python.linting.pylintEnabled": false,
+    // Python
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
     // extensions
     "autoDocstring.guessTypes": true,
     "autoDocstring.docstringFormat": "google",
     "autoDocstring.generateDocstringOnEnter": false,
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
-    }
 }
