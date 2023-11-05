@@ -19,7 +19,6 @@ import getpass
 import locale
 import logging
 import platform
-import threading
 from collections import OrderedDict
 from logging.handlers import RotatingFileHandler
 from os import path, walk
@@ -30,9 +29,7 @@ from time import strftime
 
 # GUI
 from tkinter import ACTIVE, DISABLED, END, Image, StringVar, Tk
-from tkinter.filedialog import askdirectory
 from tkinter.messagebox import showerror as avert
-from tkinter.messagebox import showinfo as info
 from tkinter.ttk import (
     Button,
     Combobox,
@@ -198,7 +195,7 @@ class DicoGIS(Tk):
         # Notebook
         self.nb = Notebook(self)
         # tabs
-        self.tab_files = TabFiles(self.nb, self.blabla, self.setpathtarg)  # tab_id = 0
+        self.tab_files = TabFiles(self.nb, self.blabla)  # tab_id = 0
         self.tab_sgbd = TabSGBD(self.nb)  # tab_id = 1
         self.tab_options = TabSettings(
             self.nb, self.blabla, utils_global.ui_switch
@@ -378,45 +375,6 @@ class DicoGIS(Tk):
         # End of function
         return self.blabla
 
-    def setpathtarg(self):
-        """Browse and insert the path of target folder."""
-        foldername = askdirectory(
-            parent=self,
-            initialdir=self.def_rep,
-            mustexist=True,
-            title=self.blabla.get("gui_cible"),
-        )
-        # deactivate Go button
-        self.val.config(state=DISABLED)
-        # check if a folder has been choosen
-        if foldername:
-            try:
-                self.tab_files.ent_target.delete(0, END)
-                self.tab_files.ent_target.insert(0, foldername)
-            except Exception as err:
-                logger.debug(err)
-                info(
-                    title=self.blabla.get("nofolder"),
-                    message=self.blabla.get("nofolder"),
-                )
-                return
-        else:
-            pass
-        # set the default output file
-        self.ent_outxl_filename.delete(0, END)
-        self.ent_outxl_filename.insert(
-            0,
-            "DicoGIS_{}_{}.xlsx".format(
-                path.split(self.tab_files.ent_target.get())[1], self.today
-            ),
-        )
-        # count geofiles in a separated thread
-        proc = threading.Thread(target=self.ligeofiles, args=(foldername,))
-        proc.daemon = True
-        proc.start()
-        # end of function
-        return foldername
-
     def ligeofiles(self, foldertarget):
         """List compatible geo-files stored into a folder structure."""
         # reseting global variables
@@ -440,7 +398,7 @@ class DicoGIS(Tk):
         # Looping in folders structure
         self.status.set(self.blabla.get("gui_prog1"))
         self.prog_layers.start()
-        logger.info("Begin of folders parsing")
+        logger.info(f"Begin of folders parsing: {foldertarget}")
         for root, dirs, files in walk(foldertarget):
             self.num_folders = self.num_folders + len(dirs)
             for d in dirs:

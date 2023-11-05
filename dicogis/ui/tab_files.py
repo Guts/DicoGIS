@@ -12,11 +12,13 @@
 # ########## Libraries #############
 # ##################################
 
-# Standard library
 import gettext
 import logging
 import threading
 from os import path
+
+# Standard library
+from pathlib import Path
 from time import strftime
 
 # GUI
@@ -39,7 +41,7 @@ logger = logging.getLogger(__name__)  # LOG
 
 
 class TabFiles(Frame):
-    def __init__(self, parent, txt: dict = {}, path_browser=None, path_var: str = ""):
+    def __init__(self, parent, txt: dict = {}):
         """Instanciating the output workbook."""
         self.p = parent
         self.txt = txt
@@ -165,7 +167,7 @@ class TabFiles(Frame):
         )
 
         # check if a folder has been choosen
-        if foldername:
+        if isinstance(foldername, (str, Path)) and len(str(foldername)):
             try:
                 self.ent_target.delete(0, END)
                 self.ent_target.insert(0, foldername)
@@ -176,7 +178,8 @@ class TabFiles(Frame):
                 )
                 return
         else:
-            pass
+            showinfo(title=self.txt.get("nofolder"), message=self.txt.get("nofolder"))
+            return
 
         # set the default output file
         self.p.master.ent_outxl_filename.delete(0, END)
