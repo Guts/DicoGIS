@@ -14,7 +14,7 @@
         "./requirements/*.txt": "pip-requirements"
     },
     // Formatter
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     // Linter
     "python.linting.enabled": true,
     "python.linting.flake8Enabled": true,
@@ -26,5 +26,8 @@
     // extensions
     "autoDocstring.guessTypes": true,
     "autoDocstring.docstringFormat": "google",
-    "autoDocstring.generateDocstringOnEnter": false
+    "autoDocstring.generateDocstringOnEnter": false,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    }
 }
