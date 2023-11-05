@@ -79,7 +79,7 @@ class MiscButtons(Frame):
         btn_doc = Button(
             self,
             text="\U0001F56E " + _("Documentation"),
-            command=lambda: open_new_tab(__about__.__uri_doc__),
+            command=lambda: open_new_tab(__about__.__uri_homepage__),
         )
 
         # griding
