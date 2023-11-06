@@ -5,6 +5,7 @@
 
 # standard library
 import logging
+from functools import lru_cache
 from math import floor
 from math import log as math_log
 
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 # ################################
 
 
+@lru_cache(maxsize=512)
 def convert_octets(octets: int) -> str:
     """Convert a mount of octets in readable size.
 
