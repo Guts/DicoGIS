@@ -16,4 +16,3 @@ from .utils import (  # noqa: E402 F401
     TextsManager,
     Utilities,
 )
-from .xlwriter import MetadataToXlsx  # noqa: E402 F401

@@ -46,6 +46,7 @@ from osgeo import gdal
 
 # Project
 from dicogis import __about__
+from dicogis.export.md2xlsx import MetadataToXlsx
 from dicogis.georeaders import (
     ReadDXF,
     ReadGDB,
@@ -57,7 +58,6 @@ from dicogis.georeaders import (
 )
 from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
 from dicogis.utils import CheckNorris, OptionsManager, TextsManager, Utilities
-from dicogis.xlwriter import MetadataToXlsx
 
 # ##############################################################################
 # ############ Globals ############
