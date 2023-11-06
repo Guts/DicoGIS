@@ -21,28 +21,6 @@ from dicogis.utils.environment import get_gdal_version
 HERE = Path(__file__).parent
 
 
-with open(HERE / "requirements/base.txt") as f:
-    requirements = [
-        line
-        for line in f.read().splitlines()
-        if not line.startswith(("#", "-")) and len(line)
-    ]
-
-with open(HERE / "requirements/development.txt") as f:
-    requirements_dev = [
-        line
-        for line in f.read().splitlines()
-        if not line.startswith(("#", "-")) and len(line)
-    ]
-
-
-with open(HERE / "requirements/documentation.txt") as f:
-    requirements_docs = [
-        line
-        for line in f.read().splitlines()
-        if not line.startswith(("#", "-")) and len(line)
-    ]
-
 # ############################################################################
 # ########### Functions ############
 # ##################################
