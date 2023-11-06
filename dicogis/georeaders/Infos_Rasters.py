@@ -152,8 +152,7 @@ class ReadRasters:
 
         # total size
         dependencies.append(rasterpath)
-        total_size = sum([path.getsize(f) for f in dependencies])
-        dico_raster["total_size"] = self.sizeof(total_size)
+        dico_raster["total_size"] = sum([path.getsize(f) for f in dependencies])
         dependencies.pop(-1)
 
         # format
