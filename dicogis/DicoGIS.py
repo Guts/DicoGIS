@@ -28,7 +28,7 @@ from sys import platform as opersys
 from time import strftime
 
 # GUI
-from tkinter import ACTIVE, DISABLED, END, Image, StringVar, Tk
+from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, StringVar, Tk
 from tkinter.messagebox import showerror as avert
 from tkinter.ttk import (
     Button,
@@ -307,8 +307,6 @@ class DicoGIS(Tk):
         if not checker.check_internet_connection():
             self.nb.tab(2, state=DISABLED)
             self.nb.tab(3, state=DISABLED)
-        else:
-            pass
 
     # =================================================================================
 
@@ -622,13 +620,20 @@ class DicoGIS(Tk):
         self.settings.save_settings(self)
 
         # get the active tab ID
-        self.typo = self.nb.index(self.nb.select())
+        self.typo: int = self.nb.index("current")
 
         # disabling UI to avoid unattended actions
         self.val.config(state=DISABLED)
         self.nb.tab(0, state=DISABLED)
         self.nb.tab(1, state=DISABLED)
         self.nb.tab(2, state=DISABLED)
+
+        if not self.check_fields(tab_data_type=self.typo):
+            self.val.config(state=ACTIVE)
+            self.nb.tab(0, state=NORMAL)
+            self.nb.tab(1, state=NORMAL)
+            self.nb.tab(2, state=NORMAL)
+            return
 
         # creating the Excel workbook
         self.wb = MetadataToXlsx(
@@ -646,11 +651,11 @@ class DicoGIS(Tk):
             self.nb.select(1)
             self.wb.set_worksheets(has_sgbd=1)
             logger.info("PROCESS LAUNCHED: SGBD")
-            self.check_fields()
+            self.check_fields(tab_data_type=self.typo)
         elif self.typo == 2:
             self.nb.select(2)
             logger.info("PROCESS LAUNCHED: services")
-            # self.check_fields()
+            # self.check_fields(tab_data_type=self.typo)
         else:
             pass
         self.val.config(state=ACTIVE)
@@ -659,21 +664,7 @@ class DicoGIS(Tk):
 
     def process_files(self):
         """Launch the different processes."""
-        # check if at least a format has been choosen
-        if (
-            self.tab_files.opt_shp.get()
-            + self.tab_files.opt_tab.get()
-            + self.tab_files.opt_kml.get()
-            + self.tab_files.opt_gml.get()
-            + self.tab_files.opt_geoj.get()
-            + self.tab_files.opt_rast.get()
-            + self.tab_files.opt_egdb.get()
-            + self.tab_files.opt_cdao.get()
-        ):
-            pass
-        else:
-            avert("DicoGIS - User error", self.blabla.get("noformat"))
-            return
+
         # check if there are some layers into the folder structure
         if (
             len(self.li_vectors)
@@ -1113,9 +1104,6 @@ class DicoGIS(Tk):
         self.destroy()
         exit()
 
-        # End path.abspath(of) function
-        return
-
     def process_db(self, sgbd_reader):
         """Process PostGIS DB analisis."""
         # getting the info from shapefiles and compile it in the excel
@@ -1144,72 +1132,91 @@ class DicoGIS(Tk):
             ftype="Excel Workbook",
             dlg_title=self.blabla.get("gui_excel"),
         )
-        logger.info("Workbook saved: %s", self.ent_outxl_filename.get())
+        logger.info(
+            f"Workbook saved: {self.ent_outxl_filename.get()}",
+        )
 
         # quit and exit
         utils_global.open_dir_file(saved[1])
         self.destroy()
         exit()
 
-        # End of function
-        return
-
-    def check_fields(self):
+    def check_fields(self, tab_data_type: int) -> bool:
         """Check if required fields are not empty"""
         # error counter
         # checking empty fields
-        if (
-            self.tab_sgbd.host.get() == ""
-            or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
-        ):
-            self.tab_sgbd.ent_H.configure(foreground="red")
-            self.tab_sgbd.ent_H.delete(0, END)
-            self.tab_sgbd.ent_H.insert(0, self.blabla.get("err_pg_empty_field"))
-            return
-        else:
-            pass
-        if not self.tab_sgbd.ent_P.get():
-            self.tab_sgbd.ent_P.configure(foreground="red")
-            self.tab_sgbd.ent_P.delete(0, END)
-            self.tab_sgbd.ent_P.insert(0, 0000)
-            return
-        else:
-            pass
-        if (
-            self.tab_sgbd.dbnb.get() == ""
-            or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
-        ):
-            self.tab_sgbd.ent_D.configure(foreground="red")
-            self.tab_sgbd.ent_D.delete(0, END)
-            self.tab_sgbd.ent_D.insert(0, self.blabla.get("err_pg_empty_field"))
-            return
-        else:
-            pass
-        if (
-            self.tab_sgbd.user.get() == ""
-            or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
-        ):
-            self.tab_sgbd.ent_U.configure(foreground="red")
-            self.tab_sgbd.ent_U.delete(0, END)
-            self.tab_sgbd.ent_U.insert(0, self.blabla.get("err_pg_empty_field"))
-            return
-        else:
-            pass
-        if (
-            self.tab_sgbd.pswd.get() == ""
-            or self.tab_sgbd.pswd.get() == self.blabla.get("err_pg_empty_field")
-        ):
-            self.tab_sgbd.ent_M.configure(foreground="red")
-            self.tab_sgbd.ent_M.delete(0, END)
-            self.tab_sgbd.ent_M.insert(0, self.blabla.get("err_pg_empty_field"))
-            return
-        else:
-            pass
+        if tab_data_type == 0:
+            if not len(self.tab_files.ent_target.get()):
+                avert("DicoGIS - User error", self.blabla.get("nofolder"))
+                return False
+
+            # check if at least a format has been choosen
+            if not (
+                self.tab_files.opt_shp.get()
+                + self.tab_files.opt_tab.get()
+                + self.tab_files.opt_kml.get()
+                + self.tab_files.opt_gml.get()
+                + self.tab_files.opt_geoj.get()
+                + self.tab_files.opt_rast.get()
+                + self.tab_files.opt_egdb.get()
+                + self.tab_files.opt_cdao.get()
+            ):
+                avert("DicoGIS - User error", self.blabla.get("noformat"))
+                return False
+
+        elif tab_data_type == 1:
+            if (
+                self.tab_sgbd.host.get() == ""
+                or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
+            ):
+                self.tab_sgbd.ent_H.configure(foreground="red")
+                self.tab_sgbd.ent_H.delete(0, END)
+                self.tab_sgbd.ent_H.insert(0, self.blabla.get("err_pg_empty_field"))
+                return
+            else:
+                pass
+            if not self.tab_sgbd.ent_P.get():
+                self.tab_sgbd.ent_P.configure(foreground="red")
+                self.tab_sgbd.ent_P.delete(0, END)
+                self.tab_sgbd.ent_P.insert(0, 0000)
+                return
+            else:
+                pass
+            if (
+                self.tab_sgbd.dbnb.get() == ""
+                or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
+            ):
+                self.tab_sgbd.ent_D.configure(foreground="red")
+                self.tab_sgbd.ent_D.delete(0, END)
+                self.tab_sgbd.ent_D.insert(0, self.blabla.get("err_pg_empty_field"))
+                return
+            else:
+                pass
+            if (
+                self.tab_sgbd.user.get() == ""
+                or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
+            ):
+                self.tab_sgbd.ent_U.configure(foreground="red")
+                self.tab_sgbd.ent_U.delete(0, END)
+                self.tab_sgbd.ent_U.insert(0, self.blabla.get("err_pg_empty_field"))
+                return
+            else:
+                pass
+            if (
+                self.tab_sgbd.pswd.get() == ""
+                or self.tab_sgbd.pswd.get() == self.blabla.get("err_pg_empty_field")
+            ):
+                self.tab_sgbd.ent_M.configure(foreground="red")
+                self.tab_sgbd.ent_M.delete(0, END)
+                self.tab_sgbd.ent_M.insert(0, self.blabla.get("err_pg_empty_field"))
+                return
+            else:
+                pass
         # no error detected: let's test connection
         logger.info("Required fields are OK.")
         self.test_connection()
         # End of function
-        return
+        return True
 
     def test_connection(self):
         """Test database connection and handling specific

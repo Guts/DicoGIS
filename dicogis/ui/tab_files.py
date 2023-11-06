@@ -176,10 +176,10 @@ class TabFiles(Frame):
                 showinfo(
                     title=self.txt.get("nofolder"), message=self.txt.get("nofolder")
                 )
-                return
+                return False
         else:
             showinfo(title=self.txt.get("nofolder"), message=self.txt.get("nofolder"))
-            return
+            return False
 
         # set the default output file
         self.p.master.ent_outxl_filename.delete(0, END)
