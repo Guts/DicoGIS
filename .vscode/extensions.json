@@ -3,6 +3,8 @@
         "github.vscode-pull-request-github",
         "grapecity.gc-excelviewer",
         "ms-python.python",
+        "ms-python.flake8",
+        "ms-python.isort",
         "njpwerner.autodocstring"
     ]
 }
