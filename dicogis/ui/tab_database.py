@@ -80,7 +80,7 @@ class TabSGBD(Frame):
         caz_pgvw.grid(row=4, column=0, sticky="NSWE", padx=2, pady=2)
 
         # frame position
-        self.FrDb.grid(row=3, column=1, sticky="NSWE", padx=2, pady=2)
+        self.FrDb.grid(row=0, column=0, sticky="NSWE", padx=2, pady=2)
 
 
 # #############################################################################
