@@ -32,15 +32,6 @@ fixtures_folder = "tests/fixtures/gisdata/data/good/vector/"
 class TestInfosFlatVector(unittest.TestCase):
     """Test info extractor for flat vector datasets."""
 
-    # standard methods
-    def setUp(self):
-        """Executed before each test."""
-        pass
-
-    def tearDown(self):
-        """Executed after each test."""
-        pass
-
     #  -- Tests ------------------------------------------------------------
     def test_read_shapefiles(self):
         fixtures_shp = Path(fixtures_folder).glob("**/*.shp")
@@ -85,7 +76,7 @@ class TestInfosFlatVector(unittest.TestCase):
             self.assertIsInstance(dico_layer.get("srs"), str)
             self.assertIsInstance(dico_layer.get("srs_type"), (str, type(None)))
             self.assertIsInstance(dico_layer.get("title"), str)
-            self.assertIsInstance(dico_layer.get("total_size"), str)
+            self.assertIsInstance(dico_layer.get("total_size"), int)
             self.assertIsInstance(dico_layer.get("format"), str)
             self.assertIsInstance(dico_layer.get("type_geom"), str)
             self.assertIsInstance(dico_layer.get("xmin"), float)

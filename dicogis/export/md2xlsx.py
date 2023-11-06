@@ -6,13 +6,15 @@
 
 # Standard library
 import logging
-from collections import OrderedDict
 from os import path
 
 # 3rd party library
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, NamedStyle
 from openpyxl.utils import get_column_letter
+
+# project
+from dicogis.utils.formatters import convert_octets
 
 # ##############################################################################
 # ############ Globals ############
@@ -176,13 +178,18 @@ class MetadataToXlsx(Workbook):
         "gdal_err",
     ]
 
-    def __init__(self, lang: str = "EN", texts=OrderedDict()):
-        """TO DOC.
+    def __init__(self, texts: dict, opt_size_prettify: bool = True):
+        """Store metadata into Excel worksheets.
 
-        Keyword arguments:
+        Args:
+            texts (dict, optional): dictionary of translated texts. Defaults to {}.
+            opt_size_prettify (bool, optional): option to prettify size or not. Defaults to False.
         """
         super().__init__()
         self.txt = texts
+
+        # options
+        self.opt_size_prettify = opt_size_prettify
 
         # styles
         s_date = NamedStyle(name="date")
@@ -427,7 +434,10 @@ class MetadataToXlsx(Workbook):
         self.ws_v[f"N{self.idx_v}"].style = "wrap"
         self.ws_v[f"N{self.idx_v}"] = " |\n ".join(layer.get("dependencies", []))
         # total size
-        self.ws_v[f"O{self.idx_v}"] = layer.get("total_size")
+        if self.opt_size_prettify:
+            self.ws_v[f"O{self.idx_v}"] = convert_octets(layer.get("total_size", 0))
+        else:
+            self.ws_v[f"O{self.idx_v}"] = layer.get("total_size", 0)
 
         # Field informations
         fields = layer.get("fields")
@@ -544,7 +554,16 @@ class MetadataToXlsx(Workbook):
         self.ws_r[f"S{self.idx_v}"] = " |\n ".join(layer.get("dependencies"))
 
         # total size of file and its dependencies
-        self.ws_r[f"T{self.idx_r}"] = layer.get("total_size")
+        if self.opt_size_prettify:
+            try:
+                self.ws_v[f"O{self.idx_r}"] = convert_octets(layer.get("total_size", 0))
+            except TypeError as exc:
+                logger.error(
+                    f"Failed to prettify size of {layer.get('name')}. Trace: {exc}"
+                )
+
+        else:
+            self.ws_v[f"O{self.idx_r}"] = layer.get("total_size", 0)
 
         # in case of a source error
         if layer.get("err_gdal", [0])[0] != 0:

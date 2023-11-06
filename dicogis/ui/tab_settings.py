@@ -12,11 +12,13 @@
 # ########## Libraries #############
 # ##################################
 
-import logging
 
 # Standard library
-from tkinter import ACTIVE, DISABLED, IntVar, StringVar, Tk
-from tkinter.ttk import Checkbutton, Entry, Frame, Label
+import logging
+from os import getenv
+from tkinter import ACTIVE, DISABLED, BooleanVar, IntVar, StringVar, Tk
+from tkinter.ttk import Checkbutton, Entry, Frame, Label, Labelframe
+from typing import Callable
 
 # ##############################################################################
 # ############ Globals ############
@@ -31,32 +33,41 @@ logger = logging.getLogger(__name__)
 
 
 class TabSettings(Frame):
-    def __init__(self, parent, txt={}, switcher=None):
+    def __init__(self, parent, txt: dict, switcher: Callable = None):
         """Instanciating the output workbook."""
         self.parent = parent
         Frame.__init__(self)
 
         # subframes
-        self.FrOptProxy = Frame(self, name="settings_proxy")
+        self.FrOptNetwork = Labelframe(
+            self, name="lfr_settings_network", text=txt.get("Network", "Network")
+        )
+
+        self.FrOptExport = Labelframe(
+            self,
+            name="lfr_settings_export",
+            text=txt.get("Export", "Export"),
+        )
 
         # options values
         self.opt_proxy = IntVar(self)  # proxy option
 
         # Options form widgets
         caz_prox = Checkbutton(
-            self,
+            self.FrOptNetwork,
             text="Proxy",
             variable=self.opt_proxy,
             command=lambda: switcher(self.opt_proxy, self.FrOptProxy),
         )
-
-        # positionning
-        caz_prox.grid(row=0, column=0, sticky="NSWE", padx=2, pady=2)
-        self.FrOptProxy.grid(
-            row=0, column=1, columnspan=8, sticky="NSWE", padx=2, pady=2, rowspan=3
+        self.FrOptProxy = Labelframe(
+            self.FrOptNetwork,
+            name="lfr_settings_network_proxy",
+            # text=txt.get("Proxy", "Proxy"),
+            labelwidget=caz_prox,
         )
 
-        # ------------------------------------------------------------------------
+        # -- NETWORK OPTIONS -----------------------------------------------------------
+
         # proxy specific variables
         self.opt_ntlm = IntVar(self.FrOptProxy, 0)  # proxy NTLM protocol option
         self.prox_server = StringVar(self.FrOptProxy, "proxy.server.com")
@@ -88,6 +99,38 @@ class TabSettings(Frame):
         self.prox_ent_M.grid(
             row=2, column=2, columnspan=2, sticky="NSEW", padx=2, pady=2
         )
+
+        self.FrOptProxy.grid(
+            row=0,
+            column=0,
+            sticky="NSWE",
+            padx=2,
+            pady=2,
+        )
+        self.FrOptNetwork.grid(
+            row=0,
+            column=0,
+            sticky="NSWE",
+            padx=2,
+            pady=2,
+        )
+
+        # -- GENERAL OPTIONS -----------------------------------------------------------
+        self.opt_export_size_prettify = BooleanVar(
+            master=self, value=getenv("DICOGIS_EXPORT_SIZE_PRETTIFY", True)
+        )
+        caz_opt_export_size_prettify = Checkbutton(
+            self.FrOptExport,
+            text="Export: prettify files size",
+            variable=self.opt_export_size_prettify,
+        )
+        caz_opt_export_size_prettify.grid(
+            row=2, column=0, sticky="NSWE", padx=2, pady=2
+        )
+
+        # positionning frames
+
+        self.FrOptExport.grid(row=1, column=0, sticky="NSWE", padx=2, pady=2)
 
 
 # #############################################################################

@@ -631,7 +631,10 @@ class DicoGIS(Tk):
         self.nb.tab(2, state=DISABLED)
 
         # creating the Excel workbook
-        self.wb = MetadataToXlsx(texts=self.blabla)
+        self.wb = MetadataToXlsx(
+            texts=self.blabla,
+            opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
+        )
         logger.info("Excel file created")
 
         # process files or PostGIS database

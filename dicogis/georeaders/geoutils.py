@@ -44,10 +44,15 @@ class Utils:
 
         return dependencies
 
-    def sizeof(self, source_path, dependencies=[]):
-        """Calculate size in different units depending on size.
+    def sizeof(self, source_path: str, dependencies: list = None) -> int:
+        """Calculate size of dataset and its dependencies.
 
-        see: http://stackoverflow.com/a/1094933
+        Args:
+            source_path (str): path to the dataset
+            dependencies (list, optional): list of dataset's dependencies. Defaults to None.
+
+        Returns:
+            int: size in octets
         """
         if path.isfile(source_path):
             dependencies.append(source_path)
@@ -66,13 +71,7 @@ class Utils:
         else:
             return None
 
-        # prettify units
-        for size_cat in ("octets", "Ko", "Mo", "Go"):
-            if total_size < 1024.0:
-                return f"{total_size:3.1f} {size_cat}"
-            total_size /= 1024.0
-
-        return "{:3.1f} {}".format(total_size, " To")
+        return total_size
 
     def erratum(self, ctner={}, src="", ds_lyr=None, mess_type=1, mess=""):
         """Handle errors message and store it into __dict__.
