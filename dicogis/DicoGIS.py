@@ -621,6 +621,7 @@ class DicoGIS(Tk):
 
         # get the active tab ID
         self.typo: int = self.nb.index("current")
+        logger.info(f"Selected tab: {self.typo}")
 
         # disabling UI to avoid unattended actions
         self.val.config(state=DISABLED)
@@ -1214,7 +1215,9 @@ class DicoGIS(Tk):
                 pass
         # no error detected: let's test connection
         logger.info("Required fields are OK.")
-        self.test_connection()
+
+        if tab_data_type == 1:
+            self.test_connection()
         # End of function
         return True
 
