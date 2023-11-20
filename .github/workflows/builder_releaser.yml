@@ -17,7 +17,7 @@ on:
     branches:
       - master
     paths:
-      - ".github/workflows/build_release.yml"
+      - ".github/workflows/builder_releaser.yml"
       - "builder/"
       - "requirements/packaging.txt"
 
