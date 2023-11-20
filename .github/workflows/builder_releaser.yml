@@ -121,7 +121,6 @@ jobs:
       - name: Compress into ZIP
         run: |
           cd dist/
-          zip -r9 DicoGIS_Windows . DicoGIS_*/*
           7z a DicoGIS_Windows.zip ./DicoGIS_*/*
 
       - name: Save it as artifact
