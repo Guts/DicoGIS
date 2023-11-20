@@ -72,11 +72,16 @@ jobs:
       - name: Generates Executable
         run: python -O ./builder/pyinstaller_build_ubuntu.py
 
+      - name: Compress into ZIP
+        run: |
+          cd dist/
+          zip -r9 DicoGIS_Ubuntu . DicoGIS_*/*
+
       - uses: actions/upload-artifact@v3
         with:
           name: DicoGIS_executable_Ubuntu
           path: |
-            dist/DicoGIS*/
+            dist/DicoGIS_*.zip
           if-no-files-found: error
 
   build-windows:
@@ -113,12 +118,17 @@ jobs:
       - name: Generates MS Executable
         run: python -O .\builder\pyinstaller_build_windows.py
 
+      - name: Compress into ZIP
+        run: |
+          cd dist/
+          zip -r9 DicoGIS_Windows . DicoGIS_*/*
+
       - name: Save it as artifact
         uses: actions/upload-artifact@v3
         with:
           name: DicoGIS_executable_Windows
           path: |
-            dist/DicoGIS*
+            dist/DicoGIS_*.zip
           if-no-files-found: error
 
   release:
@@ -149,5 +159,5 @@ jobs:
         with:
           discussion_category_name: announcements
           fail_on_unmatched_files: true
-          files: builds/*/dist/*
+          files: builds/*/*.zip
           generate_release_notes: true
