@@ -3,15 +3,23 @@ name: "Build 📦 and release 🚀"
 # Triggers
 on:
   push:
-    branches: [master]
-
+    branches:
+      - master
     paths:
       - ".github/workflows/builder_releaser.yml"
       - "builder/**/*"
       - "dicogis/**/*.py"
-
+      - "requirements/packaging.txt"
     tags:
       - "*"
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/builder_releaser.yml"
+      - "builder/"
+      - "requirements/packaging.txt"
 
 # Globals
 env:
@@ -23,8 +31,7 @@ env:
 # Jobs definition
 jobs:
   build-ubuntu:
-    name: "Ubuntu packager 📦"
-
+    name: "🐧 Ubuntu LTS"
     runs-on: ubuntu-22.04
 
     env:
@@ -65,14 +72,21 @@ jobs:
       - name: Generates Executable
         run: python -O ./builder/pyinstaller_build_ubuntu.py
 
-      - uses: actions/upload-artifact@v3
+      - name: Compress into ZIP
+        run: |
+          cd dist/
+          zip -r9 DicoGIS_Ubuntu . DicoGIS_*/*
+
+      - name: Save it as artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: DicoGIS_ubuntu_executable
-          path: dist/DicoGIS*/
+          name: DicoGIS_executable_Ubuntu
+          path: |
+            dist/DicoGIS_*.zip
+          if-no-files-found: error
 
   build-windows:
-    name: "Windows packager 📦"
-
+    name: "🏠 Windows"
     runs-on: windows-latest
 
     env:
@@ -105,38 +119,48 @@ jobs:
       - name: Generates MS Executable
         run: python -O .\builder\pyinstaller_build_windows.py
 
+      - name: Compress into ZIP
+        run: |
+          cd dist/
+          7z a DicoGIS_Windows.zip ./DicoGIS_*/*
+
       - name: Save it as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: DicoGIS_windows_executable
-          path: dist/DicoGIS*
+          name: DicoGIS_executable_Windows
+          path: |
+            dist/DicoGIS_*.zip
+          if-no-files-found: error
 
   release:
-    name: "Release on tag 🚀"
-
+    name: "🚀 GitHub Release"
     runs-on: ubuntu-latest
-
-    needs: [build-ubuntu, build-windows]
+    needs:
+        - build-ubuntu
+        - build-windows
+    permissions:
+        contents: write
+        discussions: write
 
     if: startsWith(github.ref, 'refs/tags/')
 
     steps:
-      - name: Download Ubuntu build
+      - name: Download built package for Linux (Ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: DicoGIS_ubuntu_executable
+          name: DicoGIS_executable_Ubuntu
           path: builds/ubuntu/
 
-      - uses: actions/download-artifact@v3
+      - name: Download built package for Windows
+        uses: actions/download-artifact@v3
         with:
-          name: DicoGIS_windows_executable
+          name: DicoGIS_executable_Windows
           path: builds/windows/
 
-      - name: Create/update release on GitHub
-        uses: ncipollo/release-action@v1.13.0
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          allowUpdates: true
-          artifacts: "builds/*"
-          generateReleaseNotes: true
-          omitNameDuringUpdate: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          discussion_category_name: announcements
+          fail_on_unmatched_files: true
+          files: builds/*/*.zip
+          generate_release_notes: true
