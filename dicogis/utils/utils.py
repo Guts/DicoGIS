@@ -17,6 +17,7 @@
 import logging
 import subprocess
 from os import R_OK, access, path
+from pathlib import Path
 from sys import exit
 from sys import platform as opersys
 from tkinter import ACTIVE, DISABLED
@@ -97,6 +98,10 @@ class Utilities:
             filetypes=[(ftype, "*.xlsx")],
             title=dlg_title,
         )
+
+        if not isinstance(out_name, (str, Path)) and len(str(out_name)):
+            logger.warning(f"No output file selected: {out_name}")
+            return None
 
         # check if the extension is correctly indicated
         if path.splitext(out_name)[1] != ".xlsx":

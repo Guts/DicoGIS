@@ -30,6 +30,7 @@ from time import strftime
 # GUI
 from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, StringVar, Tk
 from tkinter.messagebox import showerror as avert
+from tkinter.messagebox import showinfo
 from tkinter.ttk import (
     Button,
     Combobox,
@@ -1101,9 +1102,19 @@ class DicoGIS(Tk):
         logger.info("Workbook saved: %s", self.ent_outxl_filename.get())
 
         # quit and exit
-        utils_global.open_dir_file(saved[1])
-        self.destroy()
-        exit()
+        if saved is not None:
+            utils_global.open_dir_file(saved[1])
+            self.destroy()
+            exit()
+        else:
+            showinfo(
+                title=self.blabla.get(
+                    "no_output_file_selected", "No output file selected"
+                ),
+                message=self.blabla.get(
+                    "no_output_file_selected", "Dictionary has not been saved."
+                ),
+            )
 
     def process_db(self, sgbd_reader):
         """Process PostGIS DB analisis."""
