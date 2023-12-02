@@ -1,6 +1,6 @@
 myst-parser[linkify]>=0.14,<2.1
 
 sphinx-autobuild==2021.*
-sphinx-autodoc-typehints>=1.11,<1.25
+sphinx-autodoc-typehints>=1.11,<1.26
 sphinx-copybutton<1
 sphinx-rtd-theme>=0.5,<3
