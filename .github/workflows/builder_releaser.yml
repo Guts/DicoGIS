@@ -146,13 +146,13 @@ jobs:
 
     steps:
       - name: Download built package for Linux (Ubuntu)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: DicoGIS_executable_Ubuntu
           path: builds/ubuntu/
 
       - name: Download built package for Windows
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: DicoGIS_executable_Windows
           path: builds/windows/
