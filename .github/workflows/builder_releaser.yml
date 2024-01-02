@@ -78,7 +78,7 @@ jobs:
           zip -r9 DicoGIS_Ubuntu . DicoGIS_*/*
 
       - name: Save it as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: DicoGIS_executable_Ubuntu
           path: |
@@ -125,7 +125,7 @@ jobs:
           7z a DicoGIS_Windows.zip ./DicoGIS_*/*
 
       - name: Save it as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: DicoGIS_executable_Windows
           path: |
