@@ -6,4 +6,5 @@ geoserver-restconfig>=2.0.4,<2.0.10
 lxml>=4.9,<4.10
 numpy>=1.22,<1.27
 openpyxl>=3.0,<3.2
+typer[all]>=0.9,<1
 xmltodict>=0.12,<1
