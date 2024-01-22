@@ -59,6 +59,7 @@ from dicogis.georeaders import (
 )
 from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
 from dicogis.utils import CheckNorris, OptionsManager, TextsManager, Utilities
+from dicogis.utils.environment import get_gdal_version, get_proj_version
 
 # ##############################################################################
 # ############ Globals ############
@@ -100,6 +101,8 @@ class DicoGIS(Tk):
             )
         )
         logger.info(f"Version: {self.package_about.__version__}")
+        logger.info(f"GDAL: {get_gdal_version()}")
+        logger.info(f"PROJ: {get_proj_version()}")
 
         # store vars as attr
         self.dir_locale = dir_locale
