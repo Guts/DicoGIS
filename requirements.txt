@@ -1,8 +1,3 @@
-# Common
-# ------
-setuptools
-wheel
-
 # Project
 # -------
 -r requirements/base.txt

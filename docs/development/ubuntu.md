@@ -2,38 +2,93 @@
 
 Tested on:
 
-- Ubuntu 20.04
+- Ubuntu 22.04
 
-## Install GDAL
+## Requirements
 
-Set GDAL expected version:
+- GDAL >= 3.4.1
+- Python >= 3.9
+- Network access to:
+    - Python Package Index: <https://pypi.org/>
 
-```bash
-export GDAL_VERSION=3.1.3
+## Install system requirements
+
+### Install GDAL
+
+> As stipulated on [official GDAL Python wrapper](https://pypi.org/project/GDAL/), libgdal-dev and numpy are required to build it.
+
+#### Choose your PPA
+
+We listed here 2 options but it might be non up to date.
+
+Some packages may be required to perform PPA operations:
+
+```sh
+sudo apt install ca-certificates gnupg lsb-release software-properties-common
+sudo apt update
 ```
 
-Install GDAL:
+##### QGIS PPA
 
-```bash
-sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable && sudo apt-get update
-sudo apt-get install gdal-bin=$GDAL_VERSION
-sudo apt-get install libgdal-dev=$GDAL_VERSION
-export CPLUS_INCLUDE_PATH=/usr/include/gdal
-export C_INCLUDE_PATH=/usr/include/gdal
+If you use QGIS, it's recomended to use the same GDAL version by setting the QGIS PPA:
+
+```sh
+sudo mkdir -p /etc/apt/keyrings
+sudo wget -O /etc/apt/keyrings/qgis-archive-keyring.gpg https://download.qgis.org/downloads/qgis-archive-keyring.gpg
+echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/qgis-archive-keyring.gpg] https://qgis.org/ubuntu-ltr \
+$(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/qgis.list > /dev/null
+sudo apt update
+```
+
+##### UbuntuGIS
+
+If you want to use a specific version and get access to newer GDAL versions, UbuntuGIS is a good choice:
+
+```sh
+sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+sudo apt update
+```
+
+#### Installation
+
+To use the latest GDAL version available in the PPA you set up:
+
+```sh
+sudo apt-get install gdal-bin libgdal-dev
+```
+
+Or, optionally, you can define which exact GDAL version you want to use. For example:
+
+```sh
+export GDAL_VERSION=3.4.1
+sudo apt install gdal-bin=$GDAL_VERSION libgdal-dev=$GDAL_VERSION
+```
+
+Check it:
+
+```sh
 gdal-config --version
 ```
 
-## Install Python and Git
+Expose some paths used for wheel build as environment variables:
+
+```sh
+export CPLUS_INCLUDE_PATH=/usr/include/gdal
+export C_INCLUDE_PATH=/usr/include/gdal
+```
+
+### Install Python and Git
 
 Install system requirements:
 
-```bash
-sudo apt install git python3-pip python3-tk python3-virtualenv python3-venv unifont virtualenv
+```sh
+sudo apt install git python3-pip python3-tk pythnon3-venv unifont
 ```
 
 Clone the repository where you want:
 
-```bash
+```sh
 git clone https://github.com/Guts/DicoGIS.git
 # or using ssh
 git clone git@github.com:Guts/DicoGIS.git
@@ -41,37 +96,43 @@ git clone git@github.com:Guts/DicoGIS.git
 
 Create and enter virtual environment (change the path at your convenience):
 
-```bash
-virtualenv -p /usr/bin/python3 ~/pyvenvs/dicogis
-source ~/pyvenvs/dicogis/bin/activate
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 ## Install project requirements
 
-```bash
+```sh
 python -m pip install -U pip setuptools wheel
+python -m pip install -U gdal=="$(gdal-config --version).*"
 python -m pip install -U -r requirements.txt
-python -m pip install pygdal=="`gdal-config --version`.*"
 ```
-
-````{note}
-If you want to work outsite a virtual environment, you should install GDAL Python bindings using:
-
-```bash
-python -m pip install GDAL=="`gdal-config --version`.*"
-```
-````
 
 ## Install project
 
-```bash
-python -m pip install -e .
+```sh
+python -m pip install -U -e .[gdal,dev]
 ```
 
-Try it with:
+### Try it
 
-```bash
+CLI:
+
+```sh
+dicogis-cli --help
+```
+
+GUI:
+
+```sh
 python dicogis/DicoGIS.py
+```
+
+## Install git hooks
+
+```sh
+pre-commit install
 ```
 
 Happy coding!
