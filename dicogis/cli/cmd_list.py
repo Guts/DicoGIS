@@ -19,7 +19,7 @@ from dicogis.__about__ import __title__
 # ########## Globals ###############
 # ##################################
 
-cli_list = typer.Typer()
+cli_list = typer.Typer(help="List (inventory) operations.")
 state = {"verbose": False}
 APP_NAME = f"{__title__}_list"
 logger = logging.getLogger(__name__)
