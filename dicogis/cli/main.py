@@ -5,7 +5,7 @@
 # ##################################
 
 # standard lib
-from pathlib import Path
+import logging
 from typing import Annotated, Optional
 
 # 3rd party
@@ -13,6 +13,7 @@ import typer
 
 # project
 from dicogis.__about__ import __title__, __version__
+from dicogis.cli.cmd_list import cli_list
 
 # ############################################################################
 # ########## Globals ###############
@@ -20,6 +21,8 @@ from dicogis.__about__ import __title__, __version__
 
 cli_dicogis = typer.Typer()
 state = {"verbose": False}
+APP_NAME = __title__
+logger = logging.getLogger(__name__)
 
 
 # ############################################################################
@@ -67,27 +70,8 @@ def main(
         raise typer.Exit()
 
 
-@cli_dicogis.command(
-    help="List geodata and extract metadata into an Excel (.xlsx) spreadsheet file."
-)
-def inventory(
-    input_folder: Annotated[
-        Optional[Path],
-        typer.Option(dir_okay=True, file_okay=False, readable=True, resolve_path=True),
-    ]
-):
-    """Command to list geodata starting from a
-
-    Args:
-        input_folder (Annotated[Optional[Path], typer.Option): _description_
-    """
-    typer.echo(f"Analysing geodata stored in {input_folder}")
-
-
-@cli_dicogis.command(help="Send metadata to a database.")
-def sync():
-    """Command in charge of sending metadata to an external database."""
-    typer.echo("Syncing metadata")
+# integrate subcommands
+cli_dicogis.add_typer(cli_list, name="list")
 
 
 # ############################################################################
