@@ -10,10 +10,12 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 # 3rd party
+import rich
 import typer
 
 # project
 from dicogis.__about__ import __title__
+from dicogis.listing.geodata_listing import find_geodata_files
 
 # ############################################################################
 # ########## Globals ###############
@@ -63,6 +65,10 @@ def inventory(
     logger.warning(f"DicoGIS folder: {app_dir}")
 
     # TODO: check if specified formats are supported
+
+    # look for geographic data
+    geodata_find = find_geodata_files(start_folder=input_folder)
+    rich.print(geodata_find)
 
 
 # ############################################################################
