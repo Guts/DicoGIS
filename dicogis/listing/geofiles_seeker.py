@@ -13,9 +13,9 @@ import logging
 from os import getlogin
 from pathlib import Path
 
-# submodules
-from scan_offline import _
-from scan_offline.explorer import FORMATS_MATRIX, FormatYamlReader
+# package
+from dicogis.listing.formats_yaml_parser import FormatYamlReader
+from dicogis.listing.models import FORMATS_MATRIX
 
 # #############################################################################
 # ########## Globals ###############
@@ -51,9 +51,8 @@ class GeofilesExplorer:
         start_folder = Path(start_folder)
         if not start_folder.is_dir():
             raise OSError(
-                _(
-                    "Directory {} doesn't exist or it's not reachable for the user: {}"
-                ).format(start_folder, getlogin())
+                f"Directory {start_folder} doesn't exist or it's not reachable "
+                f"for the user: {getlogin()}"
             )
         self.start_folder = Path(start_folder)
 
@@ -69,10 +68,8 @@ class GeofilesExplorer:
             else:
                 logger.error(
                     IOError(
-                        _(
-                            "Folder of formats definitions {} doesn't exist "
-                            "or it's not reachable for the user: {}"
-                        ).format(definitions_folder, getlogin())
+                        f"Folder of formats definitions {definitions_folder} "
+                        f"doesn't exist or it's not reachable for the user: {getlogin()}"
                     )
                 )
         else:

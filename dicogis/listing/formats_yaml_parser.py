@@ -25,7 +25,7 @@ from typing import Union
 import yaml
 
 # submodule
-from scan_offline.explorer.formats_matrix import FormatMatcher
+from dicogis.listing.models import FormatMatcher
 
 # #############################################################################
 # ########## Globals ###############
