@@ -443,6 +443,14 @@ class DicoGIS(Tk):
             )
         )
 
+        # grouping vectors lists
+        self.li_vectors.extend(self.li_shp)
+        self.li_vectors.extend(self.li_tab)
+        self.li_vectors.extend(self.li_kml)
+        self.li_vectors.extend(self.li_gml)
+        self.li_vectors.extend(self.li_geoj)
+        self.li_vectors.extend(self.li_gxt)
+
         # reactivating the buttons
         self.tab_files.btn_browse.config(state=ACTIVE)
         self.val.config(state=ACTIVE)
