@@ -90,9 +90,12 @@ setup(
     install_requires=load_requirements(HERE / "requirements/base.txt"),
     # run
     entry_points={
+        "console_scripts": [
+            f"{__about__.__package_name__}-cli = dicogis.cli.main:cli_dicogis"
+        ],
         "gui_scripts": [
             "dicogis = dicogis.DicoGIS:__main__",
-        ]
+        ],
     },
     # metadata
     keywords=__about__.__keywords__,
