@@ -60,7 +60,7 @@ class FormatsRaster(ExtendedEnum):
     jpeg = ".jpeg"
 
 
-SUPPORTED_FORMATS = [*FormatsVector, *FormatsRaster]
+SUPPORTED_FORMATS: list[ExtendedEnum] = [*FormatsVector, *FormatsRaster]
 
 # ############################################################################
 # #### Stand alone program ########
@@ -73,5 +73,8 @@ if __name__ == "__main__":
     )
     assert FormatsRaster.has_key("ecw")
     assert FormatsRaster.has_key("geotiff")
-    assert FormatsRaster.has_value("geotiff")
+    assert FormatsRaster.has_value(".geotiff")
     assert FormatsRaster.has_key("fake_raster_format") is False
+
+    for f in SUPPORTED_FORMATS:
+        print(f.name)

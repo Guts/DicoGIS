@@ -15,6 +15,7 @@ import typer
 
 # project
 from dicogis.__about__ import __title__
+from dicogis.constants import SUPPORTED_FORMATS
 from dicogis.listing.geodata_listing import find_geodata_files
 
 # ############################################################################
@@ -25,7 +26,7 @@ cli_list = typer.Typer(help="List (inventory) operations.")
 state = {"verbose": False}
 APP_NAME = f"{__title__}_list"
 logger = logging.getLogger(__name__)
-
+default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 
 # ############################################################################
 # ########## Functions #############
@@ -51,7 +52,7 @@ def inventory(
         typer.Option(
             envvar="DICOGIS_FORMATS_LIST",
         ),
-    ] = "shp,geotiff,geojson,kml",
+    ] = default_formats,
 ):
     """Command to list geodata starting from a
 
