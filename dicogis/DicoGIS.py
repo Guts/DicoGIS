@@ -21,7 +21,7 @@ import logging
 import platform
 from collections import OrderedDict
 from logging.handlers import RotatingFileHandler
-from os import path, walk
+from os import path
 from pathlib import Path
 from sys import exit
 from sys import platform as opersys
@@ -57,6 +57,7 @@ from dicogis.georeaders import (
     ReadSpaDB,
     ReadVectorFlatDataset,
 )
+from dicogis.listing.geodata_listing import find_geodata_files
 from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
 from dicogis.utils import CheckNorris, OptionsManager, TextsManager, Utilities
 from dicogis.utils.environment import get_gdal_version, get_proj_version
@@ -377,198 +378,44 @@ class DicoGIS(Tk):
         # End of function
         return self.blabla
 
-    def ligeofiles(self, foldertarget):
-        """List compatible geo-files stored into a folder structure."""
-        # reseting global variables
-        self.li_shp = []
-        self.li_tab = []
-        self.li_kml = []
-        self.li_gml = []
-        self.li_geoj = []
-        self.li_gxt = []
-        self.li_vectors = []
-        self.li_dxf = []
-        self.li_dwg = []
-        self.li_dgn = []
-        self.li_cdao = []
-        self.li_raster = []
-        self.li_fdb = []
-        self.li_egdb = []
-        self.li_spadb = []
+    def ligeofiles(self, target_folder: str) -> tuple[list[str]]:
+        """List compatible geo-files stored into a folder structure.
+
+        Args:
+            target_folder (str): folder into walk to look for geographic datasets.
+
+        Returns:
+            tuple[list[str]]: tuple of list of paths by formats
+        """
+
+        # disable related UI items in the meanwhile
         self.tab_files.btn_browse.config(state=DISABLED)
 
         # Looping in folders structure
         self.status.set(self.blabla.get("gui_prog1"))
         self.prog_layers.start()
-        logger.info(f"Begin of folders parsing: {foldertarget}")
-        for root, dirs, files in walk(foldertarget):
-            self.num_folders = self.num_folders + len(dirs)
-            for d in dirs:
-                """looking for File Geodatabase among directories"""
-                try:
-                    path.join(root, d)
-                    full_path = path.join(root, d)
-                except UnicodeDecodeError:
-                    full_path = path.join(root, d.decode("latin1"))
-                if full_path[-4:].lower() == ".gdb":
-                    # add complete path of Esri FileGeoDatabase
-                    self.li_egdb.append(path.abspath(full_path))
-                else:
-                    pass
-            for f in files:
-                """looking for files with geographic data"""
-                try:
-                    path.join(root, f)
-                    full_path = path.join(root, f)
-                except UnicodeDecodeError:
-                    full_path = path.join(root, f.decode("latin1"))
-                # Looping on files contained
-                if (
-                    path.splitext(full_path.lower())[1].lower() == ".shp"
-                    and (
-                        path.isfile(f"{full_path[:-4]}.dbf")
-                        or path.isfile(f"{full_path[:-4]}.DBF")
-                    )
-                    and (
-                        path.isfile(f"{full_path[:-4]}.shx")
-                        or path.isfile(f"{full_path[:-4]}.SHX")
-                    )
-                ):
-                    """listing compatible shapefiles"""
-                    # add complete path of shapefile
-                    self.li_shp.append(full_path)
-                elif (
-                    path.splitext(full_path.lower())[1] == ".tab"
-                    and (
-                        path.isfile(full_path[:-4] + ".dat")
-                        or path.isfile(full_path[:-4] + ".DAT")
-                    )
-                    and (
-                        path.isfile(full_path[:-4] + ".map")
-                        or path.isfile(full_path[:-4] + ".MAP")
-                    )
-                    and (
-                        path.isfile(full_path[:-4] + ".id")
-                        or path.isfile(full_path[:-4] + ".ID")
-                    )
-                ):
-                    """listing MapInfo tables"""
-                    # add complete path of MapInfo file
-                    self.li_tab.append(full_path)
-                elif (
-                    path.splitext(full_path.lower())[1] == ".kml"
-                    or path.splitext(full_path.lower())[1] == ".kmz"
-                ):
-                    """listing KML and KMZ"""
-                    # add complete path of KML file
-                    self.li_kml.append(full_path)
-                elif path.splitext(full_path.lower())[1] == ".gml":
-                    """listing GML"""
-                    # add complete path of GML file
-                    self.li_gml.append(full_path)
-                elif path.splitext(full_path.lower())[1] == ".geojson":
-                    """listing GeoJSON"""
-                    # add complete path of GeoJSON file
-                    self.li_geoj.append(full_path)
-                elif path.splitext(full_path.lower())[1] == ".gxt":
-                    """listing Geoconcept eXport Text (GXT)"""
-                    # add complete path of GXT file
-                    self.li_gxt.append(full_path)
-                elif path.splitext(full_path.lower())[1] in self.li_raster_formats:
-                    """listing compatible rasters"""
-                    # add complete path of raster file
-                    self.li_raster.append(full_path)
-                elif path.splitext(full_path.lower())[1] == ".dxf":
-                    """listing DXF"""
-                    # add complete path of DXF file
-                    self.li_dxf.append(full_path)
-                elif path.splitext(full_path.lower())[1] == ".dwg":
-                    """listing DWG"""
-                    # add complete path of DWG file
-                    self.li_dwg.append(full_path)
-                elif path.splitext(full_path.lower())[1] == ".dgn":
-                    """listing MicroStation DGN"""
-                    # add complete path of DGN file
-                    self.li_dgn.append(full_path)
-                elif path.splitext(full_path.lower())[1] == ".sqlite":
-                    """listing Spatialite DB"""
-                    # add complete path of DGN file
-                    self.li_spadb.append(full_path)
-                else:
-                    continue
+        logger.info(f"Begin of folders parsing: {target_folder}")
 
-        # grouping CAO/DAO files
-        self.li_cdao.extend(self.li_dxf)
-        self.li_cdao.extend(self.li_dwg)
-        self.li_cdao.extend(self.li_dgn)
-        # grouping File geodatabases
-        self.li_fdb.extend(self.li_egdb)
-        self.li_fdb.extend(self.li_spadb)
+        (
+            self.num_folders,
+            self.li_shp,
+            self.li_tab,
+            self.li_kml,
+            self.li_gml,
+            self.li_geoj,
+            self.li_gxt,
+            self.li_raster,
+            self.li_egdb,
+            self.li_dxf,
+            self.li_dwg,
+            self.li_dgn,
+            self.li_cdao,
+            self.li_fdb,
+            self.li_spadb,
+        ) = find_geodata_files(start_folder=target_folder)
 
         # end of listing
         self.prog_layers.stop()
-        logger.info(
-            "End of folders parsing: {} shapefiles - "
-            "{} tables (MapInfo) - "
-            "{} KML - "
-            "{} GML - "
-            "{} GeoJSON"
-            "{} rasters - "
-            "{} Esri FileGDB - "
-            "{} Spatialite - "
-            "{} CAO/DAO - "
-            "{} GXT - in {}{}".format(
-                len(self.li_shp),
-                len(self.li_tab),
-                len(self.li_kml),
-                len(self.li_gml),
-                len(self.li_geoj),
-                len(self.li_raster),
-                len(self.li_egdb),
-                len(self.li_spadb),
-                len(self.li_cdao),
-                len(self.li_gxt),
-                self.num_folders,
-                self.blabla.get("log_numfold"),
-            )
-        )
-        # grouping vectors lists
-        self.li_vectors.extend(self.li_shp)
-        self.li_vectors.extend(self.li_tab)
-        self.li_vectors.extend(self.li_kml)
-        self.li_vectors.extend(self.li_gml)
-        self.li_vectors.extend(self.li_geoj)
-        self.li_vectors.extend(self.li_gxt)
-
-        # Lists ordering and tupling
-        self.li_shp.sort()
-        self.li_shp = tuple(self.li_shp)
-        self.li_tab.sort()
-        self.li_tab = tuple(self.li_tab)
-        self.li_raster.sort()
-        self.li_raster = tuple(self.li_raster)
-        self.li_kml.sort()
-        self.li_kml = tuple(self.li_kml)
-        self.li_gml.sort()
-        self.li_gml = tuple(self.li_gml)
-        self.li_geoj.sort()
-        self.li_geoj = tuple(self.li_geoj)
-        self.li_gxt.sort()
-        self.li_gxt = tuple(self.li_gxt)
-        self.li_egdb.sort()
-        self.li_egdb = tuple(self.li_egdb)
-        self.li_spadb.sort()
-        self.li_spadb = tuple(self.li_spadb)
-        self.li_fdb.sort()
-        self.li_fdb = tuple(self.li_fdb)
-        self.li_dxf.sort()
-        self.li_dxf = tuple(self.li_dxf)
-        self.li_dwg.sort()
-        self.li_dwg = tuple(self.li_dwg)
-        self.li_dgn.sort()
-        self.li_dgn = tuple(self.li_dgn)
-        self.li_cdao.sort()
-        self.li_cdao = tuple(self.li_cdao)
 
         # status message
         self.status.set(
@@ -601,7 +448,6 @@ class DicoGIS(Tk):
         self.val.config(state=ACTIVE)
         # End of function
         return (
-            foldertarget,
             self.li_shp,
             self.li_tab,
             self.li_kml,
