@@ -194,13 +194,6 @@ def find_geodata_files(
         f"{len(li_cdao)} CAO/DAO - "
         f"{len(li_gxt)} GXT - in {num_folders} folders"
     )
-    # grouping vectors lists
-    li_vectors.extend(li_shp)
-    li_vectors.extend(li_tab)
-    li_vectors.extend(li_kml)
-    li_vectors.extend(li_gml)
-    li_vectors.extend(li_geoj)
-    li_vectors.extend(li_gxt)
 
     # Lists ordering and tupling
     li_shp = tuple(sorted(li_shp))
