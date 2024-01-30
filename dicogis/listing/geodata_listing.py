@@ -182,7 +182,7 @@ def find_geodata_files(
     li_fdb.extend(li_egdb)
     li_fdb.extend(li_spadb)
 
-    logger.warning(
+    logger.info(
         f"End of folders parsing: {len(li_shp)} shapefiles - "
         f"{len(li_tab)} tables (MapInfo) - "
         f"{len(li_kml)} KML - "
