@@ -53,7 +53,7 @@ class FormatsVector(ExtendedEnum):
 
 
 class FormatsRaster(ExtendedEnum):
-    """Suported raster formats. Key=name, value = extension."""
+    """Supported raster formats. Key=name, value = extension."""
 
     ecw = ".ecw"
     geotiff = ".geotiff"
