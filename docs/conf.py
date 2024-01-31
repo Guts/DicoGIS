@@ -19,14 +19,11 @@ on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
 
 # -- Project information -----------------------------------------------------
-project = __about__.__title__
 author = __about__.__author__
 copyright = __about__.__copyright__
-
-# The short X.Y version
-version = __about__.__version__
-# The full version, including alpha/beta/rc tags
-release = __about__.__version__
+description = __about__.__summary__
+project = __about__.__title__
+version = release = __about__.__version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -44,11 +41,13 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
     # 3rd party
     "myst_parser",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
-    "sphinx_rtd_theme",
+    "sphinxcontrib.mermaid",
+    "sphinxext.opengraph",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -58,8 +57,8 @@ templates_path = ["_templates"]
 # You can specify multiple suffix as a list of string:
 #
 source_suffix = {
-    ".rst": "restructuredtext",
     ".md": "markdown",
+    ".rst": "restructuredtext",
 }
 
 # The master toctree document.
@@ -97,27 +96,18 @@ pygments_style = "sphinx"
 # Theme
 html_favicon = "static/img/DicoGIS_logo_200px.png"
 html_logo = "static/img/DicoGIS_logo_200px.png"
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 html_theme_options = {
-    # "canonical_url": __about__.__uri_homepage__,
-    "display_version": True,
-    "logo_only": False,
-    "prev_next_buttons_location": "both",
-    "style_external_links": True,
-    "style_nav_header_background": "SteelBlue",
-    # Toc options
-    "collapse_navigation": False,
-    "includehidden": False,
-    "navigation_depth": 4,
-    "sticky_navigation": False,
-    "titles_only": False,
+    "source_repository": __about__.__uri__,
+    "source_branch": "master",
+    "source_directory": "docs/",
 }
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["static"]
+# html_static_path = ["static"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -127,15 +117,15 @@ html_static_path = ["static"]
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-html_sidebars = {
-    "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
-}
+# html_sidebars = {
+#     "**": ["globaltoc.html", "relations.html", "sourcelink.html", "searchbox.html"]
+# }
 
 # Language to be used for generating the HTML full-text search index.
 # Sphinx supports the following languages:
 #   'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja'
 #   'nl', 'no', 'pt', 'ro', 'ru', 'sv', 'tr'
-html_search_language = "fr"
+html_search_language = "en"
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
@@ -146,11 +136,19 @@ intersphinx_mapping = {
 
 # -- Extension configuration -------------------------------------------------
 
+# mermaid
+mermaid_params = [
+    "--theme",
+    "forest",
+    "--width",
+    "100%",
+    "--backgroundColor",
+    "transparent",
+]
+
 # MyST Parser
 myst_enable_extensions = [
     "colon_fence",
-    "deflist",
-    "dollarmath",
     "html_admonition",
     "html_image",
     "linkify",
@@ -164,10 +162,22 @@ myst_url_schemes = ["http", "https", "mailto"]
 myst_substitutions = {
     "author": author,
     "date_update": datetime.now().strftime("%d %B %Y"),
+    "description": description,
     "repo_url": __about__.__uri__,
     "title": project,
     "version": version,
 }
+
+# OpenGraph
+ogp_site_name = f"{project} - Documentation"
+ogp_site_url = __about__.__uri_homepage__
+ogp_use_first_image = True
+ogp_enable_meta_description = True
+ogp_custom_meta_tags = [
+    "<meta name='twitter:card' content='summary_large_image'>",
+    f'<meta property="twitter:description" content="{description}" />',
+    f'<meta property="twitter:title" content="{project}" />',
+]
 
 
 # -- Options for Sphinx API doc ----------------------------------------------

@@ -85,7 +85,7 @@ jobs:
       - name: Generates licenses page with pip-licences
         run: |
           python -m pip install -U "pip-licenses<5"
-          pip-licenses --format=markdown --with-authors --with-description --with-urls --ignore-packages qgis-deployment-toolbelt --output-file=docs/misc/licenses.md
+          pip-licenses --format=markdown --with-authors --with-description --with-urls --ignore-packages dicogis --output-file=docs/misc/licenses.md
 
       - name: Install documentation requirements
         run: |
