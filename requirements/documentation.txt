@@ -1,6 +1,8 @@
-furo>=2023
+furo>=2024
+matplotlib>=3.8,<4
 myst-parser[linkify]>=2
 sphinx-autobuild>=2021
 sphinx-autodoc-typehints>=1.11,<1.26
 sphinx-copybutton<1
+sphinxcontrib-mermaid<1
 sphinxext-opengraph>=0.9
