@@ -1,6 +1,6 @@
 furo>=2023
 myst-parser[linkify]>=2
-sphinx-autobuild>=2021.*
+sphinx-autobuild>=2021
 sphinx-autodoc-typehints>=1.11,<1.26
 sphinx-copybutton<1
 sphinxext-opengraph>=0.9
