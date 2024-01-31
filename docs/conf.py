@@ -98,7 +98,7 @@ html_logo = "static/img/DicoGIS_logo_200px.png"
 html_theme = "furo"
 html_theme_options = {
     "source_repository": __about__.__uri__,
-    "source_branch": "main",
+    "source_branch": "master",
     "source_directory": "docs/",
 }
 
