@@ -46,6 +46,7 @@ extensions = [
     "myst_parser",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
+    "sphinxcontrib.mermaid",
     "sphinxext.opengraph",
 ]
 
@@ -135,11 +136,19 @@ intersphinx_mapping = {
 
 # -- Extension configuration -------------------------------------------------
 
+# mermaid
+mermaid_params = [
+    "--theme",
+    "forest",
+    "--width",
+    "100%",
+    "--backgroundColor",
+    "transparent",
+]
+
 # MyST Parser
 myst_enable_extensions = [
     "colon_fence",
-    "deflist",
-    "dollarmath",
     "html_admonition",
     "html_image",
     "linkify",
