@@ -2,7 +2,7 @@
 # -----------------------
 
 dxfgrabber>=1.0,<1.1
-geoserver-restconfig>=2.0.4,<2.0.10
+geoserver-restconfig>=2.0.4,<2.0.11
 lxml>=4.9,<5.2
 numpy>=1.22,<1.27
 openpyxl>=3.0,<3.2
