@@ -94,6 +94,12 @@ git clone https://github.com/Guts/DicoGIS.git
 git clone git@github.com:Guts/DicoGIS.git
 ```
 
+Move into the cloned folder:
+
+```sh
+cd DicoGIS
+```
+
 Create and enter virtual environment (change the path at your convenience):
 
 ```sh
