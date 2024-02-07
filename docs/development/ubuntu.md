@@ -112,7 +112,7 @@ source .venv/bin/activate
 ```sh
 python -m pip install -U pip setuptools wheel
 python -m pip install -U gdal=="$(gdal-config --version).*"
-python -m pip install -U -r requirements.txt
+python -m pip install -U -r requirements/base.txt
 ```
 
 ## Install project
