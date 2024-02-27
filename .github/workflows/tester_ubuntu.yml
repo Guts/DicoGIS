@@ -2,15 +2,21 @@ name: "Tester 🎳"
 
 on:
   push:
-    branches: [master]
+    branches:
+        - master
     paths:
-      - "**/*.py"
       - ".github/workflows/tester_ubuntu.yml"
+      - "**/*.py"
+      - "requirements/base.txt"
+      - "requirements/testing.txt"
   pull_request:
-    branches: [master]
+    branches:
+        - master
     paths:
-      - "**/*.py"
       - ".github/workflows/tester_ubuntu.yml"
+      - "**/*.py"
+      - "requirements/base.txt"
+      - "requirements/testing.txt"
 
 env:
   GDAL_VERSION: 3.*
@@ -64,4 +70,11 @@ jobs:
         run: pytest
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4.0.0
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          env_vars: PYTHON
+          flags: unittests
+          name: Code Coverage for unittests on Ubuntu (Python-${{ env.PYTHON_VERSION }}]
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
