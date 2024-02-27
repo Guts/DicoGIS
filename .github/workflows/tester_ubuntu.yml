@@ -77,4 +77,3 @@ jobs:
           name: Code Coverage for unittests on Ubuntu (Python-${{ env.PYTHON_VERSION }}]
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
