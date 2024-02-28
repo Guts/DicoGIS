@@ -16,6 +16,10 @@ from osgeo import gdal, ogr
 # ##################################
 
 logger = logging.getLogger(__name__)
+# handling GDAL/OGR specific exceptions
+gdal.AllRegister()
+ogr.UseExceptions()
+gdal.UseExceptions()
 
 # ##############################################################################
 # ########## Classes ###############
