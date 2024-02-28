@@ -14,32 +14,28 @@
 # ######### Libraries #############
 # #################################
 
-import logging
 
 # Standard library
-from collections import OrderedDict
+import logging
+from typing import Optional
 
 # 3rd party libraries
-try:
-    from osgeo import gdal, ogr
-except ImportError:
-    import gdal
-    import ogr
+import pgserviceparser
+from osgeo import gdal, ogr
 
-# custom submodules
-try:
-    from .gdal_exceptions_handler import GdalErrorHandler
-    from .geo_infos_generic import GeoInfosGenericReader
-    from .geoutils import Utils
-except ValueError:
-    from gdal_exceptions_handler import GdalErrorHandler
-    from geo_infos_generic import GeoInfosGenericReader
-    from geoutils import Utils
+# package
+from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
+from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
+from dicogis.georeaders.geoutils import Utils
 
 # ############################################################################
 # ######### Globals ############
 # ##############################
 
+# handling GDAL/OGR specific exceptions
+gdal.AllRegister()
+ogr.UseExceptions()
+gdal.UseExceptions()
 gdal_err = GdalErrorHandler()
 georeader = GeoInfosGenericReader()
 youtils = Utils(ds_type="postgis")
@@ -51,52 +47,65 @@ logger = logging.getLogger(__name__)
 
 
 class ReadPostGIS:
+    """Read PostGIS database."""
+
     def __init__(
         self,
-        host="localhost",
-        port=5432,
-        db_name="postgis",
-        user="postgres",
-        password="postgres",
-        views_included=1,
-        dico_dataset=OrderedDict(),
-        txt={},
+        txt: dict,
+        dico_dataset: dict,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        db_name: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        service: Optional[str] = None,
+        views_included: bool = True,
     ):
-        """Uses gdal/ogr functions to extract basic informations about
-        geographic file (handles shapefile or MapInfo tables)
-        and store into the dictionaries.
+        """Uses OGR to extract basic informations about geodata stored into a PostGIS
+            database.
 
-        layer = path to the geographic file
-        dico_dataset = dictionary for global informations
-        dico_fields = dictionary for the fields' informations
-        tipo = feature type to read
-        text = dictionary of texts to display
+        Args:
+            txt (dict): dictionary of translated texts
+            dico_dataset (dict): _description_
+            host (str, optional): postgres connection host. Defaults to "localhost".
+            port (int, optional): postgres connection port. Defaults to 5432.
+            db_name (str, optional): postgres database name. Defaults to "postgis".
+            user (str, optional): postgres connection user name. Defaults to "postgres".
+            password (str, optional): postgres connection user password. Defaults to \
+                "postgres".
+            service (Optional[str], optional): name of pg_service to use to connect to \
+                the database. If defined, other connection parameters are ignored. \
+                Defaults to None.
+            views_included (bool, optional): option to include views. Defaults to True.
         """
-        # handling GDAL/OGR specific exceptions
-        gdal.AllRegister()
-        ogr.UseExceptions()
-        gdal.UseExceptions()
 
         # Creating variables
         self.dico_dataset = dico_dataset
         self.txt = txt
         self.alert = 0
         if views_included:
-            gdal.SetConfigOption("PG_LIST_ALL_TABLES", "YES")
+            gdal.SetConfigOption("SKIP_VIEWS", "NO")
             logger.info("PostgreSQL views enabled.")
         else:
-            gdal.SetConfigOption("PG_LIST_ALL_TABLES", "NO")
+            gdal.SetConfigOption("SKIP_VIEWS", "YES")
             logger.info("PostgreSQL views disabled.")
 
-        # connection infos
+        # connection infos as attributes
         self.host = host
         self.port = port
         self.db_name = db_name
         self.user = user
         self.password = password
-        self.conn_settings = "PG: host={} port={} dbname={} user={} password={}".format(
-            host, port, db_name, user, password
-        )
+        self.service = service
+
+        # build connection string
+        if isinstance(service, str) and service in pgserviceparser.service_names():
+            self.conn_string = f"PG:service={service}"
+        else:
+            self.conn_string = (
+                f"PG: host={host} port={port} dbname={db_name} "
+                f"user={user} password={password}"
+            )
 
         # testing connection
         self.conn = self.get_connection()
@@ -105,11 +114,10 @@ class ReadPostGIS:
             youtils.erratum(
                 ctner=dico_dataset,
                 mess_type=1,
-                ds_lyr=self.conn_settings,
+                ds_lyr=self.conn_string,
                 mess="err_connection_failed",
             )
             dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
-            return None
         else:
             pass
 
@@ -120,7 +128,7 @@ class ReadPostGIS:
     def get_connection(self):
         """TO DOC."""
         try:
-            conn = ogr.Open(str(self.conn_settings))
+            conn = ogr.Open(str(self.conn_string))
             logging.info(f"Access granted : connecting people to {len(conn)} tables!")
             return conn
         except Exception as err:
@@ -146,7 +154,7 @@ class ReadPostGIS:
         else:
             pass
         # check layer type
-        if type(layer) is not ogr.Layer:
+        if not isinstance(layer, ogr.Layer):
             self.alert = self.alert + 1
             youtils.erratum(dico_dataset, layer, "Not a PostGIS layer")
             logging.error("OGR: {} - {}".format(layer, "Not a PostGIS layer."))
@@ -156,12 +164,13 @@ class ReadPostGIS:
             pass
 
         # connection info
+        dico_dataset["pg_service"] = self.service
         dico_dataset["sgbd_host"] = self.host
         dico_dataset["sgbd_port"] = self.port
         dico_dataset["db_name"] = self.db_name
         dico_dataset["user"] = self.user
         dico_dataset["password"] = self.password
-        dico_dataset["connection_string"] = self.conn_settings
+        dico_dataset["connection_string"] = self.conn_string
         # sgbd info
         dico_dataset["sgbd_version"] = self.get_version()
         dico_dataset["sgbd_schemas"] = self.get_schemas()
@@ -242,38 +251,35 @@ class ReadPostGIS:
 # #################################
 
 if __name__ == "__main__":
-    """standalone execution for tests. Paths are relative considering a test
-    within the official repository (https://github.com/Guts/DicoGIS/)"""
-    # libraries import
-
+    """Standalone execution for quick and dirty tests."""
     # test text dictionary
-    textos = OrderedDict()
-    textos["srs_comp"] = "Compound"
-    textos["srs_geoc"] = "Geocentric"
-    textos["srs_geog"] = "Geographic"
-    textos["srs_loca"] = "Local"
-    textos["srs_proj"] = "Projected"
-    textos["srs_vert"] = "Vertical"
-    textos["geom_point"] = "Point"
-    textos["geom_ligne"] = "Line"
-    textos["geom_polyg"] = "Polygon"
+    textos = {
+        "srs_comp": "Compound",
+        "srs_geoc": "Geocentric",
+        "srs_geog": "Geographic",
+        "srs_loca": "Local",
+        "srs_proj": "Projected",
+        "srs_vert": "Vertical",
+        "geom_point": "Point",
+        "geom_ligne": "Line",
+        "geom_polyg": "Polygon",
+    }
 
     # PostGIS database settings
     test_host = "postgresql-guts.alwaysdata.net"
     test_db = "guts_gis"
     test_user = "guts_player"
     test_pwd = "letsplay"
-    test_conn = "PG: host={} dbname={} user={} password={}".format(
-        test_host, test_db, test_user, test_pwd
-    )
+
     # use reader
-    dico_dataset = OrderedDict()
+    dico_dataset = {}
     pgReader = ReadPostGIS(
-        host=test_host,
-        port=5432,
-        db_name=test_db,
-        user=test_user,
-        password=test_pwd,
+        # host=test_host,
+        # port=5432,
+        # db_name=test_db,
+        # user=test_user,
+        # password=test_pwd,
+        service="dev_alwaysdata_reader",
         views_included=1,
         dico_dataset=dico_dataset,
         txt=textos,
