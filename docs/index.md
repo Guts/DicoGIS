@@ -28,6 +28,22 @@ introduction/es
 ```{toctree}
 ---
 maxdepth: 2
+caption: Miscellaneous
+titlesonly: true
+---
+settings
+misc/formats_matrix
+misc/compatibility
+misc/credits
+```
+
+----
+
+## Contribute
+
+```{toctree}
+---
+maxdepth: 2
 caption: Development
 ---
 development/windows
@@ -36,15 +52,4 @@ development/tests
 development/documentation
 development/packaging
 Code documentation <_apidoc/modules>
-```
-
-```{toctree}
----
-maxdepth: 2
-caption: Miscellaneous
-titlesonly: true
----
-misc/formats_matrix
-misc/compatibility
-misc/credits
 ```
