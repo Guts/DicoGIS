@@ -45,7 +45,10 @@ def version_callback(value: bool):
 
 @cli_dicogis.callback()
 def main(
-    verbose: bool = False,
+    verbose: Annotated[
+        bool,
+        typer.Option(is_flag=True, help="Increase verbosity to show debug logs."),
+    ] = False,
     version: Annotated[
         Optional[bool],
         typer.Option(
@@ -65,6 +68,8 @@ def main(
     """
     if verbose:
         state["verbose"] = True
+        logger.setLevel = logging.DEBUG
+
     if version:
         typer.echo(f"{__title__} {__version__}")
         raise typer.Exit()
