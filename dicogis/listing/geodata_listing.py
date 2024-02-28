@@ -12,6 +12,10 @@
 import logging
 from os import path, walk
 from pathlib import Path
+from typing import Optional
+
+# 3rd party
+import pgserviceparser
 
 # package
 from dicogis.constants import FormatsRaster
@@ -26,6 +30,32 @@ logger = logging.getLogger(__name__)
 # ##############################################################################
 # ########## Functions #############
 # ##################################
+
+
+def check_usable_pg_services(requested_pg_services: list[str]) -> Optional[list[str]]:
+    """Check if specified postgres services are actually referenced into the
+        pg_service.conf. Filters out services which are not present.
+
+    Args:
+        requested_pg_services (list[str]): list of requested services names
+
+    Returns:
+        list[str]: filtered list of services names
+    """
+    out_pg_srv_list: list[str] = []
+    referenced_srv = pgserviceparser.service_names()
+
+    for in_pg_srv in requested_pg_services:
+        if in_pg_srv not in referenced_srv:
+            logger.warning(
+                f"{in_pg_srv} is not among Posgtres services referenced within "
+                f"{pgserviceparser.conf_path()}: {', '.join(referenced_srv)}"
+            )
+            continue
+
+        out_pg_srv_list.append(in_pg_srv)
+
+    return out_pg_srv_list
 
 
 def find_geodata_files(

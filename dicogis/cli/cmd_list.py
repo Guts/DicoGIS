@@ -16,7 +16,7 @@ import typer
 # project
 from dicogis.__about__ import __title__
 from dicogis.constants import SUPPORTED_FORMATS
-from dicogis.listing.geodata_listing import find_geodata_files
+from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 
 # ############################################################################
 # ########## Globals ###############
@@ -103,9 +103,15 @@ def inventory(
 
     # TODO: check if specified formats are supported
 
-    # look for geographic data
-    geodata_find = find_geodata_files(start_folder=input_folder)
-    rich.print(geodata_find)
+    # look for geographic data files
+    if input_folder is not None:
+        geodata_find = find_geodata_files(start_folder=input_folder)
+        rich.print(geodata_find)
+
+    # look for geographic database
+    if pg_services:
+        print("Looking for geo SGBD")
+        pg_services = check_usable_pg_services(requested_pg_services=pg_services)
 
 
 # ############################################################################
