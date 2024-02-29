@@ -27,6 +27,23 @@ jobs:
   test-ubuntu:
     runs-on: ubuntu-22.04
 
+    services:
+      postgis:
+        image: 15-3.4-alpine
+
+        env:
+          POSTGRES_DB: sample_gisdata
+          POSTGRES_PASSWORD: dicogis_tests
+          POSTGRES_USER: dicogis_admin
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5555:5432
+
     steps:
       - name: Get source code
         uses: actions/checkout@v4
