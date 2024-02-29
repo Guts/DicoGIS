@@ -24,6 +24,7 @@ import pgserviceparser
 from osgeo import gdal, ogr
 
 # package
+from dicogis.constants import GDAL_POSTGIS_OPEN_OPTIONS
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
 from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
 from dicogis.georeaders.geoutils import Utils
@@ -83,12 +84,7 @@ class ReadPostGIS:
         self.dico_dataset = dico_dataset
         self.txt = txt
         self.alert = 0
-        if views_included:
-            gdal.SetConfigOption("SKIP_VIEWS", "NO")
-            logger.info("PostgreSQL views enabled.")
-        else:
-            gdal.SetConfigOption("SKIP_VIEWS", "YES")
-            logger.info("PostgreSQL views disabled.")
+        self.views_included = views_included
 
         # connection infos as attributes
         self.host = host
@@ -118,46 +114,85 @@ class ReadPostGIS:
                 mess="err_connection_failed",
             )
             dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
-        else:
-            pass
+            return
 
         # sgbd info
-        dico_dataset["sgbd_version"] = self.get_version()
+        dico_dataset["sgbd_version"] = self.get_postgis_version()
         dico_dataset["sgbd_schemas"] = self.get_schemas()
 
-    def get_connection(self):
-        """TO DOC."""
+    def get_connection(self) -> Optional[ogr.DataSource]:
+        """Returns OGR connection to the PostgreSQL database.
+
+        Returns:
+            Optional[ogr.DataSource]: OGR connection
+        """
+        gdal_open_options = GDAL_POSTGIS_OPEN_OPTIONS
+        if self.views_included:
+            gdal_open_options.append("SKIP_VIEWS=NO")
+            logger.info("PostgreSQL views enabled.")
+        else:
+            gdal_open_options.append("SKIP_VIEWS=YES")
+            logger.info("PostgreSQL views disabled.")
+
         try:
-            conn = ogr.Open(str(self.conn_string))
-            logging.info(f"Access granted : connecting people to {len(conn)} tables!")
+            conn: gdal.Dataset = gdal.OpenEx(
+                str(self.conn_string),
+                gdal.OF_VECTOR,
+                open_options=gdal_open_options,
+            )
+            logger.info(
+                f"Access granted: connecting people to {conn.GetLayerCount()} tables!"
+            )
             return conn
         except Exception as err:
             self.dico_dataset["conn_state"] = err
-            logging.error(f"Connection failed. Check settings: {str(err)}")
-            return 0
+            logger.error(f"Connection failed. Check settings. Trace: {err}")
+            return None
 
-    def get_version(self):
-        """TO DO."""
-        sql = self.conn.ExecuteSQL("SELECT PostGIS_full_version();")
-        feat = sql.GetNextFeature()
-        return feat.GetField(0)
+    def get_postgis_version(self) -> Optional[str]:
+        """Returns the version of PostGIS extension.
+
+        Returns:
+            Optional[str]: PostGIS version
+        """
+        try:
+            sql: ogr.Layer = self.conn.ExecuteSQL("SELECT PostGIS_full_version();")
+            pgis_version: ogr.Feature = sql.GetNextFeature()
+            pgis_version = pgis_version.GetFieldAsString(0)
+            logger.debug(f"PostGIS full version: {pgis_version}")
+            return pgis_version
+        except Exception as err:
+            self.dico_dataset["conn_state"] = err
+            logger.error(f"Trying to retrieve PostGIS versions failed. Trace: {err}")
+            return None
 
     def get_schemas(self):
         """TO DO."""
         sql_schemas = "select nspname from pg_catalog.pg_namespace;"
-        return self.conn.ExecuteSQL(sql_schemas)
+        pg_schemas: ogr.Layer = self.conn.ExecuteSQL(sql_schemas)
+        pg_schemas: ogr.Feature = pg_schemas.GetNextFeature()
+        # print(type(pg_schemas), pg_schemas.GetFieldAsString(0))
+        return pg_schemas
 
-    def infos_dataset(self, layer, dico_dataset={}, tipo="PostGIS"):
+    def infos_dataset(
+        self,
+        layer: ogr.Layer,
+        dico_dataset: Optional[dict] = None,
+        tipo: str = "PostGIS",
+    ):
         """TO DO."""
-        if not dico_dataset:
+        if dico_dataset is None:
             dico_dataset = self.dico_dataset
-        else:
-            pass
+
         # check layer type
         if not isinstance(layer, ogr.Layer):
             self.alert = self.alert + 1
-            youtils.erratum(dico_dataset, layer, "Not a PostGIS layer")
-            logging.error("OGR: {} - {}".format(layer, "Not a PostGIS layer."))
+            youtils.erratum(
+                dico_dataset, layer, "Not a OGR layer (no PostGIS table/view)"
+            )
+            logger.error(
+                f"OGR: {layer} is not a valid OGR layer (no PostGIS table/view)."
+            )
             return None
         else:
             dico_dataset["format"] = tipo
@@ -172,7 +207,7 @@ class ReadPostGIS:
         dico_dataset["password"] = self.password
         dico_dataset["connection_string"] = self.conn_string
         # sgbd info
-        dico_dataset["sgbd_version"] = self.get_version()
+        dico_dataset["sgbd_version"] = self.get_postgis_version()
         dico_dataset["sgbd_schemas"] = self.get_schemas()
 
         # layer name
@@ -188,12 +223,12 @@ class ReadPostGIS:
                 mess = str(e).split("\n")[0]
                 self.alert = self.alert + 1
                 youtils.erratum(ctner=dico_dataset, ds_lyr=layer, mess=mess)
-                logging.error(f"GDAL: {layer.GetName()} - {mess}")
+                logger.error(f"GDAL: {layer.GetName()} - {mess}")
                 return None
             else:
                 pass
         except Exception as err:
-            logging.error(err)
+            logger.error(err)
             return None
 
         # schema name
@@ -265,36 +300,49 @@ if __name__ == "__main__":
         "geom_polyg": "Polygon",
     }
 
-    # PostGIS database settings
-    test_host = "postgresql-guts.alwaysdata.net"
-    test_db = "guts_gis"
-    test_user = "guts_player"
-    test_pwd = "letsplay"
-
     # use reader
     dico_dataset = {}
-    pgReader = ReadPostGIS(
-        # host=test_host,
-        # port=5432,
-        # db_name=test_db,
-        # user=test_user,
-        # password=test_pwd,
-        service="dev_alwaysdata_reader",
+    # pg_reader = ReadPostGIS(
+    #     # host=test_host,
+    #     # port=5432,
+    #     # db_name=test_db,
+    #     # user=test_user,
+    #     # password=test_pwd,
+    #     service="dev_alwaysdata_reader",
+    #     views_included=1,
+    #     dico_dataset=dico_dataset,
+    #     txt=textos,
+    # )
+    # pg_reader = ReadPostGIS(
+    #     host="localhost",
+    #     port=5555,
+    #     db_name="sample_gisdata",
+    #     user="dicogis_admin",
+    #     password="dicogis_tests",
+    #     views_included=1,
+    #     dico_dataset=dico_dataset,
+    #     txt=textos,
+    # )
+    pg_reader = ReadPostGIS(
+        service="dicogis_test",
         views_included=1,
         dico_dataset=dico_dataset,
         txt=textos,
     )
     # check if connection succeeded
-    if not pgReader.conn:
+    if not pg_reader.conn:
         # connection failed
         print(dico_dataset)
         exit()
     else:
-        print(f"{len(pgReader.conn)} tables found.")
+        print(
+            f"{pg_reader.conn.GetLayerCount()} tables found in {pg_reader.conn.GetDescription()}."
+        )
 
     # parse layers
-    for layer in pgReader.conn:
+    for idx_layer in range(pg_reader.conn.GetLayerCount()):
+        layer = pg_reader.conn.GetLayerByIndex(idx_layer)
         dico_dataset.clear()
         print("\n", layer.GetName())
-        pgReader.infos_dataset(layer)
+        pg_reader.infos_dataset(layer)
         print(dico_dataset)

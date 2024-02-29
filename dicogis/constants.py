@@ -5,6 +5,8 @@
 # standard library
 from enum import Enum
 
+GDAL_POSTGIS_OPEN_OPTIONS: list[str] = []
+
 
 class ExtendedEnum(Enum):
     """Custom Enum with extended methods."""

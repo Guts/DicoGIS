@@ -73,7 +73,7 @@ utils_global = Utilities()
 # LOG
 logger = logging.getLogger("DicoGIS")
 logging.captureWarnings(True)
-logger.setLevel(logging.WARNING)  # all errors will be get
+logger.setLevel(logging.DEBUG)  # all errors will be get
 log_form = logging.Formatter(
     "%(asctime)s || %(levelname)s "
     "|| %(module)s - %(lineno)d ||"
@@ -495,7 +495,7 @@ class DicoGIS(Tk):
             return
 
         # creating the Excel workbook
-        self.wb = MetadataToXlsx(
+        self.xl_workbook = MetadataToXlsx(
             texts=self.blabla,
             opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
         )
@@ -508,7 +508,7 @@ class DicoGIS(Tk):
             self.process_files()
         elif self.typo == 1:
             self.nb.select(1)
-            self.wb.set_worksheets(has_sgbd=1)
+            self.xl_workbook.set_worksheets(has_sgbd=1)
             logger.info("PROCESS LAUNCHED: SGBD")
             self.check_fields(tab_data_type=self.typo)
         elif self.typo == 2:
@@ -543,52 +543,52 @@ class DicoGIS(Tk):
         total_files = 0
         if self.tab_files.opt_shp.get() and len(self.li_shp):
             total_files += len(self.li_shp)
-            self.wb.set_worksheets(has_vector=1)
+            self.xl_workbook.set_worksheets(has_vector=1)
         else:
             pass
         if self.tab_files.opt_tab.get() and len(self.li_tab):
             total_files += len(self.li_tab)
-            self.wb.set_worksheets(has_vector=1)
+            self.xl_workbook.set_worksheets(has_vector=1)
         else:
             pass
         if self.tab_files.opt_kml.get() and len(self.li_kml):
             total_files += len(self.li_kml)
-            self.wb.set_worksheets(has_vector=1)
+            self.xl_workbook.set_worksheets(has_vector=1)
         else:
             pass
         if self.tab_files.opt_gml.get() and len(self.li_gml):
             total_files += len(self.li_gml)
-            self.wb.set_worksheets(has_vector=1)
+            self.xl_workbook.set_worksheets(has_vector=1)
         else:
             pass
         if self.tab_files.opt_geoj.get() and len(self.li_geoj):
             total_files += len(self.li_geoj)
-            self.wb.set_worksheets(has_vector=1)
+            self.xl_workbook.set_worksheets(has_vector=1)
         else:
             pass
         if self.tab_files.opt_gxt.get() and len(self.li_gxt):
             total_files += len(self.li_gxt)
-            self.wb.set_worksheets(has_vector=1)
+            self.xl_workbook.set_worksheets(has_vector=1)
         else:
             pass
         if self.tab_files.opt_rast.get() and len(self.li_raster):
             total_files += len(self.li_raster)
-            self.wb.set_worksheets(has_raster=1)
+            self.xl_workbook.set_worksheets(has_raster=1)
         else:
             pass
         if self.tab_files.opt_egdb.get() and len(self.li_egdb):
             total_files += len(self.li_egdb)
-            self.wb.set_worksheets(has_filedb=1)
+            self.xl_workbook.set_worksheets(has_filedb=1)
         else:
             pass
         if self.tab_files.opt_spadb.get() and len(self.li_spadb):
             total_files += len(self.li_spadb)
-            self.wb.set_worksheets(has_filedb=1)
+            self.xl_workbook.set_worksheets(has_filedb=1)
         else:
             pass
         if self.tab_files.opt_cdao.get() and len(self.li_cdao):
             total_files += len(self.li_cdao)
-            self.wb.set_worksheets(has_cad=1)
+            self.xl_workbook.set_worksheets(has_cad=1)
         else:
             pass
 
@@ -622,7 +622,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_vector(self.dico_layer)
+                self.xl_workbook.store_md_vector(self.dico_layer)
 
                 logger.debug("Layer metadata stored into workbook.")
         else:
@@ -657,7 +657,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel file
-                self.wb.store_md_vector(self.dico_layer)
+                self.xl_workbook.store_md_vector(self.dico_layer)
 
                 logger.debug("Layer metadata stored into workbook.")
         else:
@@ -692,7 +692,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_vector(self.dico_layer)
+                self.xl_workbook.store_md_vector(self.dico_layer)
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_kml):
@@ -726,7 +726,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_vector(self.dico_layer)
+                self.xl_workbook.store_md_vector(self.dico_layer)
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_gml):
@@ -760,7 +760,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_vector(self.dico_layer)
+                self.xl_workbook.store_md_vector(self.dico_layer)
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_geoj):
@@ -797,7 +797,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_vector(self.dico_layer)
+                self.xl_workbook.store_md_vector(self.dico_layer)
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_gxt):
@@ -835,7 +835,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_raster(self.dico_raster, self.dico_bands)
+                self.xl_workbook.store_md_raster(self.dico_raster, self.dico_bands)
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_raster):
@@ -872,7 +872,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_fdb(self.dico_fdb)
+                self.xl_workbook.store_md_fdb(self.dico_fdb)
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_egdb):
@@ -906,7 +906,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_fdb(self.dico_fdb)
+                self.xl_workbook.store_md_fdb(self.dico_fdb)
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_spadb):
@@ -939,7 +939,7 @@ class DicoGIS(Tk):
                     self.prog_layers["value"] = self.prog_layers["value"] + 1
                     continue
                 # writing to the Excel dictionary
-                self.wb.store_md_cad(self.dico_cdao)
+                self.xl_workbook.store_md_cad(self.dico_cdao)
                 logger.debug("Layer metadata stored into workbook.")
         else:
             if len(self.li_cdao):
@@ -948,9 +948,9 @@ class DicoGIS(Tk):
         # saving dictionary
         self.bell()
         self.val.config(state=ACTIVE)
-        self.wb.tunning_worksheets()
+        self.xl_workbook.tunning_worksheets()
         saved = utils_global.safe_save(
-            wb=self.wb,
+            wb=self.xl_workbook,
             dest_dir=self.tab_files.target_path.get(),
             dest_filename=self.ent_outxl_filename.get(),
             ftype="Excel Workbook",
@@ -973,19 +973,25 @@ class DicoGIS(Tk):
                 ),
             )
 
-    def process_db(self, sgbd_reader):
-        """Process PostGIS DB analisis."""
+    def process_db(self, sgbd_reader: ReadPostGIS):
+        """Process PostGIS DB analisis.
+
+        Args:
+            sgbd_reader (ReadPostGIS): PostGIS georeader
+        """
         # getting the info from shapefiles and compile it in the excel
-        logger.info("PostGIS table processing...")
+        logger.info("Start processing PostGIS tables...")
+        print("KJKJHKJHKJ", type(self.xl_workbook))
         # setting progress bar
         self.prog_layers["maximum"] = sgbd_reader.conn.GetLayerCount()
         # parsing the layers
-        for layer in sgbd_reader.conn:
+        for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
+            layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
             # reset recipient data
             self.dico_dataset.clear()
             sgbd_reader.infos_dataset(layer)
             logger.info(f"Table examined: {layer.GetName()}")
-            self.wb.store_md_sgdb(self.dico_dataset)
+            self.xl_workbook.store_md_sgdb(self.dico_dataset)
             logger.debug("Layer metadata stored into workbook.")
             # increment the progress bar
             self.prog_layers["value"] = self.prog_layers["value"] + 1
@@ -994,9 +1000,9 @@ class DicoGIS(Tk):
         # saving dictionary
         self.bell()
         self.val.config(state=ACTIVE)
-        self.wb.tunning_worksheets()
+        self.xl_workbook.tunning_worksheets()
         saved = utils_global.safe_save(
-            wb=self.wb,
+            wb=self.xl_workbook,
             dest_filename=self.ent_outxl_filename.get(),
             ftype="Excel Workbook",
             dlg_title=self.blabla.get("gui_excel"),
@@ -1129,13 +1135,13 @@ class DicoGIS(Tk):
         if not sgbd_reader.conn:
             fail_reason = self.dico_dataset.get("conn_state")
             self.status.set(f"Connection failed: {fail_reason}.")
+            logger.error(f"PostGIS connection failed: {fail_reason}.")
             avert(title=self.blabla.get("err_pg_conn_fail"), message=fail_reason)
             return None
-        else:
-            # connection succeeded
-            pass
 
-        self.status.set(f"{len(sgbd_reader.conn)} tables")
+        self.status.set(
+            f"{sgbd_reader.conn.GetLayerCount()} tables found in PostGIS database."
+        )
         # set the default output file
         self.ent_outxl_filename.delete(0, END)
         self.ent_outxl_filename.insert(
@@ -1145,7 +1151,7 @@ class DicoGIS(Tk):
             ),
         )
         # launching the process
-        self.process_db(sgbd_reader)
+        self.process_db(sgbd_reader=sgbd_reader)
         # end of function
         return sgbd_reader
 

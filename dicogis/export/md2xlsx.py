@@ -1008,7 +1008,7 @@ class MetadataToXlsx(Workbook):
         # End of method
         return
 
-    def store_md_sgdb(self, layer):
+    def store_md_sgdb(self, layer: dict):
         """Storing metadata about a file database."""
         # increment line
         self.idx_s += 1
