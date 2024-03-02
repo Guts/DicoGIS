@@ -41,6 +41,7 @@ from tkinter.ttk import (
     Progressbar,
     Style,
 )
+from typing import Optional
 
 # 3rd party
 from osgeo import gdal
@@ -80,7 +81,7 @@ log_form = logging.Formatter(
     " %(funcName)s || %(message)s"
 )
 logfile = RotatingFileHandler("LOG_DicoGIS.log", "a", 5000000, 1)
-logfile.setLevel(logging.WARNING)
+logfile.setLevel(logging.DEBUG)
 logfile.setFormatter(log_form)
 logger.addHandler(logfile)
 
@@ -256,9 +257,10 @@ class DicoGIS(Tk):
         self.status = StringVar(self.FrProg, "")
         # widgets
         self.prog_layers = Progressbar(self.FrProg, orient="horizontal")
-        Label(
+        self.lbl_status = Label(
             master=self.FrProg, textvariable=self.status, foreground="DodgerBlue"
-        ).pack()
+        )
+        self.lbl_status.pack()
         # widgets placement
         self.prog_layers.pack(expand=1, fill="both")
 
@@ -474,12 +476,16 @@ class DicoGIS(Tk):
 
     def process(self):
         """Check needed info and launch different processes."""
-        # saving settings
-        self.settings.save_settings(self)
-
         # get the active tab ID
         self.typo: int = self.nb.index("current")
         logger.info(f"Selected tab: {self.typo}")
+
+        if self.typo not in (0, 1):
+            logger.debug("Active tab does not allow execution.")
+            return
+
+        # saving settings
+        self.settings.save_settings(self)
 
         # disabling UI to avoid unattended actions
         self.val.config(state=DISABLED)
@@ -487,19 +493,35 @@ class DicoGIS(Tk):
         self.nb.tab(1, state=DISABLED)
         self.nb.tab(2, state=DISABLED)
 
+        # check form fields
         if not self.check_fields(tab_data_type=self.typo):
+            self.lbl_status.configure(foreground="red")
             self.val.config(state=ACTIVE)
             self.nb.tab(0, state=NORMAL)
             self.nb.tab(1, state=NORMAL)
             self.nb.tab(2, state=NORMAL)
+            self.nb.select(self.typo)
             return
+
+        # if SGBD, check connection
+        if self.typo == 1:
+            pg_reader = self.test_connection()
+            if pg_reader is None:
+                self.lbl_status.configure(foreground="red")
+                self.val.config(state=ACTIVE)
+                self.nb.tab(0, state=NORMAL)
+                self.nb.tab(1, state=NORMAL)
+                self.nb.tab(2, state=NORMAL)
+                self.nb.select(self.typo)
+                return
 
         # creating the Excel workbook
         self.xl_workbook = MetadataToXlsx(
             texts=self.blabla,
             opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
         )
-        logger.info("Excel file created")
+        self.lbl_status.configure(foreground="DodgerBlue")
+        self.status.set(f"Excel file created: {self.xl_workbook}")
 
         # process files or PostGIS database
         if self.typo == 0:
@@ -510,11 +532,8 @@ class DicoGIS(Tk):
             self.nb.select(1)
             self.xl_workbook.set_worksheets(has_sgbd=1)
             logger.info("PROCESS LAUNCHED: SGBD")
-            self.check_fields(tab_data_type=self.typo)
-        elif self.typo == 2:
-            self.nb.select(2)
-            logger.info("PROCESS LAUNCHED: services")
-            # self.check_fields(tab_data_type=self.typo)
+            # launching the process
+            self.process_db(sgbd_reader=pg_reader)
         else:
             pass
         self.val.config(state=ACTIVE)
@@ -981,7 +1000,16 @@ class DicoGIS(Tk):
         """
         # getting the info from shapefiles and compile it in the excel
         logger.info("Start processing PostGIS tables...")
-        print("KJKJHKJHKJ", type(self.xl_workbook))
+
+        # set the default output file
+        self.ent_outxl_filename.delete(0, END)
+        self.ent_outxl_filename.insert(
+            0,
+            "DicoGIS_{}-{}_{}.xlsx".format(
+                self.tab_sgbd.dbnb.get(), self.tab_sgbd.host.get(), self.today
+            ),
+        )
+
         # setting progress bar
         self.prog_layers["maximum"] = sgbd_reader.conn.GetLayerCount()
         # parsing the layers
@@ -1046,15 +1074,15 @@ class DicoGIS(Tk):
             ):
                 self.tab_sgbd.ent_H.configure(foreground="red")
                 self.tab_sgbd.ent_H.delete(0, END)
-                self.tab_sgbd.ent_H.insert(0, self.blabla.get("err_pg_empty_field"))
-                return
+                self.status.set(f"Host is a {self.blabla.get('err_pg_empty_field')}")
+                return False
             else:
                 pass
             if not self.tab_sgbd.ent_P.get():
                 self.tab_sgbd.ent_P.configure(foreground="red")
                 self.tab_sgbd.ent_P.delete(0, END)
-                self.tab_sgbd.ent_P.insert(0, 0000)
-                return
+                self.status.set(f"Port is a {self.blabla.get('err_pg_empty_field')}")
+                return False
             else:
                 pass
             if (
@@ -1063,8 +1091,10 @@ class DicoGIS(Tk):
             ):
                 self.tab_sgbd.ent_D.configure(foreground="red")
                 self.tab_sgbd.ent_D.delete(0, END)
-                self.tab_sgbd.ent_D.insert(0, self.blabla.get("err_pg_empty_field"))
-                return
+                self.status.set(
+                    f"Database is a {self.blabla.get('err_pg_empty_field')}"
+                )
+                return False
             else:
                 pass
             if (
@@ -1073,8 +1103,8 @@ class DicoGIS(Tk):
             ):
                 self.tab_sgbd.ent_U.configure(foreground="red")
                 self.tab_sgbd.ent_U.delete(0, END)
-                self.tab_sgbd.ent_U.insert(0, self.blabla.get("err_pg_empty_field"))
-                return
+                self.status.set(f"User is a {self.blabla.get('err_pg_empty_field')}")
+                return False
             else:
                 pass
             if (
@@ -1083,23 +1113,26 @@ class DicoGIS(Tk):
             ):
                 self.tab_sgbd.ent_M.configure(foreground="red")
                 self.tab_sgbd.ent_M.delete(0, END)
-                self.tab_sgbd.ent_M.insert(0, self.blabla.get("err_pg_empty_field"))
-                return
+                self.status.set(
+                    f"Password is a {self.blabla.get('err_pg_empty_field')}"
+                )
+                self.tab_sgbd.ent_M.configure(foreground="red")
+                return False
             else:
                 pass
         # no error detected: let's test connection
         logger.info("Required fields are OK.")
 
-        if tab_data_type == 1:
-            self.test_connection()
         # End of function
         return True
 
-    def test_connection(self):
-        """Test database connection and handling specific
-        settings : proxy, DB views, etc.
+    def test_connection(self) -> Optional[ReadPostGIS]:
+        """Test database connection.
+
+        Returns:
+            Optional[ReadPostGIS]: PostGIS reader or None
         """
-        self.dico_dataset = OrderedDict()
+        self.dico_dataset: dict = {}
         # check if a proxy is needed
         # more information about the GDAL HTTP proxy options here:
         # http://trac.osgeo.org/gdal/wiki/ConfigOptions#GDALOGRHTTPoptions
@@ -1142,16 +1175,7 @@ class DicoGIS(Tk):
         self.status.set(
             f"{sgbd_reader.conn.GetLayerCount()} tables found in PostGIS database."
         )
-        # set the default output file
-        self.ent_outxl_filename.delete(0, END)
-        self.ent_outxl_filename.insert(
-            0,
-            "DicoGIS_{}-{}_{}.xlsx".format(
-                self.tab_sgbd.dbnb.get(), self.tab_sgbd.host.get(), self.today
-            ),
-        )
-        # launching the process
-        self.process_db(sgbd_reader=sgbd_reader)
+
         # end of function
         return sgbd_reader
 
