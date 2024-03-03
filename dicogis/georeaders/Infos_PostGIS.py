@@ -137,7 +137,7 @@ class ReadPostGIS:
         try:
             conn: gdal.Dataset = gdal.OpenEx(
                 str(self.conn_string),
-                gdal.OF_VECTOR,
+                gdal.OF_READONLY | gdal.OF_VECTOR | gdal.OF_VERBOSE_ERROR,
                 open_options=gdal_open_options,
             )
             logger.info(
