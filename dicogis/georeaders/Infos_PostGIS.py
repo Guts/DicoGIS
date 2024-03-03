@@ -166,13 +166,15 @@ class ReadPostGIS:
             logger.error(f"Trying to retrieve PostGIS versions failed. Trace: {err}")
             return None
 
-    def get_schemas(self):
-        """TO DO."""
+    def get_schemas(self) -> set[str]:
+        """Return unique set of schemas names accessible by the logged user.
+
+        Returns:
+            set[str]: set of schemas names
+        """
         sql_schemas = "select nspname from pg_catalog.pg_namespace;"
         pg_schemas: ogr.Layer = self.conn.ExecuteSQL(sql_schemas)
-        pg_schemas: ogr.Feature = pg_schemas.GetNextFeature()
-        # print(type(pg_schemas), pg_schemas.GetFieldAsString(0))
-        return pg_schemas
+        return {feature["nspname"] for feature in pg_schemas}
 
     def infos_dataset(
         self,
