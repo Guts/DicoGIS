@@ -33,7 +33,7 @@ jobs:
 
     services:
       postgis:
-        image: 15-3.4-alpine
+        image: postgis:15-3.4-alpine
         env:
           POSTGRES_DB: sample_gisdata
           POSTGRES_PASSWORD: dicogis_tests
