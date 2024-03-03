@@ -1,6 +1,5 @@
 #! python3  # noqa: E265
 
-
 # ----------------------------------------------------------------------------
 # Name:         InfosOGR_PG
 # Purpose:      Use GDAL/OGR library to extract informations about
@@ -281,70 +280,3 @@ class ReadPostGIS:
 
         # clean exit
         del obj
-
-
-# ############################################################################
-# #### Stand alone program ########
-# #################################
-
-if __name__ == "__main__":
-    """Standalone execution for quick and dirty tests."""
-    # test text dictionary
-    textos = {
-        "srs_comp": "Compound",
-        "srs_geoc": "Geocentric",
-        "srs_geog": "Geographic",
-        "srs_loca": "Local",
-        "srs_proj": "Projected",
-        "srs_vert": "Vertical",
-        "geom_point": "Point",
-        "geom_ligne": "Line",
-        "geom_polyg": "Polygon",
-    }
-
-    # use reader
-    dico_dataset = {}
-    # pg_reader = ReadPostGIS(
-    #     # host=test_host,
-    #     # port=5432,
-    #     # db_name=test_db,
-    #     # user=test_user,
-    #     # password=test_pwd,
-    #     service="dev_alwaysdata_reader",
-    #     views_included=1,
-    #     dico_dataset=dico_dataset,
-    #     txt=textos,
-    # )
-    # pg_reader = ReadPostGIS(
-    #     host="localhost",
-    #     port=5555,
-    #     db_name="sample_gisdata",
-    #     user="dicogis_admin",
-    #     password="dicogis_tests",
-    #     views_included=1,
-    #     dico_dataset=dico_dataset,
-    #     txt=textos,
-    # )
-    pg_reader = ReadPostGIS(
-        service="dicogis_test",
-        views_included=1,
-        dico_dataset=dico_dataset,
-        txt=textos,
-    )
-    # check if connection succeeded
-    if not pg_reader.conn:
-        # connection failed
-        print(dico_dataset)
-        exit()
-    else:
-        print(
-            f"{pg_reader.conn.GetLayerCount()} tables found in {pg_reader.conn.GetDescription()}."
-        )
-
-    # parse layers
-    for idx_layer in range(pg_reader.conn.GetLayerCount()):
-        layer = pg_reader.conn.GetLayerByIndex(idx_layer)
-        dico_dataset.clear()
-        print("\n", layer.GetName())
-        pg_reader.infos_dataset(layer)
-        print(dico_dataset)
