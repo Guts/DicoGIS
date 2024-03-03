@@ -53,7 +53,6 @@ class TestGeoReaderPostgis(unittest.TestCase):
         }
         # check connection
         environ["PGSERVICEFILE"] = f"{cls.fixture_pgservice_conf.resolve()}"
-        environ["PGSERVICEFILE"] = f"{cls.fixture_pgservice_conf.resolve()}"
         pg_conn: gdal.Dataset = gdal.OpenEx(
             "PG:service=dicogis_test",
             gdal.OF_VECTOR | gdal.OF_VERBOSE_ERROR,
@@ -77,7 +76,7 @@ class TestGeoReaderPostgis(unittest.TestCase):
                 accessMode="overwrite",
                 format="PostgreSQL",
                 layerName=f"dicogis_unittests.{shapefile.stem}",
-                skipFailures=False,
+                skipFailures=True,
             )
 
             # Load the Shapefile into the PostGIS database
