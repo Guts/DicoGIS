@@ -35,7 +35,7 @@ class TestGeoReaderPostgis(unittest.TestCase):
         # fixtures
         cls.pg_connection_string = "PG:service=dicogis_test"
         cls.fixture_pgservice_conf = Path("tests/fixtures/database/pg_service.conf")
-        cls.fixture_good_vector = Path("tests/fixtures/gisdata/data/good/")
+        cls.fixture_good_vector = Path("tests/fixtures/gisdata/data/good/vector/")
         assert cls.fixture_pgservice_conf.exists(), (
             "The required fixture pg_service.conf file is missing: "
             f"{cls.fixture_pgservice_conf}"
