@@ -12,6 +12,7 @@ on:
   pull_request:
     branches:
         - master
+        - feature/*
     paths:
       - ".github/workflows/tester_ubuntu.yml"
       - "**/*.py"
