@@ -14,9 +14,12 @@ import rich
 import typer
 
 # project
-from dicogis.__about__ import __title__
+from dicogis.__about__ import __title__, __version__
 from dicogis.constants import SUPPORTED_FORMATS
+from dicogis.export.md2xlsx import MetadataToXlsx
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
+from dicogis.utils.environment import get_gdal_version, get_proj_version
+from dicogis.utils.texts import TextsManager
 
 # ############################################################################
 # ########## Globals ###############
@@ -67,6 +70,14 @@ def inventory(
             "If None, database listing is ignored. Defaults to None.",
         ),
     ] = None,
+    out_prettify_size: Annotated[
+        bool,
+        typer.Option(
+            is_flag=True,
+            help="Enable prettified files size in output. "
+            "Example: 1 ko instead of 1024.",
+        ),
+    ] = False,
     verbose: bool = False,
 ):
     """Command to list geodata files starting from a folder and/or databases using \
@@ -90,7 +101,12 @@ def inventory(
         f"{APP_NAME} parameters: {input_folder=} - {formats=} - {pg_services=} - {verbose=}"
     )
     app_dir = typer.get_app_dir(APP_NAME)
+
+    # log some context information
+    logger.info(f"DicoGIS version: {__version__}")
     logger.debug(f"DicoGIS working folder: {app_dir}")
+    logger.info(f"GDAL: {get_gdal_version()}")
+    logger.info(f"PROJ: {get_proj_version()}")
 
     # check minimal parameters
     # note: pg_services defaults to [] not to None
@@ -103,10 +119,20 @@ def inventory(
 
     # TODO: check if specified formats are supported
 
+    # i18n
+    dir_locale = Path(__file__).parent.parent.joinpath("locale")
+    txt_manager = TextsManager(dir_locale)
+
     # look for geographic data files
     if input_folder is not None:
         geodata_find = find_geodata_files(start_folder=input_folder)
         rich.print(geodata_find)
+
+        # creating the Excel workbook
+        xl_workbook = MetadataToXlsx(
+            texts=txt_manager,
+            opt_size_prettify=out_prettify_size,
+        )
 
     # look for geographic database
     if pg_services:
