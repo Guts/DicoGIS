@@ -1,6 +1,7 @@
 name: "🏷 PR Labeler"
+
 on:
-  - pull_request_target
+  - pull_request
 
 permissions:
   contents: read
