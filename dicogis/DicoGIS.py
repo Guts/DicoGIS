@@ -1307,13 +1307,18 @@ class DicoGIS(ThemedTk):
 if __name__ == "__main__":
     """standalone execution"""
     # standard
+    import sys
     from os import getenv
     from tkinter import TkVersion
 
     # 3rd party
     import distro
 
-    logger.debug(f"{TkVersion=}")
+    # check Tk version
+    logger.info(f"{TkVersion=}")
+    if TkVersion < 8.6:
+        logger.critical("DicoGIS requires Tkversion >= 8.6.")
+        sys.exit(1)
 
     # determine theme depending on operating system and distro
     theme = "arc"
