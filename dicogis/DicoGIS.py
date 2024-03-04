@@ -331,9 +331,7 @@ class DicoGIS(Tk):
         self.tab_files.FrPath.config(text=self.blabla.get("gui_fr1"))
         self.tab_files.FrFilters.config(text=self.blabla.get("gui_fr3"))
         self.tab_files.lb_target.config(text=self.blabla.get("gui_path"))
-        self.tab_files.btn_browse.config(
-            text="\U0001F3AF " + self.blabla.get("gui_choix")
-        )
+        self.tab_files.btn_browse.config(text=self.blabla.get("gui_choix"))
         # sgbd tab
         self.nb.tab(1, text=self.blabla.get("gui_tab2"))
         self.tab_sgbd.FrDb.config(text=self.blabla.get("gui_fr2"))
