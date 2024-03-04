@@ -120,7 +120,6 @@ class TabFiles(Frame):
         self.opt_spadb = IntVar(self.FrFilters)  # able/disable Spatalite DB
         self.opt_rast = IntVar(self.FrFilters)  # able/disable rasters
         self.opt_cdao = IntVar(self.FrFilters)  # able/disable CAO/DAO files
-        self.opt_qgs = IntVar(self.FrFilters)  # able/disable Geospatial QGS
 
         # format choosen: check buttons
         caz_shp = Checkbutton(self.FrFilters, text=".shp", variable=self.opt_shp)
