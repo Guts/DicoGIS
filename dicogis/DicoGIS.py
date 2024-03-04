@@ -39,7 +39,6 @@ from tkinter.ttk import (
     Labelframe,
     Notebook,
     Progressbar,
-    Style,
 )
 
 # 3rd party
@@ -132,7 +131,6 @@ class DicoGIS(ThemedTk):
             logger.info(f"Operating system: {platform.platform()}")
             icon = Image("photo", file=self.dir_imgs / "DicoGIS_logo.gif")
             self.call("wm", "iconphoto", self._w, icon)
-            self.style = Style().theme_use("clam")
 
         elif opersys == "darwin":
             logger.info(f"Operating system: {platform.platform()}")
@@ -1330,17 +1328,19 @@ if __name__ == "__main__":
     elif opersys == "win32":
         theme = "breeze"
     else:
-        logging.warning(
+        logger.warning(
             f"Your platform/operating system is not recognized: {opersys}. "
             "It may lead to some strange behavior or buggy events."
         )
+
+    logger.info(f"Used theme: {theme}")
 
     # launch the main UI
     try:
         app = DicoGIS(theme=theme)
         app.set_theme(theme_name=theme)
     except Exception as err:
-        logging.critical(
+        logger.critical(
             "Launching DicoGIS UI failed. Did you install the system "
             f"requirements? Trace: {err}"
         )

@@ -15,7 +15,7 @@
 import gettext
 import logging
 from tkinter import PhotoImage, Tk, W
-from tkinter.ttk import Button, Frame, Label, Style
+from tkinter.ttk import Button, Frame, Label
 from webbrowser import open_new_tab
 
 # package
@@ -47,12 +47,9 @@ class MiscButtons(Frame):
             row=1, columnspan=2, column=0, padx=2, pady=2, sticky=W
         )
         # credits
-        s = Style(self)
-        s.configure("Kim.TButton", foreground="DodgerBlue", borderwidth=0)
         btn_credits = Button(
             self,
             text=parent.package_about.__copyright__,
-            style="Kim.TButton",
             command=lambda: open_new_tab(parent.package_about.__uri__),
         )
         btn_credits.grid(row=2, columnspan=2, padx=2, pady=2, sticky="WE")
