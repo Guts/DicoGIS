@@ -1111,8 +1111,6 @@ class DicoGIS(ThemedTk):
         # quit and exit
         if saved is not None:
             utils_global.open_dir_file(saved[1])
-            self.destroy()
-            self.quit()
         else:
             showinfo(
                 title=self.blabla.get(
