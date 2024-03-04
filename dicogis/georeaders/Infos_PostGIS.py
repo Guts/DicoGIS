@@ -17,7 +17,6 @@
 import logging
 
 # Standard library
-from collections import OrderedDict
 
 # 3rd party libraries
 try:
@@ -59,7 +58,7 @@ class ReadPostGIS:
         user="postgres",
         password="postgres",
         views_included=1,
-        dico_dataset=OrderedDict(),
+        dico_dataset={},
         txt={},
     ):
         """Uses gdal/ogr functions to extract basic informations about
@@ -247,7 +246,7 @@ if __name__ == "__main__":
     # libraries import
 
     # test text dictionary
-    textos = OrderedDict()
+    textos = {}
     textos["srs_comp"] = "Compound"
     textos["srs_geoc"] = "Geocentric"
     textos["srs_geog"] = "Geographic"
@@ -267,7 +266,7 @@ if __name__ == "__main__":
         test_host, test_db, test_user, test_pwd
     )
     # use reader
-    dico_dataset = OrderedDict()
+    dico_dataset = {}
     pgReader = ReadPostGIS(
         host=test_host,
         port=5432,
