@@ -63,7 +63,7 @@ class MiscButtons(Frame):
         )
         btn_contact = Button(
             self,
-            text="\U00002709 " + _("Contact"),
+            text=_("Contact"),
             command=lambda: open_new_tab(mailto),
         )
 
@@ -71,14 +71,14 @@ class MiscButtons(Frame):
         url_src = f"{parent.package_about.__uri__}issues"
         btn_src = Button(
             self,
-            text="\U000026A0 " + _("Report"),
+            text=_("Report"),
             command=lambda: open_new_tab(url_src),
         )
 
         # documentation
         btn_doc = Button(
             self,
-            text="\U0001F56E " + _("Documentation"),
+            text=_("Documentation"),
             command=lambda: open_new_tab(__about__.__uri_homepage__),
         )
 
