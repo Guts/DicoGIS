@@ -15,7 +15,6 @@
 
 # Standard library
 import logging
-from collections import OrderedDict
 from os import path
 from time import localtime, strftime
 
@@ -186,7 +185,7 @@ if __name__ == "__main__":
         path.realpath(r"..\..\test\datatest\vectors\kml\PPRI_Loire_sept2014.kmz"),
     ]
     # test text dictionary
-    textos = OrderedDict()
+    textos = {}
     textos["srs_comp"] = "Compound"
     textos["srs_geoc"] = "Geocentric"
     textos["srs_geog"] = "Geographic"
@@ -197,7 +196,7 @@ if __name__ == "__main__":
     textos["geom_ligne"] = "Line"
     textos["geom_polyg"] = "Polygon"
     # recipient datas
-    dico_dataset = OrderedDict()  # dictionary where will be stored info
+    dico_dataset = {}  # dictionary where will be stored info
     # execution
     for vector in li_vectors:
         """looping on shapefiles list"""

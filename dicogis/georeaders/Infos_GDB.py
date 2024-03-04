@@ -15,7 +15,6 @@
 # #################################
 # Standard library
 import logging
-from collections import OrderedDict
 from os import path, walk
 from time import localtime, strftime
 
@@ -114,7 +113,7 @@ class ReadGDB:
         # parsing layers
         for layer_idx in range(src.GetLayerCount()):
             # dictionary where will be stored informations
-            dico_layer = OrderedDict()
+            dico_layer = {}
             # parent GDB
             dico_layer["src_name"] = path.basename(src.GetName())
             # getting layer object
@@ -190,7 +189,7 @@ if __name__ == "__main__":
     # sample files
     chdir(r"..\..\test\datatest\FileGDB\Esri_FileGDB")
     # test text dictionary
-    textos = OrderedDict()
+    textos = {}
     textos["srs_comp"] = "Compound"
     textos["srs_geoc"] = "Geocentric"
     textos["srs_geog"] = "Geographic"
@@ -225,7 +224,7 @@ if __name__ == "__main__":
                 pass
 
     # recipient datas
-    dico_dataset = OrderedDict()
+    dico_dataset = {}
     gdbReader = ReadGDB()
 
     # read GDB

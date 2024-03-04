@@ -15,7 +15,6 @@
 
 # Standard library
 import logging
-from collections import OrderedDict
 from os import chdir, path
 from time import localtime, strftime
 
@@ -145,7 +144,7 @@ class ReadDXF:
         # parsing layers
         for layer_idx in range(src.GetLayerCount()):
             # dictionary where will be stored informations
-            dico_layer = OrderedDict()
+            dico_layer = {}
             dico_layer["src_name"] = dico_dataset.get("name")
             # getting layer object
             layer = src.GetLayerByIndex(layer_idx)
@@ -217,7 +216,7 @@ if __name__ == "__main__":
     """standalone execution for tests. Paths are relative considering a test
     within the official repository (https://github.com/Guts/DicoGIS/)"""
     # test text dictionary
-    textos = OrderedDict()
+    textos = {}
     textos["srs_comp"] = "Compound"
     textos["srs_geoc"] = "Geocentric"
     textos["srs_geog"] = "Geographic"
@@ -233,7 +232,7 @@ if __name__ == "__main__":
     li_dxf = [r"..\..\test\datatest\cao\dxf\paris_transports_ed.dxf"]
 
     # recipient datas
-    dico_dataset = OrderedDict()
+    dico_dataset = {}
 
     # read DXF
     for source_path in li_dxf:
