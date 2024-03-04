@@ -20,14 +20,13 @@ import locale
 import logging
 import platform
 from logging.handlers import RotatingFileHandler
-from os import path
 from pathlib import Path
 from sys import exit
 from sys import platform as opersys
 from time import strftime
 
 # GUI
-from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, StringVar
+from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, IntVar, StringVar
 from tkinter.messagebox import showerror as avert
 from tkinter.messagebox import showinfo
 from tkinter.ttk import (
@@ -48,15 +47,8 @@ from ttkthemes import ThemedTk
 # Project
 from dicogis import __about__
 from dicogis.export.md2xlsx import MetadataToXlsx
-from dicogis.georeaders import (
-    ReadDXF,
-    ReadGDB,
-    ReadGXT,
-    ReadPostGIS,
-    ReadRasters,
-    ReadSpaDB,
-    ReadVectorFlatDataset,
-)
+from dicogis.georeaders import ReadPostGIS
+from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.listing.geodata_listing import find_geodata_files
 from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
 from dicogis.utils import CheckNorris, OptionsManager, TextsManager, Utilities
@@ -161,20 +153,20 @@ class DicoGIS(ThemedTk):
             ".gml",
             ".geojson",
         )  # vectors handled
-        self.li_shp = []  # list for shapefiles path
-        self.li_tab = []  # list for MapInfo tables path
+        self.li_shapefiles = []  # list for shapefiles path
+        self.li_mapinfo_tab = []  # list for MapInfo tables path
         self.li_kml = []  # list for KML path
         self.li_gml = []  # list for GML path
-        self.li_geoj = []  # list for GeoJSON paths
+        self.li_geojson = []  # list for GeoJSON paths
         self.li_gxt = []  # list for GXT paths
         self.li_vectors = []  # list for all vectors
         # formats / type: rasters
         self.li_raster = []  # list for rasters paths
         self.li_raster_formats = (".ecw", ".tif", ".jp2")  # raster handled
         # formats / type: file databases
-        self.li_fdb = []  # list for all files databases
-        self.li_egdb = []  # list for Esri File Geodatabases
-        self.li_spadb = []  # list for Spatialite Geodatabases
+        self.li_file_databases = []  # list for all files databases
+        self.li_file_database_esri = []  # list for Esri File Geodatabases
+        self.li_file_database_spatialite = []  # list for Spatialite Geodatabases
         # formats / type: CAO/DAO
         self.li_cdao = []  # list for all CAO/DAO files
         self.li_dxf = []  # list for AutoCAD DXF paths
@@ -260,8 +252,11 @@ class DicoGIS(ThemedTk):
         )
         # variables
         self.status = StringVar(self.FrProg, "")
+        self.progress = IntVar(self.FrProg, 0)
         # widgets
-        self.prog_layers = Progressbar(self.FrProg, orient="horizontal")
+        self.prog_layers = Progressbar(
+            self.FrProg, orient="horizontal", variable=self.progress
+        )
         self.lbl_status = Label(
             master=self.FrProg, textvariable=self.status, foreground="DodgerBlue"
         )
@@ -403,24 +398,25 @@ class DicoGIS(ThemedTk):
 
         (
             self.num_folders,
-            self.li_shp,
-            self.li_tab,
+            self.li_shapefiles,
+            self.li_mapinfo_tab,
             self.li_kml,
             self.li_gml,
-            self.li_geoj,
+            self.li_geojson,
             self.li_gxt,
             self.li_raster,
-            self.li_egdb,
+            self.li_file_database_esri,
             self.li_dxf,
             self.li_dwg,
             self.li_dgn,
             self.li_cdao,
-            self.li_fdb,
-            self.li_spadb,
+            self.li_file_databases,
+            self.li_file_database_spatialite,
         ) = find_geodata_files(start_folder=target_folder)
 
         # end of listing
         self.prog_layers.stop()
+        self.progress.set(0)
 
         # status message
         self.status.set(
@@ -434,14 +430,14 @@ class DicoGIS(ThemedTk):
             "{} file databases - "
             "{} CAO/DAO - "
             "in {}{}".format(
-                len(self.li_shp),
-                len(self.li_tab),
+                len(self.li_shapefiles),
+                len(self.li_mapinfo_tab),
                 len(self.li_kml),
                 len(self.li_gml),
-                len(self.li_geoj),
+                len(self.li_geojson),
                 len(self.li_gxt),
                 len(self.li_raster),
-                len(self.li_fdb),
+                len(self.li_file_databases),
                 len(self.li_cdao),
                 self.num_folders,
                 self.blabla.get("log_numfold"),
@@ -449,11 +445,11 @@ class DicoGIS(ThemedTk):
         )
 
         # grouping vectors lists
-        self.li_vectors.extend(self.li_shp)
-        self.li_vectors.extend(self.li_tab)
+        self.li_vectors.extend(self.li_shapefiles)
+        self.li_vectors.extend(self.li_mapinfo_tab)
         self.li_vectors.extend(self.li_kml)
         self.li_vectors.extend(self.li_gml)
-        self.li_vectors.extend(self.li_geoj)
+        self.li_vectors.extend(self.li_geojson)
         self.li_vectors.extend(self.li_gxt)
 
         # reactivating the buttons
@@ -461,20 +457,20 @@ class DicoGIS(ThemedTk):
         self.val.config(state=ACTIVE)
         # End of function
         return (
-            self.li_shp,
-            self.li_tab,
+            self.li_shapefiles,
+            self.li_mapinfo_tab,
             self.li_kml,
             self.li_gml,
-            self.li_geoj,
+            self.li_geojson,
             self.li_gxt,
             self.li_raster,
-            self.li_egdb,
+            self.li_file_database_esri,
             self.li_dxf,
             self.li_dwg,
             self.li_dgn,
             self.li_cdao,
-            self.li_fdb,
-            self.li_spadb,
+            self.li_file_databases,
+            self.li_file_database_spatialite,
         )
 
     def process(self):
@@ -524,7 +520,7 @@ class DicoGIS(ThemedTk):
             opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
         )
         self.lbl_status.configure(foreground="DodgerBlue")
-        self.status.set(f"Excel file created: {self.xl_workbook}")
+        self.status.set("Excel worbook object instanciated")
 
         # process files or PostGIS database
         if self.typo == 0:
@@ -550,422 +546,56 @@ class DicoGIS(ThemedTk):
         if (
             len(self.li_vectors)
             + len(self.li_raster)
-            + len(self.li_fdb)
+            + len(self.li_file_databases)
             + len(self.li_cdao)
         ):
             pass
         else:
             avert("DicoGIS - User error", self.blabla.get("nodata"))
             return
-        # georeaders
-        georeader_vector = ReadVectorFlatDataset()
-        georeader_egdb = ReadGDB()
+
+        # instanciate geofiles processor
+        geofiles_processor = ProcessingFiles(
+            output_workbook=self.xl_workbook,
+            localized_strings=self.blabla,
+            # list by tabs
+            li_vectors=self.li_vectors,
+            li_rasters=self.li_raster,
+            li_file_databases=self.li_file_databases,
+            li_cdao=self.li_cdao,
+            # list by formats
+            li_dxf=self.li_dxf,
+            li_filegdb_esri=self.li_file_database_esri,
+            li_filegdb_spatialite=self.li_file_database_spatialite,
+            li_gml=self.li_gml,
+            li_gxt=self.li_gxt,
+            li_kml=self.li_kml,
+            li_shapefiles=self.li_shapefiles,
+            li_mapinfo_tab=self.li_mapinfo_tab,
+            li_geojson=self.li_geojson,
+            # options
+            opt_analyze_cdao=self.tab_files.opt_gxt.get(),
+            opt_analyze_esri_filegdb=self.tab_files.opt_egdb.get(),
+            opt_analyze_geojson=self.tab_files.opt_geoj.get(),
+            opt_analyze_gml=self.tab_files.opt_gml.get(),
+            opt_analyze_gxt=self.tab_files.opt_gxt.get(),
+            opt_analyze_kml=self.tab_files.opt_kml.get(),
+            opt_analyze_mapinfo_tab=self.tab_files.opt_tab.get(),
+            opt_analyze_raster=self.tab_files.opt_rast.get(),
+            opt_analyze_shapefiles=self.tab_files.opt_shp.get(),
+            opt_analyze_spatialite=self.tab_files.opt_spadb.get(),
+        )
 
         # sheets and progress bar
-        total_files = 0
-        if self.tab_files.opt_shp.get() and len(self.li_shp):
-            total_files += len(self.li_shp)
-            self.xl_workbook.set_worksheets(has_vector=1)
-        else:
-            pass
-        if self.tab_files.opt_tab.get() and len(self.li_tab):
-            total_files += len(self.li_tab)
-            self.xl_workbook.set_worksheets(has_vector=1)
-        else:
-            pass
-        if self.tab_files.opt_kml.get() and len(self.li_kml):
-            total_files += len(self.li_kml)
-            self.xl_workbook.set_worksheets(has_vector=1)
-        else:
-            pass
-        if self.tab_files.opt_gml.get() and len(self.li_gml):
-            total_files += len(self.li_gml)
-            self.xl_workbook.set_worksheets(has_vector=1)
-        else:
-            pass
-        if self.tab_files.opt_geoj.get() and len(self.li_geoj):
-            total_files += len(self.li_geoj)
-            self.xl_workbook.set_worksheets(has_vector=1)
-        else:
-            pass
-        if self.tab_files.opt_gxt.get() and len(self.li_gxt):
-            total_files += len(self.li_gxt)
-            self.xl_workbook.set_worksheets(has_vector=1)
-        else:
-            pass
-        if self.tab_files.opt_rast.get() and len(self.li_raster):
-            total_files += len(self.li_raster)
-            self.xl_workbook.set_worksheets(has_raster=1)
-        else:
-            pass
-        if self.tab_files.opt_egdb.get() and len(self.li_egdb):
-            total_files += len(self.li_egdb)
-            self.xl_workbook.set_worksheets(has_filedb=1)
-        else:
-            pass
-        if self.tab_files.opt_spadb.get() and len(self.li_spadb):
-            total_files += len(self.li_spadb)
-            self.xl_workbook.set_worksheets(has_filedb=1)
-        else:
-            pass
-        if self.tab_files.opt_dxf.get() and len(self.li_cdao):
-            total_files += len(self.li_cdao)
-            self.xl_workbook.set_worksheets(has_cad=1)
-        else:
-            pass
+        total_files = geofiles_processor.count_files_to_process()
 
         self.prog_layers["maximum"] = total_files
-        self.prog_layers["value"]
 
-        if self.tab_files.opt_shp.get() and len(self.li_shp) > 0:
-            logger.info("Processing shapefiles: start")
-            for shp in self.li_shp:
-                """looping on shapefiles list"""
-                self.status.set(path.basename(shp))
-                logger.info(f"Processing: {shp}")
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_layer.clear()
-                # getting the informations
-                try:
-                    georeader_vector.infos_dataset(
-                        path.abspath(shp), self.dico_layer, self.blabla
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            shp, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_vector(self.dico_layer)
-
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_shp):
-                logger.info(f"Ignoring {len(self.li_shp)} shapefiles")
-            pass
-
-        if self.tab_files.opt_tab.get() and len(self.li_tab) > 0:
-            logger.info("Processing MapInfo tables: start")
-            for tab in self.li_tab:
-                """looping on MapInfo tables list"""
-                self.status.set(path.basename(tab))
-                logger.info(tab)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_layer.clear()
-                # getting the informations
-                try:
-                    georeader_vector.infos_dataset(
-                        path.abspath(tab), self.dico_layer, self.blabla
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            tab, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel file
-                self.xl_workbook.store_md_vector(self.dico_layer)
-
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_tab):
-                logger.info(f"Ignoring {len(self.li_tab)} MapInfo tables")
-
-        if self.tab_files.opt_kml.get() and len(self.li_kml) > 0:
-            logger.info("Processing KML-KMZ: start")
-            for kml in self.li_kml:
-                """looping on KML/KMZ list"""
-                self.status.set(path.basename(kml))
-                logger.info(kml)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_layer.clear()
-                self.dico_fields.clear()
-                # getting the informations
-                try:
-                    georeader_vector.infos_dataset(
-                        path.abspath(kml), self.dico_layer, self.blabla
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            kml, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_vector(self.dico_layer)
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_kml):
-                logger.info(f"Ignoring {len(self.li_kml)} KML")
-
-        if self.tab_files.opt_gml.get() and len(self.li_gml) > 0:
-            logger.info("Processing GML: start")
-            for gml in self.li_gml:
-                """looping on GML list"""
-                self.status.set(path.basename(gml))
-                logger.info(gml)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_layer.clear()
-                self.dico_fields.clear()
-                # getting the informations
-                try:
-                    georeader_vector.infos_dataset(
-                        path.abspath(gml), self.dico_layer, self.blabla
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            gml, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_vector(self.dico_layer)
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_gml):
-                logger.info(f"Ignoring {len(self.li_gml)} GML")
-
-        if self.tab_files.opt_geoj.get() and len(self.li_geoj) > 0:
-            logger.info("Processing GeoJSON: start")
-            for geojson in self.li_geoj:
-                """looping on GeoJSON list"""
-                self.status.set(path.basename(geojson))
-                logger.info(geojson)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_layer.clear()
-                self.dico_fields.clear()
-                # getting the informations
-                try:
-                    georeader_vector.infos_dataset(
-                        path.abspath(geojson), self.dico_layer, self.blabla
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            geojson, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_vector(self.dico_layer)
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_geoj):
-                logger.info(f"Ignoring {len(self.li_geoj)} GeoJSON")
-
-        if self.tab_files.opt_gxt.get() and len(self.li_gxt) > 0:
-            logger.info("Processing GXT: start")
-            for gxtpath in self.li_gxt:
-                """looping on gxt list"""
-                self.status.set(path.basename(gxtpath))
-                logger.info(gxtpath)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_layer.clear()
-                self.dico_fields.clear()
-                # getting the informations
-                try:
-                    ReadGXT(
-                        path.abspath(gxtpath),
-                        self.dico_layer,
-                        "Geoconcept eXport Text",
-                        self.blabla,
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            gxtpath, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_vector(self.dico_layer)
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_gxt):
-                logger.info(f"Ignoring {len(self.li_gxt)} Geoconcept eXport Text")
-
-        if self.tab_files.opt_rast.get() and len(self.li_raster) > 0:
-            logger.info("Processing rasters: start")
-            for raster in self.li_raster:
-                """looping on rasters list"""
-                self.status.set(path.basename(raster))
-                logger.info(raster)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_raster.clear()
-                self.dico_bands.clear()
-                # getting the informations
-                try:
-                    ReadRasters(
-                        path.abspath(raster),
-                        self.dico_raster,
-                        self.dico_bands,
-                        path.splitext(raster)[1],
-                        self.blabla,
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            raster, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_raster(self.dico_raster, self.dico_bands)
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_raster):
-                logger.info(f"Ignoring {len(self.li_raster)} rasters")
-
-        if self.tab_files.opt_egdb.get() and len(self.li_egdb) > 0:
-            logger.info("Processing Esri FileGDB: start")
-            for gdb in self.li_egdb:
-                """looping on FileGDB list"""
-                self.status.set(path.basename(gdb))
-                logger.info(gdb)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_fdb.clear()
-                self.dico_fields.clear()
-                # getting the informations
-                try:
-                    georeader_egdb.infos_dataset(
-                        path.abspath(gdb),
-                        self.dico_fdb,
-                        self.blabla,
-                        tipo="Esri FileGDB",
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            gdb, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_fdb(self.dico_fdb)
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_egdb):
-                logger.info(f"Ignoring {len(self.li_egdb)} Esri FileGDB")
-
-        if self.tab_files.opt_spadb.get() and len(self.li_spadb) > 0:
-            logger.info("Processing Spatialite DB: start")
-            for spadb in self.li_spadb:
-                """looping on Spatialite DBs list"""
-                self.status.set(path.basename(spadb))
-                logger.info(spadb)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_fdb.clear()
-                self.dico_fields.clear()
-                # getting the informations
-                try:
-                    ReadSpaDB(
-                        path.abspath(spadb), self.dico_fdb, "Spatialite", self.blabla
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            spadb, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_fdb(self.dico_fdb)
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_spadb):
-                logger.info(f"Ignoring {len(self.li_spadb)} Spatialite DB")
-
-        if self.tab_files.opt_dxf.get() and len(self.li_cdao) > 0:
-            logger.info("Processing CAO/DAO: start")
-            for dxf in self.li_dxf:
-                """looping on DXF list"""
-                self.status.set(path.basename(dxf))
-                logger.info(dxf)
-                # increment the progress bar
-                self.prog_layers["value"] = self.prog_layers["value"] + 1
-                self.update()
-                # reset recipient data
-                self.dico_cdao.clear()
-                # getting the informations
-                try:
-                    ReadDXF(
-                        path.abspath(dxf), self.dico_cdao, "AutoCAD DXF", self.blabla
-                    )
-                    logger.debug("Dataset metadata extracted")
-                except (AttributeError, RuntimeError, Exception) as err:
-                    """empty files"""
-                    logger.error(
-                        "Metadata extraction failed on dataset: {}. Trace: {}".format(
-                            dxf, err
-                        )
-                    )
-                    self.prog_layers["value"] = self.prog_layers["value"] + 1
-                    continue
-                # writing to the Excel dictionary
-                self.xl_workbook.store_md_cad(self.dico_cdao)
-                logger.debug("Layer metadata stored into workbook.")
-        else:
-            if len(self.li_cdao):
-                logger.info(f"Ignoring {len(self.li_cdao)} CAO/DAO files")
+        geofiles_processor.process_files_in_queue(
+            progress_value_count=self.progress,
+            progress_value_message=self.status,
+            progress_callback_cmd=self.update,
+        )
 
         # saving dictionary
         self.bell()
