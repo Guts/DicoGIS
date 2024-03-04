@@ -28,7 +28,7 @@ from sys import platform as opersys
 from time import strftime
 
 # GUI
-from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, StringVar, Tk
+from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, StringVar
 from tkinter.messagebox import showerror as avert
 from tkinter.messagebox import showinfo
 from tkinter.ttk import (
@@ -44,6 +44,7 @@ from tkinter.ttk import (
 
 # 3rd party
 from osgeo import gdal
+from ttkthemes import ThemedTk
 
 # Project
 from dicogis import __about__
@@ -88,11 +89,17 @@ logger.addHandler(logfile)
 # ##################################
 
 
-class DicoGIS(Tk):
+class DicoGIS(ThemedTk):
+    """Main DicoGIS GUI object.
+
+    Args:
+        ThemedTk (_type_): themed tk object.
+    """
+
     # attributes
     package_about = __about__
 
-    def __init__(self):
+    def __init__(self, theme: str = "radiance"):
         """Main window constructor
         Creates 1 frame and 2 labelled subframes"""
         logger.info(
@@ -114,7 +121,8 @@ class DicoGIS(Tk):
         checker = CheckNorris()
 
         # basics settings
-        Tk.__init__(self)  # constructor of parent graphic class
+        ThemedTk.__init__(self, fonts=True, themebg=True)
+        self.set_theme(theme)
         self.title(f"DicoGIS {self.package_about.__version__}")
         self.uzer = getpass.getuser()
         if opersys == "win32":
@@ -1106,7 +1114,7 @@ class DicoGIS(Tk):
         if saved is not None:
             utils_global.open_dir_file(saved[1])
             self.destroy()
-            exit()
+            self.quit()
         else:
             showinfo(
                 title=self.blabla.get(
@@ -1300,5 +1308,39 @@ class DicoGIS(Tk):
 
 if __name__ == "__main__":
     """standalone execution"""
-    app = DicoGIS()
+    # standard
+    from os import getenv
+
+    # 3rd party
+    import distro
+
+    # determine theme depending on operating system and distro
+    theme = "arc"
+    if theme_from_env := getenv("DICOGIS_UI_THEME"):
+        theme = theme_from_env
+    elif opersys == "darwin":
+        theme = ""
+    elif opersys == "linux":
+        theme = "arc"
+        if distro.name().lower() == "ubuntu":
+            theme = "yaru"
+    elif opersys == "win32":
+        theme = "breeze"
+    else:
+        logging.warning(
+            f"Your platform/operating system is not recognized: {opersys}. "
+            "It may lead to some strange behavior or buggy events."
+        )
+
+    # launch the main UI
+    try:
+        app = DicoGIS(theme=theme)
+        app.set_theme(theme_name=theme)
+    except Exception as err:
+        logging.critical(
+            "Launching DicoGIS UI failed. Did you install the system "
+            f"requirements? Trace: {err}"
+        )
+        raise (err)
+
     app.mainloop()
