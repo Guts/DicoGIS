@@ -17,6 +17,7 @@
 import logging
 from os import path
 from time import localtime, strftime
+from typing import Optional
 
 # 3rd party libraries
 try:
@@ -59,7 +60,13 @@ class ReadVectorFlatDataset:
         ogr.UseExceptions()
         self.alert = 0
 
-    def infos_dataset(self, source_path: str, dico_dataset, txt: dict = {}, tipo=None):
+    def infos_dataset(
+        self,
+        source_path: str,
+        dico_dataset: dict,
+        txt: Optional[dict] = None,
+        tipo=None,
+    ):
         """Use OGR functions to extract basic informations about
         geographic vector file (handles shapefile or MapInfo tables)
         and store into dictionaries.
@@ -69,6 +76,9 @@ class ReadVectorFlatDataset:
         tipo = format
         txt = dictionary of text in the selected language
         """
+        if txt is None:
+            txt = {}
+
         # changing working directory to layer folder
         # chdir(path.dirname(source_path))
 
