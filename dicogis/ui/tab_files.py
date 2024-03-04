@@ -119,8 +119,7 @@ class TabFiles(Frame):
         self.opt_egdb = IntVar(self.FrFilters)  # able/disable Esri FileGDB
         self.opt_spadb = IntVar(self.FrFilters)  # able/disable Spatalite DB
         self.opt_rast = IntVar(self.FrFilters)  # able/disable rasters
-        self.opt_cdao = IntVar(self.FrFilters)  # able/disable CAO/DAO files
-        self.opt_qgs = IntVar(self.FrFilters)  # able/disable Geospatial QGS
+        self.opt_dxf = IntVar(self.FrFilters)  # able/disable DXF files
 
         # format choosen: check buttons
         caz_shp = Checkbutton(self.FrFilters, text=".shp", variable=self.opt_shp)
@@ -140,7 +139,7 @@ class TabFiles(Frame):
             text="rasters ({})".format(", ".join(self.li_raster_formats)),
             variable=self.opt_rast,
         )
-        caz_cdao = Checkbutton(self.FrFilters, text="CAO/DAO", variable=self.opt_cdao)
+        caz_dxf = Checkbutton(self.FrFilters, text="DXF", variable=self.opt_dxf)
         # widgets placement
         caz_shp.grid(row=1, column=0, sticky="NSWE", padx=2, pady=2)
         caz_tab.grid(row=1, column=1, sticky="NSWE", padx=2, pady=2)
@@ -150,7 +149,7 @@ class TabFiles(Frame):
         caz_gxt.grid(row=1, column=5, sticky="NSWE", padx=2, pady=2)
         caz_rast.grid(row=2, column=0, columnspan=2, sticky="NSWE", padx=2, pady=2)
         caz_egdb.grid(row=2, column=2, columnspan=2, sticky="NSWE", padx=2, pady=2)
-        caz_cdao.grid(row=2, column=4, columnspan=1, sticky="NSWE", padx=2, pady=2)
+        caz_dxf.grid(row=2, column=4, columnspan=1, sticky="NSWE", padx=2, pady=2)
         caz_spadb.grid(row=2, column=5, columnspan=2, sticky="NSWE", padx=2, pady=2)
 
         # frames placement
