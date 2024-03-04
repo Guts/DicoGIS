@@ -6,6 +6,7 @@
 
 # standard lib
 import logging
+from datetime import date
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -15,11 +16,12 @@ import typer
 
 # project
 from dicogis.__about__ import __title__, __version__
-from dicogis.constants import SUPPORTED_FORMATS
+from dicogis.constants import SUPPORTED_FORMATS, OutputFormats
 from dicogis.export.md2xlsx import MetadataToXlsx
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.texts import TextsManager
+from dicogis.utils.utils import Utilities
 
 # ############################################################################
 # ########## Globals ###############
@@ -70,6 +72,27 @@ def inventory(
             "If None, database listing is ignored. Defaults to None.",
         ),
     ] = None,
+    output_path: Annotated[
+        Optional[Path],
+        typer.Option(
+            dir_okay=False,
+            envvar="DICOGIS_OUTPUT_FILEPATH",
+            file_okay=True,
+            help="If not set, the file is created in the current working directory "
+            "(cwd) and the filename is a concatenation of various informations.",
+            resolve_path=True,
+            writable=True,
+        ),
+    ] = None,
+    output_format: Annotated[
+        OutputFormats,
+        typer.Option(
+            case_sensitive=False,
+            envvar="DICOGIS_OUTPUT_FORMAT",
+            help="Output format. For now, only Excel (Micorsoft Excel .xlsx) is "
+            "supported. Here for the future!",
+        ),
+    ] = "excel",
     out_prettify_size: Annotated[
         bool,
         typer.Option(
@@ -120,8 +143,7 @@ def inventory(
     # TODO: check if specified formats are supported
 
     # i18n
-    dir_locale = Path(__file__).parent.parent.joinpath("locale")
-    txt_manager = TextsManager(dir_locale)
+    txt_manager = TextsManager(Path(__file__).parent.parent.joinpath("locale"))
 
     # look for geographic data files
     if input_folder is not None:
@@ -134,10 +156,33 @@ def inventory(
             opt_size_prettify=out_prettify_size,
         )
 
+        # TODO: process geo files
+
+        # output file path
+        if output_path is None:
+            output_path = f"DicoGIS_{input_folder.name}_{date.today()}.xlsx"
+
+        xl_workbook.tunning_worksheets()
+        saved = Utilities.safe_save(
+            output_object=xl_workbook,
+            dest_dir=f"{output_path.parent.resolve()}",
+            dest_filename=f"{output_path.resolve()}",
+            ftype="Excel Workbook",
+            gui=False,
+        )
+        logger.info(f"Workbook saved: {saved[1]}")
+        raise typer.Exit()
+
     # look for geographic database
     if pg_services:
         print("Looking for geo SGBD")
         pg_services = check_usable_pg_services(requested_pg_services=pg_services)
+
+        # TODO: process postgis tables
+
+        # output file path
+        if output_path is None:
+            output_path = f"DicoGIS_database_{date.today()}.xlsx"
 
 
 # ############################################################################
