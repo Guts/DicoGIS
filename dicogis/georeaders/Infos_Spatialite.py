@@ -15,7 +15,6 @@
 # #################################
 # Standard library
 import logging
-from collections import OrderedDict
 from os import path
 from time import localtime, strftime
 
@@ -133,7 +132,7 @@ class ReadSpaDB:
         # parsing layers
         for layer_idx in range(spadb.GetLayerCount()):
             # dictionary where will be stored informations
-            dico_layer = OrderedDict()
+            dico_layer = {}
             # parent GDB
             dico_layer["gdb_name"] = path.basename(spadb.GetName())
             # getting layer object
@@ -181,7 +180,7 @@ class ReadSpaDB:
             self.infos_geos(layer_obj, srs, dico_layer, txt)
 
         # getting fields informations
-        dico_fields = OrderedDict()
+        dico_fields = {}
         layer_def = layer_obj.GetLayerDefn()
         dico_layer["num_fields"] = layer_def.GetFieldCount()
         self.infos_fields(layer_def, dico_fields)

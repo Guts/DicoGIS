@@ -66,7 +66,7 @@ class ReadPostGIS:
 
         Args:
             txt (dict): dictionary of translated texts
-            dico_dataset (dict): _description_
+            dico_dataset (dict): dictionary where to store extracted metadata.
             host (str, optional): postgres connection host. Defaults to "localhost".
             port (int, optional): postgres connection port. Defaults to 5432.
             db_name (str, optional): postgres database name. Defaults to "postgis".
@@ -179,9 +179,14 @@ class ReadPostGIS:
         self,
         layer: ogr.Layer,
         dico_dataset: Optional[dict] = None,
-        tipo: str = "PostGIS",
-    ):
-        """TO DO."""
+    ) -> None:
+        """Extract metadata from PostGIS layer and store it into the dictionary.
+
+        Args:
+            layer (ogr.Layer): input PostGIS layer
+            dico_dataset (Optional[dict], optional): dictionary to fill with extracted \
+                data. Defaults to None.
+        """
         if dico_dataset is None:
             dico_dataset = self.dico_dataset
 
@@ -196,8 +201,7 @@ class ReadPostGIS:
             )
             return None
         else:
-            dico_dataset["format"] = tipo
-            pass
+            dico_dataset["format"] = "PostGIS"
 
         # connection info
         dico_dataset["pg_service"] = self.service
@@ -219,17 +223,18 @@ class ReadPostGIS:
         # raising forbidden access
         try:
             obj = layer.GetFeatureCount()  # get the first object
-        except RuntimeError as e:
-            if "permission denied" in str(e):
-                mess = str(e).split("\n")[0]
+        except RuntimeError as err:
+            if "permission denied" in str(err):
+                mess = str(err).split("\n")[0]
                 self.alert = self.alert + 1
                 youtils.erratum(ctner=dico_dataset, ds_lyr=layer, mess=mess)
-                logger.error(f"GDAL: {layer.GetName()} - {mess}")
+                logger.error(f"GDAL: permission denied {layer.GetName()} - {mess}")
                 return None
             else:
-                pass
+                raise err
+
         except Exception as err:
-            logger.error(err)
+            logger.error(f"Unable to count objects for {layer.GetName()}. Trace: {err}")
             return None
 
         # schema name
@@ -243,13 +248,12 @@ class ReadPostGIS:
         # features
         layer_feat_count = layer.GetFeatureCount()
         dico_dataset["num_obj"] = layer_feat_count
+
         if layer_feat_count == 0:
             """if layer doesn't have any object, return an error"""
             self.alert += 1
             youtils.erratum(ctner=dico_dataset, ds_lyr=layer, mess="err_nobjet")
             return None
-        else:
-            pass
 
         # fields
         layer_def = layer.GetLayerDefn()
@@ -275,8 +279,6 @@ class ReadPostGIS:
         # warnings messages
         if self.alert:
             dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
-        else:
-            pass
 
         # clean exit
         del obj

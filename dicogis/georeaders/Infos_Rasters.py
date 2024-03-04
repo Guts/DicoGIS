@@ -16,7 +16,6 @@
 # #################################
 # Standard library
 import logging
-from collections import OrderedDict
 from os import chdir, path
 from time import localtime, strftime
 
@@ -376,7 +375,7 @@ if __name__ == "__main__":
     )
 
     # test text dictionary
-    textos = OrderedDict()
+    textos = {}
     textos["srs_comp"] = "Compound"
     textos["srs_geoc"] = "Geocentric"
     textos["srs_geog"] = "Geographic"
@@ -391,8 +390,8 @@ if __name__ == "__main__":
     for raster in li_rasters:
         """looping on raster files"""
         # recipient datas
-        dico_raster = OrderedDict()  # dictionary where will be stored informations
-        dico_bands = OrderedDict()  # dictionary for fields information
+        dico_raster = {}  # dictionary where will be stored informations
+        dico_bands = {}  # dictionary for fields information
         # getting the informations
         if not path.isfile(raster):
             print("\n\t==> File doesn't exist: " + raster)

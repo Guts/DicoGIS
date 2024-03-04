@@ -19,7 +19,6 @@ import getpass
 import locale
 import logging
 import platform
-from collections import OrderedDict
 from logging.handlers import RotatingFileHandler
 from os import path
 from pathlib import Path
@@ -152,7 +151,7 @@ class DicoGIS(ThemedTk):
         self.def_lang = "EN"  # default language to start
         self.today = strftime("%Y-%m-%d")  # date of the day
         li_lang = [lg.name[5:-4] for lg in dir_locale.glob("*.xml")]  # languages
-        self.blabla = OrderedDict()  # texts dictionary
+        self.blabla = {}  # texts dictionary
 
         # formats / type: vectors
         self.li_vectors_formats = (
@@ -183,16 +182,16 @@ class DicoGIS(ThemedTk):
         self.li_dgn = []  # list for MicroStation DGN paths
 
         # dictionaries to store informations
-        self.dico_layer = OrderedDict()  # dict for vectors informations
-        self.dico_fields = OrderedDict()  # dict for fields informations
-        self.dico_raster = OrderedDict()  # dict for rasters global informations
-        self.dico_bands = OrderedDict()  # dict for bands informations
-        self.dico_fdb = OrderedDict()  # dict for Esri FileGDB
-        self.dico_cdao = OrderedDict()  # dict for CAO/DAO
-        self.dico_err = OrderedDict()  # errors list
+        self.dico_layer = {}  # dict for vectors informations
+        self.dico_fields = {}  # dict for fields informations
+        self.dico_raster = {}  # dict for rasters global informations
+        self.dico_bands = {}  # dict for bands informations
+        self.dico_fdb = {}  # dict for Esri FileGDB
+        self.dico_cdao = {}  # dict for CAO/DAO
+        self.dico_err = {}  # errors list
 
         # metrics
-        self.dico_metrics = OrderedDict()
+        self.dico_metrics = {}
         self.global_total_layers = 0
         self.global_total_fields = 0
         self.global_total_features = 0
@@ -202,7 +201,7 @@ class DicoGIS(ThemedTk):
         self.global_total_srs_geog = 0
         self.global_total_srs_none = 0
         self.global_ignored = 0  # files ignored by an user filter
-        self.global_dico_fields = OrderedDict()
+        self.global_dico_fields = {}
 
         # Notebook
         self.nb = Notebook(self)
@@ -1135,6 +1134,7 @@ class DicoGIS(ThemedTk):
             Optional[ReadPostGIS]: PostGIS reader or None
         """
         self.dico_dataset: dict = {}
+
         # check if a proxy is needed
         # more information about the GDAL HTTP proxy options here:
         # http://trac.osgeo.org/gdal/wiki/ConfigOptions#GDALOGRHTTPoptions
