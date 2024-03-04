@@ -735,7 +735,7 @@ class DicoGIS(ThemedTk):
             self.wb.set_worksheets(has_filedb=1)
         else:
             pass
-        if self.tab_files.opt_cdao.get() and len(self.li_cdao):
+        if self.tab_files.opt_dxf.get() and len(self.li_cdao):
             total_files += len(self.li_cdao)
             self.wb.set_worksheets(has_cad=1)
         else:
@@ -1061,7 +1061,7 @@ class DicoGIS(ThemedTk):
             if len(self.li_spadb):
                 logger.info(f"Ignoring {len(self.li_spadb)} Spatialite DB")
 
-        if self.tab_files.opt_cdao.get() and len(self.li_cdao) > 0:
+        if self.tab_files.opt_dxf.get() and len(self.li_cdao) > 0:
             logger.info("Processing CAO/DAO: start")
             for dxf in self.li_dxf:
                 """looping on DXF list"""
@@ -1175,7 +1175,7 @@ class DicoGIS(ThemedTk):
                 + self.tab_files.opt_geoj.get()
                 + self.tab_files.opt_rast.get()
                 + self.tab_files.opt_egdb.get()
-                + self.tab_files.opt_cdao.get()
+                + self.tab_files.opt_dxf.get()
             ):
                 avert("DicoGIS - User error", self.blabla.get("noformat"))
                 return False

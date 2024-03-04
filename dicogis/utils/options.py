@@ -60,7 +60,7 @@ class OptionsManager:
         parent.tab_files.opt_rast.set(self.config.get("filters", "opt_rast"))
         parent.tab_files.opt_egdb.set(self.config.get("filters", "opt_egdb"))
         parent.tab_files.opt_spadb.set(self.config.get("filters", "opt_spadb"))
-        parent.tab_files.opt_cdao.set(self.config.get("filters", "opt_cdao"))
+        parent.tab_files.opt_dxf.set(self.config.get("filters", "opt_dxf"))
 
         # database settings
         parent.tab_sgbd.host.set(self.config.get("database", "host"))
@@ -117,7 +117,7 @@ class OptionsManager:
         self.config.set("filters", "opt_rast", str(parent.tab_files.opt_rast.get()))
         self.config.set("filters", "opt_egdb", str(parent.tab_files.opt_egdb.get()))
         self.config.set("filters", "opt_spadb", str(parent.tab_files.opt_spadb.get()))
-        self.config.set("filters", "opt_cdao", str(parent.tab_files.opt_cdao.get()))
+        self.config.set("filters", "opt_dxf", str(parent.tab_files.opt_dxf.get()))
 
         # database settings
         self.config.set("database", "host", parent.tab_sgbd.host.get())
