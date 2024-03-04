@@ -15,7 +15,7 @@
 import gettext
 import logging
 from tkinter import PhotoImage, Tk, W
-from tkinter.ttk import Button, Frame, Label, Style
+from tkinter.ttk import Button, Frame, Label
 from webbrowser import open_new_tab
 
 # package
@@ -47,12 +47,9 @@ class MiscButtons(Frame):
             row=1, columnspan=2, column=0, padx=2, pady=2, sticky=W
         )
         # credits
-        s = Style(self)
-        s.configure("Kim.TButton", foreground="DodgerBlue", borderwidth=0)
         btn_credits = Button(
             self,
             text=parent.package_about.__copyright__,
-            style="Kim.TButton",
             command=lambda: open_new_tab(parent.package_about.__uri__),
         )
         btn_credits.grid(row=2, columnspan=2, padx=2, pady=2, sticky="WE")
@@ -63,7 +60,7 @@ class MiscButtons(Frame):
         )
         btn_contact = Button(
             self,
-            text="\U00002709 " + _("Contact"),
+            text=_("Contact"),
             command=lambda: open_new_tab(mailto),
         )
 
@@ -71,14 +68,14 @@ class MiscButtons(Frame):
         url_src = f"{parent.package_about.__uri__}issues"
         btn_src = Button(
             self,
-            text="\U000026A0 " + _("Report"),
+            text=_("Report"),
             command=lambda: open_new_tab(url_src),
         )
 
         # documentation
         btn_doc = Button(
             self,
-            text="\U0001F56E " + _("Documentation"),
+            text=_("Documentation"),
             command=lambda: open_new_tab(__about__.__uri_homepage__),
         )
 

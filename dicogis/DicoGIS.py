@@ -28,7 +28,7 @@ from sys import platform as opersys
 from time import strftime
 
 # GUI
-from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, StringVar, Tk
+from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, StringVar
 from tkinter.messagebox import showerror as avert
 from tkinter.messagebox import showinfo
 from tkinter.ttk import (
@@ -39,12 +39,12 @@ from tkinter.ttk import (
     Labelframe,
     Notebook,
     Progressbar,
-    Style,
 )
 from typing import Optional
 
 # 3rd party
 from osgeo import gdal
+from ttkthemes import ThemedTk
 
 # Project
 from dicogis import __about__
@@ -90,11 +90,17 @@ logger.addHandler(logfile)
 # ##################################
 
 
-class DicoGIS(Tk):
+class DicoGIS(ThemedTk):
+    """Main DicoGIS GUI object.
+
+    Args:
+        ThemedTk (_type_): themed tk object.
+    """
+
     # attributes
     package_about = __about__
 
-    def __init__(self):
+    def __init__(self, theme: str = "radiance"):
         """Main window constructor
         Creates 1 frame and 2 labelled subframes"""
         logger.info(
@@ -116,7 +122,8 @@ class DicoGIS(Tk):
         checker = CheckNorris()
 
         # basics settings
-        Tk.__init__(self)  # constructor of parent graphic class
+        ThemedTk.__init__(self, fonts=True, themebg=True)
+        self.set_theme(theme)
         self.title(f"DicoGIS {self.package_about.__version__}")
         self.uzer = getpass.getuser()
         if opersys == "win32":
@@ -126,7 +133,6 @@ class DicoGIS(Tk):
             logger.info(f"Operating system: {platform.platform()}")
             icon = Image("photo", file=self.dir_imgs / "DicoGIS_logo.gif")
             self.call("wm", "iconphoto", self._w, icon)
-            self.style = Style().theme_use("clam")
 
         elif opersys == "darwin":
             logger.info(f"Operating system: {platform.platform()}")
@@ -334,9 +340,7 @@ class DicoGIS(Tk):
         self.tab_files.FrPath.config(text=self.blabla.get("gui_fr1"))
         self.tab_files.FrFilters.config(text=self.blabla.get("gui_fr3"))
         self.tab_files.lb_target.config(text=self.blabla.get("gui_path"))
-        self.tab_files.btn_browse.config(
-            text="\U0001F3AF " + self.blabla.get("gui_choix")
-        )
+        self.tab_files.btn_browse.config(text=self.blabla.get("gui_choix"))
         # sgbd tab
         self.nb.tab(1, text=self.blabla.get("gui_tab2"))
         self.tab_sgbd.FrDb.config(text=self.blabla.get("gui_fr2"))
@@ -980,8 +984,6 @@ class DicoGIS(Tk):
         # quit and exit
         if saved is not None:
             utils_global.open_dir_file(saved[1])
-            self.destroy()
-            exit()
         else:
             showinfo(
                 title=self.blabla.get(
@@ -1186,5 +1188,49 @@ class DicoGIS(Tk):
 
 if __name__ == "__main__":
     """standalone execution"""
-    app = DicoGIS()
+    # standard
+    import sys
+    from os import getenv
+    from tkinter import TkVersion
+
+    # 3rd party
+    import distro
+
+    # check Tk version
+    logger.info(f"{TkVersion=}")
+    if TkVersion < 8.6:
+        logger.critical("DicoGIS requires Tkversion >= 8.6.")
+        sys.exit(1)
+
+    # determine theme depending on operating system and distro
+    theme = "arc"
+    if theme_from_env := getenv("DICOGIS_UI_THEME"):
+        theme = theme_from_env
+    elif opersys == "darwin":
+        theme = "breeze"
+    elif opersys == "linux":
+        theme = "radiance"
+        if distro.name().lower() == "ubuntu":
+            theme = "yaru"
+    elif opersys == "win32":
+        theme = "breeze"
+    else:
+        logger.warning(
+            f"Your platform/operating system is not recognized: {opersys}. "
+            "It may lead to some strange behavior or buggy events."
+        )
+
+    logger.info(f"Used theme: {theme}")
+
+    # launch the main UI
+    try:
+        app = DicoGIS(theme=theme)
+        app.set_theme(theme_name=theme)
+    except Exception as err:
+        logger.critical(
+            "Launching DicoGIS UI failed. Did you install the system "
+            f"requirements? Trace: {err}"
+        )
+        raise (err)
+
     app.mainloop()
