@@ -1323,9 +1323,9 @@ if __name__ == "__main__":
     if theme_from_env := getenv("DICOGIS_UI_THEME"):
         theme = theme_from_env
     elif opersys == "darwin":
-        theme = ""
+        theme = "breeze"
     elif opersys == "linux":
-        theme = "arc"
+        theme = "radiance"
         if distro.name().lower() == "ubuntu":
             theme = "yaru"
     elif opersys == "win32":
