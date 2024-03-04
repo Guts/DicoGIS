@@ -8,6 +8,10 @@
 # Standard library
 import logging
 from os import listdir, path, walk
+from typing import Optional
+
+# 3rd party
+from osgeo import ogr
 
 # ############################################################################
 # ######### Globals ############
@@ -73,7 +77,14 @@ class Utils:
 
         return total_size
 
-    def erratum(self, ctner={}, src="", ds_lyr=None, mess_type=1, mess=""):
+    def erratum(
+        self,
+        ctner: Optional[dict],
+        src: Optional[str] = None,
+        ds_lyr: Optional[ogr.Layer] = None,
+        mess_type: int = 1,
+        mess: str = "",
+    ):
         """Handle errors message and store it into __dict__.
 
         mess_type allowed values:
@@ -89,7 +100,10 @@ class Utils:
             # method end
             return ctner
         elif self.ds_type == "postgis":
-            ctner["name"] = ds_lyr.GetName()
+            if isinstance(ds_lyr, ogr.Layer):
+                ctner["name"] = ds_lyr.GetName()
+            else:
+                ctner["name"] = "No OGR layer."
             ctner["error_type"] = mess_type
             ctner["error"] = mess
             # method end
