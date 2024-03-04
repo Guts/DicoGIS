@@ -1310,9 +1310,12 @@ if __name__ == "__main__":
     """standalone execution"""
     # standard
     from os import getenv
+    from tkinter import TkVersion
 
     # 3rd party
     import distro
+
+    logger.debug(f"{TkVersion=}")
 
     # determine theme depending on operating system and distro
     theme = "arc"
