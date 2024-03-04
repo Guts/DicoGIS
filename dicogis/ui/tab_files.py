@@ -12,12 +12,12 @@
 # ########## Libraries #############
 # ##################################
 
+
+# Standard library
 import gettext
 import logging
 import threading
 from os import path
-
-# Standard library
 from pathlib import Path
 from time import strftime
 

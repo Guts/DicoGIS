@@ -972,13 +972,13 @@ class DicoGIS(ThemedTk):
         self.val.config(state=ACTIVE)
         self.xl_workbook.tunning_worksheets()
         saved = utils_global.safe_save(
-            wb=self.xl_workbook,
+            output_object=self.xl_workbook,
             dest_dir=self.tab_files.target_path.get(),
             dest_filename=self.ent_outxl_filename.get(),
             ftype="Excel Workbook",
             dlg_title=self.blabla.get("gui_excel"),
         )
-        logger.info("Workbook saved: %s", self.ent_outxl_filename.get())
+        logger.info(f"Workbook saved: {self.ent_outxl_filename.get()}")
 
         # quit and exit
         if saved is not None:
@@ -1031,7 +1031,7 @@ class DicoGIS(ThemedTk):
         self.val.config(state=ACTIVE)
         self.xl_workbook.tunning_worksheets()
         saved = utils_global.safe_save(
-            wb=self.xl_workbook,
+            output_object=self.xl_workbook,
             dest_filename=self.ent_outxl_filename.get(),
             ftype="Excel Workbook",
             dlg_title=self.blabla.get("gui_excel"),

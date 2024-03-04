@@ -23,6 +23,7 @@ from sys import platform as opersys
 from tkinter import ACTIVE, DISABLED
 from tkinter.filedialog import asksaveasfilename  # dialogs
 from tkinter.messagebox import showerror as avert
+from typing import Optional
 
 # Imports depending on operating system
 if opersys == "win32":
@@ -31,6 +32,8 @@ if opersys == "win32":
 else:
     pass
 
+# package
+from dicogis.export.md2xlsx import MetadataToXlsx
 
 # ##############################################################################
 # ############ Globals ############
@@ -49,6 +52,7 @@ class Utilities:
         """DicoGIS specific utilities"""
         super().__init__()
 
+    @classmethod
     def open_dir_file(self, target):
         """Open a file or directory in the explorer of the operating system."""
         # check if the file or the directory exists
@@ -81,43 +85,52 @@ class Utilities:
         # end of function
         return proc
 
+    @classmethod
     def safe_save(
         self,
-        wb,
-        dest_dir=r".",
-        dest_filename="DicoGIS.xlsx",
-        ftype="Excel Workbook",
-        dlg_title="DicoGIS - Save output Excel Workbook",
+        output_object: MetadataToXlsx,
+        dest_dir: str = r".",
+        dest_filename: str = "DicoGIS.xlsx",
+        ftype: str = "Excel Workbook",
+        dlg_title: Optional[str] = "DicoGIS - Save output Excel Workbook",
+        gui: bool = True,
     ):
         """Safe save output file."""
         # Prompt of folder where save the file
-        out_name = asksaveasfilename(
-            initialdir=dest_dir,
-            initialfile=dest_filename,
-            defaultextension=".xlsx",
-            filetypes=[(ftype, "*.xlsx")],
-            title=dlg_title,
-        )
+        if gui:
+            out_name = asksaveasfilename(
+                initialdir=dest_dir,
+                initialfile=dest_filename,
+                defaultextension=".xlsx",
+                filetypes=[(ftype, "*.xlsx")],
+                title=dlg_title,
+            )
+        else:
+            out_name = dest_filename
 
         if not isinstance(out_name, (str, Path)) and len(str(out_name)):
             logger.warning(f"No output file selected: {out_name}")
             return None
 
-        # check if the extension is correctly indicated
-        if path.splitext(out_name)[1] != ".xlsx":
-            out_name = out_name + ".xlsx"
-        else:
-            pass
+        # convert into Path object
+        out_path = Path(dest_dir).joinpath(out_name)
 
-        out_path = path.join(dest_dir, out_name)
+        # check if the extension is correctly indicated
+        if out_path.suffix != ".xlsx":
+            out_path = out_path.with_suffix(".xlsx")
+
         # save
-        if out_name != ".xlsx":
+        if out_path.name != ".xlsx":
             try:
-                wb.save(out_path)
+                output_object.save(filename=out_path)
             except OSError:
-                avert(
-                    title="Concurrent access",
-                    message="Please close Microsoft Excel before saving.",
+                if gui:
+                    avert(
+                        title="Concurrent access",
+                        message="Please close Microsoft Excel before saving.",
+                    )
+                logger.error(
+                    "Unable to save the file. Is the file already opened in a software?"
                 )
                 return out_name
             except Exception as err:
@@ -127,12 +140,14 @@ class Utilities:
                     )
                 )
         else:
-            avert(title="Not saved", message="You cancelled saving operation")
-            exit()
+            if gui:
+                avert(title="Not saved", message="You cancelled saving operation")
+                exit()
 
         # End of function
         return out_name, out_path
 
+    @classmethod
     def ui_switch(self, cb_value, parent):
         """Change state of  all children widgets within a parent class.
 

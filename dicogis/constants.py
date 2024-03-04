@@ -8,6 +8,12 @@ from enum import Enum
 GDAL_POSTGIS_OPEN_OPTIONS: list[str] = []
 
 
+class OutputFormats(str, Enum):
+    """Supported output formats."""
+
+    excel = "excel"
+
+
 class ExtendedEnum(Enum):
     """Custom Enum with extended methods."""
 
