@@ -90,7 +90,7 @@ class TabFiles(Frame):
         )
         self.btn_browse = Button(
             self.FrPath,
-            text="\U0001F3AF " + txt.get("gui_choix", "Browse"),
+            text=txt.get("gui_choix", "Browse"),
             command=lambda: self.get_target_path(r"."),
             takefocus=True,
         )
