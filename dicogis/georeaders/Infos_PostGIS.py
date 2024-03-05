@@ -218,7 +218,7 @@ class ReadPostGIS:
         # layer name
         dico_dataset["name"] = layer.GetName()
         dico_dataset["title"] = layer.GetName().capitalize()
-        logger.warning("Analyzing layer: {}".format(dico_dataset.get("name")))
+        logger.info("Analyzing layer: {}".format(dico_dataset.get("name")))
 
         # raising forbidden access
         try:

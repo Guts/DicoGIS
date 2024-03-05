@@ -19,6 +19,7 @@ import typer
 from dicogis.__about__ import __title__, __version__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.md2xlsx import MetadataToXlsx
+from dicogis.georeaders import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.texts import TextsManager
@@ -90,7 +91,7 @@ def inventory(
         typer.Option(
             case_sensitive=False,
             envvar="DICOGIS_OUTPUT_FORMAT",
-            help="Output format. For now, only Excel (Micorsoft Excel .xlsx) is "
+            help="Output format. For now, only Excel (Microsoft Excel .xlsx) is "
             "supported. Here for the future!",
         ),
     ] = "excel",
@@ -160,16 +161,25 @@ def inventory(
         dico_texts=localized_strings, language_code=language
     )
 
-    # look for geographic data files
-    if input_folder is not None:
-        geodata_find = find_geodata_files(start_folder=input_folder)
-        rich.print(geodata_find)
-
+    # output format
+    if output_format == "excel":
         # creating the Excel workbook
         xl_workbook = MetadataToXlsx(
             texts=localized_strings,
             opt_size_prettify=out_prettify_size,
         )
+    else:
+        logger.error(
+            NotImplementedError(
+                f"Specified output format '{output_format}' is not available."
+            )
+        )
+        typer.Exit(1)
+
+    # look for geographic data files
+    if input_folder is not None:
+        geodata_find = find_geodata_files(start_folder=input_folder)
+        rich.print(geodata_find)
 
         # TODO: process geo files
 
@@ -192,8 +202,57 @@ def inventory(
     if pg_services:
         print("Looking for geo SGBD")
         pg_services = check_usable_pg_services(requested_pg_services=pg_services)
+        if not len(pg_services):
+            logger.error("None of the specified pg_services is available.")
+            raise typer.Exit(1)
 
-        # TODO: process postgis tables
+        # configure output workbook
+        xl_workbook.set_worksheets(has_sgbd=True)
+
+        for pg_service in pg_services:
+            dico_dataset = {}
+
+            # testing connection settings
+            sgbd_reader = ReadPostGIS(
+                dico_dataset=dico_dataset, txt=localized_strings, service=pg_service
+            )
+
+            # check connection state
+            if not sgbd_reader.conn:
+                fail_reason = dico_dataset.get("conn_state")
+                logger.error(
+                    f"Connection failed using pg_service {pg_service}. Trace: {fail_reason}."
+                )
+                continue
+
+            # show must go on
+            logger.info(
+                f"{sgbd_reader.conn.GetLayerCount()} tables found in PostGIS database."
+            )
+
+            # parsing the layers
+            for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
+                layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
+                # reset recipient data
+                dico_dataset.clear()
+                sgbd_reader.infos_dataset(layer)
+                logger.info(f"Table examined: {layer.GetName()}")
+                xl_workbook.store_md_sgdb(layer=dico_dataset)
+                logger.debug("Layer metadata stored into workbook.")
+
+        # output file path
+        if output_path is None:
+            output_path = Path(f"DicoGIS_PostGIS_{date.today()}.xlsx")
+
+        xl_workbook.tunning_worksheets()
+        saved = Utilities.safe_save(
+            output_object=xl_workbook,
+            dest_dir=f"{output_path.parent.resolve()}",
+            dest_filename=f"{output_path.resolve()}",
+            ftype="Excel Workbook",
+            gui=False,
+        )
+        logger.info(f"Workbook saved: {saved[1]}")
 
         # output file path
         if output_path is None:
