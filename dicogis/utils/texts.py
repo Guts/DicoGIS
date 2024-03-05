@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 
 
 class TextsManager:
+    """Load texts from localized files to display in a parent program"""
+
     def __init__(self, locale_folder: Path = Path("../locale")):
         """Manage texts from a file into a dictionary used to custom program display."""
         if not locale_folder.is_dir() or not locale_folder.exists():
@@ -43,22 +45,30 @@ class TextsManager:
         # set params as attributes
         self.locale_folder = locale_folder
 
-    def load_texts(self, dico_texts: dict, lang: str = "EN") -> dict:
-        """Load texts according to the selected language.
+    def load_texts(self, dico_texts: dict, language_code: str = "EN") -> dict:
+        """Load texts according to the specified language code.
 
-        :param dict dico_texts: ordered dictonary filled by methods
-        :param str lang: 2 letters prefix to pick the correct language. Defaults to: "EN" - optional
+        Args:
+            dico_texts (dict): dictonary to fill with localized strings
+            language_code (str, optional): 2 letters prefix to pick the correct
+                language. Defaults to "EN".
 
-        :raises FileNotFoundError: if language file doesn't exists
+        Raises:
+            FileNotFoundError: if language file doesn't exists
 
-        :return: [description]
-        :rtype: dict
+        Returns:
+            dict: dictonary filled by methods
         """
+
         # clearing the text dictionary
         dico_texts.clear()
 
+        # handle en_EN form
+        if "_" in language_code:
+            language_code = language_code.split("_")[0]
+
         # check file, if not exists log the error and return the default language
-        lang_file = self.locale_folder / f"lang_{lang}.xml"
+        lang_file = self.locale_folder / f"lang_{language_code}.xml"
         if not lang_file.is_file():
             logger.error(
                 FileNotFoundError(
@@ -76,12 +86,3 @@ class TextsManager:
 
         # end of fonction
         return dico_texts
-
-
-# #############################################################################
-# #### Stand alone program ########
-# #################################
-
-if __name__ == "__main__":
-    """standalone execution"""
-    pass

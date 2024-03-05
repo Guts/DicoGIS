@@ -7,6 +7,7 @@
 # standard lib
 import logging
 from datetime import date
+from locale import getlocale
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -16,7 +17,7 @@ import typer
 
 # project
 from dicogis.__about__ import __title__, __version__
-from dicogis.constants import SUPPORTED_FORMATS, OutputFormats
+from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.md2xlsx import MetadataToXlsx
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import get_gdal_version, get_proj_version
@@ -101,6 +102,14 @@ def inventory(
             "Example: 1 ko instead of 1024.",
         ),
     ] = False,
+    language: Annotated[
+        Optional[AvailableLocales],
+        typer.Option(
+            case_sensitive=False,
+            envvar="DICOGIS_DEFAULT_LANGUAGE",
+            help="Force language to use. If not set, the current default locale is used.",
+        ),
+    ] = None,
     verbose: bool = False,
 ):
     """Command to list geodata files starting from a folder and/or databases using \
@@ -121,7 +130,8 @@ def inventory(
         logger.setLevel = logging.DEBUG
 
     logger.debug(
-        f"{APP_NAME} parameters: {input_folder=} - {formats=} - {pg_services=} - {verbose=}"
+        f"{APP_NAME} parameters: {input_folder=} - {formats=} - {pg_services=} - "
+        f"{verbose=} -{language=}"
     )
     app_dir = typer.get_app_dir(APP_NAME)
 
@@ -143,7 +153,12 @@ def inventory(
     # TODO: check if specified formats are supported
 
     # i18n
-    txt_manager = TextsManager(Path(__file__).parent.parent.joinpath("locale"))
+    localized_strings: dict = {}
+    if language is None:
+        language = getlocale()[1]
+    TextsManager(Path(__file__).parent.parent.joinpath("locale")).load_texts(
+        dico_texts=localized_strings, language_code=language
+    )
 
     # look for geographic data files
     if input_folder is not None:
@@ -152,7 +167,7 @@ def inventory(
 
         # creating the Excel workbook
         xl_workbook = MetadataToXlsx(
-            texts=txt_manager,
+            texts=localized_strings,
             opt_size_prettify=out_prettify_size,
         )
 
@@ -160,7 +175,7 @@ def inventory(
 
         # output file path
         if output_path is None:
-            output_path = f"DicoGIS_{input_folder.name}_{date.today()}.xlsx"
+            output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}.xlsx")
 
         xl_workbook.tunning_worksheets()
         saved = Utilities.safe_save(

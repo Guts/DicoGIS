@@ -5,10 +5,12 @@
 # ########## Libraries #############
 # ##################################
 
-# standard library
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
+
+# standard library
+from locale import getlocale
 from os import path
 from pathlib import Path
 from typing import Callable, Optional
@@ -149,7 +151,9 @@ class ProcessingFiles:
         self.li_files_to_process: list[Optional[FileToProcess]] = []
         self.localized_strings = localized_strings
         if self.localized_strings is None:
-            txt_manager.load_texts(dico_texts=localized_strings)
+            txt_manager.load_texts(
+                dico_texts=localized_strings, language_code=getlocale()[0]
+            )
 
     def process_files_in_queue(
         self,
