@@ -1097,7 +1097,7 @@ class DicoGIS(ThemedTk):
 
         # saving dictionary
         send_system_notify(
-            notification_title="DicoGIS analisis ended",
+            notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files. "
             "\nOpen the application to save the workbook.",
         )
