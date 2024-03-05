@@ -824,7 +824,9 @@ if __name__ == "__main__":
     from tkinter import TkVersion
 
     # 3rd party
-    import distro
+    # condition import
+    if opersys == "linux":
+        import distro
 
     # check Tk version
     logger.info(f"{TkVersion=}")
