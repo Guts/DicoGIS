@@ -10,6 +10,7 @@
 # ##################################
 
 # Standard library
+import locale
 import unittest
 from pathlib import Path
 
@@ -38,16 +39,22 @@ class TestLocaleLoader(unittest.TestCase):
         txtmngr = TextsManager(locale_folder=Path("dicogis/locale"))
 
         # English
-        en_txts = txtmngr.load_texts(dico_texts={}, lang="EN")
+        en_txts = txtmngr.load_texts(dico_texts={}, language_code="EN")
         self.assertIsInstance(en_txts, dict)
 
         # French
-        fr_txts = txtmngr.load_texts(dico_texts={}, lang="FR")
+        fr_txts = txtmngr.load_texts(dico_texts={}, language_code="FR")
         self.assertIsInstance(fr_txts, dict)
 
         # Spanish
-        sp_txts = txtmngr.load_texts(dico_texts={}, lang="ES")
+        sp_txts = txtmngr.load_texts(dico_texts={}, language_code="ES")
         self.assertIsInstance(sp_txts, dict)
+
+        # Spanish
+        default_txts = txtmngr.load_texts(
+            dico_texts={}, language_code=locale.getlocale()
+        )
+        self.assertIsInstance(default_txts, dict)
 
         # checks
         self.assertTrue(len(en_txts) == len(fr_txts) == len(sp_txts))

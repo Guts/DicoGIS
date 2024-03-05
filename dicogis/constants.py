@@ -8,6 +8,14 @@ from enum import Enum
 GDAL_POSTGIS_OPEN_OPTIONS: list[str] = []
 
 
+class AvailableLocales(str, Enum):
+    """Supported locale."""
+
+    english = "EN"
+    french = "FR"
+    spanish = "ES"
+
+
 class OutputFormats(str, Enum):
     """Supported output formats."""
 

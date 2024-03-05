@@ -208,7 +208,7 @@ class DicoGIS(ThemedTk):
         )  # tab_id = 3
 
         # fillfulling text
-        txt_manager.load_texts(dico_texts=self.blabla, lang=self.def_lang)
+        txt_manager.load_texts(dico_texts=self.blabla, language_code=self.def_lang)
 
         # =================================================================================
         # ## TAB 1: FILES ##
@@ -321,7 +321,7 @@ class DicoGIS(ThemedTk):
         """Update the texts dictionary with the language selected."""
         new_lang = self.ddl_lang.get()
         # change to the new language selected
-        txt_manager.load_texts(dico_texts=self.blabla, lang=new_lang)
+        txt_manager.load_texts(dico_texts=self.blabla, language_code=new_lang)
         # update widgets text
         self.welcome.config(text=self.blabla.get("hi") + self.uzer)
         self.can.config(text=self.blabla.get("gui_quit"))
