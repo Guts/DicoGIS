@@ -83,7 +83,7 @@ export C_INCLUDE_PATH=/usr/include/gdal
 Install system requirements:
 
 ```sh
-sudo apt install git python3-pip python3-tk pythnon3-venv unifont
+sudo apt install git python3-pip python3-tk python3-venv unifont
 ```
 
 Clone the repository where you want:
