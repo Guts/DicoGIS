@@ -91,7 +91,7 @@ def inventory(
         typer.Option(
             case_sensitive=False,
             envvar="DICOGIS_OUTPUT_FORMAT",
-            help="Output format. For now, only Excel (Micorsoft Excel .xlsx) is "
+            help="Output format. For now, only Excel (Microsoft Excel .xlsx) is "
             "supported. Here for the future!",
         ),
     ] = "excel",
@@ -168,6 +168,13 @@ def inventory(
             texts=localized_strings,
             opt_size_prettify=out_prettify_size,
         )
+    else:
+        logger.error(
+            NotImplementedError(
+                f"Specified output format '{output_format}' is not available."
+            )
+        )
+        typer.Exit(1)
 
     # look for geographic data files
     if input_folder is not None:
