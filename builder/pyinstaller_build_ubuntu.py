@@ -39,7 +39,7 @@ PyInstaller.__main__.run(
         "--name={}_{}_{}{}_{}_Python{}".format(
             __about__.__title_clean__,
             __about__.__version__,
-            distro.name(),
+            distro.id(),
             distro.version(),
             platform.architecture()[0],
             platform.python_version(),
