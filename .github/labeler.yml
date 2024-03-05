@@ -10,6 +10,14 @@ ci-cd:
       - any-glob-to-any-file:
           - .github/**
 
+CLI:
+  - changed-files:
+      - any-glob-to-any-file:
+          - dicogis/cli/**
+  - head-branch:
+      - ^cli
+      - cli
+
 dependencies:
   - changed-files:
       - any-glob-to-any-file:
