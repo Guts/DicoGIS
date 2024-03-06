@@ -3,15 +3,16 @@
 Tested on:
 
 - Windows 10 Professional - build 19041 (= version 2004)
+- Windows 11 Professional - build 22621.3007
 
 ## Common
 
 ### Enable remote scripts (for virtual environment)
 
-Open a Powershell prompt as **administrator** inside the repository folder:
+Open a Powershell prompt as **administrator** inside any folder:
 
 ```powershell
-# if not already done, enable scripts  - required by virtualenv
+# if not already done, enable scripts - required by virtualenv
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
@@ -21,13 +22,14 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ### Requirements
 
-- Python 3.8+ installed with the Windows MSI installer (version from the Windows store is not working)
+- Python 3.10+ installed with the Windows MSI installer (version from the Windows store is not working)
 
 ### Download GDAL wheel
 
-1. Go to <https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal>
-2. Download the adequate package. For example: `GDAL‑3.1.3‑cp37‑cp37m‑win_amd64.whl`
-3. Move downloaded wheel to the `lib` subfolder
+1. Go to <https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal> or to <https://github.com/cgohlke/geospatial-wheels/releases/latest>
+1. Download the appropriate package for the Python environment (version, type...). For example: `GDAL-3.8.4-cp310-cp310-win_amd64`
+1. Move downloaded wheel to the `lib` subfolder
+1. Make sure there is only one wheel of GDAL in the `lib` subfolder
 
 ### Installation steps
 
@@ -35,7 +37,7 @@ Typically, you can run these commands:
 
 ```powershell
 # create a virtual env
-py -3.8 -m venv .venv
+py -3.10 -m venv .venv
 
 # enable virtual env
 .\.venv\Scripts\activate
@@ -49,18 +51,18 @@ python -m pip install -U -r requirements/development.txt
 python -m pip install -U -r requirements/windows.txt
 
 # finally, install the package in editable mode
-
+python -m pip install -e .
 ```
 
 ----
 
 ## Using conda
 
-### Requirements
+### Requirements for conda
 
 - conda >= 4.8
 
-### Installation steps
+### Installation steps with conda
 
 Open the Anaconda Powershell Prompt in the repository folder, then:
 
@@ -78,7 +80,7 @@ conda env create -f .\requirements\conda-env-dev.yml
 conda activate dicogis-dev
 
 # finally, install the package in editable mode
-
+python -m pip install -e .
 ```
 
 Happy coding!
