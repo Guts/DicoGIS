@@ -58,14 +58,14 @@ class FormatsVector(ExtendedEnum):
     """Supported vectors formats. Key=name, value = extension."""
 
     dgn = ".dgn"
-    dwg = ".dwg"
-    dxf = ".dxf"
     esri_shapefile = ".shp"
+    file_geodatabase_esri = ".gdb"
+    file_geodatabase_spatialite = ".sqlite"
     geojson = ".geojson"
     gml = ".gml"
+    gxt = ".gml"
     kml = ".kml"
     mapinfo_tab = ".tab"
-    sqlite = ".sqlite"
 
 
 class FormatsRaster(ExtendedEnum):

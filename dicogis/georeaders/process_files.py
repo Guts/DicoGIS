@@ -5,11 +5,11 @@
 # ########## Libraries #############
 # ##################################
 
+
+# standard library
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
-
-# standard library
 from locale import getlocale
 from os import path
 from pathlib import Path
@@ -62,7 +62,7 @@ class ProcessingFiles:
 
     MATRIX_FORMAT_GEOREADER = {
         "dxf": ReadDXF,
-        "esri_shapefiles": ReadVectorFlatDataset,
+        "esri_shapefile": ReadVectorFlatDataset,
         "file_geodatabase_esri": ReadGDB,
         "file_geodatabase_spatialite": ReadSpaDB,
         "geotiff": ReadRasters,
@@ -246,7 +246,7 @@ class ProcessingFiles:
             total_files += len(self.li_shapefiles)
             self.output_workbook.set_worksheets(has_vector=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_shapefiles, file_format="esri_shapefiles"
+                list_of_files=self.li_shapefiles, file_format="esri_shapefile"
             )
         else:
             pass

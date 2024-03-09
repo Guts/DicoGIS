@@ -12,14 +12,15 @@ from pathlib import Path
 from typing import Annotated, Optional
 
 # 3rd party
-import rich
 import typer
+from rich import print
 
 # project
 from dicogis.__about__ import __title__, __version__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.md2xlsx import MetadataToXlsx
-from dicogis.georeaders import ReadPostGIS
+from dicogis.georeaders.Infos_PostGIS import ReadPostGIS
+from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.texts import TextsManager
@@ -145,7 +146,7 @@ def inventory(
     # check minimal parameters
     # note: pg_services defaults to [] not to None
     if input_folder is None and not pg_services:
-        rich.print(
+        print(
             "[bold red]Error: You must provide at least one of the options: "
             "input_folder or pg_services[/bold red]"
         )
@@ -178,10 +179,93 @@ def inventory(
 
     # look for geographic data files
     if input_folder is not None:
-        geodata_find = find_geodata_files(start_folder=input_folder)
-        rich.print(geodata_find)
+        li_vectors = []
+        (
+            num_folders,
+            li_shapefiles,
+            li_mapinfo_tab,
+            li_kml,
+            li_gml,
+            li_geojson,
+            li_gxt,
+            li_raster,
+            li_file_database_esri,
+            li_dxf,
+            li_dwg,
+            li_dgn,
+            li_cdao,
+            li_file_databases,
+            li_file_database_spatialite,
+        ) = find_geodata_files(start_folder=input_folder)
 
-        # TODO: process geo files
+        print(
+            "Found: "
+            f"{len(li_shapefiles)} shapefiles - "
+            f"{len(li_mapinfo_tab)} tables (MapInfo) - "
+            f"{len(li_kml)} KML - "
+            f"{len(li_gml)} GML - "
+            f"{len(li_geojson)} GeoJSON - "
+            f"{len(li_gxt)} GXT"
+            f"{len(li_raster)} rasters - "
+            f"{len(li_file_databases)} file databases - "
+            f"{len(li_cdao)} CAO/DAO - "
+            f"in {num_folders}{localized_strings.get('log_numfold')}"
+        )
+
+        # grouping vectors lists
+        li_vectors.extend(li_shapefiles)
+        li_vectors.extend(li_mapinfo_tab)
+        li_vectors.extend(li_kml)
+        li_vectors.extend(li_gml)
+        li_vectors.extend(li_geojson)
+        li_vectors.extend(li_gxt)
+
+        # check if there are some layers into the folder structure
+        if not (
+            len(li_vectors) + len(li_raster) + len(li_file_databases) + len(li_cdao)
+        ):
+            logger.error(localized_strings.get("nodata"))
+            typer.Exit(1)
+
+        # instanciate geofiles processor
+        geofiles_processor = ProcessingFiles(
+            output_workbook=xl_workbook,
+            localized_strings=localized_strings,
+            # list by tabs
+            li_vectors=li_vectors,
+            li_rasters=li_raster,
+            li_file_databases=li_file_databases,
+            li_cdao=li_cdao,
+            # list by formats
+            li_dxf=li_dxf,
+            li_filegdb_esri=li_file_database_esri,
+            li_filegdb_spatialite=li_file_database_spatialite,
+            li_gml=li_gml,
+            li_gxt=li_gxt,
+            li_kml=li_kml,
+            li_shapefiles=li_shapefiles,
+            li_mapinfo_tab=li_mapinfo_tab,
+            li_geojson=li_geojson,
+            # options
+            opt_analyze_cdao="dxf" in formats,
+            opt_analyze_esri_filegdb="file_geodatabase_esri" in formats,
+            opt_analyze_geojson="geojson" in formats,
+            opt_analyze_gml="gml" in formats,
+            opt_analyze_gxt="gxt" in formats,
+            opt_analyze_kml="kml" in formats,
+            opt_analyze_mapinfo_tab="geojson" in formats,
+            opt_analyze_raster=any(
+                [fmt in formats for fmt in ("ecw", "geotiff", "jpeg")]
+            ),
+            opt_analyze_shapefiles="esri_shapefile" in formats,
+            opt_analyze_spatialite="file_geodatabase_spatialite" in formats,
+        )
+
+        # sheets and progress bar
+        total_files = geofiles_processor.count_files_to_process()
+        print(f"Start analyzing {total_files} files...")
+
+        geofiles_processor.process_files_in_queue()
 
         # output file path
         if output_path is None:
@@ -196,11 +280,10 @@ def inventory(
             gui=False,
         )
         logger.info(f"Workbook saved: {saved[1]}")
-        raise typer.Exit()
 
     # look for geographic database
     if pg_services:
-        print("Looking for geo SGBD")
+        print("Start looking for geographic table in PostGIS...")
         pg_services = check_usable_pg_services(requested_pg_services=pg_services)
         if not len(pg_services):
             logger.error("None of the specified pg_services is available.")

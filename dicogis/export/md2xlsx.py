@@ -453,7 +453,7 @@ class MetadataToXlsx(Workbook):
                 tipo = self.txt.get("date")
             else:
                 tipo = "unknown"
-                logger.warning(chp + " unknown type")
+                logger.warning(f"{chp} has an unknown type: {fields[chp][0]}")
 
             # concatenation of field informations
             try:
