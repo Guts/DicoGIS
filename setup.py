@@ -65,7 +65,7 @@ setup(
     author_email=__about__.__email__,
     description=__about__.__summary__,
     license=__about__.__license__,
-    long_description=(HERE / "README.md").read_text(),
+    long_description=(HERE / "README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     url=__about__.__uri__,
     project_urls={
