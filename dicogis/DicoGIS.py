@@ -53,6 +53,7 @@ from dicogis.listing.geodata_listing import find_geodata_files
 from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
 from dicogis.utils import CheckNorris, OptionsManager, TextsManager, Utilities
 from dicogis.utils.environment import get_gdal_version, get_proj_version
+from dicogis.utils.notifier import send_system_notify
 
 # ##############################################################################
 # ############ Globals ############
@@ -598,6 +599,11 @@ class DicoGIS(ThemedTk):
         )
 
         # saving dictionary
+        send_system_notify(
+            notification_title="DicoGIS analysis ended",
+            notification_message=f"DicoGIS successfully processed {total_files} files. "
+            "\nOpen the application to save the workbook.",
+        )
         self.bell()
         self.val.config(state=ACTIVE)
         self.xl_workbook.tunning_worksheets()
