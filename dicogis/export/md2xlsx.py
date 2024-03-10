@@ -207,12 +207,12 @@ class MetadataToXlsx(Workbook):
 
     def set_worksheets(
         self,
-        has_vector=0,
-        has_raster=0,
-        has_filedb=0,
-        has_mapdocs=0,
-        has_cad=0,
-        has_sgbd=0,
+        has_vector: bool = False,
+        has_raster: bool = False,
+        has_filedb: bool = False,
+        has_mapdocs: bool = False,
+        has_cad: bool = False,
+        has_sgbd: bool = False,
     ):
         """Add news sheets depending on present metadata types."""
         # SHEETS & HEADERS
@@ -453,7 +453,7 @@ class MetadataToXlsx(Workbook):
                 tipo = self.txt.get("date")
             else:
                 tipo = "unknown"
-                logger.warning(chp + " unknown type")
+                logger.warning(f"{chp} has an unknown type: {fields[chp][0]}")
 
             # concatenation of field informations
             try:
@@ -1008,7 +1008,7 @@ class MetadataToXlsx(Workbook):
         # End of method
         return
 
-    def store_md_sgdb(self, layer):
+    def store_md_sgdb(self, layer: dict):
         """Storing metadata about a file database."""
         # increment line
         self.idx_s += 1

@@ -23,6 +23,7 @@ import pgserviceparser
 from osgeo import gdal, ogr
 
 # package
+from dicogis.constants import GDAL_POSTGIS_OPEN_OPTIONS
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
 from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
 from dicogis.georeaders.geoutils import Utils
@@ -124,7 +125,7 @@ class ReadPostGIS:
         Returns:
             Optional[ogr.DataSource]: OGR connection
         """
-        gdal_open_options: list[str] = []
+        gdal_open_options = GDAL_POSTGIS_OPEN_OPTIONS
         if self.views_included:
             gdal_open_options.append("SKIP_VIEWS=NO")
             logger.info("PostgreSQL views enabled.")
@@ -217,7 +218,7 @@ class ReadPostGIS:
         # layer name
         dico_dataset["name"] = layer.GetName()
         dico_dataset["title"] = layer.GetName().capitalize()
-        logger.warning("Analyzing layer: {}".format(dico_dataset.get("name")))
+        logger.info("Analyzing layer: {}".format(dico_dataset.get("name")))
 
         # raising forbidden access
         try:

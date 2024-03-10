@@ -206,7 +206,7 @@ junit/
 *.xlsx
 arcpy.pth
 tests/fixtures/gisdata*
-tests/fixtures/
+
 
 # packaging
 !bundle_executable_cli.spec

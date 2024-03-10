@@ -1,18 +1,28 @@
 # Tests
 
-## Requirements
+## System requirements
 
-To run the tests, you need:
+- Docker >= 22
 
-1. install development requirements ([Ubuntu](ubuntu) or [Windows](windows))
-2. install data fixtures:
+## Testing setup
+
+In your virtual environment:
+
+1. Install development requirements ([Ubuntu](./ubuntu.md#requirements) or [Windows](./windows.md#requirements))
+2. Install data fixtures:
 
     ```bash
     python -m pip install -U gisdata -t ./tests/fixtures
     ```
 
-## Run
+3. Launch PostGIS container:
 
-```bash
+    ```sh
+    docker compose -f "tests/container/docker-compose.dev.yml" up -d --build
+    ```
+
+## Run tests suite
+
+```sh
 pytest
 ```

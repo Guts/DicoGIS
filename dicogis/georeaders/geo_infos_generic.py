@@ -99,7 +99,7 @@ class GeoInfosGenericReader:
         #         logger.error("LAYER: {} has not Attribute GetGeometryRef".format(layer.GetName()))
         #         return None
 
-    def get_srs_details(self, layer, txt):
+    def get_srs_details(self, layer, txt: dict):
         """get the informations about geography and geometry"""
         # SRS
         srs = layer.GetSpatialRef()

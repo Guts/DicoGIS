@@ -5,13 +5,15 @@
 # ########## Libraries #############
 # ##################################
 
+
 # standard library
 import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
+from locale import getlocale
 from os import path
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 # package
 from dicogis.export.md2xlsx import MetadataToXlsx
@@ -30,7 +32,7 @@ from dicogis.utils.utils import Utilities
 # ############ Globals ############
 # #################################
 
-dir_locale = Path(__file__).parent / "locale"
+dir_locale = Path(__file__).parent.parent / "locale"
 txt_manager = TextsManager(dir_locale)
 utils_global = Utilities()
 
@@ -60,7 +62,7 @@ class ProcessingFiles:
 
     MATRIX_FORMAT_GEOREADER = {
         "dxf": ReadDXF,
-        "esri_shapefiles": ReadVectorFlatDataset,
+        "esri_shapefile": ReadVectorFlatDataset,
         "file_geodatabase_esri": ReadGDB,
         "file_geodatabase_spatialite": ReadSpaDB,
         "geotiff": ReadRasters,
@@ -78,7 +80,6 @@ class ProcessingFiles:
         localized_strings: Optional[dict],
         # input lists of files to process
         li_cdao: Optional[Iterable],
-        li_dwg: Optional[Iterable],
         li_dxf: Optional[Iterable],
         li_filegdb_esri: Optional[Iterable],
         li_filegdb_spatialite: Optional[Iterable],
@@ -107,7 +108,6 @@ class ProcessingFiles:
         self.output_workbook = output_workbook
 
         # List of files
-        self.li_dwg = li_dwg
         self.li_dxf = li_dxf
         self.li_filegdb_esri = li_filegdb_esri
         self.li_filegdb_spatialite = li_filegdb_spatialite
@@ -148,15 +148,18 @@ class ProcessingFiles:
 
         # others
         self.total_files: Optional[int] = None
-        self.li_files_to_process: Optional[list[FileToProcess]] = None
+        self.li_files_to_process: list[Optional[FileToProcess]] = []
         self.localized_strings = localized_strings
         if self.localized_strings is None:
-            txt_manager.load_texts(dico_texts=localized_strings)
+            txt_manager.load_texts(
+                dico_texts=localized_strings, language_code=getlocale()[0]
+            )
 
     def process_files_in_queue(
         self,
         progress_value_message: Optional[str] = None,
         progress_value_count: Optional[int] = None,
+        progress_callback_cmd: Optional[Callable] = None,
     ) -> bool:
         for geofile in self.li_files_to_process:
             if geofile.processed is True:
@@ -166,9 +169,19 @@ class ProcessingFiles:
             # progression
             logger.info(f"Processing: {geofile}")
             if progress_value_message is not None:
-                progress_value_message = f"Reading: {geofile.file_path}"
+                if hasattr(progress_value_message, "set"):
+                    progress_value_message.set(
+                        f"Reading: {Path(geofile.file_path).name}"
+                    )
+                else:
+                    progress_value_message = f"Reading: {Path(geofile.file_path).name}"
             if progress_value_count is not None:
-                progress_value_count += 1
+                if hasattr(progress_value_count, "set"):
+                    progress_value_count.set(progress_value_count.get() + 1)
+                else:
+                    progress_value_count += 1
+            if progress_callback_cmd is not None:
+                progress_callback_cmd()
 
             # reset recipient data
             dico_layer = {}
@@ -177,7 +190,7 @@ class ProcessingFiles:
                 geofile.georeader().infos_dataset(
                     source_path=path.abspath(geofile.file_path),
                     dico_dataset=dico_layer,
-                    txt=self.blabla,
+                    txt=self.localized_strings,
                 )
                 logger.debug(f"Reading {geofile} succeeded.")
                 geofile.processed = True
@@ -190,7 +203,7 @@ class ProcessingFiles:
                 geofile.process_error = err
                 continue
 
-            # stroing informations into the output file
+            # storing informations into the output file
             try:
                 if progress_value_message is not None:
                     progress_value_message = f"Storing: {geofile.file_path}"
@@ -209,7 +222,7 @@ class ProcessingFiles:
     def add_files_to_process_queue(
         self, list_of_files: list, file_format: str
     ) -> list[FileToProcess]:
-        out_list = list
+        out_list: list = []
 
         for geofile in list_of_files:
             out_list.append(
@@ -233,7 +246,7 @@ class ProcessingFiles:
             total_files += len(self.li_shapefiles)
             self.output_workbook.set_worksheets(has_vector=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_shapefiles, file_format="esri_shapefiles"
+                list_of_files=self.li_shapefiles, file_format="esri_shapefile"
             )
         else:
             pass
