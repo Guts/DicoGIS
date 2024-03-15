@@ -16,9 +16,10 @@
 # Standard library
 import logging
 import subprocess
+import sys
+from importlib import resources
 from os import R_OK, access, path
 from pathlib import Path
-from sys import exit
 from sys import platform as opersys
 from tkinter import ACTIVE, DISABLED
 from tkinter.filedialog import asksaveasfilename  # dialogs
@@ -33,6 +34,7 @@ else:
     pass
 
 # package
+from dicogis.__about__ import __package_name__
 from dicogis.export.md2xlsx import MetadataToXlsx
 
 # ##############################################################################
@@ -51,6 +53,32 @@ class Utilities:
     def __init__(self):
         """DicoGIS specific utilities"""
         super().__init__()
+
+    @classmethod
+    def resolve_internal_path(self, internal_path: Path) -> Path:
+        """Determine the path to internal resources, handling normal Python execution
+        and frozen mode (typically PyInstaller).
+
+        Args:
+            internal_path (Path): internal path to resolve from dicogis package folder
+
+        Returns:
+            Path: resolved path
+        """
+        # grab locale folder depending if we are in frozen mode (typically PyInstaller)
+        # or as "normal" Python
+        if not (getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")):
+            internal_path = Path(resources.files(__package_name__)).joinpath(
+                internal_path
+            )
+            logger.debug(f"Internal path resolved in Python mode: {internal_path}")
+        else:
+            internal_path = Path(getattr(sys, "_MEIPASS", sys.executable)).joinpath(
+                internal_path
+            )
+            logger.debug(f"Internal path resolved in packaged mode: {internal_path}")
+
+        return internal_path
 
     @classmethod
     def open_dir_file(self, target):
@@ -142,7 +170,7 @@ class Utilities:
         else:
             if gui:
                 avert(title="Not saved", message="You cancelled saving operation")
-                exit()
+                sys.exit()
 
         # End of function
         return out_name, out_path

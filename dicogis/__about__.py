@@ -6,6 +6,7 @@
     See: https://packaging.python.org/guides/single-sourcing-package-version/
 """
 
+# standard lib
 from datetime import date
 from pathlib import Path
 
@@ -28,7 +29,7 @@ __copyright__ = f"2014 - {date.today().year}, {__author__}"
 __email__ = "dev@ingeoveritas.com"
 __executable_name__ = "DicoGIS.exe"
 __package_name__ = "dicogis"
-__icon_path__ = Path(__file__).parent.joinpath("bin/img/DicoGIS_logo_200px.png")
+__icon_path__ = Path("bin/img/DicoGIS_logo_200px.png")
 __keywords__ = ["GIS", "metadata", "INSPIRE", "GDAL", "OGR", "data management"]
 __license__ = "Apache-2.0"
 __summary__ = (

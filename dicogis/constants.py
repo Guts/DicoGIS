@@ -94,3 +94,5 @@ if __name__ == "__main__":
 
     for f in SUPPORTED_FORMATS:
         print(f.name)
+
+    print([v.value for v in AvailableLocales])

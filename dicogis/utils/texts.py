@@ -16,7 +16,11 @@
 import gettext
 import logging
 from pathlib import Path
+from typing import Optional
 from xml.etree import ElementTree as ET
+
+# package
+from dicogis.utils.utils import Utilities
 
 # #############################################################################
 # ########## Globals ###############
@@ -33,8 +37,17 @@ logger = logging.getLogger(__name__)
 class TextsManager:
     """Load texts from localized files to display in a parent program"""
 
-    def __init__(self, locale_folder: Path = Path("../locale")):
+    def __init__(self, locale_folder: Optional[Path] = None):
         """Manage texts from a file into a dictionary used to custom program display."""
+        self.dicogis_utils = Utilities()
+
+        if locale_folder is None:
+            locale_folder = Path("locale")
+
+        locale_folder = self.dicogis_utils.resolve_internal_path(
+            internal_path=locale_folder
+        )
+
         if not locale_folder.is_dir() or not locale_folder.exists():
             raise NotADirectoryError(
                 _("Locale folder must be an existing folder. Not: {}").format(
