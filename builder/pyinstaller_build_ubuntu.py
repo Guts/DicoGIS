@@ -46,8 +46,8 @@ PyInstaller.__main__.run(
         ).replace(".", "-"),
         "--noconfirm",
         "--noupx",
-        "--onedir",
-        # "--onefile",
+        # "--onedir",
+        "--onefile",
         "--windowed",
         str(package_folder / "DicoGIS.py"),
     ]
