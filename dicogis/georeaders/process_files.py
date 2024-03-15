@@ -32,8 +32,7 @@ from dicogis.utils.utils import Utilities
 # ############ Globals ############
 # #################################
 
-dir_locale = Path(__file__).parent.parent / "locale"
-txt_manager = TextsManager(dir_locale)
+txt_manager = TextsManager()
 utils_global = Utilities()
 
 # LOG

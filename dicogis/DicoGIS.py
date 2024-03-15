@@ -20,7 +20,6 @@ import locale
 import logging
 import platform
 from logging.handlers import RotatingFileHandler
-from pathlib import Path
 from sys import exit
 from sys import platform as opersys
 from time import strftime
@@ -46,6 +45,7 @@ from ttkthemes import ThemedTk
 
 # Project
 from dicogis import __about__
+from dicogis.constants import AvailableLocales
 from dicogis.export.md2xlsx import MetadataToXlsx
 from dicogis.georeaders import ReadPostGIS
 from dicogis.georeaders.process_files import ProcessingFiles
@@ -59,8 +59,7 @@ from dicogis.utils.notifier import send_system_notify
 # ############ Globals ############
 # #################################
 
-dir_locale = Path(__file__).parent / "locale"
-txt_manager = TextsManager(dir_locale)
+
 utils_global = Utilities()
 
 # LOG
@@ -105,8 +104,8 @@ class DicoGIS(ThemedTk):
         logger.info(f"PROJ: {get_proj_version()}")
 
         # store vars as attr
-        self.dir_locale = dir_locale
-        self.dir_imgs = Path(__file__).parent / "bin/img"
+        self.txt_manager = TextsManager()
+        self.dir_imgs = utils_global.resolve_internal_path(internal_path="bin/img")
 
         # manage settings outside the main class
         self.settings = OptionsManager("options.ini")
@@ -143,7 +142,6 @@ class DicoGIS(ThemedTk):
         self.def_rep = ""  # default folder to search for
         self.def_lang = "EN"  # default language to start
         self.today = strftime("%Y-%m-%d")  # date of the day
-        li_lang = [lg.name[5:-4] for lg in dir_locale.glob("*.xml")]  # languages
         self.blabla = {}  # texts dictionary
 
         # formats / type: vectors
@@ -209,7 +207,7 @@ class DicoGIS(ThemedTk):
         )  # tab_id = 3
 
         # fillfulling text
-        txt_manager.load_texts(dico_texts=self.blabla, language_code=self.def_lang)
+        self.txt_manager.load_texts(dico_texts=self.blabla, language_code=self.def_lang)
 
         # =================================================================================
         # ## TAB 1: FILES ##
@@ -269,7 +267,8 @@ class DicoGIS(ThemedTk):
         misc_frame = MiscButtons(self, images_folder=self.dir_imgs)
         misc_frame.grid(row=2, rowspan=3, padx=2, pady=2, sticky="NSWE")
         # language switcher
-        self.ddl_lang = Combobox(self, values=li_lang, width=5)
+        li_lang = [v.value for v in AvailableLocales]
+        self.ddl_lang = Combobox(self, values=li_lang, width=5, state="readonly")
         self.ddl_lang.current(li_lang.index(self.def_lang))
         self.ddl_lang.bind("<<ComboboxSelected>>", self.change_lang)
 
@@ -322,7 +321,7 @@ class DicoGIS(ThemedTk):
         """Update the texts dictionary with the language selected."""
         new_lang = self.ddl_lang.get()
         # change to the new language selected
-        txt_manager.load_texts(dico_texts=self.blabla, language_code=new_lang)
+        self.txt_manager.load_texts(dico_texts=self.blabla, language_code=new_lang)
         # update widgets text
         self.welcome.config(text=self.blabla.get("hi") + self.uzer)
         self.can.config(text=self.blabla.get("gui_quit"))

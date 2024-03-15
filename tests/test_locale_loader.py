@@ -36,7 +36,7 @@ class TestLocaleLoader(unittest.TestCase):
 
     #  -- Tests ------------------------------------------------------------
     def test_basic(self):
-        txtmngr = TextsManager(locale_folder=Path("dicogis/locale"))
+        txtmngr = TextsManager(locale_folder=Path("locale"))
 
         # English
         en_txts = txtmngr.load_texts(dico_texts={}, language_code="EN")

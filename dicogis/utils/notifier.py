@@ -14,15 +14,23 @@ from notifypy import Notify
 
 # package
 from dicogis.__about__ import __icon_path__, __title__
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
 # #################################
+
+
 # LOG
 logger = logging.getLogger(__name__)
+
+# common notification information
+dicogis_utils = Utilities()
 notification = Notify(
     default_application_name=__title__,
-    default_notification_icon=__icon_path__,
+    default_notification_icon=dicogis_utils.resolve_internal_path(
+        internal_path=__icon_path__
+    ),
 )
 
 

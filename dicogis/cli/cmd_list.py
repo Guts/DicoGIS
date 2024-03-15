@@ -158,9 +158,7 @@ def inventory(
     localized_strings: dict = {}
     if language is None:
         language = getlocale()[1]
-    TextsManager(Path(__file__).parent.parent.joinpath("locale")).load_texts(
-        dico_texts=localized_strings, language_code=language
-    )
+    TextsManager().load_texts(dico_texts=localized_strings, language_code=language)
 
     # output format
     if output_format == "excel":
