@@ -109,6 +109,8 @@ source .venv/bin/activate
 
 ## Install project requirements
 
+> Within the virtual environment just created before
+
 ```sh
 python -m pip install -U pip setuptools wheel
 python -m pip install -U gdal=="$(gdal-config --version).*"
@@ -132,7 +134,7 @@ dicogis-cli --help
 GUI:
 
 ```sh
-python dicogis/DicoGIS.py
+python dicogis/dicogis.py
 ```
 
 ## Install git hooks

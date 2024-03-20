@@ -36,23 +36,50 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 Typically, you can run these commands:
 
 ```powershell
-# create a virtual env
+# create a virtual env - change with your Python version
 py -3.10 -m venv .venv
 
 # enable virtual env
 .\.venv\Scripts\activate
+```
 
-# upgrade basic tooling
-python -m pip install -U pip
+## Install project requirements
 
-# install dependencies
-python -m pip install -U -r requirements.txt
+> Within the virtual environment just created before
+
+```powershell
+python -m pip install -U pip setuptools wheel
 python -m pip install -U -r requirements/development.txt
 python -m pip install -U -r requirements/windows.txt
-
-# finally, install the package in editable mode
-python -m pip install -e .
 ```
+
+## Install project
+
+```sh
+python -m pip install -U -e .[dev]
+```
+
+### Try it
+
+CLI:
+
+```sh
+dicogis-cli --help
+```
+
+GUI:
+
+```sh
+python dicogis/dicogis.py
+```
+
+## Install git hooks
+
+```sh
+pre-commit install
+```
+
+Happy coding!
 
 ----
 

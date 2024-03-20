@@ -42,7 +42,7 @@ Talking about perforamnces, it's always very dependant on the computer but to gi
     - [the executable Windows](https://github.com/Guts/DicoGIS/releases),
     - [source code](https://github.com/Guts/DicoGIS/archive/master.zip).
 
-2. Unzip it and launch DicoGIS.exe / DicoGIS.py
+2. Unzip it and launch `DicoGIS.exe` / `dicogis/dicogis.py`
 
     ![DicoGIS - Launch](../static/img/00a_DicoGIS_Win32exe.PNG "DicoGIS - Launch")
 

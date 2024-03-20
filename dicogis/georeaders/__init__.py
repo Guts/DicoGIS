@@ -2,10 +2,10 @@
 
 from .geo_infos_generic import GeoInfosGenericReader  # noqa: E402 F401
 from .geoutils import Utils  # noqa: E402 F401
-from .Infos_DXF import ReadDXF  # noqa: E402 F401
-from .Infos_GDB import ReadGDB  # noqa: E402 F401
-from .Infos_GXT import ReadGXT  # noqa: E402 F401
-from .Infos_PostGIS import ReadPostGIS  # noqa: E402 F401
-from .Infos_Rasters import ReadRasters  # noqa: E402 F401
-from .Infos_Spatialite import ReadSpaDB  # noqa: E402 F401
-from .Infos_VectorFlatDataset import ReadVectorFlatDataset  # noqa: E402 F401
+from .read_dxf import ReadDXF  # noqa: E402 F401
+from .read_esri_filegdb import ReadGDB  # noqa: E402 F401
+from .read_gxt import ReadGXT  # noqa: E402 F401
+from .read_postgis import ReadPostGIS  # noqa: E402 F401
+from .read_raster import ReadRasters  # noqa: E402 F401
+from .read_spatialite import ReadSpaDB  # noqa: E402 F401
+from .read_vector_flat_dataset import ReadVectorFlatDataset  # noqa: E402 F401

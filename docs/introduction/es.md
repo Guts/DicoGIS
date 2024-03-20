@@ -48,7 +48,7 @@ DicoGIS existe en [3 idiomas (Français, Anglais et Espagnol)](https://github.co
     - sea del [ejecutable Windows](https://github.com/Guts/DicoGIS/releases),
     - sea del [código fuente](https://github.com/Guts/DicoGIS/archive/master.zip).
 
-2. Descomprimir y iniciar DicoGIS.exe / el script DicoGIS.py
+2. Descomprimir y iniciar `DicoGIS.exe` / `dicogis/dicogis.py`
 
     ![DicoGIS - Launch](../static/img/00a_DicoGIS_Win32exe.PNG "DicoGIS - Launch")
 

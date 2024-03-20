@@ -53,6 +53,6 @@ PyInstaller.__main__.run(
         "--onefile",
         "--version-file={}".format("version_info.txt"),
         "--windowed",
-        str(package_folder / "DicoGIS.py"),
+        str(package_folder / "dicogis.py"),
     ]
 )
