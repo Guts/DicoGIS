@@ -32,6 +32,7 @@ __package_name__ = "dicogis"
 __icon_path__ = Path("bin/img/DicoGIS_logo_200px.png")
 __keywords__ = ["GIS", "metadata", "INSPIRE", "GDAL", "OGR", "data management"]
 __license__ = "Apache-2.0"
+__notification_sound_path__ = Path("bin/audio/notification_sound_microwave_bell.wav")
 __summary__ = (
     "Create Excel spreadsheet describing geographical data from a PostGIS "
     "Database or a file tree structure."

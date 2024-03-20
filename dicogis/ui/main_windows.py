@@ -387,7 +387,6 @@ class DicoGIS(ThemedTk):
         Returns:
             tuple[list[str]]: tuple of list of paths by formats
         """
-
         # disable related UI items in the meanwhile
         self.tab_files.btn_browse.config(state=DISABLED)
 
@@ -602,8 +601,8 @@ class DicoGIS(ThemedTk):
             notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files. "
             "\nOpen the application to save the workbook.",
+            notification_sound=self.tab_options.opt_end_process_notification_sound.get(),
         )
-        self.bell()
         self.val.config(state=ACTIVE)
         self.xl_workbook.tunning_worksheets()
         saved = utils_global.safe_save(
@@ -662,7 +661,13 @@ class DicoGIS(ThemedTk):
             self.update()
 
         # saving dictionary
-        self.bell()
+        send_system_notify(
+            notification_title="DicoGIS analysis ended",
+            notification_message="DicoGIS successfully processed "
+            f"{sgbd_reader.conn.GetLayerCount()} PostGIS tables. "
+            "\nOpen the application to save the workbook.",
+            notification_sound=self.tab_options.opt_end_process_notification_sound.get(),
+        )
         self.val.config(state=ACTIVE)
         self.xl_workbook.tunning_worksheets()
         saved = utils_global.safe_save(
