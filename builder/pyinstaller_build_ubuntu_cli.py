@@ -8,7 +8,6 @@
 # ########## Libraries #############
 # ##################################
 
-import platform
 import sys
 
 # Standard library
@@ -16,7 +15,6 @@ from os import getenv
 from pathlib import Path
 
 # 3rd party
-import distro
 import PyInstaller.__main__
 
 # package
@@ -38,14 +36,7 @@ PyInstaller.__main__.run(
         "--collect-submodules=shellingham",
         "--console",
         "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
-        "--name={}-cli_{}_{}{}_{}_Python{}".format(
-            __about__.__title_clean__,
-            __about__.__version__,
-            distro.id(),
-            distro.version(),
-            platform.architecture()[0],
-            platform.python_version(),
-        ).replace(".", "-"),
+        f"--name={__about__.__title_clean__}-cli.bin",
         "--noconfirm",
         "--onefile",
         str(package_folder.joinpath("cli/main.py")),
