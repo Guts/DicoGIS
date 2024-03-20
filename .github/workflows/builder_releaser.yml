@@ -72,25 +72,31 @@ jobs:
       - name: Generates executable for command-line version
         run: |
           python -O ./builder/pyinstaller_build_ubuntu_cli.py
+          chmod +x dist/DicoGIS-cli.bin
 
       - name: Save CLI binary as artifact
         uses: actions/upload-artifact@v4
         with:
           name: DicoGIS_executable_ubuntu_CLI
-          path: dist/DicoGIS-cli_*
+          path: dist/DicoGIS-cli.bin
           if-no-files-found: error
 
       - name: Generates executable for graphical version
         run: |
             python -O ./builder/pyinstaller_build_ubuntu_gui.py
+            chmod +x dist/DicoGIS-gui.bin
 
       - name: Save it as artifact
         uses: actions/upload-artifact@v4
         with:
           name: DicoGIS_executable_ubuntu_GUI
-          path: |
-            dist/DicoGIS-gui_*
+          path: dist/DicoGIS-gui.bin
           if-no-files-found: error
+
+      - name: Minimal integration test
+        run: |
+          ./dist/DicoGIS-cli.bin --help
+          ./dist/DicoGIS-cli.bin --version
 
   build-windows:
     name: "🏠 Windows"
@@ -131,7 +137,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DicoGIS_executable_windows_CLI
-          path: dist/DicoGIS-cli_*
+          path: dist/DicoGIS-cli.exe
           if-no-files-found: error
 
       - name: Generates executable for graphical version
@@ -142,9 +148,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DicoGIS_executable_windows_GUI
-          path: |
-            dist/DicoGIS-gui_*
+          path: dist/DicoGIS-gui.exe
           if-no-files-found: error
+
+      - name: Minimal integration test
+        run: |
+          ./dist/DicoGIS-cli.exe --help
+          ./dist/DicoGIS-cli.exe --version
 
   release:
     name: "🚀 GitHub Release"

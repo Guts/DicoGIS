@@ -8,7 +8,6 @@
 # ########## Libraries #############
 # ##################################
 
-import platform
 import sys
 
 # Standard library
@@ -16,7 +15,6 @@ from os import getenv
 from pathlib import Path
 
 # 3rd party
-import distro
 import PyInstaller.__main__
 
 # package
@@ -36,14 +34,7 @@ PyInstaller.__main__.run(
         "--add-data=LICENSE:.",
         "--add-data=README.md:.",
         "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
-        "--name={}-gui_{}_{}{}_{}_Python{}".format(
-            __about__.__title_clean__,
-            __about__.__version__,
-            distro.id(),
-            distro.version(),
-            platform.architecture()[0],
-            platform.python_version(),
-        ).replace(".", "-"),
+        f"--name={__about__.__title_clean__}-gui.bin",
         "--noconfirm",
         "--noupx",
         # "--onedir",
