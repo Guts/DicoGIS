@@ -185,18 +185,22 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: DicoGIS_executable_windows_GUI
-          path: builds/windows/gui
+          path: builds/windows/gui/
 
       - name: Download built package for Windows - CLI
         uses: actions/download-artifact@v4
         with:
           name: DicoGIS_executable_windows_CLI
-          path: builds/windows/cli
+          path: builds/windows/cli/
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           discussion_category_name: announcements
           fail_on_unmatched_files: true
-          files: builds/*/*.zip
+          files: |
+            builds/ubuntu/cli/*.bin
+            builds/ubuntu/gui/*.bin
+            builds/windows/cli/*.exe
+            builds/windows/gui/*.exe
           generate_release_notes: true
