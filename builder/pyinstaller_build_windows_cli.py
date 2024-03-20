@@ -28,7 +28,12 @@ package_folder = Path("dicogis")
 
 PyInstaller.__main__.run(
     [
-        "--add-binary={};bin/img/".format((package_folder / "bin/img/").resolve()),
+        "--add-binary={}:bin/audio/".format(
+            package_folder.joinpath("bin/audio/").resolve()
+        ),
+        "--add-binary={}:bin/img/".format(
+            package_folder.joinpath("bin/img/").resolve()
+        ),
         "--add-data={};locale/".format((package_folder / "locale/").resolve()),
         "--add-data=options_TPL.ini;.",
         "--add-data=LICENSE;.",
