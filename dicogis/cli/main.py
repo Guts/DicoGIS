@@ -19,7 +19,7 @@ from dicogis.cli.cmd_list import cli_list
 # ########## Globals ###############
 # ##################################
 
-cli_dicogis = typer.Typer()
+dicogis_cli = typer.Typer()
 state = {"verbose": False}
 APP_NAME = __title__
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ def version_callback(value: bool):
         raise typer.Exit()
 
 
-@cli_dicogis.callback()
+@dicogis_cli.callback()
 def main(
     verbose: Annotated[
         bool,
@@ -76,7 +76,7 @@ def main(
 
 
 # integrate subcommands
-cli_dicogis.add_typer(cli_list, name="list")
+dicogis_cli.add_typer(cli_list, name="list")
 
 
 # ############################################################################
@@ -84,4 +84,4 @@ cli_dicogis.add_typer(cli_list, name="list")
 # #################################
 if __name__ == "__main__":
     """standalone execution"""
-    cli_dicogis()
+    dicogis_cli()

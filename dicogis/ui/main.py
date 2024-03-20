@@ -39,9 +39,9 @@ logger = logging.getLogger("DicoGIS")
 # ##################################
 
 
-def main_gui_launcher():
+def dicogis_gui():
+    """Launch DicoGIS GUI."""
     # LOG
-
     logging.captureWarnings(True)
     logger.setLevel(logging.DEBUG)  # all errors will be get
     log_form = logging.Formatter(
@@ -105,4 +105,4 @@ def main_gui_launcher():
 
 if __name__ == "__main__":
     """standalone execution"""
-    main_gui_launcher()
+    dicogis_gui()
