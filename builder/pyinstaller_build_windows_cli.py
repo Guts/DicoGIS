@@ -38,7 +38,7 @@ PyInstaller.__main__.run(
         "--icon={}".format((package_folder / "bin/img/DicoGIS.ico").resolve()),
         "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
         "--manifest={}".format((package_folder / "../builder/manifest.xml").resolve()),
-        f"--name={__about__.__title_clean__}-gui",
+        f"--name={__about__.__title_clean__}-cli",
         "--noconfirm",
         "--noupx",
         "--onefile",
