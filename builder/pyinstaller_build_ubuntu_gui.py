@@ -40,6 +40,6 @@ PyInstaller.__main__.run(
         # "--onedir",
         "--onefile",
         "--windowed",
-        str(package_folder / "dicogis.py"),
+        str(package_folder.joinpath("ui/main.py")),
     ]
 )

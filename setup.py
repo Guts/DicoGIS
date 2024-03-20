@@ -80,7 +80,7 @@ setup(
     ),
     include_package_data=True,
     # dependencies
-    python_requires=">=3.9, <4",
+    python_requires=">=3.10, <4",
     extras_require={
         "dev": load_requirements(HERE / "requirements/development.txt"),
         "doc": load_requirements(HERE / "requirements/documentation.txt"),
@@ -91,10 +91,10 @@ setup(
     # run
     entry_points={
         "console_scripts": [
-            f"{__about__.__package_name__}-cli = dicogis.cli.main:cli_dicogis"
+            f"{__about__.__package_name__}-cli = dicogis.cli.main:dicogis_cli"
         ],
         "gui_scripts": [
-            "dicogis = dicogis.DicoGIS:__main__",
+            f"{__about__.__package_name__}-gui = dicogis.ui.main:dicogis_gui",
         ],
     },
     # metadata
@@ -103,15 +103,16 @@ setup(
         "Intended Audience :: End Users/Desktop",
         "Intended Audience :: Information Technology",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: Implementation :: CPython",
         "Development Status :: 5 - Production/Stable",
         "Environment :: Win32 (MS Windows)",
         "License :: OSI Approved :: Apache Software License 2.0",
         "Operating System :: OS Independent",
         "Operating System :: Microsoft :: Windows :: Windows 10",
+        "Operating System :: Microsoft :: Windows :: Windows 11",
         "Topic :: Scientific/Engineering :: GIS",
     ],
 )
