@@ -70,7 +70,9 @@ dicogis-cli --help
 GUI:
 
 ```sh
-python dicogis/dicogis.py
+dicogis-gui
+# or
+python dicogis/ui/main.py
 ```
 
 ## Install git hooks
