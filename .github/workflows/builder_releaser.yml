@@ -93,10 +93,14 @@ jobs:
           path: dist/DicoGIS-gui.bin
           if-no-files-found: error
 
+      - name: Install tests fixtures
+        run: python -m pip install -U gisdata -t ./tests/fixtures
+
       - name: Minimal integration test
         run: |
           ./dist/DicoGIS-cli.bin --help
           ./dist/DicoGIS-cli.bin --version
+          ./dist/DicoGIS-cli.bin list inventory --input-folder ./tests/ --language EN
 
   build-windows:
     name: "🏠 Windows"
@@ -151,10 +155,14 @@ jobs:
           path: dist/DicoGIS-gui.exe
           if-no-files-found: error
 
+      - name: Install tests fixtures
+        run: python -m pip install -U gisdata -t ./tests/fixtures
+
       - name: Minimal integration test
         run: |
           ./dist/DicoGIS-cli.exe --help
           ./dist/DicoGIS-cli.exe --version
+          ./dist/DicoGIS-cli.exe list inventory --input-folder ./tests/  --language EN
 
   release:
     name: "🚀 GitHub Release"
