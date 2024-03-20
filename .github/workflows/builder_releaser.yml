@@ -76,7 +76,7 @@ jobs:
       - name: Save CLI binary as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DicoGIS_executable_Ubuntu_CLI
+          name: DicoGIS_executable_ubuntu_CLI
           path: dist/DicoGIS-cli_*
           if-no-files-found: error
 
@@ -87,9 +87,9 @@ jobs:
       - name: Save it as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DicoGIS_executable_Ubuntu_GUI
+          name: DicoGIS_executable_ubuntu_GUI
           path: |
-            dist/DicoGIS_*
+            dist/DicoGIS-gui_*
           if-no-files-found: error
 
   build-windows:
@@ -123,20 +123,27 @@ jobs:
       - name: Generates MS Version Info
         run: python .\builder\version_info_templater.py
 
-      - name: Generates MS Executable
-        run: python -O .\builder\pyinstaller_build_windows.py
-
-      - name: Compress into ZIP
+      - name: Generates executable for command-line version
         run: |
-          cd dist/
-          7z a DicoGIS_Windows.zip ./DicoGIS_*/*
+          python -O ./builder/pyinstaller_build_windows_cli.py
+
+      - name: Save CLI binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DicoGIS_executable_windows_CLI
+          path: dist/DicoGIS-cli_*
+          if-no-files-found: error
+
+      - name: Generates executable for graphical version
+        run: |
+            python -O ./builder/pyinstaller_build_windows_gui.py
 
       - name: Save it as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DicoGIS_executable_Windows
+          name: DicoGIS_executable_windows_GUI
           path: |
-            dist/DicoGIS_*.zip
+            dist/DicoGIS-gui_*
           if-no-files-found: error
 
   release:
@@ -152,17 +159,29 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
 
     steps:
-      - name: Download built package for Linux (Ubuntu)
+      - name: Download built package for Linux (Ubuntu) - GUI
         uses: actions/download-artifact@v4
         with:
-          name: DicoGIS_executable_Ubuntu
-          path: builds/ubuntu/
+          name: DicoGIS_executable_ubuntu_GUI
+          path: builds/ubuntu/gui/
 
-      - name: Download built package for Windows
+      - name: Download built package for Linux (Ubuntu) - CLI
         uses: actions/download-artifact@v4
         with:
-          name: DicoGIS_executable_Windows
-          path: builds/windows/
+          name: DicoGIS_executable_ubuntu_CLI
+          path: builds/ubuntu/cli/
+
+      - name: Download built package for Windows - GUI
+        uses: actions/download-artifact@v4
+        with:
+          name: DicoGIS_executable_windows_GUI
+          path: builds/windows/gui
+
+      - name: Download built package for Windows - CLI
+        uses: actions/download-artifact@v4
+        with:
+          name: DicoGIS_executable_windows_CLI
+          path: builds/windows/cli
 
       - name: Release
         uses: softprops/action-gh-release@v1
