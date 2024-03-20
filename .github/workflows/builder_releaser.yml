@@ -194,7 +194,7 @@ jobs:
           path: builds/windows/cli/
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           discussion_category_name: announcements
           fail_on_unmatched_files: true
