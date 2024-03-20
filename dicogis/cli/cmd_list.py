@@ -19,8 +19,8 @@ from rich import print
 from dicogis.__about__ import __title__, __version__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.md2xlsx import MetadataToXlsx
-from dicogis.georeaders.Infos_PostGIS import ReadPostGIS
 from dicogis.georeaders.process_files import ProcessingFiles
+from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.texts import TextsManager

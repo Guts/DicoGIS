@@ -45,33 +45,35 @@ En ce qui concerne les performances, cela dépend surtout de la machine sur laqu
 
 1. Télécharger la dernière version :
 
-- soit de [l’exécutable Windows](https://github.com/Guts/DicoGIS/releases),
-- soit du [code source](https://github.com/Guts/DicoGIS/archive/master.zip).
+    - soit de [l’exécutable Windows](https://github.com/Guts/DicoGIS/releases),
+    - soit du [code source](https://github.com/Guts/DicoGIS/archive/master.zip).
 
-2. Dézipper et lancer DicoGIS.exe / le script DicoGIS.py
+2. Dézipper et lancer `DicoGIS.exe` / `dicogis/dicogis.py`
 
-![DicoGIS - Launch](../static/img/00a_DicoGIS_Win32exe.PNG "DicoGIS - Launch")
+    ![DicoGIS - Launch](../static/img/00a_DicoGIS_Win32exe.PNG "DicoGIS - Launch")
 
 3. Changer la langue au besoin
 
-![DicoGIS - Switch language](../static/img/99_DicoGIS_SwitchLanguage.gif "DicoGIS - Switch language")
+    ![DicoGIS - Switch language](../static/img/99_DicoGIS_SwitchLanguage.gif "DicoGIS - Switch language")
 
 4. Pour des données organisées en fichiers :
 
-- Choisir le dossier parent : l’exploration commence et la barre de progression tourne jusqu’à la fin du listing
-- Choisir les formats désirés
+    - Choisir le dossier parent : l’exploration commence et la barre de progression tourne jusqu’à la fin du listing
+    - Choisir les formats désirés
 
-![DicoGIS - Listing](../static/img/02_DicoGIS_Listing.gif "DicoGIS - Listing")
+    ![DicoGIS - Listing](../static/img/02_DicoGIS_Listing.gif "DicoGIS - Listing")
 
-4/b Pour des données stockées dans une base PostgreSQL / PostGIS, c'est le même principe sauf qu'il faut entrer les paramètres de connexion :
+5. Pour des données stockées dans une base PostgreSQL / PostGIS, c'est le même principe sauf qu'il faut entrer les paramètres de connexion :
 
-![DicoGIS - Processing PostGIS](../static/img/06_DicoGIS_PostGIS.gif "DicoGIS - Processing PostGIS")
+    ![DicoGIS - Processing PostGIS](../static/img/06_DicoGIS_PostGIS.gif "DicoGIS - Processing PostGIS")
 
-5. Lancer et attendre la fin du traitement : sauvegarder le fichier Excel généré.
+6. Lancer et attendre la fin du traitement : sauvegarder le fichier Excel généré.
 
-![DicoGIS - Processing files](../static/img/05_DicoGIS_Processing.gif "DicoGIS - Processing files")
+    ![DicoGIS - Processing files](../static/img/05_DicoGIS_Processing.gif "DicoGIS - Processing files")
 
-6. Consulter le fichier en sortie et le fichier DicoGIS.log (dans lequel il y a un paquet d'informations ^^).
+7. Consulter le fichier en sortie et le fichier DicoGIS.log (dans lequel il y a un paquet d'informations ^^).
+
+----
 
 ## Résultats
 

@@ -49,6 +49,6 @@ PyInstaller.__main__.run(
         # "--onedir",
         "--onefile",
         "--windowed",
-        str(package_folder / "DicoGIS.py"),
+        str(package_folder / "dicogis.py"),
     ]
 )

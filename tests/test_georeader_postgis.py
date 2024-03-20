@@ -20,7 +20,7 @@ from pathlib import Path
 from osgeo import gdal
 
 # package
-from dicogis.georeaders.Infos_PostGIS import ReadPostGIS
+from dicogis.georeaders.read_postgis import ReadPostGIS
 
 # #############################################################################
 # ########## Classes ###############
