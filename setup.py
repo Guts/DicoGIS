@@ -94,7 +94,7 @@ setup(
             f"{__about__.__package_name__}-cli = dicogis.cli.main:cli_dicogis"
         ],
         "gui_scripts": [
-            "dicogis = dicogis.DicoGIS:__main__",
+            f"{__about__.__package_name__}-gui = dicogis.ui.main:main_gui_launcher",
         ],
     },
     # metadata
