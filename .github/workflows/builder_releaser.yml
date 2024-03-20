@@ -100,7 +100,7 @@ jobs:
         run: |
           ./dist/DicoGIS-cli.bin --help
           ./dist/DicoGIS-cli.bin --version
-          ./dist/DicoGIS-cli.bin list inventory --input-folder ./tests/
+          ./dist/DicoGIS-cli.bin list inventory --input-folder ./tests/ --language EN
 
   build-windows:
     name: "🏠 Windows"
@@ -162,7 +162,7 @@ jobs:
         run: |
           ./dist/DicoGIS-cli.exe --help
           ./dist/DicoGIS-cli.exe --version
-          ./dist/DicoGIS-cli.exe list inventory --input-folder ./tests/
+          ./dist/DicoGIS-cli.exe list inventory --input-folder ./tests/  --language EN
 
   release:
     name: "🚀 GitHub Release"
