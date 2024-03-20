@@ -36,7 +36,7 @@ PyInstaller.__main__.run(
         "--add-data=LICENSE:.",
         "--add-data=README.md:.",
         "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
-        "--name={}_{}_{}{}_{}_Python{}".format(
+        "--name={}-gui_{}_{}{}_{}_Python{}".format(
             __about__.__title_clean__,
             __about__.__version__,
             distro.id(),

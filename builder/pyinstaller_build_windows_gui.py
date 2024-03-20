@@ -34,12 +34,10 @@ PyInstaller.__main__.run(
         "--add-data=options_TPL.ini;.",
         "--add-data=LICENSE;.",
         "--add-data=README.md;.",
-        "--clean",
-        # "--debug=all",
         "--icon={}".format((package_folder / "bin/img/DicoGIS.ico").resolve()),
         "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
         "--manifest={}".format((package_folder / "../builder/manifest.xml").resolve()),
-        "--name={}_{}_{}{}_Python{}-{}".format(
+        "--name={}-gui_{}_{}{}_Python{}-{}".format(
             __about__.__title_clean__,
             __about__.__version__.replace(".", "-"),
             platform.system(),
@@ -49,7 +47,6 @@ PyInstaller.__main__.run(
         ),
         "--noconfirm",
         "--noupx",
-        # "--onedir",
         "--onefile",
         "--version-file={}".format("version_info.txt"),
         "--windowed",
