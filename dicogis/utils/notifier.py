@@ -13,7 +13,7 @@ import logging
 from notifypy import Notify
 
 # package
-from dicogis.__about__ import __icon_path__, __title__
+from dicogis.__about__ import __icon_path__, __notification_sound_path__, __title__
 from dicogis.utils.utils import Utilities
 
 # ##############################################################################
@@ -37,7 +37,9 @@ notification = Notify(
 # ##############################################################################
 # ############ Functions ##########
 # #################################
-def send_system_notify(notification_message: str, notification_title: str):
+def send_system_notify(
+    notification_message: str, notification_title: str, notification_sound: bool = True
+):
     """Send a notification to the system.
 
     Args:
@@ -45,6 +47,12 @@ def send_system_notify(notification_message: str, notification_title: str):
         notification_title (str): notification title
     """
     notification.message = notification_message
+    if notification_sound:
+        notification.audio = str(
+            dicogis_utils.resolve_internal_path(
+                internal_path=__notification_sound_path__
+            ).resolve()
+        )
 
     try:
         notification.send()

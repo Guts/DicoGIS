@@ -23,6 +23,7 @@ from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import get_gdal_version, get_proj_version
+from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -96,9 +97,18 @@ def inventory(
             "supported. Here for the future!",
         ),
     ] = "excel",
-    out_prettify_size: Annotated[
+    opt_notify_sound: Annotated[
         bool,
         typer.Option(
+            envvar="DICOGIS_ENABLE_NOTIFICATION_SOUND",
+            is_flag=True,
+            help="Enable/disable notification's sound at the end of processing.",
+        ),
+    ] = True,
+    opt_prettify_size: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_EXPORT_SIZE_PRETTIFY",
             is_flag=True,
             help="Enable prettified files size in output. "
             "Example: 1 ko instead of 1024.",
@@ -165,7 +175,7 @@ def inventory(
         # creating the Excel workbook
         xl_workbook = MetadataToXlsx(
             texts=localized_strings,
-            opt_size_prettify=out_prettify_size,
+            opt_size_prettify=opt_prettify_size,
         )
     else:
         logger.error(
@@ -278,6 +288,11 @@ def inventory(
             gui=False,
         )
         logger.info(f"Workbook saved: {saved[1]}")
+        send_system_notify(
+            notification_title="DicoGIS analysis ended",
+            notification_message=f"DicoGIS successfully processed {total_files} files.",
+            notification_sound=opt_notify_sound,
+        )
 
     # look for geographic database
     if pg_services:
@@ -338,6 +353,14 @@ def inventory(
         # output file path
         if output_path is None:
             output_path = f"DicoGIS_database_{date.today()}.xlsx"
+
+        send_system_notify(
+            notification_title="DicoGIS analysis ended",
+            notification_message="DicoGIS successfully processed "
+            f"{sgbd_reader.conn.GetLayerCount()} PostGIS tables. "
+            "\nOpen the application to save the workbook.",
+            notification_sound=opt_notify_sound,
+        )
 
 
 # ############################################################################

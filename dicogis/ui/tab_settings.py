@@ -128,6 +128,18 @@ class TabSettings(Frame):
             row=2, column=0, sticky="NSWE", padx=2, pady=2
         )
 
+        self.opt_end_process_notification_sound = BooleanVar(
+            master=self, value=getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", True)
+        )
+        caz_opt_end_process_notification_sound = Checkbutton(
+            self.FrOptExport,
+            text="Play a notification sound when processing has finished.",
+            variable=self.opt_end_process_notification_sound,
+        )
+        caz_opt_end_process_notification_sound.grid(
+            row=3, column=0, sticky="NSWE", padx=2, pady=2
+        )
+
         # positionning frames
 
         self.FrOptExport.grid(row=1, column=0, sticky="NSWE", padx=2, pady=2)
