@@ -69,20 +69,27 @@ jobs:
           python -m pip install -e .[gdal]
           python -m pip install -U -r requirements/packaging.txt
 
-      - name: Generates Executable
-        run: python -O ./builder/pyinstaller_build_ubuntu.py
-
-      - name: Compress into ZIP
+      - name: Generates executable for command-line version
         run: |
-          cd dist/
-          zip -r9 DicoGIS_Ubuntu . DicoGIS_*/*
+          python -O ./builder/pyinstaller_build_ubuntu_cli.py
+
+      - name: Save CLI binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DicoGIS_executable_Ubuntu_CLI
+          path: dist/DicoGIS-cli_*
+          if-no-files-found: error
+
+      - name: Generates executable for graphical version
+        run: |
+            python -O ./builder/pyinstaller_build_ubuntu_gui.py
 
       - name: Save it as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DicoGIS_executable_Ubuntu
+          name: DicoGIS_executable_Ubuntu_GUI
           path: |
-            dist/DicoGIS_*.zip
+            dist/DicoGIS_*
           if-no-files-found: error
 
   build-windows:
