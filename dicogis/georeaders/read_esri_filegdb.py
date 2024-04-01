@@ -155,9 +155,9 @@ class ReadGDB:
             dico_layer["ymax"] = extent[3]
 
             # storing layer into the GDB dictionary
-            dico_dataset[
-                "{}_{}".format(layer_idx, dico_layer.get("title"))
-            ] = dico_layer
+            dico_dataset["{}_{}".format(layer_idx, dico_layer.get("title"))] = (
+                dico_layer
+            )
             # summing fields number
             total_fields += dico_layer.get("num_fields", 0)
             # summing objects number
