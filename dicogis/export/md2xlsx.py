@@ -222,9 +222,9 @@ class MetadataToXlsx(Workbook):
             self.ws_v.append([self.txt.get(i) for i in self.li_cols_vector])
             # styling
             for i in self.li_cols_vector:
-                self.ws_v.cell(
-                    row=1, column=self.li_cols_vector.index(i) + 1
-                ).style = "Headline 2"
+                self.ws_v.cell(row=1, column=self.li_cols_vector.index(i) + 1).style = (
+                    "Headline 2"
+                )
 
             # initialize line counter
             self.idx_v = 1
@@ -237,9 +237,9 @@ class MetadataToXlsx(Workbook):
             self.ws_r.append([self.txt.get(i) for i in self.li_cols_raster])
             # styling
             for i in self.li_cols_raster:
-                self.ws_r.cell(
-                    row=1, column=self.li_cols_raster.index(i) + 1
-                ).style = "Headline 2"
+                self.ws_r.cell(row=1, column=self.li_cols_raster.index(i) + 1).style = (
+                    "Headline 2"
+                )
 
             # initialize line counter
             self.idx_r = 1
