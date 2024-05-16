@@ -35,7 +35,7 @@ else:
 
 # package
 from dicogis.__about__ import __package_name__
-from dicogis.export.md2xlsx import MetadataToXlsx
+from dicogis.export.to_xlsx import MetadataToXlsx
 
 # ##############################################################################
 # ############ Globals ############

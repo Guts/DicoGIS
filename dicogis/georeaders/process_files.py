@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 # package
-from dicogis.export.md2xlsx import MetadataToXlsx
+from dicogis.export.to_xlsx import MetadataToXlsx
 from dicogis.georeaders import (
     ReadDXF,
     ReadGDB,
