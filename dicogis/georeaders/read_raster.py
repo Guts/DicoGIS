@@ -20,13 +20,11 @@ from os import chdir, path
 from time import localtime, strftime
 
 # 3rd party libraries
-try:
-    from osgeo import gdal, osr
-    from osgeo.gdalconst import GA_ReadOnly
-except ImportError:
-    import gdal
-    import osr
-    from gdalconst import GA_ReadOnly
+from osgeo import gdal, osr
+from osgeo.gdalconst import GA_ReadOnly
+
+# package
+from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
 
 # ############################################################################
 # ######### Globals ############
@@ -37,45 +35,6 @@ logger = logging.getLogger(__name__)
 # ############################################################################
 # ######### Classes #############
 # #################################
-
-
-class GdalErrorHandler:
-    def __init__(self):
-        """Callable error handler.
-
-        see: http://trac.osgeo.org/gdal/wiki/PythonGotchas#Exceptionsraisedincustomerrorhandlersdonotgetcaught
-        and http://pcjericks.github.io/py-gdalogr-cookbook/gdal_general.html#install-gdal-ogr-error-handler
-        """
-        self.err_level = gdal.CE_None
-        self.err_type = 0
-        self.err_msg = ""
-
-    def handler(self, err_level, err_type, err_msg):
-        """Make errors messages more readable."""
-        # available types
-        err_class = {
-            gdal.CE_None: "None",
-            gdal.CE_Debug: "Debug",
-            gdal.CE_Warning: "Warning",
-            gdal.CE_Failure: "Failure",
-            gdal.CE_Fatal: "Fatal",
-        }
-        # getting type
-        err_type = err_class.get(err_type, "None")
-
-        # cleaning message
-        err_msg = err_msg.replace("\n", " ")
-
-        # disabling GDAL exceptions raising to avoid future troubles
-        gdal.DontUseExceptions()
-
-        # propagating
-        self.err_level = err_level
-        self.err_type = err_type
-        self.err_msg = err_msg
-
-        # end of function
-        return self.err_level, self.err_type, self.err_msg
 
 
 class ReadRasters:

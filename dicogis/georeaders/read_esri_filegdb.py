@@ -18,21 +18,13 @@ import logging
 from os import path, walk
 from time import localtime, strftime
 
-try:
-    from osgeo import gdal, ogr
-except ImportError:
-    import gdal
-    import ogr
+# 3rd party libraries
+from osgeo import gdal, ogr
 
-# custom submodules
-try:
-    from .gdal_exceptions_handler import GdalErrorHandler
-    from .geo_infos_generic import GeoInfosGenericReader
-    from .geoutils import Utils
-except ValueError:
-    from gdal_exceptions_handler import GdalErrorHandler
-    from geo_infos_generic import GeoInfosGenericReader
-    from geoutils import Utils
+# package
+from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
+from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
+from dicogis.georeaders.geoutils import Utils
 
 # ############################################################################
 # ######### Globals ############
