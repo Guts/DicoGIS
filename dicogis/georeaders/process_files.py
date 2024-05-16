@@ -17,14 +17,12 @@ from typing import Callable, Optional
 
 # package
 from dicogis.export.to_xlsx import MetadataToXlsx
-from dicogis.georeaders import (
-    ReadDXF,
-    ReadEsriFileGdb,
-    ReadGXT,
-    ReadRasters,
-    ReadSpatialite,
-    ReadVectorFlatDataset,
-)
+from dicogis.georeaders.read_dxf import ReadDXF
+from dicogis.georeaders.read_esri_filegdb import ReadEsriFileGdb
+from dicogis.georeaders.read_gxt import ReadGXT
+from dicogis.georeaders.read_raster import ReadRasters
+from dicogis.georeaders.read_spatialite import ReadSpatialite
+from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 

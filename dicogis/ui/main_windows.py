@@ -47,13 +47,16 @@ from ttkthemes import ThemedTk
 from dicogis import __about__
 from dicogis.constants import AvailableLocales
 from dicogis.export.to_xlsx import MetadataToXlsx
-from dicogis.georeaders import ReadPostGIS
 from dicogis.georeaders.process_files import ProcessingFiles
+from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
 from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
-from dicogis.utils import CheckNorris, OptionsManager, TextsManager, Utilities
+from dicogis.utils.checknorris import CheckNorris
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.notifier import send_system_notify
+from dicogis.utils.options import OptionsManager
+from dicogis.utils.texts import TextsManager
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
