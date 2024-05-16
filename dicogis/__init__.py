@@ -2,11 +2,11 @@
 
 from .georeaders import (  # noqa: E402 F401
     ReadDXF,
-    ReadGDB,
+    ReadEsriFileGdb,
     ReadGXT,
     ReadPostGIS,
     ReadRasters,
-    ReadSpaDB,
+    ReadSpatialite,
     ReadVectorFlatDataset,
 )
 from .ui import MiscButtons, TabFiles, TabSettings, TabSGBD  # noqa: E402 F401

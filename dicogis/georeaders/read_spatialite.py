@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 # ###############################
 
 
-class ReadSpaDB:
-    def __init__(self, spadbpath, dico_spadb, tipo, txt=""):
+class ReadSpatialite:
+    def __init__(self, spadbpath, dico_spadb, txt=""):
         """Use OGR functions to extract basic informations about
         geographic vector file
         and store into dictionaries.
@@ -45,7 +45,6 @@ class ReadSpaDB:
         dico_spadb = dictionary for global informations
         dico_fields = dictionary for the fields' informations
         li_fieds = ordered list of fields
-        tipo = format
         text = dictionary of text in the selected language
         """
         # handling ogr specific exceptions
