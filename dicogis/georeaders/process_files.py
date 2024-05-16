@@ -17,14 +17,12 @@ from typing import Callable, Optional
 
 # package
 from dicogis.export.to_xlsx import MetadataToXlsx
-from dicogis.georeaders import (
-    ReadDXF,
-    ReadGDB,
-    ReadGXT,
-    ReadRasters,
-    ReadSpaDB,
-    ReadVectorFlatDataset,
-)
+from dicogis.georeaders.read_dxf import ReadDXF
+from dicogis.georeaders.read_esri_filegdb import ReadEsriFileGdb
+from dicogis.georeaders.read_gxt import ReadGXT
+from dicogis.georeaders.read_raster import ReadRasters
+from dicogis.georeaders.read_spatialite import ReadSpatialite
+from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -62,8 +60,8 @@ class ProcessingFiles:
     MATRIX_FORMAT_GEOREADER = {
         "dxf": ReadDXF,
         "esri_shapefile": ReadVectorFlatDataset,
-        "file_geodatabase_esri": ReadGDB,
-        "file_geodatabase_spatialite": ReadSpaDB,
+        "file_geodatabase_esri": ReadEsriFileGdb,
+        "file_geodatabase_spatialite": ReadSpatialite,
         "geotiff": ReadRasters,
         "gxt": ReadGXT,
         "geojson": ReadVectorFlatDataset,

@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 # ##############################
 
 
-class ReadGDB:
+class ReadEsriFileGdb:
     def __init__(self):
         """Class constructor."""
         # handling ogr specific exceptions
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     # recipient datas
     dico_dataset = {}
-    gdbReader = ReadGDB()
+    gdbReader = ReadEsriFileGdb()
 
     # read GDB
     for source_path in li_gdb:

@@ -50,8 +50,10 @@ logger = logging.getLogger(__name__)
 
 
 class Utilities:
+    """DicoGIS specific utilities"""
+
     def __init__(self):
-        """DicoGIS specific utilities"""
+        """Initialization."""
         super().__init__()
 
     @classmethod
