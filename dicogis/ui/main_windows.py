@@ -46,7 +46,7 @@ from ttkthemes import ThemedTk
 # Project
 from dicogis import __about__
 from dicogis.constants import AvailableLocales
-from dicogis.export.md2xlsx import MetadataToXlsx
+from dicogis.export.to_xlsx import MetadataToXlsx
 from dicogis.georeaders import ReadPostGIS
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.listing.geodata_listing import find_geodata_files
