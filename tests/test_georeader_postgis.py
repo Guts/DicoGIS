@@ -104,7 +104,6 @@ class TestGeoReaderPostgis(unittest.TestCase):
 
     def test_postgis_reader(self):
         """Test PostGIS Georeader."""
-        dico_dataset = {}
         pg_reader = ReadPostGIS(service="dicogis_test", txt=self.textos)
         pg_reader.get_connection()
         self.assertIsInstance(pg_reader.get_postgis_version(), str)
