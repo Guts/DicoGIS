@@ -8,10 +8,13 @@
 # Standard library
 import logging
 from os import listdir, path, walk
-from typing import Optional
+from typing import Optional, Union
 
 # 3rd party
 from osgeo import ogr
+
+# project
+from dicogis.models.dataset import MetaDataset
 
 # ############################################################################
 # ######### Globals ############
@@ -79,11 +82,11 @@ class Utils:
 
     def erratum(
         self,
-        ctner: Optional[dict],
-        src: Optional[str] = None,
-        ds_lyr: Optional[ogr.Layer] = None,
-        mess_type: int = 1,
-        mess: str = "",
+        target_container: Union[dict, MetaDataset],
+        src_path: Optional[str] = None,
+        src_dataset_layer: Optional[ogr.Layer] = None,
+        err_type: int = 1,
+        err_msg: str = "",
     ):
         """Handle errors message and store it into __dict__.
 
@@ -94,19 +97,19 @@ class Utils:
         """
         if self.ds_type == "flat":
             # local variables
-            ctner["name"] = path.basename(src)
-            ctner["folder"] = path.dirname(src)
-            ctner["error"] = mess
+            target_container["name"] = path.basename(src_path)
+            target_container["folder"] = path.dirname(src_path)
+            target_container["error"] = err_msg
             # method end
-            return ctner
+            return target_container
         elif self.ds_type == "postgis":
-            if isinstance(ds_lyr, ogr.Layer):
-                ctner["name"] = ds_lyr.GetName()
+            if isinstance(src_dataset_layer, ogr.Layer):
+                target_container.name = src_dataset_layer.GetName()
             else:
-                ctner["name"] = "No OGR layer."
-            ctner["error_type"] = mess_type
-            ctner["error"] = mess
+                target_container.name = "No OGR layer."
+            target_container.processing_error_type = err_type
+            target_container.processing_error_msg = err_msg
             # method end
-            return ctner
+            return target_container
         else:
             pass

@@ -306,16 +306,14 @@ def inventory(
         xl_workbook.set_worksheets(has_sgbd=True)
 
         for pg_service in pg_services:
-            dico_dataset = {}
 
             # testing connection settings
-            sgbd_reader = ReadPostGIS(
-                dico_dataset=dico_dataset, txt=localized_strings, service=pg_service
-            )
+            sgbd_reader = ReadPostGIS(txt=localized_strings, service=pg_service)
+            sgbd_reader.get_connection()
 
             # check connection state
             if not sgbd_reader.conn:
-                fail_reason = dico_dataset.get("conn_state")
+                fail_reason = sgbd_reader.db_connection.state_msg
                 logger.error(
                     f"Connection failed using pg_service {pg_service}. Trace: {fail_reason}."
                 )
@@ -329,11 +327,9 @@ def inventory(
             # parsing the layers
             for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
                 layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
-                # reset recipient data
-                dico_dataset.clear()
-                sgbd_reader.infos_dataset(layer)
-                logger.info(f"Table examined: {layer.GetName()}")
-                xl_workbook.store_md_sgdb(layer=dico_dataset)
+                metadataset = sgbd_reader.infos_dataset(layer=layer)
+                logger.info(f"Table examined: {metadataset.name}")
+                xl_workbook.store_md_sgdb(metadataset=metadataset)
                 logger.debug("Layer metadata stored into workbook.")
 
         # output file path
