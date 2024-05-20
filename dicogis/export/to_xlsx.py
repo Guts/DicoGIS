@@ -14,6 +14,7 @@ from openpyxl.styles import Alignment, NamedStyle
 from openpyxl.utils import get_column_letter
 
 # project
+from dicogis.models.dataset import MetaDatabaseTable
 from dicogis.utils.formatters import convert_octets
 
 # ##############################################################################
@@ -1008,7 +1009,7 @@ class MetadataToXlsx(Workbook):
         # End of method
         return
 
-    def store_md_sgdb(self, layer: dict):
+    def store_md_sgdb(self, metadataset: MetaDatabaseTable):
         """Storing metadata about a file database."""
         # increment line
         self.idx_s += 1
@@ -1016,100 +1017,90 @@ class MetadataToXlsx(Workbook):
         champs = ""
 
         # layer name
-        self.ws_sgbd[f"A{self.idx_s}"] = layer.get("name")
+        self.ws_sgbd[f"A{self.idx_s}"] = metadataset.name
 
         # connection string
-        self.ws_sgbd[f"B{self.idx_s}"] = "{}@{}:{}-{}".format(
-            layer.get("user"),
-            layer.get("sgbd_host"),
-            layer.get("sgbd_port"),
-            layer.get("db_name"),
-        )
+        if metadataset.database_connection.service_name is not None:
+            out_connection_string = metadataset.database_connection.pg_connection_uri
+        else:
+            out_connection_string = (
+                f"postgresql://{metadataset.database_connection.user_name}"
+                f"@{metadataset.database_connection.host}"
+                f":{metadataset.database_connection.port}"
+                f"/{metadataset.database_connection.database_name}"
+            )
+        self.ws_sgbd[f"B{self.idx_s}"] = out_connection_string
         self.ws_sgbd[f"B{self.idx_s}"].style = "Hyperlink"
         # schema
-        self.ws_sgbd[f"C{self.idx_s}"] = layer.get("folder")
+        self.ws_sgbd[f"C{self.idx_s}"] = metadataset.schema_name
 
         # in case of a source error
-        if "error" in layer:
-            self.ws_sgbd[f"D{self.idx_s}"] = layer.get("error")
+        if metadataset.processing_succeeded is False:
+            self.ws_sgbd[f"D{self.idx_s}"] = metadataset.processing_error_msg
             self.ws_sgbd[f"A{self.idx_s}"].style = "Warning Text"
             self.ws_sgbd[f"B{self.idx_s}"].style = "Warning Text"
             self.ws_sgbd[f"C{self.idx_s}"].style = "Warning Text"
             self.ws_sgbd[f"D{self.idx_s}"].style = "Warning Text"
             # gdal info
-            if "err_gdal" in layer:
-                self.ws_v[f"M{self.idx_v}"] = "{} : {}".format(
-                    layer.get("err_gdal")[0], layer.get("err_gdal")[1]
-                )
-                self.ws_v[f"M{self.idx_v}"].style = "Warning Text"
-            else:
-                pass
+            self.ws_sgbd[f"M{self.idx_s}"] = (
+                f"{metadataset.processing_error_type}: "
+                f"{metadataset.processing_error_type}"
+            )
+            self.ws_sgbd[f"M{self.idx_s}"].style = "Warning Text"
             # interruption of function
             return False
-        else:
-            pass
 
         # structure
-        self.ws_sgbd[f"D{self.idx_s}"] = layer.get("num_fields")
-        self.ws_sgbd[f"E{self.idx_s}"] = layer.get("num_obj")
-        self.ws_sgbd[f"F{self.idx_s}"] = layer.get("type_geom")
+        self.ws_sgbd[f"D{self.idx_s}"] = metadataset.attribute_fields_count
+        self.ws_sgbd[f"E{self.idx_s}"] = metadataset.features_count
+        self.ws_sgbd[f"F{self.idx_s}"] = metadataset.geometry_type
 
         # SRS
-        self.ws_sgbd[f"G{self.idx_s}"] = layer.get("srs")
-        self.ws_sgbd[f"H{self.idx_s}"] = layer.get("srs_type")
-        self.ws_sgbd[f"I{self.idx_s}"] = layer.get("epsg")
+        self.ws_sgbd[f"G{self.idx_s}"] = metadataset.crs_name
+        self.ws_sgbd[f"H{self.idx_s}"] = metadataset.crs_type
+        self.ws_sgbd[f"I{self.idx_s}"] = metadataset.crs_registry_code
 
         # Spatial extent
-        emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
-            layer.get("xmin"),
-            layer.get("xmax"),
-            layer.get("ymin"),
-            layer.get("ymax"),
-        )
         self.ws_sgbd[f"J{self.idx_s}"].style = "wrap"
-        self.ws_sgbd[f"J{self.idx_s}"] = emprise
+        self.ws_sgbd[f"J{self.idx_s}"] = ", ".join(
+            str(coord) for coord in metadataset.bbox
+        )
 
         # type
-        self.ws_sgbd[f"K{self.idx_s}"] = layer.get("format")
+        self.ws_sgbd[f"K{self.idx_s}"] = metadataset.format_gdal_long_name
 
         # Field informations
-        fields = layer.get("fields")
-        for chp in fields.keys():
+        for feature_attribute in metadataset.attribute_fields:
             # field type
-            if "Integer" in fields[chp][0]:
-                tipo = self.txt.get("entier")
-            elif fields[chp][0] == "Real":
-                tipo = self.txt.get("reel")
-            elif fields[chp][0] == "String":
-                tipo = self.txt.get("string")
-            elif fields[chp][0] == "Date":
-                tipo = self.txt.get("date")
+            if "Integer" in feature_attribute.data_type:
+                translated_feature_attribute_type = self.txt.get("entier")
+            elif feature_attribute.data_type == "Real":
+                translated_feature_attribute_type = self.txt.get("reel")
+            elif feature_attribute.data_type == "String":
+                translated_feature_attribute_type = self.txt.get("string")
+            elif feature_attribute.data_type == "Date":
+                translated_feature_attribute_type = self.txt.get("date")
             else:
-                tipo = "unknown"
-                logger.warning(chp + " unknown type")
+                translated_feature_attribute_type = feature_attribute.data_type
+                logger.warning(
+                    f"Layer: {metadataset.name} - {feature_attribute.name} has an "
+                    f"unstranslated type: {feature_attribute.data_type}"
+                )
 
             # concatenation of field informations
             try:
-                champs = "{} {} ({}{}{}{}{}) ; ".format(
+                champs = "{} {} ({}{}{}{}{}); ".format(
                     champs,
-                    chp,
-                    tipo,
+                    feature_attribute.name,
+                    translated_feature_attribute_type,
                     self.txt.get("longueur"),
-                    fields[chp][1],
+                    feature_attribute.length,
                     self.txt.get("precision"),
-                    fields[chp][2],
+                    feature_attribute.precision,
                 )
             except UnicodeDecodeError:
                 logger.warning(
-                    "Field name with special letters: {}".format(chp.decode("latin1"))
-                )
-                # decode the fucking field name
-                champs = (
-                    champs
-                    + chp.decode("latin1")
-                    + " ({}, Lg. = {}, Pr. = {}) ;".format(
-                        tipo, fields[chp][1], fields[chp][2]
-                    )
+                    f"Field name with special letters: {feature_attribute.name}"
                 )
                 # then continue
                 continue

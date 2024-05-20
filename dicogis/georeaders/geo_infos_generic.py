@@ -9,11 +9,10 @@
 import logging
 
 # 3rd party libraries
-try:
-    from osgeo import ogr, osr
-except ImportError:
-    import ogr
-    import osr
+from osgeo import ogr, osr
+
+# project
+from dicogis.models.feature_attributes import AttributeField
 
 # ############################################################################
 # ######### Globals ############
@@ -33,30 +32,36 @@ class GeoInfosGenericReader:
         """Instanciate class."""
         super().__init__()
 
-    def get_extent_as_tuple(self, layer_obj):
+    def get_extent_as_tuple(self, ogr_layer: ogr.Layer):
         """Get spatial extent (bounding box)."""
-        if hasattr(layer_obj, "GetExtent"):
+        if hasattr(ogr_layer, "GetExtent"):
             return (
-                round(layer_obj.GetExtent()[0], 2),
-                round(layer_obj.GetExtent()[1], 2),
-                round(layer_obj.GetExtent()[2], 2),
-                round(layer_obj.GetExtent()[3], 2),
+                round(ogr_layer.GetExtent()[0], 2),
+                round(ogr_layer.GetExtent()[1], 2),
+                round(ogr_layer.GetExtent()[2], 2),
+                round(ogr_layer.GetExtent()[3], 2),
             )
         else:
             return (None, None, None, None)
 
-    def get_fields_details(self, layer_def) -> dict:
+    def get_fields_details(
+        self, ogr_layer_definition: ogr.FeatureDefn
+    ) -> tuple[AttributeField]:
         """Get fields definition."""
-        dico_fields = {}
-        for i in range(layer_def.GetFieldCount()):
-            field = layer_def.GetFieldDefn(i)  # fields ordered
-            dico_fields[field.GetName()] = (
-                field.GetTypeName(),
-                field.GetWidth(),
-                field.GetPrecision(),
+        li_feature_attributes: list[AttributeField] = []
+        for i in range(ogr_layer_definition.GetFieldCount()):
+            field = ogr_layer_definition.GetFieldDefn(i)  # fields ordered
+            li_feature_attributes.append(
+                AttributeField(
+                    name=field.GetName(),
+                    data_type=field.GetTypeName(),
+                    length=field.GetWidth(),
+                    precision=field.GetPrecision(),
+                )
             )
+
         # end of function
-        return dico_fields
+        return tuple(li_feature_attributes)
 
     def get_geometry_type(self, layer: ogr.Layer) -> str:
         """Get geometry type human readable."""
@@ -68,7 +73,7 @@ class GeoInfosGenericReader:
             #     logger.error(geom_type)
 
             #     return geom_type
-
+            print("toto")
             feat = layer.GetNextFeature()
             if not hasattr(feat, "GetGeometryRef"):
                 logger.error("Unable to determine GeoMetryRef")
@@ -79,9 +84,8 @@ class GeoInfosGenericReader:
 
         except Exception as err:
             logger.error(
-                "Unable to retrieve geometry type for layer: {}. Trace: {}".format(
-                    layer.GetName(), err
-                )
+                f"Unable to retrieve geometry type for layer: {layer.GetName()}. "
+                f"Trace: {err}"
             )
             return None
 

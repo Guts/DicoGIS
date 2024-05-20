@@ -19,7 +19,6 @@ import logging
 from typing import Optional
 
 # 3rd party libraries
-import pgserviceparser
 from osgeo import gdal, ogr
 
 # package
@@ -27,6 +26,8 @@ from dicogis.constants import GDAL_POSTGIS_OPEN_OPTIONS
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
 from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
 from dicogis.georeaders.geoutils import Utils
+from dicogis.models.database_connection import DatabaseConnection
+from dicogis.models.dataset import MetaDatabaseTable
 
 # ############################################################################
 # ######### Globals ############
@@ -52,7 +53,7 @@ class ReadPostGIS:
     def __init__(
         self,
         txt: dict,
-        dico_dataset: dict,
+        # connection parameters
         host: Optional[str] = None,
         port: Optional[int] = None,
         db_name: Optional[str] = None,
@@ -66,7 +67,6 @@ class ReadPostGIS:
 
         Args:
             txt (dict): dictionary of translated texts
-            dico_dataset (dict): dictionary where to store extracted metadata.
             host (str, optional): postgres connection host. Defaults to "localhost".
             port (int, optional): postgres connection port. Defaults to 5432.
             db_name (str, optional): postgres database name. Defaults to "postgis".
@@ -80,47 +80,25 @@ class ReadPostGIS:
         """
 
         # Creating variables
-        self.dico_dataset = dico_dataset
+        self.conn: Optional[ogr.DataSource] = None
         self.txt = txt
         self.alert = 0
         self.views_included = views_included
 
         # connection infos as attributes
-        self.host = host
-        self.port = port
-        self.db_name = db_name
-        self.user = user
-        self.password = password
-        self.service = service
-
-        # build connection string
-        if isinstance(service, str) and service in pgserviceparser.service_names():
-            self.conn_string = f"PG:service={service}"
-        else:
-            self.conn_string = (
-                f"PG: host={host} port={port} dbname={db_name} "
-                f"user={user} password={password}"
-            )
-
-        # testing connection
-        self.conn = self.get_connection()
-        if not self.conn:
-            self.alert += 1
-            youtils.erratum(
-                ctner=dico_dataset,
-                mess_type=1,
-                ds_lyr=self.conn_string,
-                mess="err_connection_failed",
-            )
-            dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
-            return
-
-        # sgbd info
-        dico_dataset["sgbd_version"] = self.get_postgis_version()
-        dico_dataset["sgbd_schemas"] = self.get_schemas()
+        self.db_connection = DatabaseConnection(
+            database_name=db_name,
+            host=host,
+            port=port,
+            user_name=user,
+            user_password=password,
+            service_name=service,
+            is_esri_sde=False,
+            is_postgis=True,
+        )
 
     def get_connection(self) -> Optional[ogr.DataSource]:
-        """Returns OGR connection to the PostgreSQL database.
+        """Open a connection to the PostgreSQL database using GDAL.
 
         Returns:
             Optional[ogr.DataSource]: OGR connection
@@ -135,16 +113,18 @@ class ReadPostGIS:
 
         try:
             conn: gdal.Dataset = gdal.OpenEx(
-                str(self.conn_string),
+                self.db_connection.pg_connection_string,
                 gdal.OF_READONLY | gdal.OF_VECTOR | gdal.OF_VERBOSE_ERROR,
                 open_options=gdal_open_options,
             )
             logger.info(
                 f"Access granted: connecting people to {conn.GetLayerCount()} tables!"
             )
+            self.db_connection.state_msg = "OK"
+            self.conn = conn
             return conn
         except Exception as err:
-            self.dico_dataset["conn_state"] = err
+            self.db_connection.state_msg = f"KO: {err}"
             logger.error(f"Connection failed. Check settings. Trace: {err}")
             return None
 
@@ -159,9 +139,10 @@ class ReadPostGIS:
             pgis_version: ogr.Feature = sql.GetNextFeature()
             pgis_version = pgis_version.GetFieldAsString(0)
             logger.debug(f"PostGIS full version: {pgis_version}")
+            self.db_connection.state_msg = "OK"
             return pgis_version
         except Exception as err:
-            self.dico_dataset["conn_state"] = err
+            self.db_connection.state_msg = f"KO: {err}"
             logger.error(f"Trying to retrieve PostGIS versions failed. Trace: {err}")
             return None
 
@@ -178,8 +159,8 @@ class ReadPostGIS:
     def infos_dataset(
         self,
         layer: ogr.Layer,
-        dico_dataset: Optional[dict] = None,
-    ) -> None:
+        metadataset: Optional[MetaDatabaseTable] = None,
+    ) -> Optional[MetaDatabaseTable]:
         """Extract metadata from PostGIS layer and store it into the dictionary.
 
         Args:
@@ -187,38 +168,32 @@ class ReadPostGIS:
             dico_dataset (Optional[dict], optional): dictionary to fill with extracted \
                 data. Defaults to None.
         """
-        if dico_dataset is None:
-            dico_dataset = self.dico_dataset
+        if metadataset is None:
+            metadataset = MetaDatabaseTable(
+                format_gdal_long_name="PostGIS",
+                database_connection=self.db_connection,
+            )
 
         # check layer type
         if not isinstance(layer, ogr.Layer):
             self.alert = self.alert + 1
             youtils.erratum(
-                dico_dataset, layer, "Not a OGR layer (no PostGIS table/view)"
+                target_container=metadataset,
+                src_dataset_layer=layer,
+                err_msg="Not a OGR layer (no PostGIS table/view)",
             )
             logger.error(
                 f"OGR: {layer} is not a valid OGR layer (no PostGIS table/view)."
             )
             return None
-        else:
-            dico_dataset["format"] = "PostGIS"
 
-        # connection info
-        dico_dataset["pg_service"] = self.service
-        dico_dataset["sgbd_host"] = self.host
-        dico_dataset["sgbd_port"] = self.port
-        dico_dataset["db_name"] = self.db_name
-        dico_dataset["user"] = self.user
-        dico_dataset["password"] = self.password
-        dico_dataset["connection_string"] = self.conn_string
         # sgbd info
-        dico_dataset["sgbd_version"] = self.get_postgis_version()
-        dico_dataset["sgbd_schemas"] = self.get_schemas()
+        self.db_connection.sgbd_schemas = self.get_schemas()
+        self.db_connection.sgbd_version = self.get_postgis_version()
 
         # layer name
-        dico_dataset["name"] = layer.GetName()
-        dico_dataset["title"] = layer.GetName().capitalize()
-        logger.info("Analyzing layer: {}".format(dico_dataset.get("name")))
+        metadataset.name = layer.GetName()
+        logger.info(f"Analyzing layer: {metadataset.name}")
 
         # raising forbidden access
         try:
@@ -227,7 +202,9 @@ class ReadPostGIS:
             if "permission denied" in str(err):
                 mess = str(err).split("\n")[0]
                 self.alert = self.alert + 1
-                youtils.erratum(ctner=dico_dataset, ds_lyr=layer, mess=mess)
+                youtils.erratum(
+                    target_container=metadataset, src_dataset_layer=layer, err_msg=mess
+                )
                 logger.error(f"GDAL: permission denied {layer.GetName()} - {mess}")
                 return None
             else:
@@ -238,47 +215,53 @@ class ReadPostGIS:
             return None
 
         # schema name
-        try:
-            layer.GetName().split(".")[1]
-            dico_dataset["folder"] = layer.GetName().split(".")[0]
-        except IndexError:
-            dico_dataset["folder"] = "public"
+        if "." in metadataset.name:
+            metadataset.schema_name = metadataset.name.split(".")[0]
 
         # basic information
         # features
-        layer_feat_count = layer.GetFeatureCount()
-        dico_dataset["num_obj"] = layer_feat_count
-
-        if layer_feat_count == 0:
+        metadataset.features_count = layer.GetFeatureCount()
+        if metadataset.features_count == 0:
             """if layer doesn't have any object, return an error"""
             self.alert += 1
-            youtils.erratum(ctner=dico_dataset, ds_lyr=layer, mess="err_nobjet")
+            youtils.erratum(
+                target_container=metadataset,
+                src_dataset_layer=layer,
+                err_msg="err_nobjet",
+            )
             return None
 
         # fields
         layer_def = layer.GetLayerDefn()
-        dico_dataset["num_fields"] = layer_def.GetFieldCount()
-        dico_dataset["fields"] = georeader.get_fields_details(layer_def)
+        metadataset.attribute_fields_count = layer_def.GetFieldCount()
+        metadataset.attribute_fields = georeader.get_fields_details(
+            ogr_layer_definition=layer_def
+        )
 
         # geometry type
-        dico_dataset["type_geom"] = georeader.get_geometry_type(layer)
+        layer_geom_type = georeader.get_geometry_type(layer)
+        if layer_geom_type is None:
+            metadataset.processing_error_msg += f"{gdal_err.err_msg} -- "
+            metadataset.processing_error_type += f"{gdal_err.err_type} -- "
+            metadataset.processing_succeeded = False
+        metadataset.geometry_type = layer_geom_type
 
         # SRS
         srs_details = georeader.get_srs_details(layer, self.txt)
-        dico_dataset["srs"] = srs_details[0]
-        dico_dataset["epsg"] = srs_details[1]
-        dico_dataset["srs_type"] = srs_details[2]
+        metadataset.crs_name = srs_details[0]
+        metadataset.crs_registry_code = srs_details[1]
+        metadataset.crs_type = srs_details[2]
 
         # spatial extent
-        extent = georeader.get_extent_as_tuple(layer)
-        dico_dataset["xmin"] = extent[0]
-        dico_dataset["xmax"] = extent[1]
-        dico_dataset["ymin"] = extent[2]
-        dico_dataset["ymax"] = extent[3]
+        metadataset.bbox = georeader.get_extent_as_tuple(ogr_layer=layer)
 
         # warnings messages
         if self.alert:
-            dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
+            metadataset.processing_succeeded = False
+            metadataset.processing_error_msg = gdal_err.err_msg
+            metadataset.processing_error_type = gdal_err.err_type
 
         # clean exit
         del obj
+
+        return metadataset
