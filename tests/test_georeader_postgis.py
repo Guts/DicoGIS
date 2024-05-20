@@ -21,6 +21,7 @@ from osgeo import gdal
 
 # package
 from dicogis.georeaders.read_postgis import ReadPostGIS
+from dicogis.models.dataset import MetaDatabaseTable, MetaDataset
 
 # #############################################################################
 # ########## Classes ###############
@@ -104,9 +105,8 @@ class TestGeoReaderPostgis(unittest.TestCase):
     def test_postgis_reader(self):
         """Test PostGIS Georeader."""
         dico_dataset = {}
-        pg_reader = ReadPostGIS(
-            service="dicogis_test", txt=self.textos, dico_dataset=dico_dataset
-        )
+        pg_reader = ReadPostGIS(service="dicogis_test", txt=self.textos)
+        pg_reader.get_connection()
         self.assertIsInstance(pg_reader.get_postgis_version(), str)
         pg_schemas = pg_reader.get_schemas()
         self.assertIsInstance(pg_schemas, set, type(pg_schemas))
@@ -120,5 +120,6 @@ class TestGeoReaderPostgis(unittest.TestCase):
         # parse layers
         for idx_layer in range(pg_reader.conn.GetLayerCount()):
             layer = pg_reader.conn.GetLayerByIndex(idx_layer)
-            dico_dataset.clear()
-            pg_reader.infos_dataset(layer)
+            metadaset = pg_reader.infos_dataset(layer=layer)
+            self.assertIsInstance(metadaset, MetaDatabaseTable)
+            self.assertIsInstance(metadaset, MetaDataset)
