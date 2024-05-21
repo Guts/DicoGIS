@@ -134,7 +134,7 @@ class ReadEsriFileGdb:
             dico_layer["type_geom"] = georeader.get_geometry_type(layer)
 
             # SRS
-            srs_details = georeader.get_srs_details(layer, txt)
+            srs_details = georeader.get_srs_details(layer)
             dico_layer["srs"] = srs_details[0]
             dico_layer["epsg"] = srs_details[1]
             dico_layer["srs_type"] = srs_details[2]
