@@ -17,6 +17,7 @@ from pathlib import Path
 # package
 from dicogis.__about__ import __title_clean__ as package_name
 from dicogis.utils.journalizer import LogManager
+from dicogis.utils.slugger import sluggy
 
 # #############################################################################
 # ########## Classes ###############
@@ -48,7 +49,9 @@ class TestJournalizer(unittest.TestCase):
 
         # checks
         self.assertIsInstance(logmngr.initial_logger_config(), logging.Logger)
-        self.assertTrue(Path(f"tests/fixtures/Testing{package_name}.log").is_file())
+        self.assertTrue(
+            Path(f"tests/fixtures/{sluggy('Testing ' + package_name)}.log.1").is_file(),
+        )
 
 
 # #############################################################################
