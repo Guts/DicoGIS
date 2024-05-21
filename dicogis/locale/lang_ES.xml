@@ -109,6 +109,8 @@
     <subject>Tema</subject>
 <!-- SRS -->
     <srs_comp>Compuesta (2D +)</srs_comp>
+    <srs_derg>Derivada geográfica</srs_derg>
+    <srs_dyna>Dinámica</srs_dyna>
     <srs_geoc>Geocéntrica</srs_geoc>
     <srs_geog>Geográfica</srs_geog>
     <srs_loca>Local</srs_loca>
