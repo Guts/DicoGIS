@@ -35,7 +35,8 @@ class MetaDataset:
     parent_folder_name: str | None = None  # empty if storage_type == database
     # format
     format_gdal_long_name: str | None = None
-    files_dependencies: list[MetaDataset] | None = None
+    format_gdal_short_name: str | None = None
+    files_dependencies: list[Path] | None = None
     # storage
     storage_date_created: datetime | None = None
     storage_date_updated: datetime | None = None
