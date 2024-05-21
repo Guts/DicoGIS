@@ -653,11 +653,9 @@ class DicoGIS(ThemedTk):
         # parsing the layers
         for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
             layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
-            # reset recipient data
-            self.dico_dataset.clear()
-            sgbd_reader.infos_dataset(layer)
+            metadataset = sgbd_reader.infos_dataset(layer)
             logger.info(f"Table examined: {layer.GetName()}")
-            self.xl_workbook.store_md_sgdb(self.dico_dataset)
+            self.xl_workbook.store_md_sgdb(metadataset=metadataset)
             logger.debug("Layer metadata stored into workbook.")
             # increment the progress bar
             self.prog_layers["value"] = self.prog_layers["value"] + 1
@@ -805,8 +803,6 @@ class DicoGIS(ThemedTk):
             user=self.tab_sgbd.user.get(),
             password=self.tab_sgbd.pswd.get(),
             views_included=self.tab_sgbd.opt_pgvw.get(),
-            dico_dataset=self.dico_dataset,
-            translated_texts=self.blabla,
         )
 
         # check connection state

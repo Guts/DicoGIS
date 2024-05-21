@@ -316,9 +316,7 @@ def inventory(
         for pg_service in pg_services:
 
             # testing connection settings
-            sgbd_reader = ReadPostGIS(
-                translated_texts=localized_strings, service=pg_service
-            )
+            sgbd_reader = ReadPostGIS(service=pg_service)
             sgbd_reader.get_connection()
 
             # check connection state

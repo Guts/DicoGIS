@@ -22,26 +22,26 @@ from time import localtime, strftime
 import dxfgrabber
 from osgeo import gdal
 
+from dicogis.georeaders.base_georeader import GeoReaderBase
+
 # package
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
-from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
-from dicogis.georeaders.geoutils import GeoreadersUtils
 
 # ############################################################################
 # ######### Globals ############
 # ##############################
 
 gdal_err = GdalErrorHandler()
-georeader = GeoInfosGenericReader()
 logger = logging.getLogger(__name__)
-youtils = GeoreadersUtils()
+
 
 # ##############################################################################
 # ########## Classes #############
 # ################################
 
 
-class ReadDXF:
+class ReadDXF(GeoReaderBase):
+
     def __init__(self, source_path, dico_dataset, tipo, txt=""):
         """Uses OGR functions to extract basic informations about
         geographic vector file (handles shapefile or MapInfo tables)
@@ -56,7 +56,7 @@ class ReadDXF:
         errhandler = gdal_err.handler
         gdal.PushErrorHandler(errhandler)
         gdal.UseExceptions()
-        self.alert = 0
+        self.counter_alerts = 0
 
         # changing working directory to layer folder
         chdir(path.dirname(source_path))
@@ -68,16 +68,16 @@ class ReadDXF:
             src = gdal.OpenEx(source_path, 0)
         except Exception as err:
             logging.error(err)
-            youtils.erratum(dico_dataset, source_path, "err_corrupt")
-            self.alert = self.alert + 1
+            self.erratum(dico_dataset, source_path, "err_corrupt")
+            self.counter_alerts = self.counter_alerts + 1
             return None
 
         # raising incompatible files
         if not src:
             """if file is not compatible"""
-            self.alert += 1
+            self.counter_alerts += 1
             dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
-            youtils.erratum(dico_dataset, source_path, "err_nobjet")
+            self.erratum(dico_dataset, source_path, "err_nobjet")
             return None
         else:
             layer = src.GetLayer()  # get the layer
@@ -119,9 +119,11 @@ class ReadDXF:
         dico_dataset["layers_idx"] = li_layers_idx
 
         # dependencies and total size
-        dependencies = youtils.list_dependencies(main_file_path=source_path)
+        dependencies = self.list_dependencies(main_file_path=source_path)
         dico_dataset["dependencies"] = dependencies
-        dico_dataset["total_size"] = youtils.sizeof(source_path, dependencies)
+        dico_dataset["total_size"] = self.calc_size_full_dataset(
+            source_path, dependencies
+        )
         # global dates
         crea, up = path.getctime(source_path), path.getmtime(source_path)
         dico_dataset["date_crea"] = strftime("%Y/%m/%d", localtime(crea))
@@ -141,7 +143,6 @@ class ReadDXF:
             layer = src.GetLayerByIndex(layer_idx)
             # layer globals
             li_layers_names.append(layer.GetName())
-            dico_layer["title"] = georeader.get_title(layer)
             li_layers_idx.append(layer_idx)
             # features
             layer_feat_count = layer.GetFeatureCount()
@@ -149,26 +150,26 @@ class ReadDXF:
             if layer_feat_count == 0:
                 """if layer doesn't have any object, return an error"""
                 dico_layer["error"] = "err_nobjet"
-                self.alert = self.alert + 1
+                self.counter_alerts = self.counter_alerts + 1
             else:
                 pass
 
             # fields
             layer_def = layer.GetLayerDefn()
             dico_layer["num_fields"] = layer_def.GetFieldCount()
-            dico_layer["fields"] = georeader.get_fields_details(layer_def)
+            dico_layer["fields"] = self.get_fields_details(layer_def)
 
             # geometry type
-            dico_layer["type_geom"] = georeader.get_geometry_type(layer)
+            dico_layer["type_geom"] = self.get_geometry_type(layer)
 
             # SRS
-            srs_details = georeader.get_srs_details(layer)
+            srs_details = self.get_srs_details(layer)
             dico_layer["srs"] = srs_details[0]
             dico_layer["epsg"] = srs_details[1]
             dico_layer["srs_type"] = srs_details[2]
 
             # spatial extent
-            extent = georeader.get_extent_as_tuple(layer)
+            extent = self.get_extent_as_tuple(layer)
             dico_layer["xmin"] = extent[0]
             dico_layer["xmax"] = extent[1]
             dico_layer["ymin"] = extent[2]
@@ -190,7 +191,7 @@ class ReadDXF:
         dico_dataset["total_objs"] = total_objs
 
         # warnings messages
-        if self.alert:
+        if self.counter_alerts:
             dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
         else:
             pass
