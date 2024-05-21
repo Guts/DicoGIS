@@ -58,7 +58,9 @@ class TextsManager:
         # set params as attributes
         self.locale_folder = locale_folder
 
-    def load_texts(self, dico_texts: dict, language_code: str = "EN") -> dict:
+    def load_texts(
+        self, dico_texts: Optional[dict] = None, language_code: str = "EN"
+    ) -> dict:
         """Load texts according to the specified language code.
 
         Args:
@@ -74,18 +76,21 @@ class TextsManager:
         """
 
         # clearing the text dictionary
-        dico_texts.clear()
+        if isinstance(dico_texts, dict):
+            dico_texts.clear()
+        if dico_texts is None:
+            dico_texts = {}
 
         # handle en_EN form
         if "_" in language_code:
-            language_code = language_code.split("_")[0]
+            language_code = language_code.split("_")[1]
 
         # check file, if not exists log the error and return the default language
-        lang_file = self.locale_folder / f"lang_{language_code}.xml"
+        lang_file = self.locale_folder / f"lang_{language_code.upper()}.xml"
         if not lang_file.is_file():
             logger.error(
                 FileNotFoundError(
-                    _("Langue file not found: {}").format(lang_file.resolve())
+                    _("Language file not found: {}").format(lang_file.resolve())
                 )
             )
             return self.load_texts(dico_texts=dico_texts)
