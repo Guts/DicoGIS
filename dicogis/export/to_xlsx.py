@@ -1044,7 +1044,7 @@ class MetadataToXlsx(Workbook):
             # gdal info
             self.ws_sgbd[f"M{self.idx_s}"] = (
                 f"{metadataset.processing_error_type}: "
-                f"{metadataset.processing_error_type}"
+                f"{metadataset.processing_error_msg}"
             )
             self.ws_sgbd[f"M{self.idx_s}"].style = "Warning Text"
             # interruption of function
