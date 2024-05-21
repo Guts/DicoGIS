@@ -185,7 +185,7 @@ class ReadPostGIS:
             logger.error(
                 f"OGR: {layer} is not a valid OGR layer (no PostGIS table/view)."
             )
-            return None
+            return metadataset
 
         # sgbd info
         self.db_connection.sgbd_schemas = self.get_schemas()
@@ -206,13 +206,18 @@ class ReadPostGIS:
                     target_container=metadataset, src_dataset_layer=layer, err_msg=mess
                 )
                 logger.error(f"GDAL: permission denied {layer.GetName()} - {mess}")
-                return None
+                return metadataset
             else:
                 raise err
 
         except Exception as err:
+            self.alert = self.alert + 1
+            youtils.erratum(
+                target_container=metadataset, src_dataset_layer=layer, err_msg=err
+            )
             logger.error(f"Unable to count objects for {layer.GetName()}. Trace: {err}")
-            return None
+
+            return metadataset
 
         # schema name
         if "." in metadataset.name:
@@ -229,7 +234,7 @@ class ReadPostGIS:
                 src_dataset_layer=layer,
                 err_msg="err_nobjet",
             )
-            return None
+            return metadataset
 
         # fields
         layer_def = layer.GetLayerDefn()
