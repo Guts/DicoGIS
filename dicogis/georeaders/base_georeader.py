@@ -16,6 +16,7 @@ from typing import Literal, Optional, Union
 from osgeo import gdal, ogr, osr
 
 # project
+from dicogis.constants import GDAL_POSTGIS_OPEN_OPTIONS
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
 from dicogis.models.dataset import MetaDataset
 from dicogis.models.feature_attributes import AttributeField
@@ -144,16 +145,28 @@ class GeoReaderBase:
             pass
 
     def get_extent_as_tuple(
-        self, ogr_layer: ogr.Layer
+        self, dataset_or_layer: Union[ogr.Layer, gdal.Dataset]
     ) -> tuple[Optional[float], Optional[float], Optional[float], Optional[float]]:
         """Get spatial extent (bounding box)."""
-        if hasattr(ogr_layer, "GetExtent"):
+        if hasattr(dataset_or_layer, "GetExtent"):
             return (
-                round(ogr_layer.GetExtent()[0], 2),
-                round(ogr_layer.GetExtent()[1], 2),
-                round(ogr_layer.GetExtent()[2], 2),
-                round(ogr_layer.GetExtent()[3], 2),
+                round(dataset_or_layer.GetExtent()[0], 2),
+                round(dataset_or_layer.GetExtent()[1], 2),
+                round(dataset_or_layer.GetExtent()[2], 2),
+                round(dataset_or_layer.GetExtent()[3], 2),
             )
+        elif hasattr(dataset_or_layer, "GetGeoTransform"):
+            """
+            Returns the minimum and maximum coordinate values in the sequence expected
+            by, e.g., the `-te` switch in various GDAL utiltiies:
+            (xmin, ymin, xmax, ymax).
+            """
+            gt = dataset_or_layer.GetGeoTransform()
+            xsize = dataset_or_layer.RasterXSize  # Size in the x-direction
+            ysize = dataset_or_layer.RasterYSize  # Size in the y-direction
+            xr = abs(gt[1])  # Resolution in the x-direction
+            yr = abs(gt[-1])  # Resolution in the y-direction
+            return (gt[0], gt[3] - (ysize * yr), gt[0] + (xsize * xr), gt[3])
         else:
             return (None, None, None, None)
 
@@ -195,10 +208,12 @@ class GeoReaderBase:
             )
             return None
 
-    def get_srs_details(self, layer: ogr.Layer) -> tuple[str, str, str]:
+    def get_srs_details(
+        self, dataset_or_layer: Union[ogr.Layer, gdal.Dataset]
+    ) -> tuple[str, str, str]:
         """get the informations about geography and geometry"""
         # SRS
-        srs = layer.GetSpatialRef()
+        srs = dataset_or_layer.GetSpatialRef()
         if not srs:
             return (
                 self.localized_strings.get("srs_undefined", ""),
@@ -313,9 +328,31 @@ class GeoReaderBase:
         if isinstance(source_dataset, Path):
             source_dataset = str(source_dataset.resolve())
 
+        # customize GDAL flags
+        if self.dataset_type in (
+            "flat_cad",
+            "flat_database_esri",
+            "flat_vector",
+            "sgbd_postgis",
+        ):
+            gdal_flags = gdal.OF_READONLY | gdal.OF_VECTOR | gdal.OF_VERBOSE_ERROR
+        elif self.dataset_type in ("flat_raster",):
+            gdal_flags = gdal.OF_READONLY | gdal.OF_RASTER | gdal.OF_VERBOSE_ERROR
+
+        # customize GDAL open options
+        gdal_open_options = None
+        if self.dataset_type == "sgbd_postgis":
+            gdal_open_options = GDAL_POSTGIS_OPEN_OPTIONS
+            if self.views_included:
+                gdal_open_options.append("SKIP_VIEWS=NO")
+                logger.info("PostgreSQL views enabled.")
+            else:
+                gdal_open_options.append("SKIP_VIEWS=YES")
+                logger.info("PostgreSQL views disabled.")
+
+        # open it
         dataset: gdal.Dataset = gdal.OpenEx(
-            source_dataset,
-            gdal.OF_READONLY | gdal.OF_VECTOR | gdal.OF_VERBOSE_ERROR,
+            source_dataset, gdal_flags, open_options=gdal_open_options
         )
         logger.debug(f"Opening '{source_dataset}' with GDAL succeeded.")
         return dataset
