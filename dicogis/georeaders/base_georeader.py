@@ -276,19 +276,28 @@ class GeoReaderBase:
 
     def list_dependencies(
         self,
-        main_file_path: Union[Path, str],
+        main_dataset: Union[Path, str, gdal.Dataset],
     ) -> list[Path]:
         """List dependant files around a main file."""
-        if isinstance(main_file_path, str):
-            check_var_can_be_path(input_var=main_file_path, raise_error=True)
-            main_file_path = Path(main_file_path)
+        if isinstance(main_dataset, str):
+            check_var_can_be_path(input_var=main_dataset, raise_error=True)
+            main_dataset = Path(main_dataset)
 
         file_dependencies: list[Path] = []
-        for f in main_file_path.parent.iterdir():
-            if not f.is_file():
-                continue
-            if f.stem == main_file_path.stem and f != main_file_path:
-                file_dependencies.append(f)
+
+        if isinstance(main_dataset, Path):
+            for f in main_dataset.parent.iterdir():
+                if not f.is_file():
+                    continue
+                if f.stem == main_dataset.stem and f != main_dataset:
+                    file_dependencies.append(f)
+        elif isinstance(main_dataset, gdal.Dataset):
+            file_dependencies = [
+                Path(filepath) for filepath in main_dataset.GetFileList()
+            ]
+            # GetFileList includes the main dataset file in first position
+            if len(file_dependencies):
+                file_dependencies.pop(0)
 
         return file_dependencies
 

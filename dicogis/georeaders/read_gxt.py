@@ -88,7 +88,7 @@ class ReadGXT(GeoReaderBase):
         dico_layer["title"] = dico_layer.get("name")[:-4].replace("_", " ").capitalize()
 
         # dependencies and total size
-        dependencies = self.list_dependencies(main_file_path=layerpath)
+        dependencies = self.list_dependencies(main_dataset=layerpath)
         dico_layer["dependencies"] = dependencies
         dico_layer["total_size"] = self.calc_size_full_dataset(layerpath, dependencies)
 

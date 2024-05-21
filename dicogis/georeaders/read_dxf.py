@@ -119,7 +119,7 @@ class ReadDXF(GeoReaderBase):
         dico_dataset["layers_idx"] = li_layers_idx
 
         # dependencies and total size
-        dependencies = self.list_dependencies(main_file_path=source_path)
+        dependencies = self.list_dependencies(main_dataset=source_path)
         dico_dataset["dependencies"] = dependencies
         dico_dataset["total_size"] = self.calc_size_full_dataset(
             source_path, dependencies
