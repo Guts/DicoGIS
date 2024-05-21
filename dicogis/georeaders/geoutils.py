@@ -7,7 +7,8 @@
 
 # Standard library
 import logging
-from os import listdir, path, walk
+from os import path
+from pathlib import Path
 from typing import Optional, Union
 
 # 3rd party
@@ -15,6 +16,7 @@ from osgeo import ogr
 
 # project
 from dicogis.models.dataset import MetaDataset
+from dicogis.utils.check_path import check_var_can_be_path
 
 # ############################################################################
 # ######### Globals ############
@@ -27,56 +29,60 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class Utils:
+class GeoreadersUtils:
     """TO DOC"""
 
     def __init__(self, ds_type="flat"):
         """Instanciate Utils class."""
         self.ds_type = ds_type
-        super().__init__()
 
-    def list_dependencies(self, main_file_path, exclude=""):
+    def list_dependencies(
+        self,
+        main_file_path: Union[Path, str],
+    ) -> list[Path]:
         """List dependant files around a main file."""
-        if exclude == "auto":
-            exclude = path.splitext(path.abspath(main_file_path).lower())[1]
-        else:
-            pass
-        # dependencies
-        dependencies = [
-            f
-            for f in listdir(path.dirname(main_file_path))
-            if path.splitext(path.abspath(f))[0] == path.splitext(main_file_path)[0]
-            and not path.splitext(path.abspath(f).lower())[1] == exclude
-        ]
+        if isinstance(main_file_path, str):
+            check_var_can_be_path(input_var=main_file_path, raise_error=True)
+            main_file_path = Path(main_file_path)
 
-        return dependencies
+        file_dependencies: list[Path] = []
+        for f in main_file_path.parent.iterdir():
+            if not f.is_file():
+                continue
+            if f.stem == main_file_path.stem and f.suffix != main_file_path.suffix:
+                file_dependencies.append(f)
 
-    def sizeof(self, source_path: str, dependencies: list = None) -> int:
+        return file_dependencies
+
+    def sizeof(
+        self, source_path: Union[Path, str], dependencies: Optional[list[Path]] = None
+    ) -> int:
         """Calculate size of dataset and its dependencies.
 
         Args:
-            source_path (str): path to the dataset
-            dependencies (list, optional): list of dataset's dependencies. Defaults to None.
+            source_path (str): path to the dataset or a folder.
+            dependencies (list, optional): list of dataset's dependencies.
+                Defaults to None.
 
         Returns:
             int: size in octets
         """
-        if path.isfile(source_path):
+        if isinstance(source_path, str):
+            check_var_can_be_path(input_var=source_path, raise_error=True)
+            source_path = Path(source_path)
+
+        if dependencies is None:
+            dependencies = list
+
+        if source_path.is_file():
             dependencies.append(source_path)
-            total_size = sum([path.getsize(f) for f in dependencies])
-            dependencies.pop(-1)
-        elif path.isdir(source_path):
-            # sum files size
-            total_size = 0
-            for chemins in walk(path.realpath(source_path)):
-                for file in chemins[2]:
-                    chem_complete = path.join(chemins[0], file)
-                    if path.isfile(chem_complete):
-                        total_size = total_size + path.getsize(chem_complete)
-                    else:
-                        pass
+            total_size = sum(f.stat().st_size for f in dependencies)
+        elif source_path.is_dir():
+            total_size = sum(
+                f.stat().st_size for f in source_path.rglob("*") if f.is_file()
+            )
         else:
-            return None
+            total_size = 0
 
         return total_size
 
@@ -99,9 +105,10 @@ class Utils:
         """
         if self.ds_type == "flat":
             # local variables
-            target_container["name"] = path.basename(src_path)
-            target_container["folder"] = path.dirname(src_path)
-            target_container["error"] = err_msg
+            target_container.name = path.basename(src_path)
+            target_container.parent_folder_name = path.dirname(src_path)
+            target_container.processing_error_type = err_type
+            target_container.processing_error_msg = err_msg
             # method end
             return target_container
         elif self.ds_type == "postgis":
