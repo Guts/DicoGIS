@@ -7,12 +7,15 @@
 
 # Standard library
 import logging
+from locale import getlocale
+from typing import Optional
 
 # 3rd party libraries
 from osgeo import ogr, osr
 
 # project
 from dicogis.models.feature_attributes import AttributeField
+from dicogis.utils.texts import TextsManager
 
 # ############################################################################
 # ######### Globals ############
@@ -28,7 +31,24 @@ logger = logging.getLogger(__name__)
 class GeoInfosGenericReader:
     """Reader for geographic dataset stored as flat files."""
 
-    def get_extent_as_tuple(self, ogr_layer: ogr.Layer):
+    def __init__(
+        self,
+        localized_strings: Optional[dict] = None,
+    ) -> None:
+        """Initialization.
+
+        Args:
+            localized_strings (Optional[dict]): translated strings
+        """
+        self.localized_strings = localized_strings
+        if self.localized_strings is None:
+            self.localized_strings = TextsManager().load_texts(
+                dico_texts=localized_strings, language_code=getlocale()[0]
+            )
+
+    def get_extent_as_tuple(
+        self, ogr_layer: ogr.Layer
+    ) -> tuple[Optional[float], Optional[float], Optional[float], Optional[float]]:
         """Get spatial extent (bounding box)."""
         if hasattr(ogr_layer, "GetExtent"):
             return (
@@ -43,7 +63,7 @@ class GeoInfosGenericReader:
     def get_fields_details(
         self, ogr_layer_definition: ogr.FeatureDefn
     ) -> tuple[AttributeField]:
-        """Get fields definition."""
+        """Get feature attributes from layer definition."""
         li_feature_attributes: list[AttributeField] = []
         for i in range(ogr_layer_definition.GetFieldCount()):
             field = ogr_layer_definition.GetFieldDefn(i)  # fields ordered
@@ -78,15 +98,15 @@ class GeoInfosGenericReader:
             )
             return None
 
-    def get_srs_details(self, layer: ogr.Layer, txt: dict):
+    def get_srs_details(self, layer: ogr.Layer) -> tuple[str, str, str]:
         """get the informations about geography and geometry"""
         # SRS
         srs = layer.GetSpatialRef()
         if not srs:
             return (
-                txt.get("srs_undefined", ""),
-                txt.get("srs_no_epsg", ""),
-                txt.get("srs_nr", ""),
+                self.localized_strings.get("srs_undefined", ""),
+                self.localized_strings.get("srs_no_epsg", ""),
+                self.localized_strings.get("srs_nr", ""),
             )
         else:
             pass
@@ -96,12 +116,17 @@ class GeoInfosGenericReader:
 
         # srs type
         srsmetod = [
-            (srs.IsCompound(), txt.get("srs_comp")),
-            (srs.IsGeocentric(), txt.get("srs_geoc")),
-            (srs.IsGeographic(), txt.get("srs_geog")),
-            (srs.IsLocal(), txt.get("srs_loca")),
-            (srs.IsProjected(), txt.get("srs_proj")),
-            (srs.IsVertical(), txt.get("srs_vert")),
+            (srs.IsDynamic(), self.localized_strings.get("srs_dyna", "Dynamic")),
+            (srs.IsCompound(), self.localized_strings.get("srs_comp", "Compound")),
+            (
+                srs.IsDerivedGeographic(),
+                self.localized_strings.get("srs_derg", "Derived geographic"),
+            ),
+            (srs.IsGeocentric(), self.localized_strings.get("srs_geoc", "Geocentric")),
+            (srs.IsGeographic(), self.localized_strings.get("srs_geog", "Geographic")),
+            (srs.IsLocal(), self.localized_strings.get("srs_loca", "Local")),
+            (srs.IsProjected(), self.localized_strings.get("srs_proj", "Projected")),
+            (srs.IsVertical(), self.localized_strings.get("srs_vert", "Vertical")),
         ]
         # searching for a match with one of srs types
         for srsmet in srsmetod:
@@ -113,7 +138,7 @@ class GeoInfosGenericReader:
         try:
             srs_type = typsrs
         except UnboundLocalError:
-            typsrs = txt.get("srs_nr")
+            typsrs = self.localized_strings.get("srs_nr")
             srs_type = typsrs
 
         # handling exceptions in srs names'encoding
