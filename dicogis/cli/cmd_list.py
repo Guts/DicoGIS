@@ -16,13 +16,14 @@ import typer
 from rich import print
 
 # project
-from dicogis.__about__ import __title__, __version__
+from dicogis.__about__ import __package_name__, __title__, __version__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.to_xlsx import MetadataToXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import get_gdal_version, get_proj_version
+from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
@@ -139,7 +140,14 @@ def inventory(
     """
     if verbose:
         state["verbose"] = True
-        logger.setLevel = logging.DEBUG
+
+    logmngr = LogManager(
+        console_level=logging.DEBUG if verbose else logging.WARNING,
+        file_level=logging.DEBUG if verbose else logging.INFO,
+        label=f"{__package_name__}-cli",
+    )
+    # add headers
+    logmngr.headers()
 
     logger.debug(
         f"{APP_NAME} parameters: {input_folder=} - {formats=} - {pg_services=} - "

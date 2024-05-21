@@ -188,7 +188,7 @@ virtenv*/
 virtualenv/
 
 # logs, config and thumbnails files
-*.log
+*.log*
 *Thumbs.db
 options.ini
 arcpy.pth
