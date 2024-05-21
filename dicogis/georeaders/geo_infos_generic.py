@@ -26,11 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class GeoInfosGenericReader:
-    """TO DOC."""
-
-    def __init__(self):
-        """Instanciate class."""
-        super().__init__()
+    """Reader for geographic dataset stored as flat files."""
 
     def get_extent_as_tuple(self, ogr_layer: ogr.Layer):
         """Get spatial extent (bounding box)."""
@@ -64,16 +60,9 @@ class GeoInfosGenericReader:
         return tuple(li_feature_attributes)
 
     def get_geometry_type(self, layer: ogr.Layer) -> str:
-        """Get geometry type human readable."""
+        """Get geometry type in a human readable format."""
         try:
             logger.debug(ogr.GeometryTypeToName(layer.GetGeomType()))
-            # if layer.GetGeomType():
-            #     geom_type = layer.GetGeomType()
-            #     layer.ResetReading()
-            #     logger.error(geom_type)
-
-            #     return geom_type
-            print("toto")
             feat = layer.GetNextFeature()
             if not hasattr(feat, "GetGeometryRef"):
                 logger.error("Unable to determine GeoMetryRef")
@@ -89,21 +78,7 @@ class GeoInfosGenericReader:
             )
             return None
 
-        # try:
-        #     print("\n\nTRY")
-        #     first_obj = layer.GetNextFeature()
-        #     layer_geom = first_obj.GetGeometryRef()
-        #     print("GOT IT")
-        # except AttributeError as err:
-        #     logger.error("{}: {}".format(layer.GetName(), e))
-        #     first_obj = layer.GetNextFeature()
-        #     if hasattr(first_obj, "GetGeometryRef"):
-        #         layer_geom = first_obj.GetGeometryRef()
-        #     else:
-        #         logger.error("LAYER: {} has not Attribute GetGeometryRef".format(layer.GetName()))
-        #         return None
-
-    def get_srs_details(self, layer, txt: dict):
+    def get_srs_details(self, layer: ogr.Layer, txt: dict):
         """get the informations about geography and geometry"""
         # SRS
         srs = layer.GetSpatialRef()
@@ -169,7 +144,7 @@ class GeoInfosGenericReader:
 
         return (srs_name, srs_epsg, srs_type)
 
-    def get_title(self, layer) -> str:
+    def get_title(self, layer: ogr.Layer) -> str:
         """Get layer title preventing encoding errors."""
         try:
             layer_title = layer.GetName()
