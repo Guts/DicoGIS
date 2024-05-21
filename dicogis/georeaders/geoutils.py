@@ -49,7 +49,7 @@ class GeoreadersUtils:
         for f in main_file_path.parent.iterdir():
             if not f.is_file():
                 continue
-            if f.stem == main_file_path.stem and f.suffix != main_file_path.suffix:
+            if f.stem == main_file_path.stem and f != main_file_path:
                 file_dependencies.append(f)
 
         return file_dependencies
@@ -72,11 +72,12 @@ class GeoreadersUtils:
             source_path = Path(source_path)
 
         if dependencies is None:
-            dependencies = list
+            dependencies = []
 
         if source_path.is_file():
-            dependencies.append(source_path)
-            total_size = sum(f.stat().st_size for f in dependencies)
+            total_size = (
+                sum(f.stat().st_size for f in dependencies) + source_path.stat().st_size
+            )
         elif source_path.is_dir():
             total_size = sum(
                 f.stat().st_size for f in source_path.rglob("*") if f.is_file()
