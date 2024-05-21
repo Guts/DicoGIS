@@ -175,14 +175,14 @@ def inventory(
     # i18n
     localized_strings: dict = {}
     if language is None:
-        language = getlocale()[1]
+        language = getlocale()[0]
     TextsManager().load_texts(dico_texts=localized_strings, language_code=language)
 
     # output format
     if output_format == "excel":
         # creating the Excel workbook
         xl_workbook = MetadataToXlsx(
-            texts=localized_strings,
+            translated_texts=localized_strings,
             opt_size_prettify=opt_prettify_size,
         )
     else:
@@ -316,7 +316,9 @@ def inventory(
         for pg_service in pg_services:
 
             # testing connection settings
-            sgbd_reader = ReadPostGIS(txt=localized_strings, service=pg_service)
+            sgbd_reader = ReadPostGIS(
+                translated_texts=localized_strings, service=pg_service
+            )
             sgbd_reader.get_connection()
 
             # check connection state
