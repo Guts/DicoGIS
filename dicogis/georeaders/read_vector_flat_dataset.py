@@ -111,7 +111,7 @@ class ReadVectorFlatDataset(GeoReaderBase):
 
         # dependencies and total size
         metadataset.files_dependencies = self.list_dependencies(
-            main_file_path=source_path
+            main_dataset=source_path
         )
         metadataset.storage_size = self.calc_size_full_dataset(
             source_path=source_path, dependencies=metadataset.files_dependencies

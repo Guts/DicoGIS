@@ -1,19 +1,9 @@
 #! python3  # noqa: E265
 
-
-# ----------------------------------------------------------------------------
-# Name:         Infos Rasters
-# Purpose:      Use GDAL library to extract informations about
-#                   geographic rasters data. It permits a more friendly use as
-#                   submodule.
-#
-# Author:       Julien Moura (https://github.com/Guts/)
-# ----------------------------------------------------------------------------
-
-
 # ############################################################################
 # ######### Libraries #############
 # #################################
+
 # Standard library
 import logging
 from os import path
@@ -46,16 +36,7 @@ class ReadRasters(GeoReaderBase):
     def __init__(
         self,
     ):
-        """Use GDAL functions to extract basic informations about
-        geographic raster file (handles ECW, GeoTIFF, JPEG2000)
-        and store into dictionaries.
-
-        layerpath = path to the geographic file
-        dico_raster = dictionary for global informations
-        dico_bands = dictionary for the bands informations
-        tipo = format
-        text = dictionary of text in the selected language
-        """
+        """Initialization."""
         super().__init__(dataset_type="flat_raster")
 
     def infos_dataset(
