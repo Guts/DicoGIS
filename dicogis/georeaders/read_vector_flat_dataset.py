@@ -157,7 +157,7 @@ class ReadVectorFlatDataset(GeoReaderBase):
         metadataset.crs_type = srs_details[2]
 
         # spatial extent
-        metadataset.bbox = self.get_extent_as_tuple(ogr_layer=layer)
+        metadataset.bbox = self.get_extent_as_tuple(dataset_or_layer=layer)
 
         # warnings messages
         if self.counter_alerts:

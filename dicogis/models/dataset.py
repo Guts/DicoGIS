@@ -10,10 +10,6 @@
 # #################################
 
 # Standard library
-from __future__ import (
-    annotations,  # used to manage type annotation for method that return Self in Python < 3.11
-)
-
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -81,11 +77,13 @@ class MetaRasterDataset(MetaDataset):
     """Raster dataset abstraction model."""
 
     bands_count: int | None = None
+    data_type: str | None = None
     columns_count: int | None = None
     rows_count: int | None = None
     pixel_height: int | None = None
     pixel_width: int | None = None
     origin_x: float | None = None
     origin_y: float | None = None
+    orientation: float | None = None
     color_space: str | None = None
     compression_rate: int | None = None
