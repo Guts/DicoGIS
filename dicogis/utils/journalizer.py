@@ -12,22 +12,25 @@
 # ########## Libraries #############
 # ##################################
 
-import getpass
 
 # Standard library
+
 import gettext
 import logging
+from getpass import getuser
 from logging.handlers import RotatingFileHandler
 from os import environ
 from pathlib import Path
 from platform import architecture
 from platform import platform as opersys
 from socket import gethostname
+from typing import Optional
 from urllib.request import getproxies
 
 # modules
 from dicogis.__about__ import __title_clean__ as package_name
 from dicogis.__about__ import __version__
+from dicogis.utils.slugger import sluggy
 
 # #############################################################################
 # ########## Globals ###############
@@ -47,8 +50,8 @@ class LogManager:
 
     LOG_FORMAT = logging.Formatter(
         "%(asctime)s || %(levelname)s "
-        "|| %(module)s - %(lineno)d ||"
-        " %(funcName)s || %(message)s"
+        "|| %(module)s || %(lineno)d "
+        "|| %(funcName)s || %(message)s"
     )
 
     def __init__(
@@ -56,24 +59,24 @@ class LogManager:
         console_level: int = logging.WARNING,
         file_level: int = logging.INFO,
         label: str = package_name,
-        folder: Path = Path("./_logs"),
+        folder: Optional[Path] = None,
     ):
         """Instanciation method."""
         # store parameters as attributes
         self.console_level = console_level
         self.file_level = file_level
-        self.label = "".join(e for e in label if e.isalnum())
+        self.label = sluggy(label)
+        self.folder = folder or Path("./_logs")
 
         # ensure folder is created
         try:
-            folder.mkdir(exist_ok=True, parents=True)
+            self.folder.mkdir(exist_ok=True, parents=True)
         except PermissionError as err:
             msg_err = _(
                 "Impossible to create the logs folder. Does the user '{}' ({}) have "
                 "write permissions on: {}. Trace: {}"
-            ).format(environ.get("userdomain"), getpass.getuser(), folder, err)
+            ).format(environ.get("userdomain"), getuser(), self.folder, err)
             logger.error(msg_err)
-        self.folder = folder
 
         # create logger
         self.initial_logger_config()
@@ -96,13 +99,20 @@ class LogManager:
         log_console_handler.setLevel(self.console_level)
 
         # create file handler
+        logs_filepath = self.folder.joinpath(f"{self.label}.log")
         log_file_handler = RotatingFileHandler(
-            filename=self.folder / f"{self.label}.log",
-            mode="a",
-            maxBytes=3000000,
             backupCount=10,
+            delay=10,
             encoding="UTF-8",
+            filename=logs_filepath,
+            maxBytes=3000000,
+            mode="a",
         )
+
+        # force new file by execution
+        if logs_filepath.is_file():
+            log_file_handler.doRollover()
+
         log_file_handler.setLevel(self.file_level)
 
         # apply format
@@ -121,13 +131,6 @@ class LogManager:
         logger.info(_("Operating System: {}").format(opersys()))
         logger.info(_("Architecture: {}").format(architecture()[0]))
         logger.info(_("Computer: {}").format(gethostname()))
-        logger.info(_("Launched by: {}").format(getpass.getuser()))
+        logger.info(_("Launched by: {}").format(getuser()))
         logger.info(_("OS Domain: {}").format(environ.get("userdomain")))
         logger.info(_("Network proxies detected: {}").format(len(getproxies())))
-
-
-# #############################################################################
-# ##### Main #######################
-# ##################################
-if __name__ == "__main__":
-    pass
