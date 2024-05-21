@@ -253,7 +253,7 @@ class ReadPostGIS:
         metadataset.geometry_type = layer_geom_type
 
         # SRS
-        srs_details = georeader.get_srs_details(layer, self.txt)
+        srs_details = georeader.get_srs_details(layer)
         metadataset.crs_name = srs_details[0]
         metadataset.crs_registry_code = srs_details[1]
         metadataset.crs_type = srs_details[2]

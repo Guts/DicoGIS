@@ -38,7 +38,16 @@ logger = logging.getLogger(__name__)
 
 
 class ReadRasters:
-    def __init__(self, rasterpath, dico_raster, dico_bands, tipo, text=""):
+    """Reader for geographic dataset stored as flat raster files."""
+
+    def __init__(
+        self,
+        rasterpath: str,
+        dico_raster: dict,
+        dico_bands: dict,
+        tipo: str,
+        text: str = "",
+    ):
         """Use GDAL functions to extract basic informations about
         geographic raster file (handles ECW, GeoTIFF, JPEG2000)
         and store into dictionaries.
@@ -93,7 +102,7 @@ class ReadRasters:
         # warnings messages
         dico_raster["err_gdal"] = gdalerr.err_type, gdalerr.err_msg
 
-    def infos_basics(self, rasterpath, dico_raster, txt):
+    def infos_basics(self, rasterpath, dico_raster):
         """Get the global informations about the raster."""
         # files and folder
         dico_raster["name"] = path.basename(rasterpath)

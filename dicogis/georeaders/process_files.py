@@ -180,14 +180,10 @@ class ProcessingFiles:
             if progress_callback_cmd is not None:
                 progress_callback_cmd()
 
-            # reset recipient data
-            dico_layer = {}
             # getting the informations
             try:
-                geofile.georeader().infos_dataset(
+                metadataset = geofile.georeader().infos_dataset(
                     source_path=path.abspath(geofile.file_path),
-                    dico_dataset=dico_layer,
-                    txt=self.localized_strings,
                 )
                 logger.debug(f"Reading {geofile} succeeded.")
                 geofile.processed = True
@@ -205,7 +201,7 @@ class ProcessingFiles:
                 if progress_value_message is not None:
                     progress_value_message = f"Storing: {geofile.file_path}"
                 # writing to the Excel file
-                self.output_workbook.store_md_vector(layer=dico_layer)
+                self.output_workbook.store_md_vector(metadataset=metadataset)
                 geofile.exported = True
                 logger.debug(f"Metadata stored into workbook for {geofile.file_path}")
             except Exception as err:

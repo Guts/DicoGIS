@@ -50,11 +50,7 @@ logger = logging.getLogger(__name__)
 
 
 class Utilities:
-    """DicoGIS specific utilities"""
-
-    def __init__(self):
-        """Initialization."""
-        super().__init__()
+    """DicoGIS specific utilities."""
 
     @classmethod
     def resolve_internal_path(self, internal_path: Path) -> Path:
@@ -192,12 +188,3 @@ class Utilities:
                 child.configure(state=DISABLED)
         # end of function
         return
-
-
-# ############################################################################
-# #### Stand alone program ########
-# #################################
-
-if __name__ == "__main__":
-    """standalone execution"""
-    utils = Utilities()
