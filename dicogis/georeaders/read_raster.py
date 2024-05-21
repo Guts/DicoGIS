@@ -16,15 +16,18 @@
 # #################################
 # Standard library
 import logging
-from os import chdir, path
+from os import path
+from pathlib import Path
 from time import localtime, strftime
+from typing import Optional, Union
 
 # 3rd party libraries
 from osgeo import gdal, osr
-from osgeo.gdalconst import GA_ReadOnly
 
 # package
-from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
+from dicogis.georeaders.base_georeader import GeoReaderBase
+from dicogis.models.dataset import MetaRasterDataset
+from dicogis.utils.check_path import check_var_can_be_path
 
 # ############################################################################
 # ######### Globals ############
@@ -37,16 +40,11 @@ logger = logging.getLogger(__name__)
 # #################################
 
 
-class ReadRasters:
+class ReadRasters(GeoReaderBase):
     """Reader for geographic dataset stored as flat raster files."""
 
     def __init__(
         self,
-        rasterpath: str,
-        dico_raster: dict,
-        dico_bands: dict,
-        tipo: str,
-        text: str = "",
     ):
         """Use GDAL functions to extract basic informations about
         geographic raster file (handles ECW, GeoTIFF, JPEG2000)
@@ -58,40 +56,65 @@ class ReadRasters:
         tipo = format
         text = dictionary of text in the selected language
         """
-        # gdal specific
-        gdal.AllRegister()
-        # changing working directory to layer folder
-        chdir(path.dirname(rasterpath))
+        super().__init__(dataset_type="flat_raster")
 
-        # handling specific exceptions
-        gdalerr = GdalErrorHandler()
-        errhandler = gdalerr.handler
-        gdal.PushErrorHandler(errhandler)
-        self.alert = 0
-        # gdal.SetConfigOption(str("GTIFF_IGNORE_READ_ERRORS"), str("TRUE"))
-        gdal.UseExceptions()
+    def infos_dataset(
+        self,
+        source_path: Union[Path, str],
+        metadataset: Optional[MetaRasterDataset] = None,
+        tipo: Optional[str] = None,
+    ):
+        if isinstance(source_path, str):
+            check_var_can_be_path(input_var=source_path, raise_error=True)
+            source_path = Path(source_path).resolve()
 
-        # opening file
+        if metadataset is None:
+            metadataset = MetaRasterDataset(
+                path=source_path,
+                name=source_path.stem,
+                parent_folder_name=source_path.parent.name,
+            )
+
+        # opening dataset
         try:
-            self.rast = gdal.Open(rasterpath, GA_ReadOnly)
+            dataset = self.open_dataset_with_gdal(source_dataset=source_path)
         except Exception as err:
-            logger.error(err)
-            self.alert += 1
-            self.erratum(dico_raster, rasterpath, "err_incomp")
-            return
+            logger.error(f"An error occurred opening '{source_path}'. Trace: {err}")
+            self.counter_alerts = self.counter_alerts + 1
+            metadataset.format_gdal_long_name = tipo
+            self.erratum(
+                target_container=metadataset,
+                src_path=source_path,
+                err_type="err_corrupt",
+            )
+            metadataset.processing_succeeded = False
+            metadataset.processing_error_type = self.gdal_err.err_type
+            metadataset.processing_error_msg = self.gdal_err.err_msg
+            return metadataset
 
-        # check if raster is GDAL friendly
-        if self.rast is None:
-            self.alert += 1
-            self.erratum(dico_raster, rasterpath, "err_incomp")
-            return
-        else:
-            pass
+        metadataset.format_gdal_long_name = dataset.GetDriver().LongName
+        metadataset.format_gdal_short_name = dataset.GetDriver().ShortName
+
+        # raising incompatible files
+        if not dataset:
+            """if file is not compatible"""
+            self.counter_alerts += 1
+            metadataset.processing_succeeded = False
+            metadataset.processing_error_type = self.gdal_err.err_type
+            metadataset.processing_error_msg = self.gdal_err.err_msg
+            self.erratum(
+                target_container=metadataset,
+                src_path=source_path,
+                err_type="err_nobjet",
+            )
+            return metadataset
+
         # basic informations
-        dico_raster["format"] = tipo
-        self.infos_basics(rasterpath, dico_raster, text)
+        self.infos_basics(source_path, dico_raster, self.localized_strings)
+
         # geometry information
-        self.infos_geom(dico_raster, text)
+        self.infos_geom(dico_raster, self.localized_strings)
+
         # bands information
         for band in range(1, self.rast.RasterCount):
             self.infos_bands(band, dico_bands)
@@ -100,14 +123,10 @@ class ReadRasters:
         # safe close (see: http://pcjericks.github.io/py-gdalogr-cookbook/)
         del self.rast
         # warnings messages
-        dico_raster["err_gdal"] = gdalerr.err_type, gdalerr.err_msg
+        dico_raster["err_gdal"] = self.gdalerr.err_type, self.gdalerr.err_msg
 
     def infos_basics(self, rasterpath, dico_raster):
         """Get the global informations about the raster."""
-        # files and folder
-        dico_raster["name"] = path.basename(rasterpath)
-        dico_raster["folder"] = path.dirname(rasterpath)
-        dico_raster["title"] = dico_raster["name"][:-4].replace("_", " ").capitalize()
 
         # dependencies
         dependencies = [
@@ -297,24 +316,6 @@ class ReadRasters:
 
         # end of function
         return dico_bands
-
-    def sizeof(self, os_size):
-        """return size in different units depending on size
-        see http://stackoverflow.com/a/1094933"""
-        for size_cat in ["octets", "Ko", "Mo", "Go"]:
-            if os_size < 1024.0:
-                return f"{os_size:3.1f} {size_cat}"
-            os_size /= 1024.0
-        return "{:3.1f} {}".format(os_size, " To")
-
-    def erratum(self, dico_raster, rasterpath, mess):
-        """errors handling"""
-        # storing minimal informations to give clues to solve later
-        dico_raster["name"] = path.basename(rasterpath)
-        dico_raster["folder"] = path.dirname(rasterpath)
-        dico_raster["error"] = mess
-        # End of function
-        return dico_raster
 
 
 # ############################################################################
