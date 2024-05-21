@@ -88,12 +88,14 @@ class Utils:
         err_type: int = 1,
         err_msg: str = "",
     ):
-        """Handle errors message and store it into __dict__.
+        """Store error messages in container object.
 
-        mess_type allowed values:
-          1: impossible to read dataset (corruption, format...)
-          2: dataset no contains any feature object
-          3: no SRS
+        Args:
+            target_container (Union[dict, MetaDataset]): object where to store error message and type
+            src_path (Optional[str], optional): source path. Defaults to None.
+            src_dataset_layer (Optional[ogr.Layer], optional): source dataset layer. Defaults to None.
+            err_type (int, optional): _description_. Defaults to 1.
+            err_msg (str, optional): _description_. Defaults to "".
         """
         if self.ds_type == "flat":
             # local variables
