@@ -23,9 +23,7 @@ from osgeo import gdal, ogr
 
 # package
 from dicogis.constants import GDAL_POSTGIS_OPEN_OPTIONS
-from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
-from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
-from dicogis.georeaders.geoutils import GeoreadersUtils
+from dicogis.georeaders.base_georeader import GeoReaderBase
 from dicogis.models.database_connection import DatabaseConnection
 from dicogis.models.dataset import MetaDatabaseTable
 
@@ -34,12 +32,7 @@ from dicogis.models.dataset import MetaDatabaseTable
 # ##############################
 
 # handling GDAL/OGR specific exceptions
-gdal.AllRegister()
-ogr.UseExceptions()
-gdal.UseExceptions()
-gdal_err = GdalErrorHandler()
-georeader = GeoInfosGenericReader()
-youtils = GeoreadersUtils(ds_type="postgis")
+
 logger = logging.getLogger(__name__)
 
 # ############################################################################
@@ -47,12 +40,11 @@ logger = logging.getLogger(__name__)
 # #################################
 
 
-class ReadPostGIS:
+class ReadPostGIS(GeoReaderBase):
     """Read PostGIS database."""
 
     def __init__(
         self,
-        translated_texts: dict[str],
         # connection parameters
         host: Optional[str] = None,
         port: Optional[int] = None,
@@ -81,8 +73,7 @@ class ReadPostGIS:
 
         # Creating variables
         self.conn: Optional[ogr.DataSource] = None
-        self.txt = translated_texts
-        self.alert = 0
+        self.counter_alerts = 0
         self.views_included = views_included
 
         # connection infos as attributes
@@ -96,6 +87,8 @@ class ReadPostGIS:
             is_esri_sde=False,
             is_postgis=True,
         )
+
+        super().__init__(dataset_type="sgbd_postgis")
 
     def get_connection(self) -> Optional[ogr.DataSource]:
         """Open a connection to the PostgreSQL database using GDAL.
@@ -177,8 +170,8 @@ class ReadPostGIS:
 
         # check layer type
         if not isinstance(layer, ogr.Layer):
-            self.alert = self.alert + 1
-            youtils.erratum(
+            self.counter_alerts = self.counter_alerts + 1
+            self.erratum(
                 target_container=metadataset,
                 src_dataset_layer=layer,
                 err_msg="Not a OGR layer (no PostGIS table/view)",
@@ -202,8 +195,8 @@ class ReadPostGIS:
         except RuntimeError as err:
             if "permission denied" in str(err):
                 mess = str(err).split("\n")[0]
-                self.alert = self.alert + 1
-                youtils.erratum(
+                self.counter_alerts = self.counter_alerts + 1
+                self.erratum(
                     target_container=metadataset, src_dataset_layer=layer, err_msg=mess
                 )
                 logger.error(f"GDAL: permission denied {layer.GetName()} - {mess}")
@@ -212,8 +205,8 @@ class ReadPostGIS:
                 raise err
 
         except Exception as err:
-            self.alert = self.alert + 1
-            youtils.erratum(
+            self.counter_alerts = self.counter_alerts + 1
+            self.erratum(
                 target_container=metadataset, src_dataset_layer=layer, err_msg=err
             )
             logger.error(f"Unable to count objects for {layer.GetName()}. Trace: {err}")
@@ -229,8 +222,8 @@ class ReadPostGIS:
         metadataset.features_count = layer.GetFeatureCount()
         if metadataset.features_count == 0:
             """if layer doesn't have any object, return an error"""
-            self.alert += 1
-            youtils.erratum(
+            self.counter_alerts += 1
+            self.erratum(
                 target_container=metadataset,
                 src_dataset_layer=layer,
                 err_msg="err_nobjet",
@@ -240,32 +233,32 @@ class ReadPostGIS:
         # fields
         layer_def = layer.GetLayerDefn()
         metadataset.attribute_fields_count = layer_def.GetFieldCount()
-        metadataset.attribute_fields = georeader.get_fields_details(
+        metadataset.attribute_fields = self.get_fields_details(
             ogr_layer_definition=layer_def
         )
 
         # geometry type
-        layer_geom_type = georeader.get_geometry_type(layer)
+        layer_geom_type = self.get_geometry_type(layer)
         if layer_geom_type is None:
-            metadataset.processing_error_msg += f"{gdal_err.err_msg} -- "
-            metadataset.processing_error_type += f"{gdal_err.err_type} -- "
+            metadataset.processing_error_msg += f"{self.gdal_err.err_msg} -- "
+            metadataset.processing_error_type += f"{self.gdal_err.err_type} -- "
             metadataset.processing_succeeded = False
         metadataset.geometry_type = layer_geom_type
 
         # SRS
-        srs_details = georeader.get_srs_details(layer)
+        srs_details = self.get_srs_details(layer)
         metadataset.crs_name = srs_details[0]
         metadataset.crs_registry_code = srs_details[1]
         metadataset.crs_type = srs_details[2]
 
         # spatial extent
-        metadataset.bbox = georeader.get_extent_as_tuple(ogr_layer=layer)
+        metadataset.bbox = self.get_extent_as_tuple(ogr_layer=layer)
 
         # warnings messages
-        if self.alert:
+        if self.counter_alerts:
             metadataset.processing_succeeded = False
-            metadataset.processing_error_msg = gdal_err.err_msg
-            metadataset.processing_error_type = gdal_err.err_type
+            metadataset.processing_error_msg = self.gdal_err.err_msg
+            metadataset.processing_error_type = self.gdal_err.err_type
 
         # clean exit
         del obj

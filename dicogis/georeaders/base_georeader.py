@@ -8,13 +8,18 @@
 # Standard library
 import logging
 from locale import getlocale
-from typing import Optional
+from os import path
+from pathlib import Path
+from typing import Literal, Optional, Union
 
 # 3rd party libraries
-from osgeo import ogr, osr
+from osgeo import gdal, ogr, osr
 
 # project
+from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
+from dicogis.models.dataset import MetaDataset
 from dicogis.models.feature_attributes import AttributeField
+from dicogis.utils.check_path import check_var_can_be_path
 from dicogis.utils.texts import TextsManager
 
 # ############################################################################
@@ -28,23 +33,115 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class GeoInfosGenericReader:
-    """Reader for geographic dataset stored as flat files."""
+class GeoReaderBase:
+    """Base class for geographic dataset readers."""
 
     def __init__(
         self,
+        dataset_type: Literal[
+            "flat_cad",
+            "flat_database_esri",
+            "flat_raster",
+            "flat_vector",
+            "sgbd_postgis",
+        ],
         localized_strings: Optional[dict] = None,
     ) -> None:
         """Initialization.
 
         Args:
-            localized_strings (Optional[dict]): translated strings
+            dataset_type: type of dataset to read
+            localized_strings: translated strings
         """
+        # store args as attributes
+        self.dataset_type = dataset_type
+
+        # i18n
         self.localized_strings = localized_strings
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts(
                 dico_texts=localized_strings, language_code=getlocale()[0]
             )
+        # attributes to be used later
+        self.counter_alerts: int = 0
+
+        # GDAL customization and error handling
+        gdal.AllRegister()
+        self.gdal_err = GdalErrorHandler()
+        errhandler = self.gdal_err.handler
+        gdal.PushErrorHandler(errhandler)
+        gdal.UseExceptions()
+        ogr.UseExceptions()
+
+    def calc_size_full_dataset(
+        self, source_path: Union[Path, str], dependencies: Optional[list[Path]] = None
+    ) -> int:
+        """Calculate size of dataset and its dependencies.
+
+        Args:
+            source_path (str): path to the dataset or a folder.
+            dependencies (list, optional): list of dataset's dependencies.
+                Defaults to None.
+
+        Returns:
+            int: size in octets
+        """
+        if isinstance(source_path, str):
+            check_var_can_be_path(input_var=source_path, raise_error=True)
+            source_path = Path(source_path)
+
+        if dependencies is None:
+            dependencies = []
+
+        if source_path.is_file():
+            total_size = (
+                sum(f.stat().st_size for f in dependencies) + source_path.stat().st_size
+            )
+        elif source_path.is_dir():
+            total_size = sum(
+                f.stat().st_size for f in source_path.rglob("*") if f.is_file()
+            )
+        else:
+            total_size = 0
+
+        return total_size
+
+    def erratum(
+        self,
+        target_container: Union[dict, MetaDataset],
+        src_path: Optional[str] = None,
+        src_dataset_layer: Optional[ogr.Layer] = None,
+        err_type: int = 1,
+        err_msg: str = "",
+    ):
+        """Store error messages in container object.
+
+        Args:
+            target_container (Union[dict, MetaDataset]): object where to store error message and type
+            src_path (Optional[str], optional): source path. Defaults to None.
+            src_dataset_layer (Optional[ogr.Layer], optional): source dataset layer. Defaults to None.
+            err_type (int, optional): _description_. Defaults to 1.
+            err_msg (str, optional): _description_. Defaults to "".
+        """
+        if self.dataset_type == "flat":
+            # local variables
+            target_container.name = path.basename(src_path)
+            target_container.parent_folder_name = path.dirname(src_path)
+            target_container.processing_error_type = err_type
+            target_container.processing_error_msg = err_msg
+            # method end
+            return target_container
+        elif self.dataset_type == "postgis":
+            if isinstance(src_dataset_layer, ogr.Layer):
+                target_container.name = src_dataset_layer.GetName()
+            else:
+                target_container.name = "No OGR layer."
+            target_container.processing_error_type = err_type
+            target_container.processing_error_msg = err_msg
+            # method end
+            return target_container
+        else:
+            pass
 
     def get_extent_as_tuple(
         self, ogr_layer: ogr.Layer
@@ -176,3 +273,40 @@ class GeoInfosGenericReader:
         except UnicodeDecodeError:
             layer_title = layer.GetName().decode("latin1", errors="replace")
         return layer_title
+
+    def list_dependencies(
+        self,
+        main_file_path: Union[Path, str],
+    ) -> list[Path]:
+        """List dependant files around a main file."""
+        if isinstance(main_file_path, str):
+            check_var_can_be_path(input_var=main_file_path, raise_error=True)
+            main_file_path = Path(main_file_path)
+
+        file_dependencies: list[Path] = []
+        for f in main_file_path.parent.iterdir():
+            if not f.is_file():
+                continue
+            if f.stem == main_file_path.stem and f != main_file_path:
+                file_dependencies.append(f)
+
+        return file_dependencies
+
+    def open_dataset_with_gdal(self, source_dataset: Union[Path, str]) -> gdal.Dataset:
+        """Open dataset with GDAL (OGR).
+
+        Args:
+            source_dataset (Union[Path, str]): path or connection string to the dataset
+
+        Returns:
+            gdal.Dataset: opened dataset
+        """
+        if isinstance(source_dataset, Path):
+            source_dataset = str(source_dataset.resolve())
+
+        dataset: gdal.Dataset = gdal.OpenEx(
+            source_dataset,
+            gdal.OF_READONLY | gdal.OF_VECTOR | gdal.OF_VERBOSE_ERROR,
+        )
+        logger.debug(f"Opening '{source_dataset}' with GDAL succeeded.")
+        return dataset

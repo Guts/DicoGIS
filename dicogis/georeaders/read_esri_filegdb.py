@@ -19,20 +19,15 @@ from os import path, walk
 from time import localtime, strftime
 
 # 3rd party libraries
-from osgeo import gdal, ogr
+from osgeo import ogr
 
 # package
-from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
-from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
-from dicogis.georeaders.geoutils import GeoreadersUtils
+from dicogis.georeaders.base_georeader import GeoReaderBase
 
 # ############################################################################
 # ######### Globals ############
 # ##############################
 
-gdal_err = GdalErrorHandler()
-georeader = GeoInfosGenericReader()
-youtils = GeoreadersUtils(ds_type="flat")
 logger = logging.getLogger(__name__)
 
 # ############################################################################
@@ -40,16 +35,14 @@ logger = logging.getLogger(__name__)
 # ##############################
 
 
-class ReadEsriFileGdb:
+class ReadEsriFileGdb(GeoReaderBase):
+    """Reader for geographic dataset stored as flat Esri FileGeoDataBase vector."""
+
     def __init__(self):
         """Class constructor."""
-        # handling ogr specific exceptions
-        errhandler = gdal_err.handler
-        gdal.PushErrorHandler(errhandler)
-        gdal.UseExceptions()
-        self.alert = 0
+        super().__init__(dataset_type="flat_database_esri")
 
-    def infos_dataset(self, source_path, dico_dataset, txt={}, tipo=None):
+    def infos_dataset(self, source_path, dico_dataset, txt: dict = {}, tipo=None):
         """Use OGR functions to extract basic informations.
 
         source_path = path to the File Geodatabase Esri
@@ -70,8 +63,8 @@ class ReadEsriFileGdb:
                 pass
         except Exception as err:
             logger.error(err)
-            youtils.erratum(dico_dataset, source_path, "err_corrupt")
-            self.alert = self.alert + 1
+            self.erratum(dico_dataset, source_path, "err_corrupt")
+            self.counter_alerts = self.counter_alerts + 1
             return None
 
         # GDB name and parent folder
@@ -90,7 +83,7 @@ class ReadEsriFileGdb:
         dico_dataset["layers_idx"] = li_layers_idx
 
         # cumulated size
-        dico_dataset["total_size"] = youtils.sizeof(source_path)
+        dico_dataset["total_size"] = self.calc_size_full_dataset(source_path)
 
         # global dates
         crea, up = path.getctime(source_path), path.getmtime(source_path)
@@ -112,7 +105,7 @@ class ReadEsriFileGdb:
             layer = src.GetLayerByIndex(layer_idx)
             # layer globals
             li_layers_names.append(layer.GetName())
-            dico_layer["title"] = georeader.get_title(layer)
+            dico_layer["title"] = self.get_title(layer)
             li_layers_idx.append(layer_idx)
 
             # features
@@ -121,26 +114,26 @@ class ReadEsriFileGdb:
             if layer_feat_count == 0:
                 """if layer doesn't have any object, return an error"""
                 dico_layer["error"] = "err_nobjet"
-                self.alert = self.alert + 1
+                self.counter_alerts = self.counter_alerts + 1
             else:
                 pass
 
             # fields
             layer_def = layer.GetLayerDefn()
             dico_layer["num_fields"] = layer_def.GetFieldCount()
-            dico_layer["fields"] = georeader.get_fields_details(layer_def)
+            dico_layer["fields"] = self.get_fields_details(layer_def)
 
             # geometry type
-            dico_layer["type_geom"] = georeader.get_geometry_type(layer)
+            dico_layer["type_geom"] = self.get_geometry_type(layer)
 
             # SRS
-            srs_details = georeader.get_srs_details(layer)
+            srs_details = self.get_srs_details(layer)
             dico_layer["srs"] = srs_details[0]
             dico_layer["epsg"] = srs_details[1]
             dico_layer["srs_type"] = srs_details[2]
 
             # spatial extent
-            extent = georeader.get_extent_as_tuple(layer)
+            extent = self.get_extent_as_tuple(layer)
             dico_layer["xmin"] = extent[0]
             dico_layer["xmax"] = extent[1]
             dico_layer["ymin"] = extent[2]
@@ -161,8 +154,8 @@ class ReadEsriFileGdb:
         dico_dataset["total_objs"] = total_objs
 
         # warnings messages
-        if self.alert:
-            dico_dataset["err_gdal"] = gdal_err.err_type, gdal_err.err_msg
+        if self.counter_alerts:
+            dico_dataset["err_gdal"] = self.gdal_err.err_type, self.gdal_err.err_msg
         else:
             pass
         # clean exit
