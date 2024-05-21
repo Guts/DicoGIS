@@ -109,6 +109,8 @@
     <subject>Subject</subject>
 <!-- SRS -->
     <srs_comp>Compound</srs_comp>
+    <srs_derg>Derived geographic</srs_derg>
+    <srs_dyna>Dynamic</srs_dyna>
     <srs_geoc>Geocentric</srs_geoc>
     <srs_geog>Geographic</srs_geog>
     <srs_loca>Local</srs_loca>
