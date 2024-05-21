@@ -25,7 +25,7 @@ from osgeo import gdal, ogr
 from dicogis.constants import GDAL_POSTGIS_OPEN_OPTIONS
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
 from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
-from dicogis.georeaders.geoutils import Utils
+from dicogis.georeaders.geoutils import GeoreadersUtils
 from dicogis.models.database_connection import DatabaseConnection
 from dicogis.models.dataset import MetaDatabaseTable
 
@@ -39,7 +39,7 @@ ogr.UseExceptions()
 gdal.UseExceptions()
 gdal_err = GdalErrorHandler()
 georeader = GeoInfosGenericReader()
-youtils = Utils(ds_type="postgis")
+youtils = GeoreadersUtils(ds_type="postgis")
 logger = logging.getLogger(__name__)
 
 # ############################################################################
@@ -52,7 +52,7 @@ class ReadPostGIS:
 
     def __init__(
         self,
-        txt: dict,
+        translated_texts: dict[str],
         # connection parameters
         host: Optional[str] = None,
         port: Optional[int] = None,
@@ -81,7 +81,7 @@ class ReadPostGIS:
 
         # Creating variables
         self.conn: Optional[ogr.DataSource] = None
-        self.txt = txt
+        self.txt = translated_texts
         self.alert = 0
         self.views_included = views_included
 
@@ -170,7 +170,8 @@ class ReadPostGIS:
         """
         if metadataset is None:
             metadataset = MetaDatabaseTable(
-                format_gdal_long_name="PostGIS",
+                format_gdal_long_name=self.conn.GetDriver().LongName,
+                format_gdal_short_name=self.conn.GetDriver().ShortName,
                 database_connection=self.db_connection,
             )
 

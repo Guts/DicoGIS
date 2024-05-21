@@ -518,7 +518,7 @@ class DicoGIS(ThemedTk):
 
         # creating the Excel workbook
         self.xl_workbook = MetadataToXlsx(
-            texts=self.blabla,
+            translated_texts=self.blabla,
             opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
         )
         self.lbl_status.configure(foreground="DodgerBlue")
@@ -806,7 +806,7 @@ class DicoGIS(ThemedTk):
             password=self.tab_sgbd.pswd.get(),
             views_included=self.tab_sgbd.opt_pgvw.get(),
             dico_dataset=self.dico_dataset,
-            txt=self.blabla,
+            translated_texts=self.blabla,
         )
 
         # check connection state

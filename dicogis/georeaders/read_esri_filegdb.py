@@ -24,7 +24,7 @@ from osgeo import gdal, ogr
 # package
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
 from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
-from dicogis.georeaders.geoutils import Utils
+from dicogis.georeaders.geoutils import GeoreadersUtils
 
 # ############################################################################
 # ######### Globals ############
@@ -32,7 +32,7 @@ from dicogis.georeaders.geoutils import Utils
 
 gdal_err = GdalErrorHandler()
 georeader = GeoInfosGenericReader()
-youtils = Utils(ds_type="flat")
+youtils = GeoreadersUtils(ds_type="flat")
 logger = logging.getLogger(__name__)
 
 # ############################################################################
