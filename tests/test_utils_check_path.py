@@ -19,7 +19,7 @@ from os import chmod, getenv
 from pathlib import Path
 
 # project
-from qgis_deployment_toolbelt.utils.check_path import (
+from dicogis.utils.check_path import (
     check_folder_is_empty,
     check_path,
     check_path_exists,
