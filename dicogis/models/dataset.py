@@ -43,15 +43,13 @@ class MetaDataset:
     storage_size: int | None = None
     storage_type: str | None = None
     # data
-    attribute_fields_count: int | None = None
-    attribute_fields: tuple[AttributeField] | None = None
     bbox: tuple[float] | None = None
     envelope: tuple[float] | None = None
     crs_name: str | None = None
     crs_registry: str = "EPSG"
     crs_registry_code: str | None = None
     crs_type: str | None = None
-    features_count: int = 0
+
     geometry_type: str | None = None
     # properties
     is_3d: bool = False
@@ -62,8 +60,32 @@ class MetaDataset:
 
 
 @dataclass
-class MetaDatabaseTable(MetaDataset):
+class MetaVectorDataset(MetaDataset):
+    """Vector dataset abstraction model."""
+
+    attribute_fields_count: int | None = None
+    attribute_fields: tuple[AttributeField] | None = None
+    features_count: int = 0
+
+
+@dataclass
+class MetaDatabaseTable(MetaVectorDataset):
     """Database table abstraction model."""
 
     database_connection: DatabaseConnection | None = None
     schema_name: str = "public"
+
+
+@dataclass
+class MetaRasterDataset(MetaDataset):
+    """Raster dataset abstraction model."""
+
+    bands_count: int | None = None
+    columns_count: int | None = None
+    rows_count: int | None = None
+    pixel_height: int | None = None
+    pixel_width: int | None = None
+    origin_x: float | None = None
+    origin_y: float | None = None
+    color_space: str | None = None
+    compression_rate: int | None = None
