@@ -68,7 +68,7 @@ class TestInfosFlatVector(unittest.TestCase):
             self.assertIsInstance(dico_layer.get("date_crea"), str)
             self.assertIsInstance(dico_layer.get("dependencies"), list)
             self.assertIsInstance(dico_layer.get("epsg"), (str, type(None)))
-            self.assertIsInstance(dico_layer.get("fields"), dict)
+            self.assertIsInstance(dico_layer.get("fields"), tuple)
             self.assertIsInstance(dico_layer.get("folder"), str)
             self.assertIsInstance(dico_layer.get("name"), str)
             self.assertIsInstance(dico_layer.get("num_fields"), int)
