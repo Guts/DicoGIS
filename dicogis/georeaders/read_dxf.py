@@ -25,7 +25,7 @@ from osgeo import gdal
 # package
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
 from dicogis.georeaders.geo_infos_generic import GeoInfosGenericReader
-from dicogis.georeaders.geoutils import Utils
+from dicogis.georeaders.geoutils import GeoreadersUtils
 
 # ############################################################################
 # ######### Globals ############
@@ -34,7 +34,7 @@ from dicogis.georeaders.geoutils import Utils
 gdal_err = GdalErrorHandler()
 georeader = GeoInfosGenericReader()
 logger = logging.getLogger(__name__)
-youtils = Utils()
+youtils = GeoreadersUtils()
 
 # ##############################################################################
 # ########## Classes #############
@@ -119,7 +119,7 @@ class ReadDXF:
         dico_dataset["layers_idx"] = li_layers_idx
 
         # dependencies and total size
-        dependencies = youtils.list_dependencies(source_path, "auto")
+        dependencies = youtils.list_dependencies(main_file_path=source_path)
         dico_dataset["dependencies"] = dependencies
         dico_dataset["total_size"] = youtils.sizeof(source_path, dependencies)
         # global dates
