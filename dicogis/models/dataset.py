@@ -65,6 +65,14 @@ class MetaVectorDataset(MetaDataset):
 
 
 @dataclass
+class MetaDatabaseFlat(MetaDataset):
+    """Database table abstraction model."""
+
+    layers: list[MetaVectorDataset] | None = None
+    layers_count: int = 0
+
+
+@dataclass
 class MetaDatabaseTable(MetaVectorDataset):
     """Database table abstraction model."""
 

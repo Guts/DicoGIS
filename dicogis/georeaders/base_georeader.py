@@ -41,6 +41,7 @@ class GeoReaderBase:
         self,
         dataset_type: Literal[
             "flat_cad",
+            "flat_database",
             "flat_database_esri",
             "flat_raster",
             "flat_vector",
@@ -329,15 +330,16 @@ class GeoReaderBase:
             source_dataset = str(source_dataset.resolve())
 
         # customize GDAL flags
+        gdal_flags = gdal.OF_READONLY | gdal.OF_VERBOSE_ERROR
         if self.dataset_type in (
             "flat_cad",
             "flat_database_esri",
             "flat_vector",
             "sgbd_postgis",
         ):
-            gdal_flags = gdal.OF_READONLY | gdal.OF_VECTOR | gdal.OF_VERBOSE_ERROR
+            gdal_flags += gdal.OF_VECTOR
         elif self.dataset_type in ("flat_raster",):
-            gdal_flags = gdal.OF_READONLY | gdal.OF_RASTER | gdal.OF_VERBOSE_ERROR
+            gdal_flags += gdal.OF_RASTER
 
         # customize GDAL open options
         gdal_open_options = []

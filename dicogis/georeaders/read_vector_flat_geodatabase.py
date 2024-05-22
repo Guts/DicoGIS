@@ -1,0 +1,71 @@
+#! python3  # noqa: E265
+
+
+# ----------------------------------------------------------------------------
+# Name:         InfosSpatialite
+# Purpose:      Use OGR to read into Spatialite databases (ie SQLite with
+#               geospatial extension)
+#
+# Author:       Julien Moura (https://github.com/Guts/)
+# ----------------------------------------------------------------------------
+
+
+# ############################################################################
+# ######### Libraries #############
+# #################################
+
+# Standard library
+import logging
+
+# package
+from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
+
+# #############################################################################
+# ########## Globals ###############
+# ##################################
+
+logger = logging.getLogger(__name__)
+
+# ############################################################################
+# ######## Classes #############
+# ###############################
+
+
+class ReadFlatDatabase(ReadVectorFlatDataset):
+    """Reader for geographic dataset stored as flat database files or folders.
+
+    Typically ESRI FileGDB, Geopackage, Spatialite...
+    """
+
+    def __init__(self):
+        """Class constructor."""
+        super().__init__(dataset_type="flat_database")
+
+
+# ###########################################################################
+# #### Stand alone program ########
+# #################################
+if __name__ == "__main__":
+    """Standalone execution."""
+    from pprint import pprint
+
+    # SpatiaLite
+    georeader = ReadVectorFlatDataset(dataset_type="flat_database")
+    metadataset = georeader.infos_dataset(
+        source_path="/home/jmo/Documents/GIS Database/QGIS Training Data/QGIS-Training-Data-release_3.28/exercise_data/qgis-server-tutorial-data/naturalearth.sqlite",
+    )
+    pprint(metadataset)
+
+    # Geopackage
+    georeader = ReadVectorFlatDataset(dataset_type="flat_database")
+    metadataset = georeader.infos_dataset(
+        source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gpkg"
+    )
+    pprint(metadataset)
+
+    # Esri FileGDB
+    georeader = ReadVectorFlatDataset(dataset_type="flat_database")
+    metadataset = georeader.infos_dataset(
+        source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gdb"
+    )
+    pprint(metadataset)
