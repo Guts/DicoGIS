@@ -39,7 +39,7 @@ class TestInfosFlatVector(unittest.TestCase):
         for fixture_filepath in fixtures_shp:
             # run
             metadaset = georeader_vector.infos_dataset(
-                fixture_filepath.resolve(), tipo="ESRI Shapefiles"
+                fixture_filepath.resolve(), fallback_format="ESRI Shapefiles"
             )
 
             # check types
