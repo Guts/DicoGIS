@@ -18,11 +18,10 @@ from typing import Callable, Optional
 # package
 from dicogis.export.to_xlsx import MetadataToXlsx
 from dicogis.georeaders.read_dxf import ReadDXF
-from dicogis.georeaders.read_esri_filegdb import ReadEsriFileGdb
 from dicogis.georeaders.read_gxt import ReadGXT
 from dicogis.georeaders.read_raster import ReadRasters
-from dicogis.georeaders.read_spatialite import ReadSpatialite
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
+from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -60,8 +59,9 @@ class ProcessingFiles:
     MATRIX_FORMAT_GEOREADER = {
         "dxf": ReadDXF,
         "esri_shapefile": ReadVectorFlatDataset,
-        "file_geodatabase_esri": ReadEsriFileGdb,
-        "file_geodatabase_spatialite": ReadSpatialite,
+        "file_geodatabase_esri": ReadFlatDatabase,
+        "file_geodatabase_spatialite": ReadFlatDatabase,
+        "geopackage": ReadFlatDatabase,
         "geotiff": ReadRasters,
         "gxt": ReadGXT,
         "geojson": ReadVectorFlatDataset,
@@ -78,8 +78,9 @@ class ProcessingFiles:
         # input lists of files to process
         li_cdao: Optional[Iterable],
         li_dxf: Optional[Iterable],
-        li_filegdb_esri: Optional[Iterable],
-        li_filegdb_spatialite: Optional[Iterable],
+        li_flat_geodatabase_esri_filegdb: Optional[Iterable],
+        li_flat_geodatabase_geopackage: Optional[Iterable],
+        li_flat_geodatabase_spatialite: Optional[Iterable],
         li_geojson: Optional[Iterable],
         li_gxt: Optional[Iterable],
         li_gml: Optional[Iterable],
@@ -106,8 +107,9 @@ class ProcessingFiles:
 
         # List of files
         self.li_dxf = li_dxf
-        self.li_filegdb_esri = li_filegdb_esri
-        self.li_filegdb_spatialite = li_filegdb_spatialite
+        self.li_flat_geodatabase_esri_filegdb = li_flat_geodatabase_esri_filegdb
+        self.li_flat_geodatabase_geopackage = li_flat_geodatabase_geopackage
+        self.li_flat_geodatabase_spatialite = li_flat_geodatabase_spatialite
         self.li_geojson = li_geojson
         self.li_gxt = li_gxt
         self.li_gml = li_gml
@@ -298,20 +300,21 @@ class ProcessingFiles:
         else:
             pass
 
-        if self.opt_analyze_esri_filegdb and len(self.li_filegdb_esri):
-            total_files += len(self.li_filegdb_esri)
+        if self.opt_analyze_esri_filegdb and len(self.li_flat_geodatabase_esri_filegdb):
+            total_files += len(self.li_flat_geodatabase_esri_filegdb)
             self.output_workbook.set_worksheets(has_filedb=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_filegdb_esri, file_format="file_geodatabase_esri"
+                list_of_files=self.li_flat_geodatabase_esri_filegdb,
+                file_format="file_geodatabase_esri",
             )
         else:
             pass
 
-        if self.opt_analyze_spatialite and len(self.li_filegdb_spatialite):
-            total_files += len(self.li_filegdb_spatialite)
+        if self.opt_analyze_spatialite and len(self.li_flat_geodatabase_spatialite):
+            total_files += len(self.li_flat_geodatabase_spatialite)
             self.output_workbook.set_worksheets(has_filedb=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_filegdb_spatialite,
+                list_of_files=self.li_flat_geodatabase_spatialite,
                 file_format="file_geodatabase_spatialite",
             )
         else:

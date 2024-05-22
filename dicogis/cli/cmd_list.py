@@ -254,8 +254,8 @@ def inventory(
             li_cdao=li_cdao,
             # list by formats
             li_dxf=li_dxf,
-            li_filegdb_esri=li_file_database_esri,
-            li_filegdb_spatialite=li_file_database_spatialite,
+            li_flat_geodatabase_esri_filegdb=li_file_database_esri,
+            li_flat_geodatabase_spatialite=li_file_database_spatialite,
             li_gml=li_gml,
             li_gxt=li_gxt,
             li_kml=li_kml,
