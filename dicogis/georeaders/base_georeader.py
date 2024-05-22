@@ -340,9 +340,9 @@ class GeoReaderBase:
             gdal_flags = gdal.OF_READONLY | gdal.OF_RASTER | gdal.OF_VERBOSE_ERROR
 
         # customize GDAL open options
-        gdal_open_options = None
+        gdal_open_options = []
         if self.dataset_type == "sgbd_postgis":
-            gdal_open_options = GDAL_POSTGIS_OPEN_OPTIONS
+            gdal_open_options.extend(GDAL_POSTGIS_OPEN_OPTIONS)
             if self.views_included:
                 gdal_open_options.append("SKIP_VIEWS=NO")
                 logger.info("PostgreSQL views enabled.")
@@ -352,7 +352,10 @@ class GeoReaderBase:
 
         # open it
         dataset: gdal.Dataset = gdal.OpenEx(
-            source_dataset, gdal_flags, open_options=gdal_open_options
+            source_dataset, gdal_flags, gdal_open_options
         )
-        logger.debug(f"Opening '{source_dataset}' with GDAL succeeded.")
+        logger.debug(
+            f"Opening '{source_dataset}' with GDAL "
+            f"{dataset.GetDriver().LongName} succeeded."
+        )
         return dataset
