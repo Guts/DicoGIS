@@ -1,13 +1,5 @@
 #! python3  # noqa: E265
 
-# ----------------------------------------------------------------------------
-# Name:         InfosOGR_PG
-# Purpose:      Use GDAL/OGR library to extract informations about
-#                   geographic data contained in a PostGIS database.
-#                   It permits a more friendly use as submodule.
-#
-# Author:       Julien Moura (https://github.com/Guts/)
-# ----------------------------------------------------------------------------
 
 # ############################################################################
 # ######### Libraries #############

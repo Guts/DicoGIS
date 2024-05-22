@@ -567,8 +567,8 @@ class DicoGIS(ThemedTk):
             li_cdao=self.li_cdao,
             # list by formats
             li_dxf=self.li_dxf,
-            li_filegdb_esri=self.li_file_database_esri,
-            li_filegdb_spatialite=self.li_file_database_spatialite,
+            li_flat_geodatabase_esri_filegdb=self.li_file_database_esri,
+            li_flat_geodatabase_spatialite=self.li_file_database_spatialite,
             li_gml=self.li_gml,
             li_gxt=self.li_gxt,
             li_kml=self.li_kml,
