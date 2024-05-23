@@ -18,7 +18,6 @@ from typing import Callable, Optional
 # package
 from dicogis.export.to_xlsx import MetadataToXlsx
 from dicogis.georeaders.read_dxf import ReadDXF
-from dicogis.georeaders.read_gxt import ReadGXT
 from dicogis.georeaders.read_raster import ReadRasters
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
@@ -63,7 +62,7 @@ class ProcessingFiles:
         "file_geodatabase_spatialite": ReadFlatDatabase,
         "geopackage": ReadFlatDatabase,
         "geotiff": ReadRasters,
-        "gxt": ReadGXT,
+        "gxt": ReadVectorFlatDataset,
         "geojson": ReadVectorFlatDataset,
         "gml": ReadVectorFlatDataset,
         "kml": ReadVectorFlatDataset,
