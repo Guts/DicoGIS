@@ -181,7 +181,17 @@ class MetadataToXlsx(Workbook):
         has_cad: bool = False,
         has_sgbd: bool = False,
     ):
-        """Add news sheets depending on present metadata types."""
+        """Set workbook's sheets accordingly to metadata types.
+
+        Args:
+            has_vector (bool, optional): _description_. Defaults to False.
+            has_raster (bool, optional): _description_. Defaults to False.
+            has_filedb (bool, optional): _description_. Defaults to False.
+            has_mapdocs (bool, optional): _description_. Defaults to False.
+            has_cad (bool, optional): _description_. Defaults to False.
+            has_sgbd (bool, optional): _description_. Defaults to False.
+        """
+
         # SHEETS & HEADERS
         if (
             has_vector
@@ -194,16 +204,9 @@ class MetadataToXlsx(Workbook):
             self.sheet_vector_files.append(
                 [self.translated_texts.get(i) for i in self.li_cols_vector]
             )
-            # styling
-            for i in self.li_cols_vector:
-                self.sheet_vector_files.cell(
-                    row=1, column=self.li_cols_vector.index(i) + 1
-                ).style = "Headline 2"
 
             # initialize line counter
             self.row_index_vector_files = 1
-        else:
-            pass
 
         if (
             has_raster
@@ -216,16 +219,9 @@ class MetadataToXlsx(Workbook):
             self.sheet_raster_files.append(
                 [self.translated_texts.get(i) for i in self.li_cols_raster]
             )
-            # styling
-            for i in self.li_cols_raster:
-                self.sheet_raster_files.cell(
-                    row=1, column=self.li_cols_raster.index(i) + 1
-                ).style = "Headline 2"
 
             # initialize line counter
             self.row_index_raster_files = 1
-        else:
-            pass
 
         if (
             has_filedb
@@ -238,16 +234,9 @@ class MetadataToXlsx(Workbook):
             self.sheet_flat_geodatabases.append(
                 [self.translated_texts.get(i) for i in self.li_cols_filedb]
             )
-            # styling
-            for i in self.li_cols_filedb:
-                self.sheet_flat_geodatabases.cell(
-                    row=1, column=self.li_cols_filedb.index(i) + 1
-                ).style = "Headline 2"
 
             # initialize line counter
             self.row_index_flat_geodatabases = 1
-        else:
-            pass
 
         if (
             has_mapdocs
@@ -260,16 +249,9 @@ class MetadataToXlsx(Workbook):
             self.sheet_map_workspaces.append(
                 [self.translated_texts.get(i) for i in self.li_cols_mapdocs]
             )
-            # styling
-            for i in self.li_cols_mapdocs:
-                self.sheet_map_workspaces.cell(
-                    row=1, column=self.li_cols_mapdocs.index(i) + 1
-                ).style = "Headline 2"
 
             # initialize line counter
             self.row_index_map_worskpaces = 1
-        else:
-            pass
 
         if has_cad and self.translated_texts.get("sheet_cdao") not in self.sheetnames:
             self.sheet_cad_files = self.create_sheet(
@@ -279,16 +261,9 @@ class MetadataToXlsx(Workbook):
             self.sheet_cad_files.append(
                 [self.translated_texts.get(i) for i in self.li_cols_caodao]
             )
-            # styling
-            for i in self.li_cols_caodao:
-                self.sheet_cad_files.cell(
-                    row=1, column=self.li_cols_caodao.index(i) + 1
-                ).style = "Headline 2"
 
             # initialize line counter
             self.row_index_cad_files = 1
-        else:
-            pass
 
         if has_sgbd and "PostGIS" not in self.sheetnames:
             self.sheet_server_geodatabases = self.create_sheet(title="PostGIS")
@@ -296,18 +271,8 @@ class MetadataToXlsx(Workbook):
             self.sheet_server_geodatabases.append(
                 [self.translated_texts.get(i) for i in self.li_cols_sgbd]
             )
-            # styling
-            for i in self.li_cols_sgbd:
-                self.sheet_server_geodatabases.cell(
-                    row=1, column=self.li_cols_sgbd.index(i) + 1
-                ).style = "Headline 2"
             # initialize line counter
             self.row_index_server_geodatabases = 1
-        else:
-            pass
-
-        # end of method
-        return
 
     def tunning_worksheets(self):
         """Clean up and tunning worksheet."""
@@ -326,14 +291,19 @@ class MetadataToXlsx(Workbook):
             wsprops = sheet.sheet_properties
             wsprops.filterMode = True
 
+            # headers
+            for cell in sheet[1]:
+                if cell.value:
+                    cell.style = "Headline 2"
+
             # enable filters
             sheet.auto_filter.ref = "A1:{}{}".format(
                 get_column_letter(sheet.max_column), sheet.max_row
             )
             # columns width
             sheet.column_dimensions["A"].bestFit = True
-            # sheet.column_dimensions['A'].auto_size = True
-            # sheet.column_dimensions['B'].auto_size = True
+            sheet.column_dimensions["A"].auto_size = True
+            sheet.column_dimensions["B"].auto_size = True
 
             # dims = {}
             # for row in sheet.rows:
