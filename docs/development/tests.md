@@ -2,6 +2,7 @@
 
 ## System requirements
 
+- Git
 - Docker >= 22
 
 ## Testing setup
@@ -11,7 +12,8 @@ In your virtual environment:
 1. Install development requirements ([Ubuntu](./ubuntu.md#requirements) or [Windows](./windows.md#requirements))
 2. Install data fixtures:
 
-    ```bash
+    ```sh
+    git clone --depth=1 https://github.com/qgis/QGIS-Training-Data.git ./tests/fixtures/qgisdata
     python -m pip install -U gisdata -t ./tests/fixtures
     ```
 
@@ -20,6 +22,12 @@ In your virtual environment:
     ```sh
     docker compose -f "tests/container/docker-compose.dev.yml" up -d --build
     ```
+
+## Try it out on test dataset
+
+```sh
+dicogis-cli --verbose --input-folder tests/fixtures
+```
 
 ## Run tests suite
 
