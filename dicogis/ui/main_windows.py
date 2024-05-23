@@ -655,7 +655,7 @@ class DicoGIS(ThemedTk):
             layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
             metadataset = sgbd_reader.infos_dataset(layer)
             logger.info(f"Table examined: {layer.GetName()}")
-            self.xl_workbook.store_md_sgdb(metadataset=metadataset)
+            self.xl_workbook.store_md_geodatabases_server(metadataset=metadataset)
             logger.debug("Layer metadata stored into workbook.")
             # increment the progress bar
             self.prog_layers["value"] = self.prog_layers["value"] + 1
