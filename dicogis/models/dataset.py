@@ -13,6 +13,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 # package
 from dicogis.models.database_connection import DatabaseConnection
@@ -29,6 +30,17 @@ class MetaDataset:
     name: str | None = None
     path: Path | None = None  # empty if storage_type == database
     parent_folder_name: str | None = None  # empty if storage_type == database
+    dataset_type: (
+        None
+        | Literal[
+            "flat_cad",
+            "flat_database",
+            "flat_database_esri",
+            "flat_raster",
+            "flat_vector",
+            "sgbd_postgis",
+        ]
+    ) = None
     # format
     format_gdal_long_name: str | None = None
     format_gdal_short_name: str | None = None
