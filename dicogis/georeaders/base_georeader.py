@@ -142,8 +142,6 @@ class GeoReaderBase:
             target_container.processing_error_msg = err_msg
             # method end
             return target_container
-        else:
-            pass
 
     def get_extent_as_tuple(
         self, dataset_or_layer: Union[ogr.Layer, gdal.Dataset]
@@ -212,7 +210,14 @@ class GeoReaderBase:
     def get_srs_details(
         self, dataset_or_layer: Union[ogr.Layer, gdal.Dataset]
     ) -> tuple[str, str, str]:
-        """get the informations about geography and geometry"""
+        """Get coordinates system.
+
+        Args:
+            dataset_or_layer (Union[ogr.Layer, gdal.Dataset]): input dataset or OGR layer
+
+        Returns:
+            tuple[str, str, str]: crs_name, crs_code, crs_type
+        """
         # SRS
         srs = dataset_or_layer.GetSpatialRef()
         if not srs:
@@ -221,8 +226,7 @@ class GeoReaderBase:
                 self.localized_strings.get("srs_no_epsg", ""),
                 self.localized_strings.get("srs_nr", ""),
             )
-        else:
-            pass
+
         srs.AutoIdentifyEPSG()
         prj = osr.SpatialReference(str(srs))
         srs_epsg = prj.GetAuthorityCode(None)
@@ -277,8 +281,6 @@ class GeoReaderBase:
         # World SRS default
         if srs_epsg == "4326" and srs_name == "None":
             srs_name = "WGS 84"
-        else:
-            pass
 
         return (srs_name, srs_epsg, srs_type)
 
