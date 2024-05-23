@@ -76,6 +76,7 @@ def find_geodata_files(
     list[str],
     list[str],
     list[str],
+    list[str],
 ]:
     """List compatible geo-files stored into a folder structure.
 
@@ -102,6 +103,7 @@ def find_geodata_files(
     li_dgn: list[str] = []
     li_cdao: list[str] = []
     li_raster: list[str] = []
+    li_gpkg: list[str] = []
     li_fdb: list[str] = []
     li_egdb: list[str] = []
     li_spadb: list[str] = []
@@ -160,46 +162,47 @@ def find_geodata_files(
                 )
             ):
                 """listing MapInfo tables"""
-                # add complete path of MapInfo file
+
                 li_tab.append(full_path)
             elif (
                 path.splitext(full_path.lower())[1] == ".kml"
                 or path.splitext(full_path.lower())[1] == ".kmz"
             ):
                 """listing KML and KMZ"""
-                # add complete path of KML file
+
                 li_kml.append(full_path)
             elif path.splitext(full_path.lower())[1] == ".gml":
                 """listing GML"""
-                # add complete path of GML file
+
                 li_gml.append(full_path)
             elif path.splitext(full_path.lower())[1] == ".geojson":
                 """listing GeoJSON"""
-                # add complete path of GeoJSON file
+
                 li_geoj.append(full_path)
             elif path.splitext(full_path.lower())[1] == ".gxt":
                 """listing Geoconcept eXport Text (GXT)"""
-                # add complete path of GXT file
+
                 li_gxt.append(full_path)
             elif FormatsRaster.has_key(path.splitext(full_path.lower())[1]):
                 """listing compatible rasters"""
-                # add complete path of raster file
+
                 li_raster.append(full_path)
             elif path.splitext(full_path.lower())[1] == ".dxf":
                 """listing DXF"""
-                # add complete path of DXF file
+
                 li_dxf.append(full_path)
             elif path.splitext(full_path.lower())[1] == ".dwg":
                 """listing DWG"""
-                # add complete path of DWG file
+
                 li_dwg.append(full_path)
             elif path.splitext(full_path.lower())[1] == ".dgn":
                 """listing MicroStation DGN"""
-                # add complete path of DGN file
                 li_dgn.append(full_path)
+            elif path.splitext(full_path.lower())[1] == ".gpkg":
+                """listing GeoPackage"""
+                li_gpkg.append(full_path)
             elif path.splitext(full_path.lower())[1] == ".sqlite":
                 """listing Spatialite DB"""
-                # add complete path of DGN file
                 li_spadb.append(full_path)
             else:
                 continue
@@ -211,6 +214,7 @@ def find_geodata_files(
     # grouping File geodatabases
     li_fdb.extend(li_egdb)
     li_fdb.extend(li_spadb)
+    li_fdb.extend(li_gpkg)
 
     logger.info(
         f"End of folders parsing: {len(li_shp)} shapefiles - "
@@ -220,6 +224,7 @@ def find_geodata_files(
         f"{len(li_geoj)} GeoJSON"
         f"{len(li_raster)} rasters - "
         f"{len(li_egdb)} Esri FileGDB - "
+        f"{len(li_gpkg)} Geopackages - "
         f"{len(li_spadb)} Spatialite - "
         f"{len(li_cdao)} CAO/DAO - "
         f"{len(li_gxt)} GXT - in {num_folders} folders"
@@ -234,6 +239,7 @@ def find_geodata_files(
     li_geoj = tuple(sorted(li_geoj))
     li_gxt = tuple(sorted(li_gxt))
     li_egdb = tuple(sorted(li_egdb))
+    li_gpkg = tuple(sorted(li_gpkg))
     li_spadb = tuple(sorted(li_spadb))
     li_fdb = tuple(sorted(li_fdb))
     li_dxf = tuple(sorted(li_dxf))
@@ -257,5 +263,6 @@ def find_geodata_files(
         li_dgn,
         li_cdao,
         li_fdb,
+        li_gpkg,
         li_spadb,
     )

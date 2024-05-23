@@ -208,6 +208,7 @@ def inventory(
             li_cdao,
             li_file_databases,
             li_file_database_spatialite,
+            li_file_database_geopackage,
         ) = find_geodata_files(start_folder=input_folder)
 
         print(
@@ -252,6 +253,7 @@ def inventory(
             li_dxf=li_dxf,
             li_flat_geodatabase_esri_filegdb=li_file_database_esri,
             li_flat_geodatabase_spatialite=li_file_database_spatialite,
+            li_flat_geodatabase_geopackage=li_file_database_geopackage,
             li_gml=li_gml,
             li_gxt=li_gxt,
             li_kml=li_kml,
