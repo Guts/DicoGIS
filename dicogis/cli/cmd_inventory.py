@@ -365,10 +365,6 @@ def inventory(
         )
         logger.info(f"Workbook saved: {saved[1]}")
 
-        # output file path
-        if output_path is None:
-            output_path = f"DicoGIS_database_{date.today()}.xlsx"
-
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "
@@ -376,3 +372,6 @@ def inventory(
             "\nOpen the application to save the workbook.",
             notification_sound=opt_notify_sound,
         )
+
+        if opt_open_output:
+            Utilities.open_dir_file(target=output_path)
