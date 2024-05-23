@@ -13,7 +13,7 @@ import typer
 
 # project
 from dicogis.__about__ import __title__, __version__
-from dicogis.cli.cmd_list import cli_list
+from dicogis.cli.cmd_inventory import inventory
 
 # ############################################################################
 # ########## Globals ###############
@@ -76,7 +76,7 @@ def main(
 
 
 # integrate subcommands
-dicogis_cli.add_typer(cli_list, name="list")
+dicogis_cli.command()(inventory)
 
 
 # ############################################################################
