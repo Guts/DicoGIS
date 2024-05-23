@@ -44,13 +44,13 @@ class TestInfosFlatVector(unittest.TestCase):
 
             # check types
             self.assertIsInstance(
-                metadaset.attribute_fields,
+                metadaset.feature_attributes,
                 (list, tuple),
                 fixture_filepath,
                 fixture_filepath,
             )
             self.assertIsInstance(
-                metadaset.attribute_fields_count, int, fixture_filepath
+                metadaset.feature_attributes_count, int, fixture_filepath
             )
             self.assertIsInstance(metadaset.bbox, tuple, fixture_filepath)
             self.assertIsInstance(metadaset.crs_name, str, fixture_filepath)
@@ -60,7 +60,9 @@ class TestInfosFlatVector(unittest.TestCase):
             self.assertIsInstance(
                 metadaset.crs_type, (str, type(None)), fixture_filepath
             )
-            self.assertIsInstance(metadaset.features_count, int, fixture_filepath)
+            self.assertIsInstance(
+                metadaset.features_objects_count, int, fixture_filepath
+            )
             self.assertIsInstance(metadaset.files_dependencies, list, fixture_filepath)
             self.assertIsInstance(
                 metadaset.format_gdal_long_name, str, fixture_filepath
