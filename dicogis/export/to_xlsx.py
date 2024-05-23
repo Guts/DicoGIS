@@ -362,6 +362,15 @@ class MetadataToXlsx(Workbook):
 
         return f'=HYPERLINK("{target}", "{label}")'
 
+    @lru_cache(maxsize=128, typed=True)
+    def format_bbox(self, bbox: tuple[float, float, float, float] | None) -> str:
+        if isinstance(bbox, tuple) and all(
+            [isinstance(coord, (float, int)) for coord in bbox]
+        ):
+            return ", ".join(str(coord) for coord in bbox)
+        else:
+            return ""
+
     def format_feature_attributes(self, metadataset: MetaVectorDataset) -> str:
         """Format vector feature attributes in an unique string.
 
@@ -526,12 +535,17 @@ class MetadataToXlsx(Workbook):
             )
         elif isinstance(metadataset, MetaDatabaseFlat) and metadataset.dataset_type in (
             "flat_database",
-            "flat_datavase_esri",
+            "flat_database_esri",
         ):
             return self.store_md_flat_geodatabases(
                 metadataset=metadataset,
                 worksheet=worksheet,
                 row_index=row_index,
+            )
+        else:
+            logger.error(
+                f"No matching serializer for {metadataset.name} "
+                f"(in {metadataset.path_as_str}): {metadataset.dataset_type}"
             )
 
     # ------------ Writing metadata ---------------------
@@ -573,7 +587,7 @@ class MetadataToXlsx(Workbook):
         worksheet[f"I{row_index}"] = metadataset.crs_registry_code
         # Spatial extent
         worksheet[f"J{row_index}"].style = "wrap"
-        worksheet[f"J{row_index}"] = ", ".join(str(coord) for coord in metadataset.bbox)
+        worksheet[f"J{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
         # Creation date
         worksheet[f"K{row_index}"] = metadataset.storage_date_created
@@ -699,6 +713,7 @@ class MetadataToXlsx(Workbook):
         for layer_metadataset in metadataset.layers:
             # increment line
             self.row_index_flat_geodatabases += 1
+            row_index = self.row_index_flat_geodatabases
 
             # in case of a source error
             if metadataset.processing_succeeded is False:
@@ -727,9 +742,7 @@ class MetadataToXlsx(Workbook):
 
             # Spatial extent
             worksheet[f"O{row_index}"].style = "wrap"
-            worksheet[f"P{row_index}"] = ", ".join(
-                str(coord) for coord in metadataset.bbox
-            )
+            worksheet[f"P{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
             # Field informations
             worksheet[f"Q{row_index}"] = self.format_feature_attributes(
@@ -903,7 +916,7 @@ class MetadataToXlsx(Workbook):
 
         # Spatial extent
         worksheet[f"J{row_index}"].style = "wrap"
-        worksheet[f"J{row_index}"] = ", ".join(str(coord) for coord in metadataset.bbox)
+        worksheet[f"J{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
         # type
         worksheet[f"K{row_index}"] = metadataset.format_gdal_long_name
