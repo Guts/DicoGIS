@@ -60,7 +60,7 @@ class ProcessingFiles:
         "esri_shapefile": ReadVectorFlatDataset,
         "file_geodatabase_esri": ReadFlatDatabase,
         "file_geodatabase_spatialite": ReadFlatDatabase,
-        "geopackage": ReadFlatDatabase,
+        "file_geodatabase_geopackage": ReadFlatDatabase,
         "geotiff": ReadRasters,
         "gxt": ReadVectorFlatDataset,
         "geojson": ReadVectorFlatDataset,
@@ -81,6 +81,7 @@ class ProcessingFiles:
         li_flat_geodatabase_geopackage: Optional[Iterable],
         li_flat_geodatabase_spatialite: Optional[Iterable],
         li_geojson: Optional[Iterable],
+        li_geotiff: Optional[Iterable],
         li_gxt: Optional[Iterable],
         li_gml: Optional[Iterable],
         li_kml: Optional[Iterable],
@@ -92,6 +93,8 @@ class ProcessingFiles:
         # options
         opt_analyze_esri_filegdb: bool = True,
         opt_analyze_geojson: bool = True,
+        opt_analyze_geopackage: bool = True,
+        opt_analyze_geotiff: bool = True,
         opt_analyze_gml: bool = True,
         opt_analyze_gxt: bool = True,
         opt_analyze_kml: bool = True,
@@ -110,6 +113,7 @@ class ProcessingFiles:
         self.li_flat_geodatabase_geopackage = li_flat_geodatabase_geopackage
         self.li_flat_geodatabase_spatialite = li_flat_geodatabase_spatialite
         self.li_geojson = li_geojson
+        self.li_geotiff = li_geotiff
         self.li_gxt = li_gxt
         self.li_gml = li_gml
         self.li_kml = li_kml
@@ -135,6 +139,7 @@ class ProcessingFiles:
         self.opt_analyze_spatialite = opt_analyze_spatialite
         self.opt_analyze_esri_filegdb = opt_analyze_esri_filegdb
         self.opt_analyze_geojson = opt_analyze_geojson
+        self.opt_analyze_geotiff = opt_analyze_geotiff
         self.opt_analyze_gml = opt_analyze_gml
         self.opt_analyze_gxt = opt_analyze_gxt
         self.opt_analyze_kml = opt_analyze_kml
@@ -142,7 +147,7 @@ class ProcessingFiles:
         self.opt_analyze_raster = opt_analyze_raster
         self.opt_analyze_cdao = opt_analyze_cdao
         self.opt_analyze_shapefiles = opt_analyze_shapefiles
-        self.opt_analyze_spatialite = opt_analyze_spatialite
+        self.opt_analyze_geopackage = opt_analyze_geopackage
 
         # others
         self.total_files: Optional[int] = None
@@ -281,6 +286,15 @@ class ProcessingFiles:
         else:
             pass
 
+        if self.opt_analyze_geotiff and len(self.li_geotiff):
+            total_files += len(self.li_geotiff)
+            self.output_workbook.set_worksheets(has_raster=1)
+            self.add_files_to_process_queue(
+                list_of_files=self.li_geotiff, file_format="geotiff"
+            )
+        else:
+            pass
+
         if self.opt_analyze_gxt and len(self.li_gxt):
             total_files += len(self.li_gxt)
             self.output_workbook.set_worksheets(has_vector=1)
@@ -309,6 +323,16 @@ class ProcessingFiles:
         else:
             pass
 
+        if self.opt_analyze_geopackage and len(self.li_flat_geodatabase_geopackage):
+            total_files += len(self.li_flat_geodatabase_geopackage)
+            self.output_workbook.set_worksheets(has_filedb=1)
+            self.add_files_to_process_queue(
+                list_of_files=self.li_flat_geodatabase_geopackage,
+                file_format="file_geodatabase_geopackage",
+            )
+        else:
+            pass
+
         if self.opt_analyze_spatialite and len(self.li_flat_geodatabase_spatialite):
             total_files += len(self.li_flat_geodatabase_spatialite)
             self.output_workbook.set_worksheets(has_filedb=1)
@@ -323,7 +347,7 @@ class ProcessingFiles:
             total_files += len(self.li_cdao)
             self.output_workbook.set_worksheets(has_cad=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_cdao, file_format="file_geodatabase_spatialite"
+                list_of_files=self.li_cdao, file_format="file_cad"
             )
         else:
             pass

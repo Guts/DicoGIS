@@ -60,6 +60,7 @@ class FormatsVector(ExtendedEnum):
     dgn = ".dgn"
     esri_shapefile = ".shp"
     file_geodatabase_esri = ".gdb"
+    file_geodatabase_geopackage = ".gpkg"
     file_geodatabase_spatialite = ".sqlite"
     geojson = ".geojson"
     gml = ".gml"

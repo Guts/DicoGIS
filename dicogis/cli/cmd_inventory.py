@@ -207,6 +207,7 @@ def inventory(
             li_kml,
             li_gml,
             li_geojson,
+            li_geotiff,
             li_gxt,
             li_raster,
             li_file_database_esri,
@@ -240,6 +241,7 @@ def inventory(
         li_vectors.extend(li_gml)
         li_vectors.extend(li_geojson)
         li_vectors.extend(li_gxt)
+        li_raster.extend(li_geotiff)
 
         # check if there are some layers into the folder structure
         if not (
@@ -262,12 +264,13 @@ def inventory(
             li_flat_geodatabase_esri_filegdb=li_file_database_esri,
             li_flat_geodatabase_spatialite=li_file_database_spatialite,
             li_flat_geodatabase_geopackage=li_file_database_geopackage,
+            li_geojson=li_geojson,
+            li_geotiff=li_geotiff,
             li_gml=li_gml,
             li_gxt=li_gxt,
             li_kml=li_kml,
-            li_shapefiles=li_shapefiles,
             li_mapinfo_tab=li_mapinfo_tab,
-            li_geojson=li_geojson,
+            li_shapefiles=li_shapefiles,
             # options
             opt_analyze_cdao="dxf" in formats,
             opt_analyze_esri_filegdb="file_geodatabase_esri" in formats,

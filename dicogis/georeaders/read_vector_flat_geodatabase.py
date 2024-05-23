@@ -43,22 +43,23 @@ if __name__ == "__main__":
     from pprint import pprint
 
     # SpatiaLite
-    georeader = ReadVectorFlatDataset(dataset_type="flat_database")
+    georeader = ReadFlatDatabase()
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/QGIS Training Data/QGIS-Training-Data-release_3.28/exercise_data/qgis-server-tutorial-data/naturalearth.sqlite",
     )
-    pprint(metadataset)
+    print(metadataset.name, metadataset.count_layers, metadataset.dataset_type)
 
     # Geopackage
-    georeader = ReadVectorFlatDataset(dataset_type="flat_database")
+    georeader = ReadFlatDatabase()
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gpkg"
     )
-    pprint(metadataset)
+    print(metadataset.name, metadataset.count_layers, metadataset.dataset_type)
 
     # Esri FileGDB
-    georeader = ReadVectorFlatDataset(dataset_type="flat_database")
+    georeader = ReadFlatDatabase()
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gdb"
     )
+    print(metadataset.name, metadataset.count_layers, metadataset.dataset_type)
     pprint(metadataset)
