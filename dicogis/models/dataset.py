@@ -1,9 +1,6 @@
 #! python3  # noqa: E265
 
-"""
-    Dataset model
-
-"""
+"""Metadaset models."""
 
 # ############################################################################
 # ######### Libraries #############
@@ -66,14 +63,51 @@ class MetaDataset:
     processing_error_msg: str | None = ""
     processing_error_type: str | None = ""
 
+    @property
+    def path_as_str(self) -> str | None:
+        """Helper to have an universal path resolver independent of source type.
+
+        Returns:
+            str | None: path or connection uri (without password)
+        """
+        if isinstance(self.path, Path):
+            return self.path.resolve()
+        elif isinstance(self, MetaDatabaseTable) and isinstance(
+            self.database_connection, DatabaseConnection
+        ):
+            if self.database_connection.service_name is not None:
+                out_connection_string = self.database_connection.pg_connection_uri
+            else:
+                out_connection_string = (
+                    f"postgresql://{self.database_connection.user_name}"
+                    f"@{self.database_connection.host}"
+                    f":{self.database_connection.port}"
+                    f"/{self.database_connection.database_name}"
+                )
+            return out_connection_string
+
+        return None
+
 
 @dataclass
 class MetaVectorDataset(MetaDataset):
     """Vector dataset abstraction model."""
 
-    attribute_fields_count: int | None = None
-    attribute_fields: tuple[AttributeField] | None = None
-    features_count: int = 0
+    feature_attributes: list[AttributeField] | None = None
+    features_objects_count: int = 0
+
+    @property
+    def count_feature_attributes(self) -> int | None:
+        """Return the length of 'feature_attributes' attribute.
+
+        Returns:
+            int | None: number of attribute fields related to the layer or None if no
+            feature atttributes listed
+        """
+        if self.feature_attributes is not None:
+            return len(self.feature_attributes)
+
+        return None
 
 
 @dataclass
@@ -81,7 +115,42 @@ class MetaDatabaseFlat(MetaDataset):
     """Database table abstraction model."""
 
     layers: list[MetaVectorDataset] | None = None
-    layers_count: int = 0
+
+    @property
+    def cumulated_count_feature_attributes(self) -> int | None:
+        """Calculate the total number of attribute fields of every layer.
+
+        Returns:
+            int | None: total number of attribute fields or None if no layers listed
+        """
+        if self.layers is not None:
+            return sum([layer.count_feature_attributes for layer in self.layers])
+
+        return None
+
+    @property
+    def cumulated_count_feature_objects(self) -> int | None:
+        """Calculate the total number of feature objects of every layer.
+
+        Returns:
+            int | None: total number of feature objects or None if no layers listed
+        """
+        if self.layers is not None:
+            return sum([layer.features_objects_count for layer in self.layers])
+
+        return None
+
+    @property
+    def count_layers(self) -> int | None:
+        """Calculate the total number of layers.
+
+        Returns:
+            int | None: total number of layers or None if no layers listed
+        """
+        if self.layers is not None:
+            return len(self.layers)
+
+        return None
 
 
 @dataclass
