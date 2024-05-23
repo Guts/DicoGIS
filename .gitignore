@@ -182,11 +182,6 @@ GitHub.sublime-settings
 ## Custom
 #############
 
-# virtual environments
-*venv*
-virtenv*/
-virtualenv/
-
 # logs, config and thumbnails files
 *.log*
 *Thumbs.db
@@ -199,6 +194,7 @@ arcpy.pth
 
 # tests
 junit/
+tests/dev/tmp/
 
 # geodatabase
 \test\datatestGDB*
