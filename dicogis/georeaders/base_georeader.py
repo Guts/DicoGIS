@@ -188,7 +188,7 @@ class GeoReaderBase:
         # end of function
         return tuple(li_feature_attributes)
 
-    def get_geometry_type(self, layer: ogr.Layer) -> str:
+    def get_geometry_type(self, layer: ogr.Layer) -> str | None:
         """Get geometry type in a human readable format."""
         try:
             logger.debug(ogr.GeometryTypeToName(layer.GetGeomType()))

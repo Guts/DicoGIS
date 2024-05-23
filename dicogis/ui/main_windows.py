@@ -160,6 +160,7 @@ class DicoGIS(ThemedTk):
         self.li_kml = []  # list for KML path
         self.li_gml = []  # list for GML path
         self.li_geojson = []  # list for GeoJSON paths
+        self.li_geotiff = []  # list for GeoJSON paths
         self.li_gxt = []  # list for GXT paths
         self.li_vectors = []  # list for all vectors
         # formats / type: rasters
@@ -168,6 +169,7 @@ class DicoGIS(ThemedTk):
         # formats / type: file databases
         self.li_file_databases = []  # list for all files databases
         self.li_file_database_esri = []  # list for Esri File Geodatabases
+        self.li_file_database_geopackage = []
         self.li_file_database_spatialite = []  # list for Spatialite Geodatabases
         # formats / type: CAO/DAO
         self.li_cdao = []  # list for all CAO/DAO files
@@ -305,8 +307,7 @@ class DicoGIS(ThemedTk):
                         err
                     )
                 )
-        else:
-            pass
+
         self.ddl_lang.set(self.def_lang)
         self.change_lang(1)
 
@@ -405,6 +406,7 @@ class DicoGIS(ThemedTk):
             self.li_kml,
             self.li_gml,
             self.li_geojson,
+            self.li_geotiff,
             self.li_gxt,
             self.li_raster,
             self.li_file_database_esri,
@@ -414,6 +416,7 @@ class DicoGIS(ThemedTk):
             self.li_cdao,
             self.li_file_databases,
             self.li_file_database_spatialite,
+            self.li_file_database_geopackage,
         ) = find_geodata_files(start_folder=target_folder)
 
         # end of listing
@@ -569,12 +572,14 @@ class DicoGIS(ThemedTk):
             li_dxf=self.li_dxf,
             li_flat_geodatabase_esri_filegdb=self.li_file_database_esri,
             li_flat_geodatabase_spatialite=self.li_file_database_spatialite,
+            li_flat_geodatabase_geopackage=self.li_file_database_geopackage,
             li_gml=self.li_gml,
             li_gxt=self.li_gxt,
             li_kml=self.li_kml,
             li_shapefiles=self.li_shapefiles,
             li_mapinfo_tab=self.li_mapinfo_tab,
             li_geojson=self.li_geojson,
+            li_geotiff=self.li_geotiff,
             # options
             opt_analyze_cdao=self.tab_files.opt_gxt.get(),
             opt_analyze_esri_filegdb=self.tab_files.opt_egdb.get(),

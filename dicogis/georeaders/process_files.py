@@ -247,8 +247,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_shapefiles, file_format="esri_shapefile"
             )
-        else:
-            pass
 
         if self.opt_analyze_mapinfo_tab and len(self.li_mapinfo_tab):
             total_files += len(self.li_mapinfo_tab)
@@ -256,8 +254,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_mapinfo_tab, file_format="mapinfo_tab"
             )
-        else:
-            pass
 
         if self.opt_analyze_kml and len(self.li_kml):
             total_files += len(self.li_kml)
@@ -265,8 +261,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_kml, file_format="kml"
             )
-        else:
-            pass
 
         if self.opt_analyze_gml and len(self.li_gml):
             total_files += len(self.li_gml)
@@ -274,8 +268,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_gml, file_format="gml"
             )
-        else:
-            pass
 
         if self.opt_analyze_geojson and len(self.li_geojson):
             total_files += len(self.li_geojson)
@@ -283,8 +275,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_geojson, file_format="geojson"
             )
-        else:
-            pass
 
         if self.opt_analyze_geotiff and len(self.li_geotiff):
             total_files += len(self.li_geotiff)
@@ -292,8 +282,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_geotiff, file_format="geotiff"
             )
-        else:
-            pass
 
         if self.opt_analyze_gxt and len(self.li_gxt):
             total_files += len(self.li_gxt)
@@ -301,8 +289,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_gxt, file_format="gxt"
             )
-        else:
-            pass
 
         if self.opt_analyze_raster and len(self.li_rasters):
             total_files += len(self.li_rasters)
@@ -310,8 +296,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_tif, file_format="raster"
             )
-        else:
-            pass
 
         if self.opt_analyze_esri_filegdb and len(self.li_flat_geodatabase_esri_filegdb):
             total_files += len(self.li_flat_geodatabase_esri_filegdb)
@@ -320,8 +304,6 @@ class ProcessingFiles:
                 list_of_files=self.li_flat_geodatabase_esri_filegdb,
                 file_format="file_geodatabase_esri",
             )
-        else:
-            pass
 
         if self.opt_analyze_geopackage and len(self.li_flat_geodatabase_geopackage):
             total_files += len(self.li_flat_geodatabase_geopackage)
@@ -330,8 +312,6 @@ class ProcessingFiles:
                 list_of_files=self.li_flat_geodatabase_geopackage,
                 file_format="file_geodatabase_geopackage",
             )
-        else:
-            pass
 
         if self.opt_analyze_spatialite and len(self.li_flat_geodatabase_spatialite):
             total_files += len(self.li_flat_geodatabase_spatialite)
@@ -340,8 +320,6 @@ class ProcessingFiles:
                 list_of_files=self.li_flat_geodatabase_spatialite,
                 file_format="file_geodatabase_spatialite",
             )
-        else:
-            pass
 
         if self.opt_analyze_cdao and len(self.li_cdao):
             total_files += len(self.li_cdao)
@@ -349,8 +327,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_cdao, file_format="file_cad"
             )
-        else:
-            pass
 
         self.total_files = total_files
         return total_files
