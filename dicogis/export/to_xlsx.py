@@ -34,33 +34,6 @@ from dicogis.utils.formatters import convert_octets
 # LOG
 logger = logging.getLogger(__name__)
 
-# ##############################################################################
-# ########## Functions #############
-# ##################################
-
-
-def secure_encoding(layer_dict: dict, key_str: str) -> str:
-    """Check if dictionary value is compatible with XML encoding.
-
-    Args:
-        layer_dict (dict): layer metadata dictionary
-        key_str (str): key fo dictionary to check
-
-    Returns:
-        str: clean string
-    """
-    try:
-        out_str = layer_dict.get(key_str, "").encode("utf-8", "strict")
-        return out_str
-    except UnicodeError as err:
-        err_msg = "Encoding error spotted in '{}' for layer {}".format(
-            key_str, layer_dict.get("name")
-        )
-        logger.warning(
-            "{}. Layer: {}. Trace: {}".format(err_msg, layer_dict.get("name"), err)
-        )
-        return layer_dict.get(key_str, "").encode("utf8", "xmlcharrefreplace")
-
 
 # ##############################################################################
 # ########## Classes ###############
@@ -153,24 +126,6 @@ class MetadataToXlsx(Workbook):
         "sub_layers",
         "num_attrib",
         "num_objets",
-        "li_chps",
-    ]
-
-    li_cols_caodao = [
-        "nomfic",
-        "path",
-        "theme",
-        "tot_size",
-        "date_crea",
-        "date_actu",
-        "sub_layers",
-        "num_attrib",
-        "num_objets",
-        "geometrie",
-        "srs",
-        "srs_type",
-        "codepsg",
-        "emprise",
         "li_chps",
     ]
 
@@ -641,9 +596,6 @@ class MetadataToXlsx(Workbook):
             metadataset=metadataset
         )
 
-        # end of method
-        return
-
     def store_md_raster_files(
         self,
         metadataset: MetaRasterDataset,
@@ -709,9 +661,6 @@ class MetadataToXlsx(Workbook):
         worksheet[f"O{row_index}"] = self.format_size(
             in_size_in_octets=metadataset.storage_size
         )
-
-        # end of method
-        return
 
     def store_md_flat_geodatabases(
         self,
@@ -787,9 +736,6 @@ class MetadataToXlsx(Workbook):
                 metadataset=layer_metadataset
             )
 
-        # end of method
-        return
-
     def store_md_mapdoc(
         self,
         metadataset: MetaVectorDataset,
@@ -819,7 +765,6 @@ class MetadataToXlsx(Workbook):
         worksheet[f"B{row_index}"] = link
         worksheet[f"B{row_index}"].style = "Hyperlink"
         worksheet[f"C{row_index}"] = path.dirname(metadataset.get("folder"))
-        worksheet[f"D{row_index}"] = metadataset.get("title")
         worksheet[f"E{row_index}"] = metadataset.get("creator_prod")
         worksheet[f"F{row_index}"] = metadataset.get("keywords")
         worksheet[f"G{row_index}"] = metadataset.get("subject")
@@ -829,9 +774,9 @@ class MetadataToXlsx(Workbook):
         worksheet[f"K{row_index}"] = metadataset.get("date_actu")
         worksheet[f"L{row_index}"] = metadataset.get("xOrigin")
         worksheet[f"M{row_index}"] = metadataset.get("yOrigin")
-        worksheet[f"N{row_index}"] = secure_encoding(metadataset, "srs")
-        worksheet[f"O{row_index}"] = metadataset.get("srs_type")
-        worksheet[f"P{row_index}"] = metadataset.get("epsg")
+        worksheet[f"N{row_index}"] = metadataset.crs_name
+        worksheet[f"O{row_index}"] = metadataset.crs_type
+        worksheet[f"P{row_index}"] = metadataset.crs_registry_code
         worksheet[f"Q{row_index}"] = metadataset.get("layers_count")
         worksheet[f"R{row_index}"] = metadataset.get("total_fields")
         worksheet[f"S{row_index}"] = metadataset.get("total_objs")
@@ -921,168 +866,6 @@ class MetadataToXlsx(Workbook):
         # end of method
         return
 
-    def store_md_cad(
-        self,
-        metadataset: MetaVectorDataset,
-        worksheet: Worksheet | None = None,
-        row_index: int | None = None,
-    ):
-        """Serialize a metadataset into an Excel worksheet's row.
-
-        Args:
-            metadataset (MetaDatabaseTable): metadataset to serialize
-            worksheet (Workbook | None, optional): Excel workbook's sheet where to store. Defaults to None.
-            row_index (int | None, optional): worksheet's row index. Defaults to None.
-        """
-        # if args not defined use class attributes
-        if worksheet is None:
-            worksheet = self.sheet_cad_files
-        if row_index is None:
-            row_index = self.row_index_cad_files
-
-        # local variables
-        champs = ""
-
-        # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{}","{}")'.format(
-            metadataset.get("folder"), self.translated_texts.get("browse")
-        )
-        self.sheet_cad_files[f"B{self.row_index_cad_files}"] = link
-        self.sheet_cad_files[f"B{self.row_index_cad_files}"].style = "Hyperlink"
-
-        # Name of parent folder with an exception if this is the format name
-        self.sheet_cad_files[f"C{self.row_index_cad_files}"] = path.basename(
-            metadataset.get("folder")
-        )
-        # total size
-        self.sheet_cad_files[f"D{self.row_index_cad_files}"] = metadataset.get(
-            "total_size"
-        )
-        # Creation date
-        self.sheet_cad_files[f"E{self.row_index_cad_files}"] = metadataset.get(
-            "date_crea"
-        )
-        # Last update date
-        self.sheet_cad_files[f"F{self.row_index_cad_files}"] = metadataset.get(
-            "date_actu"
-        )
-        self.sheet_cad_files[f"G{self.row_index_cad_files}"] = metadataset.get(
-            "layers_count"
-        )
-        self.sheet_cad_files[f"H{self.row_index_cad_files}"] = metadataset.get(
-            "total_fields"
-        )
-        self.sheet_cad_files[f"I{self.row_index_cad_files}"] = metadataset.get(
-            "total_objs"
-        )
-
-        # parsing layers
-        for layer_idx, layer_name in zip(
-            metadataset.get("layers_idx"), metadataset.get("layers_names")
-        ):
-            # increment line
-            self.row_index_cad_files += 1
-            champs = ""
-            # get the layer informations
-            try:
-                layer = metadataset.get(f"{layer_idx}_{layer_name}")
-            except UnicodeDecodeError:
-                layer = metadataset.get(
-                    "{}_{}".format(layer_idx, layer_name.decode("latin1"))
-                )
-            # in case of a source error
-            if layer.get("error"):
-                err_mess = self.translated_texts.get(layer.get("error"))
-                logger.warning(
-                    "Problem detected: " "{} in {}".format(err_mess, layer.get("title"))
-                )
-                self.sheet_cad_files[f"G{self.row_index_cad_files}"] = layer.get(
-                    "title"
-                )
-                self.sheet_cad_files[f"G{self.row_index_cad_files}"].style = (
-                    "Warning Text"
-                )
-                self.sheet_cad_files[f"H{self.row_index_cad_files}"] = err_mess
-                self.sheet_cad_files[f"H{self.row_index_cad_files}"].style = (
-                    "Warning Text"
-                )
-                # Interruption of function
-                continue
-            else:
-                pass
-
-            self.sheet_cad_files[f"G{self.row_index_cad_files}"] = layer.get("title")
-            self.sheet_cad_files[f"H{self.row_index_cad_files}"] = layer.get(
-                "num_fields"
-            )
-            self.sheet_cad_files[f"I{self.row_index_cad_files}"] = layer.get("num_obj")
-            self.sheet_cad_files[f"J{self.row_index_cad_files}"] = layer.get(
-                "type_geom"
-            )
-            self.sheet_cad_files[f"K{self.row_index_cad_files}"] = layer.get("srs")
-            self.sheet_cad_files[f"L{self.row_index_cad_files}"] = layer.get("srs_type")
-            self.sheet_cad_files[f"M{self.row_index_cad_files}"] = layer.get("epsg")
-
-            # Spatial extent
-            emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
-                layer.get("xmin"),
-                layer.get("xmax"),
-                layer.get("ymin"),
-                layer.get("ymax"),
-            )
-            self.sheet_cad_files[f"N{self.row_index_cad_files}"].style = "wrap"
-            self.sheet_cad_files[f"N{self.row_index_cad_files}"] = emprise
-
-            # Field informations
-            fields = layer.get("fields")
-            for chp in fields.keys():
-                # field type
-                if "Integer" in fields[chp][0]:
-                    tipo = self.translated_texts.get("entier")
-                elif fields[chp][0] == "Real":
-                    tipo = self.translated_texts.get("reel")
-                elif fields[chp][0] == "String":
-                    tipo = self.translated_texts.get("string")
-                elif fields[chp][0] == "Date":
-                    tipo = self.translated_texts.get("date")
-                else:
-                    tipo = "unknown"
-                    logger.warning(chp + " unknown type")
-
-                # concatenation of field informations
-                try:
-                    champs = "{} {} ({}{}{}{}{}) ; ".format(
-                        champs,
-                        chp,
-                        tipo,
-                        self.translated_texts.get("longueur"),
-                        fields[chp][1],
-                        self.translated_texts.get("precision"),
-                        fields[chp][2],
-                    )
-                except UnicodeDecodeError:
-                    logger.warning(
-                        "Field name with special letters: {}".format(
-                            chp.decode("latin1")
-                        )
-                    )
-                    # decode the fucking field name
-                    champs = (
-                        champs
-                        + chp.decode("latin1")
-                        + " ({}, Lg. = {}, Pr. = {}) ;".format(
-                            tipo, fields[chp][1], fields[chp][2]
-                        )
-                    )
-                    # then continue
-                    continue
-
-            # Once all fieds explored, write them
-            self.sheet_cad_files[f"O{self.row_index_cad_files}"] = champs
-
-        # End of method
-        return
-
     def store_md_geodatabases_server(
         self,
         metadataset: MetaDatabaseTable,
@@ -1129,6 +912,3 @@ class MetadataToXlsx(Workbook):
         worksheet[f"L{row_index}"] = self.format_feature_attributes(
             metadataset=metadataset
         )
-
-        # end of method
-        return
