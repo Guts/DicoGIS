@@ -712,10 +712,10 @@ class MetadataToXlsx(Workbook):
 
             # Spatial extent
             worksheet[f"O{row_index}"].style = "wrap"
-            worksheet[f"P{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
+            worksheet[f"O{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
             # Field informations
-            worksheet[f"Q{row_index}"] = self.format_feature_attributes(
+            worksheet[f"P{row_index}"] = self.format_feature_attributes(
                 metadataset=layer_metadataset
             )
 
