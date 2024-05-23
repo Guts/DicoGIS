@@ -1,14 +1,6 @@
 #! python3  # noqa: E265
 
 
-"""
-    Name:         Geodata Explorer
-    Purpose:      Explore directory structure and list files and folders
-                with geospatial data
-
-    Author:       Julien Moura (@geojulien)
-"""
-
 # ############################################################################
 # ######## Libraries #############
 # ################################
@@ -18,7 +10,6 @@ import logging
 import subprocess
 import sys
 from importlib import resources
-from os import R_OK, access, path
 from pathlib import Path
 from sys import platform as opersys
 from tkinter import ACTIVE, DISABLED
@@ -36,6 +27,7 @@ else:
 # package
 from dicogis.__about__ import __package_name__
 from dicogis.export.to_xlsx import MetadataToXlsx
+from dicogis.utils.check_path import check_path
 
 # ##############################################################################
 # ############ Globals ############
@@ -79,36 +71,48 @@ class Utilities:
         return internal_path
 
     @classmethod
-    def open_dir_file(self, target):
-        """Open a file or directory in the explorer of the operating system."""
-        # check if the file or the directory exists
-        if not path.exists(target):
-            raise OSError(f"No such file: {target}")
+    def open_dir_file(self, target: str | Path) -> subprocess.Popen | None:
+        """Open a file or directory in the explorer of the operating system.
 
-        # check the read permission
-        if not access(target, R_OK):
-            raise OSError(f"Cannot access file: {target}")
+        Args:
+            target (str | Path): file or folder path to open
 
-        # open the directory or the file according to the os
-        if opersys == "win32":  # Windows
-            proc = startfile(path.realpath(target))
+        Returns:
+            subprocess.Popen: subprocess instance
+        """
 
-        elif opersys.startswith("linux"):  # Linux:
+        check_path(
+            input_path=target,
+            must_be_a_file=False,
+            must_be_a_folder=False,
+            must_be_readable=True,
+            must_exists=True,
+        )
+
+        if isinstance(target, Path):
+            target = str(target.resolve())
+
+        # Windows
+        if opersys == "win32":
+            proc = startfile(target)
+        # Linux
+        elif opersys.startswith("linux"):
             proc = subprocess.Popen(
                 ["xdg-open", target], stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
-
-        elif opersys == "darwin":  # Mac:
+        # Mac
+        elif opersys == "darwin":
             proc = subprocess.Popen(
                 ["open", "--", target], stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
-
         else:
-            raise NotImplementedError(
-                "Your `%s` isn't a supported operating system`." % opersys
+            logger.error(
+                NotImplementedError(
+                    "Your `%s` isn't a supported operating system`." % opersys
+                )
             )
+            proc = None
 
-        # end of function
         return proc
 
     @classmethod

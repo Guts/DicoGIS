@@ -101,6 +101,14 @@ def inventory(
             help="Enable/disable notification's sound at the end of processing.",
         ),
     ] = True,
+    opt_open_output: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_OPEN_OUTPUT",
+            is_flag=True,
+            help="Enable/disable auto opening output file when processing has finished.",
+        ),
+    ] = True,
     opt_prettify_size: Annotated[
         bool,
         typer.Option(
@@ -218,7 +226,7 @@ def inventory(
             f"{len(li_kml)} KML - "
             f"{len(li_gml)} GML - "
             f"{len(li_geojson)} GeoJSON - "
-            f"{len(li_gxt)} GXT"
+            f"{len(li_gxt)} GXT - "
             f"{len(li_raster)} rasters - "
             f"{len(li_file_databases)} file databases - "
             f"{len(li_cdao)} CAO/DAO - "
@@ -299,6 +307,8 @@ def inventory(
             notification_message=f"DicoGIS successfully processed {total_files} files.",
             notification_sound=opt_notify_sound,
         )
+        if opt_open_output:
+            Utilities.open_dir_file(target=output_path)
 
     # look for geographic database
     if pg_services:
@@ -335,7 +345,7 @@ def inventory(
                 layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
                 metadataset = sgbd_reader.infos_dataset(layer=layer)
                 logger.info(f"Table examined: {metadataset.name}")
-                xl_workbook.store_md_geodatabases_server(metadataset=metadataset)
+                xl_workbook.serialize_metadaset(metadataset=metadataset)
                 logger.debug("Layer metadata stored into workbook.")
 
         # output file path
