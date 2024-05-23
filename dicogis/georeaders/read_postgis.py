@@ -211,8 +211,8 @@ class ReadPostGIS(GeoReaderBase):
 
         # basic information
         # features
-        metadataset.features_count = layer.GetFeatureCount()
-        if metadataset.features_count == 0:
+        metadataset.features_objects_count = layer.GetFeatureCount()
+        if metadataset.features_objects_count == 0:
             """if layer doesn't have any object, return an error"""
             self.counter_alerts += 1
             self.erratum(
@@ -224,8 +224,7 @@ class ReadPostGIS(GeoReaderBase):
 
         # fields
         layer_def = layer.GetLayerDefn()
-        metadataset.attribute_fields_count = layer_def.GetFieldCount()
-        metadataset.attribute_fields = self.get_fields_details(
+        metadataset.feature_attributes = self.get_fields_details(
             ogr_layer_definition=layer_def
         )
 
