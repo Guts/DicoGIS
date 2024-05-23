@@ -121,6 +121,7 @@ class MetadataToXlsx(Workbook):
         "tot_size",
         "date_crea",
         "date_actu",
+        "format",
         "feats_class",
         "num_attrib",
         "num_objets",
@@ -406,7 +407,7 @@ class MetadataToXlsx(Workbook):
 
         return f'=HYPERLINK("{target}", "{label}")'
 
-    def format_feature_attributes(self, metadataset: MetaDataset) -> str:
+    def format_feature_attributes(self, metadataset: MetaVectorDataset) -> str:
         """Format vector feature attributes in an unique string.
 
         Args:
@@ -417,7 +418,7 @@ class MetadataToXlsx(Workbook):
         """
         out_attributes_str = ""
 
-        for feature_attribute in metadataset.attribute_fields:
+        for feature_attribute in metadataset.feature_attributes:
             # field type
             if "integer" in feature_attribute.data_type.lower():
                 translated_feature_attribute_type = self.translated_texts.get("entier")
@@ -463,7 +464,10 @@ class MetadataToXlsx(Workbook):
             return in_size_in_octets
 
     def store_error(
-        self, metadataset: MetaDataset, worksheet: Worksheet, row_index: int
+        self,
+        metadataset: MetaDataset,
+        worksheet: Worksheet,
+        row_index: int,
     ):
         """Helper to store processing error in worksheet's row.
 
@@ -474,12 +478,13 @@ class MetadataToXlsx(Workbook):
         """
         err_mess = self.translated_texts.get(metadataset.processing_error_type)
         logger.warning(
-            "Problem detected: " "{} in {}".format(err_mess, metadataset.name)
+            f"Problem detected on {metadataset.name} (in {metadataset.path}). "
+            f"Error: {err_mess}"
         )
         worksheet[f"A{row_index}"] = metadataset.name
         worksheet[f"A{row_index}"].style = "Warning Text"
         worksheet[f"B{row_index}"] = self.format_as_hyperlink(
-            target=metadataset.path.parent,
+            target=metadataset.path_as_str,
             label=self.translated_texts.get("browse"),
         )
         worksheet[f"B{row_index}"].style = "Warning Text"
@@ -492,34 +497,40 @@ class MetadataToXlsx(Workbook):
         )
         worksheet[f"Q{row_index}"].style = "Warning Text"
 
-    def sheet_and_row_index_from_type(
+    def get_sheet_and_incremented_row_index_from_type(
         self,
         metadataset: MetaDataset,
     ) -> tuple[Worksheet, int]:
-        if isinstance(metadataset, MetaVectorDataset):
+        if (
+            isinstance(metadataset, MetaVectorDataset)
+            and metadataset.dataset_type == "flat_vector"
+        ):
+            self.row_index_vector_files += 1
             return self.sheet_vector_files, self.row_index_vector_files
         elif isinstance(metadataset, MetaRasterDataset):
+            self.row_index_raster_files += 1
             return self.sheet_raster_files, self.row_index_raster_files
         elif isinstance(metadataset, MetaDatabaseTable):
-            return self.sheet_raster_files, self.row_index_raster_files
+            self.row_index_server_geodatabases += 1
+            return self.sheet_server_geodatabases, self.row_index_server_geodatabases
         elif isinstance(metadataset, MetaDatabaseFlat):
-            return self.sheet_raster_files, self.row_index_raster_files
+            self.row_index_flat_geodatabases += 1
+            return self.sheet_flat_geodatabases, self.row_index_flat_geodatabases
 
     def serialize_metadaset(self, metadataset: MetaDataset) -> bool:
         """Router method to serialize metadataset depending on its type.
 
         Args:
-            metadataset (MetaDataset): _description_
+            metadataset (MetaDataset): metadaset object to serialize
 
         Returns:
-            bool: _description_
+            bool: True if the object has been correctly serialized
         """
-        worksheet, row_index = self.sheet_and_row_index_from_type(
+        worksheet, row_index = self.get_sheet_and_incremented_row_index_from_type(
             metadataset=metadataset
         )
 
         # -- Common --
-        row_index += 1  # increment row
         # in case of a source error
         if metadataset.processing_succeeded is False:
             self.store_error(
@@ -531,25 +542,37 @@ class MetadataToXlsx(Workbook):
         worksheet[f"A{row_index}"] = metadataset.name
 
         # routing to custom serializing methods
-        if isinstance(metadataset, MetaVectorDataset):
+        if (
+            isinstance(metadataset, MetaVectorDataset)
+            and metadataset.dataset_type == "flat_vector"
+        ):
             return self.store_md_vector_files(
                 metadataset=metadataset,
                 worksheet=worksheet,
                 row_index=row_index,
             )
-        elif isinstance(metadataset, MetaRasterDataset):
+        elif (
+            isinstance(metadataset, MetaRasterDataset)
+            and metadataset.dataset_type == "flat_raster"
+        ):
             return self.store_md_raster_files(
                 metadataset=metadataset,
                 worksheet=worksheet,
                 row_index=row_index,
             )
-        elif isinstance(metadataset, MetaDatabaseTable):
+        elif (
+            isinstance(metadataset, MetaDatabaseTable)
+            and metadataset.dataset_type == "sgbd_postgis"
+        ):
             return self.store_md_geodatabases_server(
                 metadataset=metadataset,
                 worksheet=worksheet,
                 row_index=row_index,
             )
-        elif isinstance(metadataset, MetaDatabaseFlat):
+        elif isinstance(metadataset, MetaDatabaseFlat) and metadataset.dataset_type in (
+            "flat_database",
+            "flat_datavase_esri",
+        ):
             return self.store_md_flat_geodatabases(
                 metadataset=metadataset,
                 worksheet=worksheet,
@@ -580,9 +603,9 @@ class MetadataToXlsx(Workbook):
         worksheet[f"C{row_index}"] = metadataset.parent_folder_name
 
         # Fields count
-        worksheet[f"D{row_index}"] = metadataset.attribute_fields_count
+        worksheet[f"D{row_index}"] = metadataset.count_feature_attributes
         # Objects count
-        worksheet[f"E{row_index}"] = metadataset.features_count
+        worksheet[f"E{row_index}"] = metadataset.features_objects_count
         # Geometry type
         worksheet[f"F{row_index}"] = metadataset.geometry_type
 
@@ -709,102 +732,60 @@ class MetadataToXlsx(Workbook):
         if row_index is None:
             row_index = self.row_index_flat_geodatabases
 
-        # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{}","{}")'.format(
-            metadataset.get("folder"), self.translated_texts.get("browse")
+        # writing metadata
+        worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+            target=metadataset.path.parent, label=self.translated_texts.get("browse")
         )
-        worksheet[f"B{row_index}"] = link
         worksheet[f"B{row_index}"].style = "Hyperlink"
-
-        worksheet[f"C{row_index}"] = path.basename(metadataset.get("folder"))
-        worksheet[f"D{row_index}"] = metadataset.get("total_size")
-        worksheet[f"E{row_index}"] = metadataset.get("date_crea")
-        worksheet[f"F{row_index}"] = metadataset.get("date_actu")
-        worksheet[f"G{row_index}"] = metadataset.get("layers_count")
-        worksheet[f"H{row_index}"] = metadataset.get("total_fields")
-        worksheet[f"I{row_index}"] = metadataset.get("total_objs")
+        worksheet[f"C{row_index}"] = metadataset.parent_folder_name
+        worksheet[f"D{row_index}"] = metadataset.storage_size
+        worksheet[f"E{row_index}"] = metadataset.storage_date_created
+        worksheet[f"F{row_index}"] = metadataset.storage_date_updated
+        worksheet[f"G{row_index}"] = metadataset.format_gdal_long_name
+        worksheet[f"H{row_index}"] = metadataset.count_layers
+        worksheet[f"I{row_index}"] = metadataset.cumulated_count_feature_attributes
+        worksheet[f"J{row_index}"] = metadataset.cumulated_count_feature_objects
 
         # parsing layers
-        for layer_idx, layer_name in zip(
-            metadataset.get("layers_idx"), metadataset.get("layers_names")
-        ):
+        for layer_metadataset in metadataset.layers:
             # increment line
             self.row_index_flat_geodatabases += 1
-            champs = ""
-            # get the layer informations
-            try:
-                gdb_layer = metadataset.get(f"{layer_idx}_{layer_name}")
-            except UnicodeError as err:
-                logger.error(f"Encoding error. Trace: {err}")
-                continue
+
             # in case of a source error
-            if gdb_layer.get("error"):
-                err_mess = self.translated_texts.get(gdb_layer.get("error"))
-                logger.warning(
-                    "Problem detected: {} in {}".format(
-                        err_mess, gdb_layer.get("title")
-                    )
+            if metadataset.processing_succeeded is False:
+                err_mess = self.translated_texts.get(
+                    layer_metadataset.processing_error_type
                 )
-                worksheet[f"G{row_index}"] = gdb_layer.get("title")
-                worksheet[f"G{row_index}"].style = "Warning Text"
-                worksheet[f"H{row_index}"] = err_mess
+                logger.warning(
+                    f"Problem detected on layer {layer_metadataset.name} "
+                    f"(part of dataset '{metadataset.path.resolve}'). "
+                    f"Error: {err_mess}"
+                )
+                worksheet[f"H{row_index}"] = layer_metadataset.name
                 worksheet[f"H{row_index}"].style = "Warning Text"
+                worksheet[f"I{row_index}"] = err_mess
+                worksheet[f"I{row_index}"].style = "Warning Text"
                 # Interruption of function
                 continue
-            else:
-                pass
 
-            worksheet[f"G{row_index}"] = gdb_layer.get("title")
-            worksheet[f"H{row_index}"] = gdb_layer.get("num_fields")
-            worksheet[f"I{row_index}"] = gdb_layer.get("num_obj")
-            worksheet[f"J{row_index}"] = gdb_layer.get("type_geom")
-            worksheet[f"K{row_index}"] = secure_encoding(gdb_layer, "srs")
-            worksheet[f"L{row_index}"] = gdb_layer.get("srs_type")
-            worksheet[f"M{row_index}"] = gdb_layer.get("epsg")
+            worksheet[f"H{row_index}"] = layer_metadataset.name
+            worksheet[f"I{row_index}"] = layer_metadataset.count_feature_attributes
+            worksheet[f"J{row_index}"] = layer_metadataset.features_objects_count
+            worksheet[f"K{row_index}"] = layer_metadataset.geometry_type
+            worksheet[f"L{row_index}"] = layer_metadataset.crs_name
+            worksheet[f"M{row_index}"] = layer_metadataset.crs_type
+            worksheet[f"N{row_index}"] = layer_metadataset.crs_registry_code
 
             # Spatial extent
-            emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
-                gdb_layer.get("xmin"),
-                gdb_layer.get("xmax"),
-                gdb_layer.get("ymin"),
-                gdb_layer.get("ymax"),
+            worksheet[f"O{row_index}"].style = "wrap"
+            worksheet[f"P{row_index}"] = ", ".join(
+                str(coord) for coord in metadataset.bbox
             )
-            worksheet[f"N{row_index}"].style = "wrap"
-            worksheet[f"N{row_index}"] = emprise
 
             # Field informations
-            fields = gdb_layer.get("fields")
-            for chp in fields.keys():
-                # field type
-                if "Integer" in fields[chp][0]:
-                    tipo = self.translated_texts.get("entier")
-                elif fields[chp][0] == "Real":
-                    tipo = self.translated_texts.get("reel")
-                elif fields[chp][0] == "String":
-                    tipo = self.translated_texts.get("string")
-                elif fields[chp][0] == "Date":
-                    tipo = self.translated_texts.get("date")
-                else:
-                    tipo = "unknown"
-                    logger.warning(chp + " unknown type")
-
-                # concatenation of field informations
-                try:
-                    champs = "{} {} ({}{}{}{}{}) ; ".format(
-                        champs,
-                        chp.encode("utf8", "replace"),
-                        tipo,
-                        self.translated_texts.get("longueur"),
-                        fields[chp][1],
-                        self.translated_texts.get("precision"),
-                        fields[chp][2],
-                    )
-                except UnicodeDecodeError:
-                    logger.warning(f"Field name with special letters: {chp}")
-                    continue
-
-            # Once all fieds explored, write them
-            worksheet[f"O{row_index}"] = champs
+            worksheet[f"Q{row_index}"] = self.format_feature_attributes(
+                metadataset=layer_metadataset
+            )
 
         # end of method
         return
@@ -1122,23 +1103,14 @@ class MetadataToXlsx(Workbook):
             row_index = self.row_index_server_geodatabases
 
         # connection string
-        if metadataset.database_connection.service_name is not None:
-            out_connection_string = metadataset.database_connection.pg_connection_uri
-        else:
-            out_connection_string = (
-                f"postgresql://{metadataset.database_connection.user_name}"
-                f"@{metadataset.database_connection.host}"
-                f":{metadataset.database_connection.port}"
-                f"/{metadataset.database_connection.database_name}"
-            )
-        worksheet[f"B{row_index}"] = out_connection_string
+        worksheet[f"B{row_index}"] = metadataset.path_as_str
         worksheet[f"B{row_index}"].style = "Hyperlink"
         # schema
         worksheet[f"C{row_index}"] = metadataset.schema_name
 
         # structure
-        worksheet[f"D{row_index}"] = metadataset.attribute_fields_count
-        worksheet[f"E{row_index}"] = metadataset.features_count
+        worksheet[f"D{row_index}"] = metadataset.count_feature_attributes
+        worksheet[f"E{row_index}"] = metadataset.features_objects_count
         worksheet[f"F{row_index}"] = metadataset.geometry_type
 
         # SRS

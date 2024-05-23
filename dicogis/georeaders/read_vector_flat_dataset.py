@@ -142,7 +142,9 @@ class ReadVectorFlatDataset(GeoReaderBase):
             metadataset.layers = []
             for layer_idx in range(dataset.GetLayerCount()):
                 layer: ogr.Layer = dataset.GetLayer(layer_idx)
-                layer_metadataset = MetaVectorDataset(name=layer.GetName())
+                layer_metadataset = MetaVectorDataset(
+                    name=layer.GetName(), dataset_type="data_layer"
+                )
                 self.get_infos_layer(in_layer=layer, metadataset=layer_metadataset)
                 metadataset.layers.append(layer_metadataset)
 
@@ -158,8 +160,8 @@ class ReadVectorFlatDataset(GeoReaderBase):
 
     def get_infos_layer(self, in_layer: ogr.Layer, metadataset: MetaVectorDataset):
         # features
-        metadataset.features_count = in_layer.GetFeatureCount()
-        if metadataset.features_count == 0:
+        metadataset.features_objects_count = in_layer.GetFeatureCount()
+        if metadataset.features_objects_count == 0:
             """if layer doesn't have any object, return an error"""
             self.counter_alerts += 1
             self.erratum(
@@ -170,8 +172,7 @@ class ReadVectorFlatDataset(GeoReaderBase):
 
         # fields
         layer_def = in_layer.GetLayerDefn()
-        metadataset.attribute_fields_count = layer_def.GetFieldCount()
-        metadataset.attribute_fields = self.get_fields_details(
+        metadataset.feature_attributes = self.get_fields_details(
             ogr_layer_definition=layer_def
         )
 
