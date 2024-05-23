@@ -16,10 +16,11 @@ from typing import Literal
 from dicogis.models.database_connection import DatabaseConnection
 from dicogis.models.feature_attributes import AttributeField
 
-
 # ############################################################################
 # ######### Classes #############
 # ###############################
+
+
 @dataclass
 class MetaDataset:
     """Dataset abstraction model."""
