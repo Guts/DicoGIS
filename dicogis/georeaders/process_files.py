@@ -17,7 +17,7 @@ from typing import Callable, Optional
 
 # package
 from dicogis.export.to_xlsx import MetadataToXlsx
-from dicogis.georeaders.read_dxf import ReadDXF
+from dicogis.georeaders.read_dxf import ReadCadDxf
 from dicogis.georeaders.read_raster import ReadRasters
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
@@ -56,7 +56,7 @@ class ProcessingFiles:
     """Geofiles processor."""
 
     MATRIX_FORMAT_GEOREADER = {
-        "dxf": ReadDXF,
+        "dxf": ReadCadDxf,
         "esri_shapefile": ReadVectorFlatDataset,
         "file_geodatabase_esri": ReadFlatDatabase,
         "file_geodatabase_spatialite": ReadFlatDatabase,

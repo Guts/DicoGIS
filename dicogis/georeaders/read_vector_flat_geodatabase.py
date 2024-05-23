@@ -1,14 +1,7 @@
 #! python3  # noqa: E265
 
 
-# ----------------------------------------------------------------------------
-# Name:         InfosSpatialite
-# Purpose:      Use OGR to read into Spatialite databases (ie SQLite with
-#               geospatial extension)
-#
-# Author:       Julien Moura (https://github.com/Guts/)
-# ----------------------------------------------------------------------------
-
+"""Reader for flat geodatabases."""
 
 # ############################################################################
 # ######### Libraries #############
