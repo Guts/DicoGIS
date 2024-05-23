@@ -32,9 +32,7 @@ from dicogis.utils.utils import Utilities
 # ########## Globals ###############
 # ##################################
 
-cli_list = typer.Typer(help="List (inventory) operations.")
 state = {"verbose": False}
-APP_NAME = f"{__title__}_list"
 logger = logging.getLogger(__name__)
 default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 
@@ -43,9 +41,6 @@ default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 # ##################################
 
 
-@cli_list.command(
-    help="List geodata and extract metadata into an Excel (.xlsx) spreadsheet file."
-)
 def inventory(
     input_folder: Annotated[
         Optional[Path],
@@ -125,8 +120,9 @@ def inventory(
     ] = None,
     verbose: bool = False,
 ):
-    """Command to list geodata files starting from a folder and/or databases using \
-        connection listed in pg_service.conf.
+    """Main command. Make an inventory of geodata files starting from a folder and/or
+    databases using connection listed in pg_service.conf and store everything in an
+    output file.
 
     Args:
         input_folder (Annotated[Optional[Path], typer.Option): starting folder for files.
@@ -150,10 +146,10 @@ def inventory(
     logmngr.headers()
 
     logger.debug(
-        f"{APP_NAME} parameters: {input_folder=} - {formats=} - {pg_services=} - "
+        f"Passed parameters: {input_folder=} - {formats=} - {pg_services=} - "
         f"{verbose=} -{language=}"
     )
-    app_dir = typer.get_app_dir(APP_NAME)
+    app_dir = typer.get_app_dir(__title__)
 
     # log some context information
     logger.info(f"DicoGIS version: {__version__}")
@@ -365,11 +361,3 @@ def inventory(
             "\nOpen the application to save the workbook.",
             notification_sound=opt_notify_sound,
         )
-
-
-# ############################################################################
-# #### Stand alone program ########
-# #################################
-if __name__ == "__main__":
-    """standalone execution"""
-    cli_list()
