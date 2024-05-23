@@ -203,7 +203,7 @@ class ProcessingFiles:
                 if progress_value_message is not None:
                     progress_value_message = f"Storing: {geofile.file_path}"
                 # writing to the Excel file
-                self.output_workbook.store_md_vector_files(metadataset=metadataset)
+                self.output_workbook.serialize_metadaset(metadataset=metadataset)
                 geofile.exported = True
                 logger.debug(f"Metadata stored into workbook for {geofile.file_path}")
             except Exception as err:
