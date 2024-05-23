@@ -335,7 +335,7 @@ def inventory(
                 layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
                 metadataset = sgbd_reader.infos_dataset(layer=layer)
                 logger.info(f"Table examined: {metadataset.name}")
-                xl_workbook.store_md_sgdb(metadataset=metadataset)
+                xl_workbook.store_md_geodatabases_server(metadataset=metadataset)
                 logger.debug("Layer metadata stored into workbook.")
 
         # output file path
