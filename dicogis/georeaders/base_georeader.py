@@ -189,23 +189,51 @@ class GeoReaderBase:
         return tuple(li_feature_attributes)
 
     def get_geometry_type(self, layer: ogr.Layer) -> str | None:
-        """Get geometry type in a human readable format."""
-        try:
-            logger.debug(ogr.GeometryTypeToName(layer.GetGeomType()))
-            feat = layer.GetNextFeature()
-            if not hasattr(feat, "GetGeometryRef"):
-                logger.error("Unable to determine GeoMetryRef")
-                return None
-            layer_geom = feat.GetGeometryRef()
-            if hasattr(layer_geom, "GetGeometryName"):
-                return layer_geom.GetGeometryName()
+        """Get geometry type for a given ogr layer.
 
+        Args:
+            layer: OGR layer
+
+        Returns:
+            geometry type or None
+        """
+        geometry_type: str | None = None
+        try:
+            geometry_type = ogr.GeometryTypeToName(layer.GetGeomType())
         except Exception as err:
+            logger.info(
+                f"Unable to determine geometry type using 'ogr.GeometryTypeToName' on "
+                f"'layer.GetGeomType()'. Trace: {err}"
+            )
+
+        if (
+            geometry_type is not None
+            and isinstance(geometry_type, str)
+            and "unknown" not in geometry_type.lower()
+        ):
+            return geometry_type
+
+        try:
+            first_feature_object: ogr.Feature = layer.GetNextFeature()
+        except AttributeError as err:
             logger.error(
-                f"Unable to retrieve geometry type for layer: {layer.GetName()}. "
+                f"Impossible to get next feature on layer {layer.GetName()}. "
                 f"Trace: {err}"
             )
             return None
+
+        if not hasattr(first_feature_object, "GetGeometryRef"):
+            logger.warning(
+                "Unable to determine GeoMetryRef for object "
+                f"{first_feature_object.GetFID()} in {layer.GetName()}."
+            )
+            return None
+
+        layer_geometry_ref = first_feature_object.GetGeometryRef()
+        if hasattr(layer_geometry_ref, "GetGeometryName"):
+            return layer_geometry_ref.GetGeometryName()
+
+        return None
 
     def get_srs_details(
         self, dataset_or_layer: Union[ogr.Layer, gdal.Dataset]
