@@ -375,6 +375,8 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
                 translated_feature_attribute_type = self.translated_texts.get("string")
             elif feature_attribute.data_type.lower() in ("date", "datetime"):
                 translated_feature_attribute_type = self.translated_texts.get("date")
+            elif feature_attribute.data_type.lower() == "binary":
+                translated_feature_attribute_type = self.translated_texts.get("binary")
             else:
                 translated_feature_attribute_type = feature_attribute.data_type
                 logger.warning(
