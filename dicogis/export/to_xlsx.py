@@ -6,14 +6,25 @@
 
 # Standard library
 import logging
+from functools import lru_cache
 from os import path
+from pathlib import Path
+from typing import Union
 
 # 3rd party library
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, NamedStyle
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
 
 # project
+from dicogis.models.dataset import (
+    MetaDatabaseFlat,
+    MetaDatabaseTable,
+    MetaDataset,
+    MetaRasterDataset,
+    MetaVectorDataset,
+)
 from dicogis.utils.formatters import convert_octets
 
 # ##############################################################################
@@ -22,33 +33,6 @@ from dicogis.utils.formatters import convert_octets
 
 # LOG
 logger = logging.getLogger(__name__)
-
-# ##############################################################################
-# ########## Functions #############
-# ##################################
-
-
-def secure_encoding(layer_dict: dict, key_str: str) -> str:
-    """Check if dictionary value is compatible with XML encoding.
-
-    Args:
-        layer_dict (dict): layer metadata dictionary
-        key_str (str): key fo dictionary to check
-
-    Returns:
-        str: clean string
-    """
-    try:
-        out_str = layer_dict.get(key_str, "").encode("utf-8", "strict")
-        return out_str
-    except UnicodeError as err:
-        err_msg = "Encoding error spotted in '{}' for layer {}".format(
-            key_str, layer_dict.get("name")
-        )
-        logger.warning(
-            "{}. Layer: {}. Trace: {}".format(err_msg, layer_dict.get("name"), err)
-        )
-        return layer_dict.get(key_str, "").encode("utf8", "xmlcharrefreplace")
 
 
 # ##############################################################################
@@ -110,6 +94,7 @@ class MetadataToXlsx(Workbook):
         "tot_size",
         "date_crea",
         "date_actu",
+        "format",
         "feats_class",
         "num_attrib",
         "num_objets",
@@ -144,24 +129,6 @@ class MetadataToXlsx(Workbook):
         "li_chps",
     ]
 
-    li_cols_caodao = [
-        "nomfic",
-        "path",
-        "theme",
-        "tot_size",
-        "date_crea",
-        "date_actu",
-        "sub_layers",
-        "num_attrib",
-        "num_objets",
-        "geometrie",
-        "srs",
-        "srs_type",
-        "codepsg",
-        "emprise",
-        "li_chps",
-    ]
-
     li_cols_sgbd = [
         "nomfic",
         "conn_chain",
@@ -178,15 +145,15 @@ class MetadataToXlsx(Workbook):
         "gdal_err",
     ]
 
-    def __init__(self, texts: dict, opt_size_prettify: bool = True):
+    def __init__(self, translated_texts: dict, opt_size_prettify: bool = True):
         """Store metadata into Excel worksheets.
 
         Args:
             texts (dict, optional): dictionary of translated texts. Defaults to {}.
             opt_size_prettify (bool, optional): option to prettify size or not. Defaults to False.
         """
-        super().__init__()
-        self.txt = texts
+        super().__init__(iso_dates=True)
+        self.translated_texts = translated_texts
 
         # options
         self.opt_size_prettify = opt_size_prettify
@@ -201,7 +168,7 @@ class MetadataToXlsx(Workbook):
 
         # deleting the default worksheet
         ws = self.active
-        self.remove_sheet(ws)
+        self.remove(worksheet=ws)
 
     # ------------ Setting workbook ---------------------
 
@@ -214,99 +181,98 @@ class MetadataToXlsx(Workbook):
         has_cad: bool = False,
         has_sgbd: bool = False,
     ):
-        """Add news sheets depending on present metadata types."""
+        """Set workbook's sheets accordingly to metadata types.
+
+        Args:
+            has_vector (bool, optional): _description_. Defaults to False.
+            has_raster (bool, optional): _description_. Defaults to False.
+            has_filedb (bool, optional): _description_. Defaults to False.
+            has_mapdocs (bool, optional): _description_. Defaults to False.
+            has_cad (bool, optional): _description_. Defaults to False.
+            has_sgbd (bool, optional): _description_. Defaults to False.
+        """
+
         # SHEETS & HEADERS
-        if has_vector and self.txt.get("sheet_vectors") not in self.sheetnames:
-            self.ws_v = self.create_sheet(title=self.txt.get("sheet_vectors"))
+        if (
+            has_vector
+            and self.translated_texts.get("sheet_vectors") not in self.sheetnames
+        ):
+            self.sheet_vector_files = self.create_sheet(
+                title=self.translated_texts.get("sheet_vectors")
+            )
             # headers
-            self.ws_v.append([self.txt.get(i) for i in self.li_cols_vector])
-            # styling
-            for i in self.li_cols_vector:
-                self.ws_v.cell(row=1, column=self.li_cols_vector.index(i) + 1).style = (
-                    "Headline 2"
-                )
+            self.sheet_vector_files.append(
+                [self.translated_texts.get(i) for i in self.li_cols_vector]
+            )
 
             # initialize line counter
-            self.idx_v = 1
-        else:
-            pass
+            self.row_index_vector_files = 1
 
-        if has_raster and self.txt.get("sheet_rasters") not in self.sheetnames:
-            self.ws_r = self.create_sheet(title=self.txt.get("sheet_rasters"))
+        if (
+            has_raster
+            and self.translated_texts.get("sheet_rasters") not in self.sheetnames
+        ):
+            self.sheet_raster_files = self.create_sheet(
+                title=self.translated_texts.get("sheet_rasters")
+            )
             # headers
-            self.ws_r.append([self.txt.get(i) for i in self.li_cols_raster])
-            # styling
-            for i in self.li_cols_raster:
-                self.ws_r.cell(row=1, column=self.li_cols_raster.index(i) + 1).style = (
-                    "Headline 2"
-                )
+            self.sheet_raster_files.append(
+                [self.translated_texts.get(i) for i in self.li_cols_raster]
+            )
 
             # initialize line counter
-            self.idx_r = 1
-        else:
-            pass
+            self.row_index_raster_files = 1
 
-        if has_filedb and self.txt.get("sheet_filedb") not in self.sheetnames:
-            self.ws_fdb = self.create_sheet(title=self.txt.get("sheet_filedb"))
+        if (
+            has_filedb
+            and self.translated_texts.get("sheet_filedb") not in self.sheetnames
+        ):
+            self.sheet_flat_geodatabases = self.create_sheet(
+                title=self.translated_texts.get("sheet_filedb")
+            )
             # headers
-            self.ws_fdb.append([self.txt.get(i) for i in self.li_cols_filedb])
-            # styling
-            for i in self.li_cols_filedb:
-                self.ws_fdb.cell(
-                    row=1, column=self.li_cols_filedb.index(i) + 1
-                ).style = "Headline 2"
+            self.sheet_flat_geodatabases.append(
+                [self.translated_texts.get(i) for i in self.li_cols_filedb]
+            )
 
             # initialize line counter
-            self.idx_f = 1
-        else:
-            pass
+            self.row_index_flat_geodatabases = 1
 
-        if has_mapdocs and self.txt.get("sheet_maplans") not in self.sheetnames:
-            self.ws_mdocs = self.create_sheet(title=self.txt.get("sheet_maplans"))
+        if (
+            has_mapdocs
+            and self.translated_texts.get("sheet_maplans") not in self.sheetnames
+        ):
+            self.sheet_map_workspaces = self.create_sheet(
+                title=self.translated_texts.get("sheet_maplans")
+            )
             # headers
-            self.ws_mdocs.append([self.txt.get(i) for i in self.li_cols_mapdocs])
-            # styling
-            for i in self.li_cols_mapdocs:
-                self.ws_mdocs.cell(
-                    row=1, column=self.li_cols_mapdocs.index(i) + 1
-                ).style = "Headline 2"
+            self.sheet_map_workspaces.append(
+                [self.translated_texts.get(i) for i in self.li_cols_mapdocs]
+            )
 
             # initialize line counter
-            self.idx_m = 1
-        else:
-            pass
+            self.row_index_map_worskpaces = 1
 
-        if has_cad and self.txt.get("sheet_cdao") not in self.sheetnames:
-            self.ws_cad = self.create_sheet(title=self.txt.get("sheet_cdao"))
+        if has_cad and self.translated_texts.get("sheet_cdao") not in self.sheetnames:
+            self.sheet_cad_files = self.create_sheet(
+                title=self.translated_texts.get("sheet_cdao")
+            )
             # headers
-            self.ws_cad.append([self.txt.get(i) for i in self.li_cols_caodao])
-            # styling
-            for i in self.li_cols_caodao:
-                self.ws_cad.cell(
-                    row=1, column=self.li_cols_caodao.index(i) + 1
-                ).style = "Headline 2"
+            self.sheet_cad_files.append(
+                [self.translated_texts.get(i) for i in self.li_cols_caodao]
+            )
 
             # initialize line counter
-            self.idx_c = 1
-        else:
-            pass
+            self.row_index_cad_files = 1
 
         if has_sgbd and "PostGIS" not in self.sheetnames:
-            self.ws_sgbd = self.create_sheet(title="PostGIS")
+            self.sheet_server_geodatabases = self.create_sheet(title="PostGIS")
             # headers
-            self.ws_sgbd.append([self.txt.get(i) for i in self.li_cols_sgbd])
-            # styling
-            for i in self.li_cols_sgbd:
-                self.ws_sgbd.cell(
-                    row=1, column=self.li_cols_sgbd.index(i) + 1
-                ).style = "Headline 2"
+            self.sheet_server_geodatabases.append(
+                [self.translated_texts.get(i) for i in self.li_cols_sgbd]
+            )
             # initialize line counter
-            self.idx_s = 1
-        else:
-            pass
-
-        # end of method
-        return
+            self.row_index_server_geodatabases = 1
 
     def tunning_worksheets(self):
         """Clean up and tunning worksheet."""
@@ -325,14 +291,19 @@ class MetadataToXlsx(Workbook):
             wsprops = sheet.sheet_properties
             wsprops.filterMode = True
 
+            # headers
+            for cell in sheet[1]:
+                if cell.value:
+                    cell.style = "Headline 2"
+
             # enable filters
             sheet.auto_filter.ref = "A1:{}{}".format(
                 get_column_letter(sheet.max_column), sheet.max_row
             )
             # columns width
             sheet.column_dimensions["A"].bestFit = True
-            # sheet.column_dimensions['A'].auto_size = True
-            # sheet.column_dimensions['B'].auto_size = True
+            sheet.column_dimensions["A"].auto_size = True
+            sheet.column_dimensions["B"].auto_size = True
 
             # dims = {}
             # for row in sheet.rows:
@@ -345,485 +316,501 @@ class MetadataToXlsx(Workbook):
         # end of method
         return
 
-    # ------------ Writing metadata ---------------------
+    @lru_cache(maxsize=128, typed=True)
+    def format_as_hyperlink(self, target: Union[str, Path], label: str) -> str:
+        """Format a cell hyperlink with a target and a label.
 
-    def store_md_vector(self, layer):
-        """Store metadata about a vector dataset."""
-        # increment line
-        self.idx_v += 1
-        # local variables
-        champs = ""
+        Args:
+            target (Union[str, Path]): link destination
+            label (str): display text
 
-        # in case of a source error
-        if "error" in layer:
-            # sheet.row(line).set_style(self.xls_erreur)
-            err_mess = self.txt.get(layer.get("error"))
-            logger.warning(
-                "Problem detected: " "{} in {}".format(err_mess, layer.get("name"))
-            )
-            self.ws_v[f"A{self.idx_v}"] = layer.get("name")
-            self.ws_v[f"A{self.idx_v}"].style = "Warning Text"
-            link = r'=HYPERLINK("{}","{}")'.format(
-                layer.get("folder"), self.txt.get("browse")
-            )
-            self.ws_v[f"B{self.idx_v}"] = link
-            self.ws_v[f"B{self.idx_v}"].style = "Warning Text"
-            self.ws_v[f"C{self.idx_v}"] = err_mess
-            self.ws_v[f"C{self.idx_v}"].style = "Warning Text"
-            # gdal info
-            if "err_gdal" in layer:
-                logger.warning(
-                    "Problem detected by GDAL: "
-                    "{} in {}".format(err_mess, layer.get("name"))
-                )
-                self.ws_v[f"Q{self.idx_v}"] = "{} : {}".format(
-                    layer.get("err_gdal")[0], layer.get("err_gdal")[1]
-                )
-                self.ws_v[f"Q{self.idx_v}"].style = "Warning Text"
-            else:
-                pass
-            # Interruption of function
-            return False
+        Returns:
+            str: cell text formatted with hyperlink
+        """
+        if isinstance(target, Path):
+            target = str(target.resolve())
+
+        return f'=HYPERLINK("{target}", "{label}")'
+
+    @lru_cache(maxsize=128, typed=True)
+    def format_bbox(self, bbox: tuple[float, float, float, float] | None) -> str:
+        if isinstance(bbox, tuple) and all(
+            [isinstance(coord, (float, int)) for coord in bbox]
+        ):
+            return ", ".join(str(coord) for coord in bbox)
         else:
-            pass
+            return ""
 
-        # Name
-        self.ws_v[f"A{self.idx_v}"] = secure_encoding(layer, "name")
+    def format_feature_attributes(self, metadataset: MetaVectorDataset) -> str:
+        """Format vector feature attributes in an unique string.
 
-        # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{}","{}")'.format(
-            layer.get("folder"), self.txt.get("browse")
-        )
-        self.ws_v[f"B{self.idx_v}"] = link
-        self.ws_v[f"B{self.idx_v}"].style = "Hyperlink"
+        Args:
+            metadataset (MetaDataset): metadataset
 
-        # Name of parent folder with an exception if this is the format name
-        self.ws_v[f"C{self.idx_v}"] = path.basename(layer.get("folder"))
+        Returns:
+            str: concatenated string with feature attributes informations
+        """
+        out_attributes_str = ""
 
-        # Fields count
-        self.ws_v[f"D{self.idx_v}"] = layer.get("num_fields", "")
-        # Objects count
-        self.ws_v[f"E{self.idx_v}"] = layer.get("num_obj", "")
-        # Geometry type
-        self.ws_v[f"F{self.idx_v}"] = layer.get("type_geom", "")
-
-        # Name of srs
-        self.ws_v[f"G{self.idx_v}"] = secure_encoding(layer, "srs")
-
-        # Type of SRS
-        self.ws_v[f"H{self.idx_v}"] = layer.get("srs_type", "")
-        # EPSG code
-        self.ws_v[f"I{self.idx_v}"] = layer.get("epsg", "")
-        # Spatial extent
-        emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
-            layer.get("xmin"),
-            layer.get("xmax"),
-            layer.get("ymin"),
-            layer.get("ymax"),
-        )
-        self.ws_v[f"J{self.idx_v}"].style = "wrap"
-        self.ws_v[f"J{self.idx_v}"] = emprise
-
-        # Creation date
-        self.ws_v[f"K{self.idx_v}"] = layer.get("date_crea")
-        # Last update date
-        self.ws_v[f"L{self.idx_v}"] = layer.get("date_actu")
-        # Format of data
-        self.ws_v[f"M{self.idx_v}"] = layer.get("format")
-        # dependencies
-        self.ws_v[f"N{self.idx_v}"].style = "wrap"
-        self.ws_v[f"N{self.idx_v}"] = " |\n ".join(layer.get("dependencies", []))
-        # total size
-        if self.opt_size_prettify:
-            self.ws_v[f"O{self.idx_v}"] = convert_octets(layer.get("total_size", 0))
-        else:
-            self.ws_v[f"O{self.idx_v}"] = layer.get("total_size", 0)
-
-        # Field informations
-        fields = layer.get("fields")
-        for chp in fields.keys():
+        for feature_attribute in metadataset.feature_attributes:
             # field type
-            if "Integer" in fields[chp][0]:
-                tipo = self.txt.get("entier")
-            elif fields[chp][0] == "Real":
-                tipo = self.txt.get("reel")
-            elif fields[chp][0] == "String":
-                tipo = self.txt.get("string")
-            elif fields[chp][0] == "Date":
-                tipo = self.txt.get("date")
+            if "integer" in feature_attribute.data_type.lower():
+                translated_feature_attribute_type = self.translated_texts.get("entier")
+            elif feature_attribute.data_type.lower() == "real":
+                translated_feature_attribute_type = self.translated_texts.get("reel")
+            elif feature_attribute.data_type.lower() == "string":
+                translated_feature_attribute_type = self.translated_texts.get("string")
+            elif feature_attribute.data_type.lower() in ("date", "datetime"):
+                translated_feature_attribute_type = self.translated_texts.get("date")
             else:
-                tipo = "unknown"
-                logger.warning(f"{chp} has an unknown type: {fields[chp][0]}")
+                translated_feature_attribute_type = feature_attribute.data_type
+                logger.warning(
+                    f"Layer: {metadataset.name} - {feature_attribute.name} has an "
+                    f"unstranslated type: {feature_attribute.data_type}"
+                )
 
             # concatenation of field informations
-            try:
-                champs = "{} {} ({}{}{}{}{}) ; ".format(
-                    champs,
-                    chp.encode("utf8", "replace"),
-                    tipo,
-                    self.txt.get("longueur"),
-                    fields[chp][1],
-                    self.txt.get("precision"),
-                    fields[chp][2],
-                )
-            except UnicodeDecodeError:
-                logger.warning(f"Field name with special letters: {chp}")
-                continue
-
-        # Once all fieds explored, write them
-        self.ws_v[f"P{self.idx_v}"] = champs
-
-        # end of method
-        return
-
-    def store_md_raster(self, layer, bands):
-        """Store metadata about a raster dataset."""
-        # increment line
-        self.idx_r += 1
-
-        # in case of a source error
-        if "error" in layer:
-            # sheet.row(line).set_style(self.xls_erreur)
-            err_mess = self.txt.get(layer.get("error"))
-            logger.warning(
-                "Problem detected: " "{} in {}".format(err_mess, layer.get("name"))
+            out_attributes_str = "{} {} ({}{}{}{}{}); ".format(
+                out_attributes_str,
+                feature_attribute.name,
+                translated_feature_attribute_type,
+                self.translated_texts.get("longueur"),
+                feature_attribute.length,
+                self.translated_texts.get("precision"),
+                feature_attribute.precision,
             )
-            self.ws_r[f"A{self.idx_r}"] = layer.get("name")
-            link = r'=HYPERLINK("{}","{}")'.format(
-                layer.get("folder"), self.txt.get("browse")
-            )
-            self.ws_r[f"B{self.idx_r}"] = link
-            self.ws_r[f"B{self.idx_r}"].style = "Warning Text"
-            self.ws_r[f"C{self.idx_r}"] = err_mess
-            self.ws_r[f"C{self.idx_r}"].style = "Warning Text"
-            # Interruption of function
-            return False
+
+        return out_attributes_str
+
+    @lru_cache
+    def format_size(self, in_size_in_octets: int = 0) -> str:
+        """Format size in octets accordingly to the option.
+
+        Args:
+            in_size_in_octets (int): input size in octets
+
+        Returns:
+            str: formatted size in octets
+        """
+        if self.opt_size_prettify:
+            return convert_octets(in_size_in_octets)
         else:
-            pass
+            return in_size_in_octets
 
-        # Name
-        self.ws_r[f"A{self.idx_r}"] = layer.get("name")
+    def store_error(
+        self,
+        metadataset: MetaDataset,
+        worksheet: Worksheet,
+        row_index: int,
+    ):
+        """Helper to store processing error in worksheet's row.
+
+        Args:
+            metadataset (MetaDataset): metadata with processing error
+            worksheet (Worksheet): Excel workbook's sheet where to store
+            row_index (int): worksheet's row index
+        """
+        err_mess = self.translated_texts.get(metadataset.processing_error_type)
+        logger.warning(
+            f"Problem detected on {metadataset.name} (in {metadataset.path}). "
+            f"Error: {err_mess}"
+        )
+        worksheet[f"A{row_index}"] = metadataset.name
+        worksheet[f"A{row_index}"].style = "Warning Text"
+        worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+            target=metadataset.path_as_str,
+            label=self.translated_texts.get("browse"),
+        )
+        worksheet[f"B{row_index}"].style = "Warning Text"
+        worksheet[f"C{row_index}"] = err_mess
+        worksheet[f"C{row_index}"].style = "Warning Text"
+        # gdal info
+        worksheet[f"Q{row_index}"] = (
+            f"{metadataset.processing_error_type}: "
+            f"{metadataset.processing_error_msg}"
+        )
+        worksheet[f"Q{row_index}"].style = "Warning Text"
+
+    def get_sheet_and_incremented_row_index_from_type(
+        self,
+        metadataset: MetaDataset,
+    ) -> tuple[Worksheet, int]:
+        if (
+            isinstance(metadataset, MetaVectorDataset)
+            and metadataset.dataset_type == "flat_vector"
+        ):
+            self.row_index_vector_files += 1
+            return self.sheet_vector_files, self.row_index_vector_files
+        elif isinstance(metadataset, MetaRasterDataset):
+            self.row_index_raster_files += 1
+            return self.sheet_raster_files, self.row_index_raster_files
+        elif isinstance(metadataset, MetaDatabaseTable):
+            self.row_index_server_geodatabases += 1
+            return self.sheet_server_geodatabases, self.row_index_server_geodatabases
+        elif isinstance(metadataset, MetaDatabaseFlat):
+            self.row_index_flat_geodatabases += 1
+            return self.sheet_flat_geodatabases, self.row_index_flat_geodatabases
+
+    def serialize_metadaset(self, metadataset: MetaDataset) -> bool:
+        """Router method to serialize metadataset depending on its type.
+
+        Args:
+            metadataset (MetaDataset): metadaset object to serialize
+
+        Returns:
+            bool: True if the object has been correctly serialized
+        """
+        worksheet, row_index = self.get_sheet_and_incremented_row_index_from_type(
+            metadataset=metadataset
+        )
+
+        # -- Common --
+        # in case of a source error
+        if metadataset.processing_succeeded is False:
+            self.store_error(
+                metadataset=metadataset, worksheet=worksheet, row_index=row_index
+            )
+            return False
+
+        # Dataset name
+        worksheet[f"A{row_index}"] = metadataset.name
+
+        # routing to custom serializing methods
+        if (
+            isinstance(metadataset, MetaVectorDataset)
+            and metadataset.dataset_type == "flat_vector"
+        ):
+            return self.store_md_vector_files(
+                metadataset=metadataset,
+                worksheet=worksheet,
+                row_index=row_index,
+            )
+        elif (
+            isinstance(metadataset, MetaRasterDataset)
+            and metadataset.dataset_type == "flat_raster"
+        ):
+            return self.store_md_raster_files(
+                metadataset=metadataset,
+                worksheet=worksheet,
+                row_index=row_index,
+            )
+        elif (
+            isinstance(metadataset, MetaDatabaseTable)
+            and metadataset.dataset_type == "sgbd_postgis"
+        ):
+            return self.store_md_geodatabases_server(
+                metadataset=metadataset,
+                worksheet=worksheet,
+                row_index=row_index,
+            )
+        elif isinstance(metadataset, MetaDatabaseFlat) and metadataset.dataset_type in (
+            "flat_database",
+            "flat_database_esri",
+        ):
+            return self.store_md_flat_geodatabases(
+                metadataset=metadataset,
+                worksheet=worksheet,
+                row_index=row_index,
+            )
+        else:
+            logger.error(
+                f"No matching serializer for {metadataset.name} "
+                f"(in {metadataset.path_as_str}): {metadataset.dataset_type}"
+            )
+
+    # ------------ Writing metadata ---------------------
+    def store_md_vector_files(
+        self,
+        metadataset: MetaVectorDataset,
+        worksheet: Worksheet | None = None,
+        row_index: int | None = None,
+    ):
+        """Store metadata about a vector dataset."""
+        # if args not defined use class attributes
+        if worksheet is None:
+            worksheet = self.sheet_vector_files
+        if row_index is None:
+            row_index = self.row_index_vector_files
 
         # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{}","{}")'.format(
-            layer.get("folder"), self.txt.get("browse")
+        worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+            target=metadataset.path.parent, label=self.translated_texts.get("browse")
         )
-        self.ws_r[f"B{self.idx_r}"] = link
-        self.ws_r[f"B{self.idx_r}"].style = "Hyperlink"
+        worksheet[f"B{row_index}"].style = "Hyperlink"
 
         # Name of parent folder with an exception if this is the format name
-        self.ws_r[f"C{self.idx_r}"] = path.basename(layer.get("folder"))
+        worksheet[f"C{row_index}"] = metadataset.parent_folder_name
 
-        # Image dimensions
-        self.ws_r[f"D{self.idx_r}"] = layer.get("num_rows")
-        self.ws_r[f"E{self.idx_r}"] = layer.get("num_cols")
+        # Fields count
+        worksheet[f"D{row_index}"] = metadataset.count_feature_attributes
+        # Objects count
+        worksheet[f"E{row_index}"] = metadataset.features_objects_count
+        # Geometry type
+        worksheet[f"F{row_index}"] = metadataset.geometry_type
 
-        # Pixel dimensions
-        self.ws_r[f"F{self.idx_r}"] = layer.get("pixelWidth")
-        self.ws_r[f"G{self.idx_r}"] = layer.get("pixelHeight")
-
-        # Image dimensions
-        self.ws_r[f"H{self.idx_r}"] = layer.get("xOrigin")
-        self.ws_r[f"I{self.idx_r}"] = layer.get("yOrigin")
+        # Name of srs
+        worksheet[f"G{row_index}"] = metadataset.crs_name
 
         # Type of SRS
-        self.ws_r[f"J{self.idx_r}"] = layer.get("srs_type")
+        worksheet[f"H{row_index}"] = metadataset.crs_type
         # EPSG code
-        self.ws_r[f"K{self.idx_r}"] = layer.get("epsg")
+        worksheet[f"I{row_index}"] = metadataset.crs_registry_code
+        # Spatial extent
+        worksheet[f"J{row_index}"].style = "wrap"
+        worksheet[f"J{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
         # Creation date
-        self.ws_r[f"M{self.idx_r}"] = layer.get("date_crea")
+        worksheet[f"K{row_index}"] = metadataset.storage_date_created
         # Last update date
-        self.ws_r[f"N{self.idx_r}"] = layer.get("date_actu")
-
-        # Number of bands
-        self.ws_r[f"O{self.idx_r}"] = layer.get("num_bands")
-
+        worksheet[f"L{row_index}"] = metadataset.storage_date_updated
         # Format of data
-        self.ws_r[f"P{self.idx_r}"] = "{} {}".format(
-            layer.get("format"), layer.get("format_version")
+        worksheet[f"M{row_index}"] = metadataset.format_gdal_long_name
+        # dependencies
+        worksheet[f"N{row_index}"].style = "wrap"
+        worksheet[f"N{row_index}"] = " |\n ".join(
+            str(f.resolve()) for f in metadataset.files_dependencies
         )
-        # Compression rate
-        self.ws_r[f"Q{self.idx_r}"] = layer.get("compr_rate")
+        # total size
+        worksheet[f"O{row_index}"] = self.format_size(
+            in_size_in_octets=metadataset.storage_size
+        )
 
-        # Color referential
-        self.ws_r[f"R{self.idx_r}"] = layer.get("color_ref")
+        # Field informations
+        worksheet[f"P{row_index}"] = self.format_feature_attributes(
+            metadataset=metadataset
+        )
 
-        # Dependencies
-        self.ws_r[f"S{self.idx_v}"].style = "wrap"
-        self.ws_r[f"S{self.idx_v}"] = " |\n ".join(layer.get("dependencies"))
-
-        # total size of file and its dependencies
-        if self.opt_size_prettify:
-            try:
-                self.ws_v[f"O{self.idx_r}"] = convert_octets(layer.get("total_size", 0))
-            except TypeError as exc:
-                logger.error(
-                    f"Failed to prettify size of {layer.get('name')}. Trace: {exc}"
-                )
-
-        else:
-            self.ws_v[f"O{self.idx_r}"] = layer.get("total_size", 0)
-
-        # in case of a source error
-        if layer.get("err_gdal", [0])[0] != 0:
-            logger.warning(
-                "Problem detected by GDAL: "
-                "{} in {}".format(layer.get("err_gdal"), layer.get("name"))
-            )
-            self.ws_r[f"U{self.idx_r}"] = "{} : {}".format(
-                layer.get("err_gdal")[0], layer.get("err_gdal")[1]
-            )
-            self.ws_r[f"U{self.idx_r}"].style = "Warning Text"
-        else:
-            pass
-
-        # end of method
-        return
-
-    def store_md_fdb(self, filedb):
-        """Storing metadata about a file database."""
-        # increment line
-        self.idx_f += 1
-
-        # in case of a source error
-        if "error" in filedb:
-            # sheet.row(line).set_style(self.xls_erreur)
-            err_mess = self.txt.get(filedb.get("error"))
-            logger.warning(
-                "Problem detected: " "{} in {}".format(err_mess, filedb.get("name"))
-            )
-            self.ws_fdb[f"A{self.idx_f}"] = filedb.get("name")
-            link = r'=HYPERLINK("{}","{}")'.format(
-                filedb.get("folder"), self.txt.get("browse")
-            )
-            self.ws_fdb[f"B{self.idx_f}"] = link
-            self.ws_fdb[f"B{self.idx_f}"].style = "Warning Text"
-            self.ws_fdb[f"C{self.idx_f}"] = err_mess
-            self.ws_fdb[f"C{self.idx_f}"].style = "Warning Text"
-            # gdal info
-            if "err_gdal" in filedb:
-                logger.warning(
-                    "Problem detected by GDAL: "
-                    "{} in {}".format(err_mess, filedb.get("name"))
-                )
-                self.ws_fdb[f"Q{self.idx_v}"] = "{} : {}".format(
-                    filedb.get("err_gdal")[0], filedb.get("err_gdal")[1]
-                )
-                self.ws_fdb[f"Q{self.idx_v}"].style = "Warning Text"
-            else:
-                pass
-            # Interruption of function
-            return False
-        else:
-            pass
-
-        # Name
-        self.ws_fdb[f"A{self.idx_f}"] = filedb.get("name")
+    def store_md_raster_files(
+        self,
+        metadataset: MetaRasterDataset,
+        worksheet: Worksheet | None = None,
+        row_index: int | None = None,
+    ):
+        """Store metadata about a raster dataset."""
+        # if args not defined use class attributes
+        if worksheet is None:
+            worksheet = self.sheet_raster_files
+        if row_index is None:
+            row_index = self.row_index_raster_files
 
         # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{}","{}")'.format(
-            filedb.get("folder"), self.txt.get("browse")
+        worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+            target=metadataset.path.parent, label=self.translated_texts.get("browse")
         )
-        self.ws_fdb[f"B{self.idx_f}"] = link
-        self.ws_fdb[f"B{self.idx_f}"].style = "Hyperlink"
+        worksheet[f"B{row_index}"].style = "Hyperlink"
 
-        self.ws_fdb[f"C{self.idx_f}"] = path.basename(filedb.get("folder"))
-        self.ws_fdb[f"D{self.idx_f}"] = filedb.get("total_size")
-        self.ws_fdb[f"E{self.idx_f}"] = filedb.get("date_crea")
-        self.ws_fdb[f"F{self.idx_f}"] = filedb.get("date_actu")
-        self.ws_fdb[f"G{self.idx_f}"] = filedb.get("layers_count")
-        self.ws_fdb[f"H{self.idx_f}"] = filedb.get("total_fields")
-        self.ws_fdb[f"I{self.idx_f}"] = filedb.get("total_objs")
+        # Name of parent folder with an exception if this is the format name
+        worksheet[f"C{row_index}"] = metadataset.parent_folder_name
+
+        # Image dimensions
+        worksheet[f"D{row_index}"] = metadataset.rows_count
+        worksheet[f"E{row_index}"] = metadataset.columns_count
+
+        # Pixel dimensions
+        worksheet[f"F{row_index}"] = metadataset.pixel_width
+        worksheet[f"G{row_index}"] = metadataset.pixel_height
+
+        # Image dimensions
+        worksheet[f"H{row_index}"] = metadataset.origin_x
+        worksheet[f"I{row_index}"] = metadataset.origin_y
+
+        # Type of SRS
+        worksheet[f"J{row_index}"] = metadataset.crs_type
+        # EPSG code
+        worksheet[f"K{row_index}"] = metadataset.crs_registry_code
+
+        # Creation date
+        worksheet[f"M{row_index}"] = metadataset.storage_date_created
+        # Last update date
+        worksheet[f"N{row_index}"] = metadataset.storage_date_updated
+
+        # Number of bands
+        worksheet[f"O{row_index}"] = metadataset.bands_count
+
+        # Format of data
+        worksheet[f"P{row_index}"] = metadataset.format_gdal_long_name
+        # Compression rate
+        worksheet[f"Q{row_index}"] = metadataset.compression_rate
+
+        # Color referential
+        worksheet[f"R{row_index}"] = metadataset.color_space
+
+        # Dependencies
+        worksheet[f"S{row_index}"].style = "wrap"
+        worksheet[f"S{row_index}"] = " |\n ".join(
+            f.resolve() for f in metadataset.files_dependencies
+        )
+
+        # total size of file and its dependencies
+        worksheet[f"O{row_index}"] = self.format_size(
+            in_size_in_octets=metadataset.storage_size
+        )
+
+    def store_md_flat_geodatabases(
+        self,
+        metadataset: MetaDatabaseFlat,
+        worksheet: Worksheet | None = None,
+        row_index: int | None = None,
+    ):
+        """Serialize a metadataset into an Excel worksheet's row.
+
+        Args:
+            metadataset (MetaDatabaseTable): metadataset to serialize
+            worksheet (Workbook | None, optional): Excel workbook's sheet where to store. Defaults to None.
+            row_index (int | None, optional): worksheet's row index. Defaults to None.
+        """
+        # if args not defined use class attributes
+        if worksheet is None:
+            worksheet = self.sheet_flat_geodatabases
+        if row_index is None:
+            row_index = self.row_index_flat_geodatabases
+
+        # writing metadata
+        worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+            target=metadataset.path.parent, label=self.translated_texts.get("browse")
+        )
+        worksheet[f"B{row_index}"].style = "Hyperlink"
+        worksheet[f"C{row_index}"] = metadataset.parent_folder_name
+        worksheet[f"D{row_index}"] = metadataset.storage_size
+        worksheet[f"E{row_index}"] = metadataset.storage_date_created
+        worksheet[f"F{row_index}"] = metadataset.storage_date_updated
+        worksheet[f"G{row_index}"] = metadataset.format_gdal_long_name
+        worksheet[f"H{row_index}"] = metadataset.count_layers
+        worksheet[f"I{row_index}"] = metadataset.cumulated_count_feature_attributes
+        worksheet[f"J{row_index}"] = metadataset.cumulated_count_feature_objects
 
         # parsing layers
-        for layer_idx, layer_name in zip(
-            filedb.get("layers_idx"), filedb.get("layers_names")
-        ):
+        for layer_metadataset in metadataset.layers:
             # increment line
-            self.idx_f += 1
-            champs = ""
-            # get the layer informations
-            try:
-                gdb_layer = filedb.get(f"{layer_idx}_{layer_name}")
-            except UnicodeError as err:
-                logger.error(f"Encoding error. Trace: {err}")
-                continue
+            self.row_index_flat_geodatabases += 1
+            row_index = self.row_index_flat_geodatabases
+
             # in case of a source error
-            if gdb_layer.get("error"):
-                err_mess = self.txt.get(gdb_layer.get("error"))
-                logger.warning(
-                    "Problem detected: {} in {}".format(
-                        err_mess, gdb_layer.get("title")
-                    )
+            if metadataset.processing_succeeded is False:
+                err_mess = self.translated_texts.get(
+                    layer_metadataset.processing_error_type
                 )
-                self.ws_fdb[f"G{self.idx_f}"] = gdb_layer.get("title")
-                self.ws_fdb[f"G{self.idx_f}"].style = "Warning Text"
-                self.ws_fdb[f"H{self.idx_f}"] = err_mess
-                self.ws_fdb[f"H{self.idx_f}"].style = "Warning Text"
+                logger.warning(
+                    f"Problem detected on layer {layer_metadataset.name} "
+                    f"(part of dataset '{metadataset.path.resolve}'). "
+                    f"Error: {err_mess}"
+                )
+                worksheet[f"H{row_index}"] = layer_metadataset.name
+                worksheet[f"H{row_index}"].style = "Warning Text"
+                worksheet[f"I{row_index}"] = err_mess
+                worksheet[f"I{row_index}"].style = "Warning Text"
                 # Interruption of function
                 continue
-            else:
-                pass
 
-            self.ws_fdb[f"G{self.idx_f}"] = gdb_layer.get("title")
-            self.ws_fdb[f"H{self.idx_f}"] = gdb_layer.get("num_fields")
-            self.ws_fdb[f"I{self.idx_f}"] = gdb_layer.get("num_obj")
-            self.ws_fdb[f"J{self.idx_f}"] = gdb_layer.get("type_geom")
-            self.ws_fdb[f"K{self.idx_f}"] = secure_encoding(gdb_layer, "srs")
-            self.ws_fdb[f"L{self.idx_f}"] = gdb_layer.get("srs_type")
-            self.ws_fdb[f"M{self.idx_f}"] = gdb_layer.get("epsg")
+            worksheet[f"H{row_index}"] = layer_metadataset.name
+            worksheet[f"I{row_index}"] = layer_metadataset.count_feature_attributes
+            worksheet[f"J{row_index}"] = layer_metadataset.features_objects_count
+            worksheet[f"K{row_index}"] = layer_metadataset.geometry_type
+            worksheet[f"L{row_index}"] = layer_metadataset.crs_name
+            worksheet[f"M{row_index}"] = layer_metadataset.crs_type
+            worksheet[f"N{row_index}"] = layer_metadataset.crs_registry_code
 
             # Spatial extent
-            emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
-                gdb_layer.get("xmin"),
-                gdb_layer.get("xmax"),
-                gdb_layer.get("ymin"),
-                gdb_layer.get("ymax"),
-            )
-            self.ws_fdb[f"N{self.idx_f}"].style = "wrap"
-            self.ws_fdb[f"N{self.idx_f}"] = emprise
+            worksheet[f"O{row_index}"].style = "wrap"
+            worksheet[f"O{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
             # Field informations
-            fields = gdb_layer.get("fields")
-            for chp in fields.keys():
-                # field type
-                if "Integer" in fields[chp][0]:
-                    tipo = self.txt.get("entier")
-                elif fields[chp][0] == "Real":
-                    tipo = self.txt.get("reel")
-                elif fields[chp][0] == "String":
-                    tipo = self.txt.get("string")
-                elif fields[chp][0] == "Date":
-                    tipo = self.txt.get("date")
-                else:
-                    tipo = "unknown"
-                    logger.warning(chp + " unknown type")
+            worksheet[f"P{row_index}"] = self.format_feature_attributes(
+                metadataset=layer_metadataset
+            )
 
-                # concatenation of field informations
-                try:
-                    champs = "{} {} ({}{}{}{}{}) ; ".format(
-                        champs,
-                        chp.encode("utf8", "replace"),
-                        tipo,
-                        self.txt.get("longueur"),
-                        fields[chp][1],
-                        self.txt.get("precision"),
-                        fields[chp][2],
-                    )
-                except UnicodeDecodeError:
-                    logger.warning(f"Field name with special letters: {chp}")
-                    continue
+    def store_md_mapdoc(
+        self,
+        metadataset: MetaVectorDataset,
+        worksheet: Worksheet | None = None,
+        row_index: int | None = None,
+    ):
+        """Serialize a metadataset into an Excel worksheet's row.
 
-            # Once all fieds explored, write them
-            self.ws_fdb[f"O{self.idx_f}"] = champs
-
-        # end of method
-        return
-
-    def store_md_mapdoc(self, mapdoc):
-        """To store mapdocs information from DicoGIS."""
-        # increment line
-        self.idx_m += 1
+        Args:
+            metadataset (MetaDatabaseTable): metadataset to serialize
+            worksheet (Workbook | None, optional): Excel workbook's sheet where to store. Defaults to None.
+            row_index (int | None, optional): worksheet's row index. Defaults to None.
+        """
+        # if args not defined use class attributes
+        if worksheet is None:
+            worksheet = self.sheet_map_workspaces
+        if row_index is None:
+            row_index = self.row_index_map_worskpaces
 
         # local variables
         champs = ""
 
-        # in case of a source error
-        if "error" in mapdoc:
-            # sheet.row(line).set_style(self.xls_erreur)
-            err_mess = self.txt.get(mapdoc.get("error"))
-            logger.warning(
-                "Problem detected: " "{} in {}".format(err_mess, mapdoc.get("name"))
-            )
-            self.ws_mdocs[f"A{self.idx_m}"] = mapdoc.get("name")
-            self.ws_mdocs[f"A{self.idx_m}"].style = "Warning Text"
-            link = r'=HYPERLINK("{}","{}")'.format(
-                mapdoc.get("folder"), self.txt.get("browse")
-            )
-            self.ws_mdocs[f"B{self.idx_m}"] = link
-            self.ws_mdocs[f"B{self.idx_m}"].style = "Warning Text"
-            self.ws_mdocs[f"C{self.idx_m}"] = err_mess
-            self.ws_mdocs[f"C{self.idx_m}"].style = "Warning Text"
-            # Interruption of function
-            return False
-        else:
-            pass
-
-        # Name
-        self.ws_mdocs[f"A{self.idx_m}"] = mapdoc.get("name")
-
         # Path of parent folder formatted to be a hyperlink
         link = r'=HYPERLINK("{}","{}")'.format(
-            mapdoc.get("folder"), self.txt.get("browse")
+            metadataset.get("folder"), self.translated_texts.get("browse")
         )
-        self.ws_mdocs[f"B{self.idx_m}"] = link
-        self.ws_mdocs[f"B{self.idx_m}"].style = "Hyperlink"
-        self.ws_mdocs[f"C{self.idx_m}"] = path.dirname(mapdoc.get("folder"))
-        self.ws_mdocs[f"D{self.idx_m}"] = mapdoc.get("title")
-        self.ws_mdocs[f"E{self.idx_m}"] = mapdoc.get("creator_prod")
-        self.ws_mdocs[f"F{self.idx_m}"] = mapdoc.get("keywords")
-        self.ws_mdocs[f"G{self.idx_m}"] = mapdoc.get("subject")
-        self.ws_mdocs[f"H{self.idx_m}"] = mapdoc.get("dpi")
-        self.ws_mdocs[f"I{self.idx_m}"] = mapdoc.get("total_size")
-        self.ws_mdocs[f"J{self.idx_m}"] = mapdoc.get("date_crea")
-        self.ws_mdocs[f"K{self.idx_m}"] = mapdoc.get("date_actu")
-        self.ws_mdocs[f"L{self.idx_m}"] = mapdoc.get("xOrigin")
-        self.ws_mdocs[f"M{self.idx_m}"] = mapdoc.get("yOrigin")
-        self.ws_mdocs[f"N{self.idx_m}"] = secure_encoding(mapdoc, "srs")
-        self.ws_mdocs[f"O{self.idx_m}"] = mapdoc.get("srs_type")
-        self.ws_mdocs[f"P{self.idx_m}"] = mapdoc.get("epsg")
-        self.ws_mdocs[f"Q{self.idx_m}"] = mapdoc.get("layers_count")
-        self.ws_mdocs[f"R{self.idx_m}"] = mapdoc.get("total_fields")
-        self.ws_mdocs[f"S{self.idx_m}"] = mapdoc.get("total_objs")
+        worksheet[f"B{row_index}"] = link
+        worksheet[f"B{row_index}"].style = "Hyperlink"
+        worksheet[f"C{row_index}"] = path.dirname(metadataset.get("folder"))
+        worksheet[f"E{row_index}"] = metadataset.get("creator_prod")
+        worksheet[f"F{row_index}"] = metadataset.get("keywords")
+        worksheet[f"G{row_index}"] = metadataset.get("subject")
+        worksheet[f"H{row_index}"] = metadataset.get("dpi")
+        worksheet[f"I{row_index}"] = metadataset.get("total_size")
+        worksheet[f"J{row_index}"] = metadataset.get("date_crea")
+        worksheet[f"K{row_index}"] = metadataset.get("date_actu")
+        worksheet[f"L{row_index}"] = metadataset.get("xOrigin")
+        worksheet[f"M{row_index}"] = metadataset.get("yOrigin")
+        worksheet[f"N{row_index}"] = metadataset.crs_name
+        worksheet[f"O{row_index}"] = metadataset.crs_type
+        worksheet[f"P{row_index}"] = metadataset.crs_registry_code
+        worksheet[f"Q{row_index}"] = metadataset.get("layers_count")
+        worksheet[f"R{row_index}"] = metadataset.get("total_fields")
+        worksheet[f"S{row_index}"] = metadataset.get("total_objs")
 
         for layer_idx, layer_name in zip(
-            mapdoc.get("layers_idx"), mapdoc.get("layers_names")
+            metadataset.get("layers_idx"), metadataset.get("layers_names")
         ):
             # increment line
-            self.idx_m += 1
+            self.row_index_map_worskpaces += 1
             champs = ""
 
             # get the layer informations
             try:
-                mdoc_layer = mapdoc.get(f"{layer_idx}_{layer_name}")
+                mdoc_layer = metadataset.get(f"{layer_idx}_{layer_name}")
             except UnicodeDecodeError:
-                mdoc_layer = mapdoc.get(
+                mdoc_layer = metadataset.get(
                     "{}_{}".format(layer_idx, layer_name.encode("utf8", "replace"))
                 )
             # in case of a source error
             if mdoc_layer.get("error"):
-                err_mess = self.txt.get(mdoc_layer.get("error"))
+                err_mess = self.translated_texts.get(mdoc_layer.get("error"))
                 logger.warning(
                     "Problem detected: {} in {}".format(
                         err_mess, mdoc_layer.get("title")
                     )
                 )
-                self.ws_mdocs[f"Q{self.idx_f}"] = mdoc_layer.get("title")
-                self.ws_mdocs[f"Q{self.idx_f}"].style = "Warning Text"
-                self.ws_mdocs[f"R{self.idx_f}"] = err_mess
-                self.ws_mdocs[f"R{self.idx_f}"].style = "Warning Text"
+                worksheet[f"Q{row_index}"] = mdoc_layer.get("title")
+                worksheet[f"Q{row_index}"].style = "Warning Text"
+                worksheet[f"R{row_index}"] = err_mess
+                worksheet[f"R{row_index}"].style = "Warning Text"
                 # loop must go on
                 continue
             else:
                 pass
             # layer info
-            self.ws_mdocs[f"Q{self.idx_m}"] = mdoc_layer.get("title")
-            self.ws_mdocs[f"R{self.idx_m}"] = mdoc_layer.get("num_fields")
-            self.ws_mdocs[f"S{self.idx_m}"] = mdoc_layer.get("num_objs")
+            worksheet[f"Q{row_index}"] = mdoc_layer.get("title")
+            worksheet[f"R{row_index}"] = mdoc_layer.get("num_fields")
+            worksheet[f"S{row_index}"] = mdoc_layer.get("num_objs")
 
             # Field informations
             fields = mdoc_layer.get("fields")
             for chp in fields.keys():
                 # field type
                 if "Integer" in fields[chp][0]:
-                    tipo = self.txt.get("entier")
+                    tipo = self.translated_texts.get("entier")
                 elif fields[chp][0] == "Real":
-                    tipo = self.txt.get("reel")
+                    tipo = self.translated_texts.get("reel")
                 elif fields[chp][0] == "String":
-                    tipo = self.txt.get("string")
+                    tipo = self.translated_texts.get("string")
                 elif fields[chp][0] == "Date":
-                    tipo = self.txt.get("date")
+                    tipo = self.translated_texts.get("date")
                 else:
                     tipo = "unknown"
                     logger.warning(chp + " unknown type")
@@ -834,9 +821,9 @@ class MetadataToXlsx(Workbook):
                         champs,
                         chp.decode("utf8", "replace"),
                         tipo,
-                        self.txt.get("longueur"),
+                        self.translated_texts.get("longueur"),
                         fields[chp][1],
-                        self.txt.get("precision"),
+                        self.translated_texts.get("precision"),
                         fields[chp][2],
                     )
                 except UnicodeDecodeError:
@@ -857,273 +844,54 @@ class MetadataToXlsx(Workbook):
                     continue
 
             # Once all fieds explored, write them
-            self.ws_fdb[f"T{self.idx_f}"] = champs
+            self.sheet_flat_geodatabases[f"T{row_index}"] = champs
 
         # end of method
         return
 
-    def store_md_cad(self, cad):
-        """Store metadata about CAD dataset."""
-        # increment line
-        self.idx_c += 1
+    def store_md_geodatabases_server(
+        self,
+        metadataset: MetaDatabaseTable,
+        worksheet: Worksheet | None = None,
+        row_index: int | None = None,
+    ):
+        """Serialize a metadataset into an Excel worksheet's row.
 
-        # local variables
-        champs = ""
-
-        # in case of a source error
-        if "error" in cad:
-            # sheet.row(line).set_style(self.xls_erreur)
-            err_mess = self.txt.get(cad.get("error"))
-            logger.warning(
-                "Problem detected: {} in {}".format(err_mess, cad.get("name"))
-            )
-            self.ws_cad[f"A{self.idx_c}"] = cad.get("name")
-            self.ws_cad[f"A{self.idx_c}"].style = "Warning Text"
-            link = r'=HYPERLINK("{}","{}")'.format(
-                cad.get("folder"), self.txt.get("browse")
-            )
-            self.ws_cad[f"B{self.idx_c}"] = link
-            self.ws_cad[f"B{self.idx_c}"].style = "Warning Text"
-            self.ws_cad[f"C{self.idx_c}"] = err_mess
-            self.ws_cad[f"C{self.idx_c}"].style = "Warning Text"
-            # Interruption of function
-            return False
-        else:
-            pass
-
-        # Name
-        self.ws_cad[f"A{self.idx_c}"] = cad.get("name")
-
-        # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{}","{}")'.format(
-            cad.get("folder"), self.txt.get("browse")
-        )
-        self.ws_cad[f"B{self.idx_c}"] = link
-        self.ws_cad[f"B{self.idx_c}"].style = "Hyperlink"
-
-        # Name of parent folder with an exception if this is the format name
-        self.ws_cad[f"C{self.idx_c}"] = path.basename(cad.get("folder"))
-        # total size
-        self.ws_cad[f"D{self.idx_c}"] = cad.get("total_size")
-        # Creation date
-        self.ws_cad[f"E{self.idx_c}"] = cad.get("date_crea")
-        # Last update date
-        self.ws_cad[f"F{self.idx_c}"] = cad.get("date_actu")
-        self.ws_cad[f"G{self.idx_c}"] = cad.get("layers_count")
-        self.ws_cad[f"H{self.idx_c}"] = cad.get("total_fields")
-        self.ws_cad[f"I{self.idx_c}"] = cad.get("total_objs")
-
-        # parsing layers
-        for layer_idx, layer_name in zip(
-            cad.get("layers_idx"), cad.get("layers_names")
-        ):
-            # increment line
-            self.idx_c += 1
-            champs = ""
-            # get the layer informations
-            try:
-                layer = cad.get(f"{layer_idx}_{layer_name}")
-            except UnicodeDecodeError:
-                layer = cad.get("{}_{}".format(layer_idx, layer_name.decode("latin1")))
-            # in case of a source error
-            if layer.get("error"):
-                err_mess = self.txt.get(layer.get("error"))
-                logger.warning(
-                    "Problem detected: " "{} in {}".format(err_mess, layer.get("title"))
-                )
-                self.ws_cad[f"G{self.idx_c}"] = layer.get("title")
-                self.ws_cad[f"G{self.idx_c}"].style = "Warning Text"
-                self.ws_cad[f"H{self.idx_c}"] = err_mess
-                self.ws_cad[f"H{self.idx_c}"].style = "Warning Text"
-                # Interruption of function
-                continue
-            else:
-                pass
-
-            self.ws_cad[f"G{self.idx_c}"] = layer.get("title")
-            self.ws_cad[f"H{self.idx_c}"] = layer.get("num_fields")
-            self.ws_cad[f"I{self.idx_c}"] = layer.get("num_obj")
-            self.ws_cad[f"J{self.idx_c}"] = layer.get("type_geom")
-            self.ws_cad[f"K{self.idx_c}"] = layer.get("srs")
-            self.ws_cad[f"L{self.idx_c}"] = layer.get("srs_type")
-            self.ws_cad[f"M{self.idx_c}"] = layer.get("epsg")
-
-            # Spatial extent
-            emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
-                layer.get("xmin"),
-                layer.get("xmax"),
-                layer.get("ymin"),
-                layer.get("ymax"),
-            )
-            self.ws_cad[f"N{self.idx_c}"].style = "wrap"
-            self.ws_cad[f"N{self.idx_c}"] = emprise
-
-            # Field informations
-            fields = layer.get("fields")
-            for chp in fields.keys():
-                # field type
-                if "Integer" in fields[chp][0]:
-                    tipo = self.txt.get("entier")
-                elif fields[chp][0] == "Real":
-                    tipo = self.txt.get("reel")
-                elif fields[chp][0] == "String":
-                    tipo = self.txt.get("string")
-                elif fields[chp][0] == "Date":
-                    tipo = self.txt.get("date")
-                else:
-                    tipo = "unknown"
-                    logger.warning(chp + " unknown type")
-
-                # concatenation of field informations
-                try:
-                    champs = "{} {} ({}{}{}{}{}) ; ".format(
-                        champs,
-                        chp,
-                        tipo,
-                        self.txt.get("longueur"),
-                        fields[chp][1],
-                        self.txt.get("precision"),
-                        fields[chp][2],
-                    )
-                except UnicodeDecodeError:
-                    logger.warning(
-                        "Field name with special letters: {}".format(
-                            chp.decode("latin1")
-                        )
-                    )
-                    # decode the fucking field name
-                    champs = (
-                        champs
-                        + chp.decode("latin1")
-                        + " ({}, Lg. = {}, Pr. = {}) ;".format(
-                            tipo, fields[chp][1], fields[chp][2]
-                        )
-                    )
-                    # then continue
-                    continue
-
-            # Once all fieds explored, write them
-            self.ws_cad[f"O{self.idx_c}"] = champs
-
-        # End of method
-        return
-
-    def store_md_sgdb(self, layer: dict):
-        """Storing metadata about a file database."""
-        # increment line
-        self.idx_s += 1
-        # local variable
-        champs = ""
-
-        # layer name
-        self.ws_sgbd[f"A{self.idx_s}"] = layer.get("name")
+        Args:
+            metadataset (MetaDatabaseTable): metadataset to serialize
+            worksheet (Workbook | None, optional): Excel workbook's sheet where to store. Defaults to None.
+            row_index (int | None, optional): worksheet's row index. Defaults to None.
+        """
+        # if args not defined use class attributes
+        if worksheet is None:
+            worksheet = self.sheet_server_geodatabases
+        if row_index is None:
+            row_index = self.row_index_server_geodatabases
 
         # connection string
-        self.ws_sgbd[f"B{self.idx_s}"] = "{}@{}:{}-{}".format(
-            layer.get("user"),
-            layer.get("sgbd_host"),
-            layer.get("sgbd_port"),
-            layer.get("db_name"),
-        )
-        self.ws_sgbd[f"B{self.idx_s}"].style = "Hyperlink"
+        worksheet[f"B{row_index}"] = metadataset.path_as_str
+        worksheet[f"B{row_index}"].style = "Hyperlink"
         # schema
-        self.ws_sgbd[f"C{self.idx_s}"] = layer.get("folder")
-
-        # in case of a source error
-        if "error" in layer:
-            self.ws_sgbd[f"D{self.idx_s}"] = layer.get("error")
-            self.ws_sgbd[f"A{self.idx_s}"].style = "Warning Text"
-            self.ws_sgbd[f"B{self.idx_s}"].style = "Warning Text"
-            self.ws_sgbd[f"C{self.idx_s}"].style = "Warning Text"
-            self.ws_sgbd[f"D{self.idx_s}"].style = "Warning Text"
-            # gdal info
-            if "err_gdal" in layer:
-                self.ws_v[f"M{self.idx_v}"] = "{} : {}".format(
-                    layer.get("err_gdal")[0], layer.get("err_gdal")[1]
-                )
-                self.ws_v[f"M{self.idx_v}"].style = "Warning Text"
-            else:
-                pass
-            # interruption of function
-            return False
-        else:
-            pass
+        worksheet[f"C{row_index}"] = metadataset.schema_name
 
         # structure
-        self.ws_sgbd[f"D{self.idx_s}"] = layer.get("num_fields")
-        self.ws_sgbd[f"E{self.idx_s}"] = layer.get("num_obj")
-        self.ws_sgbd[f"F{self.idx_s}"] = layer.get("type_geom")
+        worksheet[f"D{row_index}"] = metadataset.count_feature_attributes
+        worksheet[f"E{row_index}"] = metadataset.features_objects_count
+        worksheet[f"F{row_index}"] = metadataset.geometry_type
 
         # SRS
-        self.ws_sgbd[f"G{self.idx_s}"] = layer.get("srs")
-        self.ws_sgbd[f"H{self.idx_s}"] = layer.get("srs_type")
-        self.ws_sgbd[f"I{self.idx_s}"] = layer.get("epsg")
+        worksheet[f"G{row_index}"] = metadataset.crs_name
+        worksheet[f"H{row_index}"] = metadataset.crs_type
+        worksheet[f"I{row_index}"] = metadataset.crs_registry_code
 
         # Spatial extent
-        emprise = "Xmin : {} - Xmax : {} | \nYmin : {} - Ymax : {}".format(
-            layer.get("xmin"),
-            layer.get("xmax"),
-            layer.get("ymin"),
-            layer.get("ymax"),
-        )
-        self.ws_sgbd[f"J{self.idx_s}"].style = "wrap"
-        self.ws_sgbd[f"J{self.idx_s}"] = emprise
+        worksheet[f"J{row_index}"].style = "wrap"
+        worksheet[f"J{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
         # type
-        self.ws_sgbd[f"K{self.idx_s}"] = layer.get("format")
+        worksheet[f"K{row_index}"] = metadataset.format_gdal_long_name
 
         # Field informations
-        fields = layer.get("fields")
-        for chp in fields.keys():
-            # field type
-            if "Integer" in fields[chp][0]:
-                tipo = self.txt.get("entier")
-            elif fields[chp][0] == "Real":
-                tipo = self.txt.get("reel")
-            elif fields[chp][0] == "String":
-                tipo = self.txt.get("string")
-            elif fields[chp][0] == "Date":
-                tipo = self.txt.get("date")
-            else:
-                tipo = "unknown"
-                logger.warning(chp + " unknown type")
-
-            # concatenation of field informations
-            try:
-                champs = "{} {} ({}{}{}{}{}) ; ".format(
-                    champs,
-                    chp,
-                    tipo,
-                    self.txt.get("longueur"),
-                    fields[chp][1],
-                    self.txt.get("precision"),
-                    fields[chp][2],
-                )
-            except UnicodeDecodeError:
-                logger.warning(
-                    "Field name with special letters: {}".format(chp.decode("latin1"))
-                )
-                # decode the fucking field name
-                champs = (
-                    champs
-                    + chp.decode("latin1")
-                    + " ({}, Lg. = {}, Pr. = {}) ;".format(
-                        tipo, fields[chp][1], fields[chp][2]
-                    )
-                )
-                # then continue
-                continue
-
-        # Once all fieds explored, write them
-        self.ws_sgbd[f"L{self.idx_s}"] = champs
-
-        # end of method
-        return
-
-
-# ############################################################################
-# ##### Stand alone program ########
-# ##################################
-if __name__ == "__main__":
-    """Standalone execution and tests"""
-    pass
+        worksheet[f"L{row_index}"] = self.format_feature_attributes(
+            metadataset=metadataset
+        )

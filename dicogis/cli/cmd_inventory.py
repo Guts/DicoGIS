@@ -16,13 +16,14 @@ import typer
 from rich import print
 
 # project
-from dicogis.__about__ import __title__, __version__
+from dicogis.__about__ import __package_name__, __title__, __version__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.to_xlsx import MetadataToXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import get_gdal_version, get_proj_version
+from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
@@ -31,9 +32,7 @@ from dicogis.utils.utils import Utilities
 # ########## Globals ###############
 # ##################################
 
-cli_list = typer.Typer(help="List (inventory) operations.")
 state = {"verbose": False}
-APP_NAME = f"{__title__}_list"
 logger = logging.getLogger(__name__)
 default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 
@@ -42,9 +41,6 @@ default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 # ##################################
 
 
-@cli_list.command(
-    help="List geodata and extract metadata into an Excel (.xlsx) spreadsheet file."
-)
 def inventory(
     input_folder: Annotated[
         Optional[Path],
@@ -105,6 +101,14 @@ def inventory(
             help="Enable/disable notification's sound at the end of processing.",
         ),
     ] = True,
+    opt_open_output: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_OPEN_OUTPUT",
+            is_flag=True,
+            help="Enable/disable auto opening output file when processing has finished.",
+        ),
+    ] = True,
     opt_prettify_size: Annotated[
         bool,
         typer.Option(
@@ -124,8 +128,9 @@ def inventory(
     ] = None,
     verbose: bool = False,
 ):
-    """Command to list geodata files starting from a folder and/or databases using \
-        connection listed in pg_service.conf.
+    """Main command. Make an inventory of geodata files starting from a folder and/or
+    databases using connection listed in pg_service.conf and store everything in an
+    output file.
 
     Args:
         input_folder (Annotated[Optional[Path], typer.Option): starting folder for files.
@@ -139,13 +144,20 @@ def inventory(
     """
     if verbose:
         state["verbose"] = True
-        logger.setLevel = logging.DEBUG
+
+    logmngr = LogManager(
+        console_level=logging.DEBUG if verbose else logging.WARNING,
+        file_level=logging.DEBUG if verbose else logging.INFO,
+        label=f"{__package_name__}-cli",
+    )
+    # add headers
+    logmngr.headers()
 
     logger.debug(
-        f"{APP_NAME} parameters: {input_folder=} - {formats=} - {pg_services=} - "
+        f"Passed parameters: {input_folder=} - {formats=} - {pg_services=} - "
         f"{verbose=} -{language=}"
     )
-    app_dir = typer.get_app_dir(APP_NAME)
+    app_dir = typer.get_app_dir(__title__)
 
     # log some context information
     logger.info(f"DicoGIS version: {__version__}")
@@ -165,16 +177,15 @@ def inventory(
     # TODO: check if specified formats are supported
 
     # i18n
-    localized_strings: dict = {}
     if language is None:
-        language = getlocale()[1]
-    TextsManager().load_texts(dico_texts=localized_strings, language_code=language)
+        language = getlocale()
+    localized_strings = TextsManager().load_texts(language_code=language)
 
     # output format
     if output_format == "excel":
         # creating the Excel workbook
         xl_workbook = MetadataToXlsx(
-            texts=localized_strings,
+            translated_texts=localized_strings,
             opt_size_prettify=opt_prettify_size,
         )
     else:
@@ -195,6 +206,7 @@ def inventory(
             li_kml,
             li_gml,
             li_geojson,
+            li_geotiff,
             li_gxt,
             li_raster,
             li_file_database_esri,
@@ -204,6 +216,7 @@ def inventory(
             li_cdao,
             li_file_databases,
             li_file_database_spatialite,
+            li_file_database_geopackage,
         ) = find_geodata_files(start_folder=input_folder)
 
         print(
@@ -213,7 +226,7 @@ def inventory(
             f"{len(li_kml)} KML - "
             f"{len(li_gml)} GML - "
             f"{len(li_geojson)} GeoJSON - "
-            f"{len(li_gxt)} GXT"
+            f"{len(li_gxt)} GXT - "
             f"{len(li_raster)} rasters - "
             f"{len(li_file_databases)} file databases - "
             f"{len(li_cdao)} CAO/DAO - "
@@ -227,6 +240,7 @@ def inventory(
         li_vectors.extend(li_gml)
         li_vectors.extend(li_geojson)
         li_vectors.extend(li_gxt)
+        li_raster.extend(li_geotiff)
 
         # check if there are some layers into the folder structure
         if not (
@@ -246,14 +260,16 @@ def inventory(
             li_cdao=li_cdao,
             # list by formats
             li_dxf=li_dxf,
-            li_filegdb_esri=li_file_database_esri,
-            li_filegdb_spatialite=li_file_database_spatialite,
+            li_flat_geodatabase_esri_filegdb=li_file_database_esri,
+            li_flat_geodatabase_spatialite=li_file_database_spatialite,
+            li_flat_geodatabase_geopackage=li_file_database_geopackage,
+            li_geojson=li_geojson,
+            li_geotiff=li_geotiff,
             li_gml=li_gml,
             li_gxt=li_gxt,
             li_kml=li_kml,
-            li_shapefiles=li_shapefiles,
             li_mapinfo_tab=li_mapinfo_tab,
-            li_geojson=li_geojson,
+            li_shapefiles=li_shapefiles,
             # options
             opt_analyze_cdao="dxf" in formats,
             opt_analyze_esri_filegdb="file_geodatabase_esri" in formats,
@@ -293,6 +309,8 @@ def inventory(
             notification_message=f"DicoGIS successfully processed {total_files} files.",
             notification_sound=opt_notify_sound,
         )
+        if opt_open_output:
+            Utilities.open_dir_file(target=output_path)
 
     # look for geographic database
     if pg_services:
@@ -306,16 +324,14 @@ def inventory(
         xl_workbook.set_worksheets(has_sgbd=True)
 
         for pg_service in pg_services:
-            dico_dataset = {}
 
             # testing connection settings
-            sgbd_reader = ReadPostGIS(
-                dico_dataset=dico_dataset, txt=localized_strings, service=pg_service
-            )
+            sgbd_reader = ReadPostGIS(service=pg_service)
+            sgbd_reader.get_connection()
 
             # check connection state
-            if not sgbd_reader.conn:
-                fail_reason = dico_dataset.get("conn_state")
+            if sgbd_reader.conn is None:
+                fail_reason = sgbd_reader.db_connection.state_msg
                 logger.error(
                     f"Connection failed using pg_service {pg_service}. Trace: {fail_reason}."
                 )
@@ -329,11 +345,9 @@ def inventory(
             # parsing the layers
             for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
                 layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
-                # reset recipient data
-                dico_dataset.clear()
-                sgbd_reader.infos_dataset(layer)
-                logger.info(f"Table examined: {layer.GetName()}")
-                xl_workbook.store_md_sgdb(layer=dico_dataset)
+                metadataset = sgbd_reader.infos_dataset(layer=layer)
+                logger.info(f"Table examined: {metadataset.name}")
+                xl_workbook.serialize_metadaset(metadataset=metadataset)
                 logger.debug("Layer metadata stored into workbook.")
 
         # output file path
@@ -350,10 +364,6 @@ def inventory(
         )
         logger.info(f"Workbook saved: {saved[1]}")
 
-        # output file path
-        if output_path is None:
-            output_path = f"DicoGIS_database_{date.today()}.xlsx"
-
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "
@@ -362,10 +372,5 @@ def inventory(
             notification_sound=opt_notify_sound,
         )
 
-
-# ############################################################################
-# #### Stand alone program ########
-# #################################
-if __name__ == "__main__":
-    """standalone execution"""
-    cli_list()
+        if opt_open_output:
+            Utilities.open_dir_file(target=output_path)

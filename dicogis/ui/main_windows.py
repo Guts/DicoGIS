@@ -145,7 +145,7 @@ class DicoGIS(ThemedTk):
         self.def_rep = ""  # default folder to search for
         self.def_lang = "EN"  # default language to start
         self.today = strftime("%Y-%m-%d")  # date of the day
-        self.blabla = {}  # texts dictionary
+        self.localized_strings = {}  # texts dictionary
 
         # formats / type: vectors
         self.li_vectors_formats = (
@@ -160,6 +160,7 @@ class DicoGIS(ThemedTk):
         self.li_kml = []  # list for KML path
         self.li_gml = []  # list for GML path
         self.li_geojson = []  # list for GeoJSON paths
+        self.li_geotiff = []  # list for GeoJSON paths
         self.li_gxt = []  # list for GXT paths
         self.li_vectors = []  # list for all vectors
         # formats / type: rasters
@@ -168,6 +169,7 @@ class DicoGIS(ThemedTk):
         # formats / type: file databases
         self.li_file_databases = []  # list for all files databases
         self.li_file_database_esri = []  # list for Esri File Geodatabases
+        self.li_file_database_geopackage = []
         self.li_file_database_spatialite = []  # list for Spatialite Geodatabases
         # formats / type: CAO/DAO
         self.li_cdao = []  # list for all CAO/DAO files
@@ -200,17 +202,19 @@ class DicoGIS(ThemedTk):
         # Notebook
         self.nb = Notebook(self)
         # tabs
-        self.tab_files = TabFiles(self.nb, self.blabla)  # tab_id = 0
+        self.tab_files = TabFiles(self.nb, self.localized_strings)  # tab_id = 0
         self.tab_sgbd = TabSGBD(self.nb)  # tab_id = 1
         self.tab_options = TabSettings(
-            self.nb, self.blabla, utils_global.ui_switch
+            self.nb, self.localized_strings, utils_global.ui_switch
         )  # tab_id = 2
         self.tab_credits = TabCredits(
-            self.nb, self.blabla, utils_global.ui_switch
+            self.nb, self.localized_strings, utils_global.ui_switch
         )  # tab_id = 3
 
         # fillfulling text
-        self.txt_manager.load_texts(dico_texts=self.blabla, language_code=self.def_lang)
+        self.localized_strings = self.txt_manager.load_texts(
+            language_code=self.def_lang
+        )
 
         # =================================================================================
         # ## TAB 1: FILES ##
@@ -235,13 +239,17 @@ class DicoGIS(ThemedTk):
         # ## MAIN FRAME ##
         # welcome message
         self.welcome = Label(
-            self, text=self.blabla.get("hi") + self.uzer, foreground="blue"
+            self, text=self.localized_strings.get("hi") + self.uzer, foreground="blue"
         )
 
         # Frame: Output
-        self.FrOutp = Labelframe(self, name="output", text=self.blabla.get("gui_fr4"))
+        self.FrOutp = Labelframe(
+            self, name="output", text=self.localized_strings.get("gui_fr4")
+        )
         # widgets
-        self.lbl_outxl_filename = Label(self.FrOutp, text=self.blabla.get("gui_fic"))
+        self.lbl_outxl_filename = Label(
+            self.FrOutp, text=self.localized_strings.get("gui_fic")
+        )
         self.ent_outxl_filename = Entry(self.FrOutp, width=35)
         # widgets placement
         self.lbl_outxl_filename.grid(row=0, column=1, sticky="NSWE", padx=2, pady=2)
@@ -250,7 +258,7 @@ class DicoGIS(ThemedTk):
         )
         # Frame: Progression bar
         self.FrProg = Labelframe(
-            self, name="progression", text=self.blabla.get("gui_prog")
+            self, name="progression", text=self.localized_strings.get("gui_prog")
         )
         # variables
         self.status = StringVar(self.FrProg, "")
@@ -278,12 +286,14 @@ class DicoGIS(ThemedTk):
         # Basic buttons
         self.val = Button(
             self,
-            text=self.blabla.get("gui_go"),
+            text=self.localized_strings.get("gui_go"),
             state=ACTIVE,
             command=lambda: self.process(),
         )
         self.can = Button(
-            self, text=self.blabla.get("gui_quit"), command=lambda: self.destroy()
+            self,
+            text=self.localized_strings.get("gui_quit"),
+            command=lambda: self.destroy(),
         )
 
         # widgets placement
@@ -305,8 +315,7 @@ class DicoGIS(ThemedTk):
                         err
                     )
                 )
-        else:
-            pass
+
         self.ddl_lang.set(self.def_lang)
         self.change_lang(1)
 
@@ -324,38 +333,38 @@ class DicoGIS(ThemedTk):
         """Update the texts dictionary with the language selected."""
         new_lang = self.ddl_lang.get()
         # change to the new language selected
-        self.txt_manager.load_texts(dico_texts=self.blabla, language_code=new_lang)
+        self.localized_strings = self.txt_manager.load_texts(language_code=new_lang)
         # update widgets text
-        self.welcome.config(text=self.blabla.get("hi") + self.uzer)
-        self.can.config(text=self.blabla.get("gui_quit"))
-        self.FrOutp.config(text=self.blabla.get("gui_fr4", "Output"))
-        self.FrProg.config(text=self.blabla.get("gui_prog", "Progression"))
-        self.val.config(text=self.blabla.get("gui_go", "Launch"))
-        self.lbl_outxl_filename.config(text=self.blabla.get("gui_fic"))
+        self.welcome.config(text=self.localized_strings.get("hi") + self.uzer)
+        self.can.config(text=self.localized_strings.get("gui_quit"))
+        self.FrOutp.config(text=self.localized_strings.get("gui_fr4", "Output"))
+        self.FrProg.config(text=self.localized_strings.get("gui_prog", "Progression"))
+        self.val.config(text=self.localized_strings.get("gui_go", "Launch"))
+        self.lbl_outxl_filename.config(text=self.localized_strings.get("gui_fic"))
         # tab files
-        self.nb.tab(0, text=self.blabla.get("gui_tab1"))
-        self.tab_files.FrPath.config(text=self.blabla.get("gui_fr1"))
-        self.tab_files.FrFilters.config(text=self.blabla.get("gui_fr3"))
-        self.tab_files.lb_target.config(text=self.blabla.get("gui_path"))
-        self.tab_files.btn_browse.config(text=self.blabla.get("gui_choix"))
+        self.nb.tab(0, text=self.localized_strings.get("gui_tab1"))
+        self.tab_files.FrPath.config(text=self.localized_strings.get("gui_fr1"))
+        self.tab_files.FrFilters.config(text=self.localized_strings.get("gui_fr3"))
+        self.tab_files.lb_target.config(text=self.localized_strings.get("gui_path"))
+        self.tab_files.btn_browse.config(text=self.localized_strings.get("gui_choix"))
         # sgbd tab
-        self.nb.tab(1, text=self.blabla.get("gui_tab2"))
-        self.tab_sgbd.FrDb.config(text=self.blabla.get("gui_fr2"))
-        self.tab_sgbd.lb_H.config(text=self.blabla.get("gui_host"))
-        self.tab_sgbd.lb_P.config(text=self.blabla.get("gui_port"))
-        self.tab_sgbd.lb_D.config(text=self.blabla.get("gui_db"))
-        self.tab_sgbd.lb_U.config(text=self.blabla.get("gui_user"))
-        self.tab_sgbd.lb_M.config(text=self.blabla.get("gui_mdp"))
+        self.nb.tab(1, text=self.localized_strings.get("gui_tab2"))
+        self.tab_sgbd.FrDb.config(text=self.localized_strings.get("gui_fr2"))
+        self.tab_sgbd.lb_H.config(text=self.localized_strings.get("gui_host"))
+        self.tab_sgbd.lb_P.config(text=self.localized_strings.get("gui_port"))
+        self.tab_sgbd.lb_D.config(text=self.localized_strings.get("gui_db"))
+        self.tab_sgbd.lb_U.config(text=self.localized_strings.get("gui_user"))
+        self.tab_sgbd.lb_M.config(text=self.localized_strings.get("gui_mdp"))
 
         # options
-        self.nb.tab(2, text=self.blabla.get("gui_tab5"))
-        self.tab_options.prox_lb_H.config(text=self.blabla.get("gui_host"))
-        self.tab_options.prox_lb_P.config(text=self.blabla.get("gui_port"))
-        self.tab_options.prox_lb_M.config(text=self.blabla.get("gui_mdp"))
-        self.tab_options.prox_lb_H.config(text=self.blabla.get("gui_host"))
+        self.nb.tab(2, text=self.localized_strings.get("gui_tab5"))
+        self.tab_options.prox_lb_H.config(text=self.localized_strings.get("gui_host"))
+        self.tab_options.prox_lb_P.config(text=self.localized_strings.get("gui_port"))
+        self.tab_options.prox_lb_M.config(text=self.localized_strings.get("gui_mdp"))
+        self.tab_options.prox_lb_H.config(text=self.localized_strings.get("gui_host"))
 
         # credits
-        self.nb.tab(3, text=self.blabla.get("gui_tab6"))
+        self.nb.tab(3, text=self.localized_strings.get("gui_tab6"))
 
         # setting locale according to the language passed
         try:
@@ -379,7 +388,7 @@ class DicoGIS(ThemedTk):
             logger.error("Selected locale is not installed")
 
         # End of function
-        return self.blabla
+        return self.localized_strings
 
     def ligeofiles(self, target_folder: str) -> tuple[list[str]]:
         """List compatible geo-files stored into a folder structure.
@@ -394,7 +403,7 @@ class DicoGIS(ThemedTk):
         self.tab_files.btn_browse.config(state=DISABLED)
 
         # Looping in folders structure
-        self.status.set(self.blabla.get("gui_prog1"))
+        self.status.set(self.localized_strings.get("gui_prog1"))
         self.prog_layers.start()
         logger.info(f"Begin of folders parsing: {target_folder}")
 
@@ -405,6 +414,7 @@ class DicoGIS(ThemedTk):
             self.li_kml,
             self.li_gml,
             self.li_geojson,
+            self.li_geotiff,
             self.li_gxt,
             self.li_raster,
             self.li_file_database_esri,
@@ -414,6 +424,7 @@ class DicoGIS(ThemedTk):
             self.li_cdao,
             self.li_file_databases,
             self.li_file_database_spatialite,
+            self.li_file_database_geopackage,
         ) = find_geodata_files(start_folder=target_folder)
 
         # end of listing
@@ -442,7 +453,7 @@ class DicoGIS(ThemedTk):
                 len(self.li_file_databases),
                 len(self.li_cdao),
                 self.num_folders,
-                self.blabla.get("log_numfold"),
+                self.localized_strings.get("log_numfold"),
             )
         )
 
@@ -518,7 +529,7 @@ class DicoGIS(ThemedTk):
 
         # creating the Excel workbook
         self.xl_workbook = MetadataToXlsx(
-            texts=self.blabla,
+            translated_texts=self.localized_strings,
             opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
         )
         self.lbl_status.configure(foreground="DodgerBlue")
@@ -553,13 +564,13 @@ class DicoGIS(ThemedTk):
         ):
             pass
         else:
-            avert("DicoGIS - User error", self.blabla.get("nodata"))
+            avert("DicoGIS - User error", self.localized_strings.get("nodata"))
             return
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
             output_workbook=self.xl_workbook,
-            localized_strings=self.blabla,
+            localized_strings=self.localized_strings,
             # list by tabs
             li_vectors=self.li_vectors,
             li_rasters=self.li_raster,
@@ -567,14 +578,16 @@ class DicoGIS(ThemedTk):
             li_cdao=self.li_cdao,
             # list by formats
             li_dxf=self.li_dxf,
-            li_filegdb_esri=self.li_file_database_esri,
-            li_filegdb_spatialite=self.li_file_database_spatialite,
+            li_flat_geodatabase_esri_filegdb=self.li_file_database_esri,
+            li_flat_geodatabase_spatialite=self.li_file_database_spatialite,
+            li_flat_geodatabase_geopackage=self.li_file_database_geopackage,
             li_gml=self.li_gml,
             li_gxt=self.li_gxt,
             li_kml=self.li_kml,
             li_shapefiles=self.li_shapefiles,
             li_mapinfo_tab=self.li_mapinfo_tab,
             li_geojson=self.li_geojson,
+            li_geotiff=self.li_geotiff,
             # options
             opt_analyze_cdao=self.tab_files.opt_gxt.get(),
             opt_analyze_esri_filegdb=self.tab_files.opt_egdb.get(),
@@ -613,7 +626,7 @@ class DicoGIS(ThemedTk):
             dest_dir=self.tab_files.target_path.get(),
             dest_filename=self.ent_outxl_filename.get(),
             ftype="Excel Workbook",
-            dlg_title=self.blabla.get("gui_excel"),
+            dlg_title=self.localized_strings.get("gui_excel"),
         )
         logger.info(f"Workbook saved: {self.ent_outxl_filename.get()}")
 
@@ -622,10 +635,10 @@ class DicoGIS(ThemedTk):
             utils_global.open_dir_file(saved[1])
         else:
             showinfo(
-                title=self.blabla.get(
+                title=self.localized_strings.get(
                     "no_output_file_selected", "No output file selected"
                 ),
-                message=self.blabla.get(
+                message=self.localized_strings.get(
                     "no_output_file_selected", "Dictionary has not been saved."
                 ),
             )
@@ -653,12 +666,11 @@ class DicoGIS(ThemedTk):
         # parsing the layers
         for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
             layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
-            # reset recipient data
-            self.dico_dataset.clear()
-            sgbd_reader.infos_dataset(layer)
-            logger.info(f"Table examined: {layer.GetName()}")
-            self.xl_workbook.store_md_sgdb(self.dico_dataset)
-            logger.debug("Layer metadata stored into workbook.")
+            self.status.set(f"Reading: {layer.GetName()}")
+            metadataset = sgbd_reader.infos_dataset(layer)
+            logger.info(f"Table examined: {metadataset.name}")
+            self.xl_workbook.serialize_metadaset(metadataset=metadataset)
+            logger.debug("Layer metadata stored into workbook: {metadataset.name}")
             # increment the progress bar
             self.prog_layers["value"] = self.prog_layers["value"] + 1
             self.update()
@@ -677,7 +689,7 @@ class DicoGIS(ThemedTk):
             output_object=self.xl_workbook,
             dest_filename=self.ent_outxl_filename.get(),
             ftype="Excel Workbook",
-            dlg_title=self.blabla.get("gui_excel"),
+            dlg_title=self.localized_strings.get("gui_excel"),
         )
         logger.info(
             f"Workbook saved: {self.ent_outxl_filename.get()}",
@@ -694,7 +706,7 @@ class DicoGIS(ThemedTk):
         # checking empty fields
         if tab_data_type == 0:
             if not len(self.tab_files.ent_target.get()):
-                avert("DicoGIS - User error", self.blabla.get("nofolder"))
+                avert("DicoGIS - User error", self.localized_strings.get("nofolder"))
                 return False
 
             # check if at least a format has been choosen
@@ -708,62 +720,67 @@ class DicoGIS(ThemedTk):
                 + self.tab_files.opt_egdb.get()
                 + self.tab_files.opt_dxf.get()
             ):
-                avert("DicoGIS - User error", self.blabla.get("noformat"))
+                avert("DicoGIS - User error", self.localized_strings.get("noformat"))
                 return False
 
         elif tab_data_type == 1:
             if (
                 self.tab_sgbd.host.get() == ""
-                or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
+                or self.tab_sgbd.host.get()
+                == self.localized_strings.get("err_pg_empty_field")
             ):
                 self.tab_sgbd.ent_H.configure(foreground="red")
                 self.tab_sgbd.ent_H.delete(0, END)
-                self.status.set(f"Host is a {self.blabla.get('err_pg_empty_field')}")
+                self.status.set(
+                    f"Host is a {self.localized_strings.get('err_pg_empty_field')}"
+                )
                 return False
-            else:
-                pass
+
             if not self.tab_sgbd.ent_P.get():
                 self.tab_sgbd.ent_P.configure(foreground="red")
                 self.tab_sgbd.ent_P.delete(0, END)
-                self.status.set(f"Port is a {self.blabla.get('err_pg_empty_field')}")
+                self.status.set(
+                    f"Port is a {self.localized_strings.get('err_pg_empty_field')}"
+                )
                 return False
-            else:
-                pass
+
             if (
                 self.tab_sgbd.dbnb.get() == ""
-                or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
+                or self.tab_sgbd.host.get()
+                == self.localized_strings.get("err_pg_empty_field")
             ):
                 self.tab_sgbd.ent_D.configure(foreground="red")
                 self.tab_sgbd.ent_D.delete(0, END)
                 self.status.set(
-                    f"Database is a {self.blabla.get('err_pg_empty_field')}"
+                    f"Database is a {self.localized_strings.get('err_pg_empty_field')}"
                 )
                 return False
-            else:
-                pass
+
             if (
                 self.tab_sgbd.user.get() == ""
-                or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
+                or self.tab_sgbd.host.get()
+                == self.localized_strings.get("err_pg_empty_field")
             ):
                 self.tab_sgbd.ent_U.configure(foreground="red")
                 self.tab_sgbd.ent_U.delete(0, END)
-                self.status.set(f"User is a {self.blabla.get('err_pg_empty_field')}")
+                self.status.set(
+                    f"User is a {self.localized_strings.get('err_pg_empty_field')}"
+                )
                 return False
-            else:
-                pass
+
             if (
                 self.tab_sgbd.pswd.get() == ""
-                or self.tab_sgbd.pswd.get() == self.blabla.get("err_pg_empty_field")
+                or self.tab_sgbd.pswd.get()
+                == self.localized_strings.get("err_pg_empty_field")
             ):
                 self.tab_sgbd.ent_M.configure(foreground="red")
                 self.tab_sgbd.ent_M.delete(0, END)
                 self.status.set(
-                    f"Password is a {self.blabla.get('err_pg_empty_field')}"
+                    f"Password is a {self.localized_strings.get('err_pg_empty_field')}"
                 )
                 self.tab_sgbd.ent_M.configure(foreground="red")
                 return False
-            else:
-                pass
+
         # no error detected: let's test connection
         logger.info("Required fields are OK.")
 
@@ -792,8 +809,7 @@ class DicoGIS(ThemedTk):
                 # username/password or not (NTLM)
                 gdal.SetConfigOption("GDAL_PROXY_AUTH", "NTLM")
                 gdal.SetConfigOption("GDAL_HTTP_PROXYUSERPWD", " : ")
-            else:
-                pass
+
         else:
             logger.info("No proxy configured.")
 
@@ -805,16 +821,17 @@ class DicoGIS(ThemedTk):
             user=self.tab_sgbd.user.get(),
             password=self.tab_sgbd.pswd.get(),
             views_included=self.tab_sgbd.opt_pgvw.get(),
-            dico_dataset=self.dico_dataset,
-            txt=self.blabla,
         )
 
         # check connection state
-        if not sgbd_reader.conn:
-            fail_reason = self.dico_dataset.get("conn_state")
+        if sgbd_reader.conn is None:
+            fail_reason = sgbd_reader.db_connection.state_msg
             self.status.set(f"Connection failed: {fail_reason}.")
             logger.error(f"PostGIS connection failed: {fail_reason}.")
-            avert(title=self.blabla.get("err_pg_conn_fail"), message=fail_reason)
+            avert(
+                title=self.localized_strings.get("err_pg_conn_fail"),
+                message=fail_reason,
+            )
             return None
 
         self.status.set(

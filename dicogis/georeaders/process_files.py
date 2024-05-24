@@ -17,12 +17,10 @@ from typing import Callable, Optional
 
 # package
 from dicogis.export.to_xlsx import MetadataToXlsx
-from dicogis.georeaders.read_dxf import ReadDXF
-from dicogis.georeaders.read_esri_filegdb import ReadEsriFileGdb
-from dicogis.georeaders.read_gxt import ReadGXT
+from dicogis.georeaders.read_dxf import ReadCadDxf
 from dicogis.georeaders.read_raster import ReadRasters
-from dicogis.georeaders.read_spatialite import ReadSpatialite
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
+from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -58,12 +56,13 @@ class ProcessingFiles:
     """Geofiles processor."""
 
     MATRIX_FORMAT_GEOREADER = {
-        "dxf": ReadDXF,
+        "dxf": ReadCadDxf,
         "esri_shapefile": ReadVectorFlatDataset,
-        "file_geodatabase_esri": ReadEsriFileGdb,
-        "file_geodatabase_spatialite": ReadSpatialite,
+        "file_geodatabase_esri": ReadFlatDatabase,
+        "file_geodatabase_spatialite": ReadFlatDatabase,
+        "file_geodatabase_geopackage": ReadFlatDatabase,
         "geotiff": ReadRasters,
-        "gxt": ReadGXT,
+        "gxt": ReadVectorFlatDataset,
         "geojson": ReadVectorFlatDataset,
         "gml": ReadVectorFlatDataset,
         "kml": ReadVectorFlatDataset,
@@ -78,9 +77,11 @@ class ProcessingFiles:
         # input lists of files to process
         li_cdao: Optional[Iterable],
         li_dxf: Optional[Iterable],
-        li_filegdb_esri: Optional[Iterable],
-        li_filegdb_spatialite: Optional[Iterable],
+        li_flat_geodatabase_esri_filegdb: Optional[Iterable],
+        li_flat_geodatabase_geopackage: Optional[Iterable],
+        li_flat_geodatabase_spatialite: Optional[Iterable],
         li_geojson: Optional[Iterable],
+        li_geotiff: Optional[Iterable],
         li_gxt: Optional[Iterable],
         li_gml: Optional[Iterable],
         li_kml: Optional[Iterable],
@@ -92,6 +93,8 @@ class ProcessingFiles:
         # options
         opt_analyze_esri_filegdb: bool = True,
         opt_analyze_geojson: bool = True,
+        opt_analyze_geopackage: bool = True,
+        opt_analyze_geotiff: bool = True,
         opt_analyze_gml: bool = True,
         opt_analyze_gxt: bool = True,
         opt_analyze_kml: bool = True,
@@ -106,9 +109,11 @@ class ProcessingFiles:
 
         # List of files
         self.li_dxf = li_dxf
-        self.li_filegdb_esri = li_filegdb_esri
-        self.li_filegdb_spatialite = li_filegdb_spatialite
+        self.li_flat_geodatabase_esri_filegdb = li_flat_geodatabase_esri_filegdb
+        self.li_flat_geodatabase_geopackage = li_flat_geodatabase_geopackage
+        self.li_flat_geodatabase_spatialite = li_flat_geodatabase_spatialite
         self.li_geojson = li_geojson
+        self.li_geotiff = li_geotiff
         self.li_gxt = li_gxt
         self.li_gml = li_gml
         self.li_kml = li_kml
@@ -134,6 +139,7 @@ class ProcessingFiles:
         self.opt_analyze_spatialite = opt_analyze_spatialite
         self.opt_analyze_esri_filegdb = opt_analyze_esri_filegdb
         self.opt_analyze_geojson = opt_analyze_geojson
+        self.opt_analyze_geotiff = opt_analyze_geotiff
         self.opt_analyze_gml = opt_analyze_gml
         self.opt_analyze_gxt = opt_analyze_gxt
         self.opt_analyze_kml = opt_analyze_kml
@@ -141,16 +147,14 @@ class ProcessingFiles:
         self.opt_analyze_raster = opt_analyze_raster
         self.opt_analyze_cdao = opt_analyze_cdao
         self.opt_analyze_shapefiles = opt_analyze_shapefiles
-        self.opt_analyze_spatialite = opt_analyze_spatialite
+        self.opt_analyze_geopackage = opt_analyze_geopackage
 
         # others
         self.total_files: Optional[int] = None
         self.li_files_to_process: list[Optional[FileToProcess]] = []
         self.localized_strings = localized_strings
         if self.localized_strings is None:
-            txt_manager.load_texts(
-                dico_texts=localized_strings, language_code=getlocale()[0]
-            )
+            self.localized_strings = txt_manager.load_texts(language_code=getlocale())
 
     def process_files_in_queue(
         self,
@@ -180,14 +184,10 @@ class ProcessingFiles:
             if progress_callback_cmd is not None:
                 progress_callback_cmd()
 
-            # reset recipient data
-            dico_layer = {}
             # getting the informations
             try:
-                geofile.georeader().infos_dataset(
+                metadataset = geofile.georeader().infos_dataset(
                     source_path=path.abspath(geofile.file_path),
-                    dico_dataset=dico_layer,
-                    txt=self.localized_strings,
                 )
                 logger.debug(f"Reading {geofile} succeeded.")
                 geofile.processed = True
@@ -205,7 +205,7 @@ class ProcessingFiles:
                 if progress_value_message is not None:
                     progress_value_message = f"Storing: {geofile.file_path}"
                 # writing to the Excel file
-                self.output_workbook.store_md_vector(layer=dico_layer)
+                self.output_workbook.serialize_metadaset(metadataset=metadataset)
                 geofile.exported = True
                 logger.debug(f"Metadata stored into workbook for {geofile.file_path}")
             except Exception as err:
@@ -245,8 +245,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_shapefiles, file_format="esri_shapefile"
             )
-        else:
-            pass
 
         if self.opt_analyze_mapinfo_tab and len(self.li_mapinfo_tab):
             total_files += len(self.li_mapinfo_tab)
@@ -254,8 +252,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_mapinfo_tab, file_format="mapinfo_tab"
             )
-        else:
-            pass
 
         if self.opt_analyze_kml and len(self.li_kml):
             total_files += len(self.li_kml)
@@ -263,8 +259,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_kml, file_format="kml"
             )
-        else:
-            pass
 
         if self.opt_analyze_gml and len(self.li_gml):
             total_files += len(self.li_gml)
@@ -272,8 +266,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_gml, file_format="gml"
             )
-        else:
-            pass
 
         if self.opt_analyze_geojson and len(self.li_geojson):
             total_files += len(self.li_geojson)
@@ -281,8 +273,13 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_geojson, file_format="geojson"
             )
-        else:
-            pass
+
+        if self.opt_analyze_geotiff and len(self.li_geotiff):
+            total_files += len(self.li_geotiff)
+            self.output_workbook.set_worksheets(has_raster=1)
+            self.add_files_to_process_queue(
+                list_of_files=self.li_geotiff, file_format="geotiff"
+            )
 
         if self.opt_analyze_gxt and len(self.li_gxt):
             total_files += len(self.li_gxt)
@@ -290,8 +287,6 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_gxt, file_format="gxt"
             )
-        else:
-            pass
 
         if self.opt_analyze_raster and len(self.li_rasters):
             total_files += len(self.li_rasters)
@@ -299,36 +294,37 @@ class ProcessingFiles:
             self.add_files_to_process_queue(
                 list_of_files=self.li_tif, file_format="raster"
             )
-        else:
-            pass
 
-        if self.opt_analyze_esri_filegdb and len(self.li_filegdb_esri):
-            total_files += len(self.li_filegdb_esri)
+        if self.opt_analyze_esri_filegdb and len(self.li_flat_geodatabase_esri_filegdb):
+            total_files += len(self.li_flat_geodatabase_esri_filegdb)
             self.output_workbook.set_worksheets(has_filedb=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_filegdb_esri, file_format="file_geodatabase_esri"
+                list_of_files=self.li_flat_geodatabase_esri_filegdb,
+                file_format="file_geodatabase_esri",
             )
-        else:
-            pass
 
-        if self.opt_analyze_spatialite and len(self.li_filegdb_spatialite):
-            total_files += len(self.li_filegdb_spatialite)
+        if self.opt_analyze_geopackage and len(self.li_flat_geodatabase_geopackage):
+            total_files += len(self.li_flat_geodatabase_geopackage)
             self.output_workbook.set_worksheets(has_filedb=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_filegdb_spatialite,
+                list_of_files=self.li_flat_geodatabase_geopackage,
+                file_format="file_geodatabase_geopackage",
+            )
+
+        if self.opt_analyze_spatialite and len(self.li_flat_geodatabase_spatialite):
+            total_files += len(self.li_flat_geodatabase_spatialite)
+            self.output_workbook.set_worksheets(has_filedb=1)
+            self.add_files_to_process_queue(
+                list_of_files=self.li_flat_geodatabase_spatialite,
                 file_format="file_geodatabase_spatialite",
             )
-        else:
-            pass
 
         if self.opt_analyze_cdao and len(self.li_cdao):
             total_files += len(self.li_cdao)
             self.output_workbook.set_worksheets(has_cad=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_cdao, file_format="file_geodatabase_spatialite"
+                list_of_files=self.li_cdao, file_format="file_cad"
             )
-        else:
-            pass
 
         self.total_files = total_files
         return total_files
