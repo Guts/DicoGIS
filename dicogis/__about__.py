@@ -41,7 +41,7 @@ __title__ = "DicoGIS"
 __title_clean__ = "".join(e for e in __title__ if e.isalnum())
 __uri_homepage__ = "https://guts.github.io/DicoGIS/"
 __uri_repository__ = "https://github.com/Guts/DicoGIS/"
-__uri_tracker__ = f"{__uri_repository__}/issues/"
+__uri_tracker__ = f"{__uri_repository__}issues/"
 __uri__ = __uri_repository__
 
 

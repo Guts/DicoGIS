@@ -128,6 +128,16 @@ class TabSettings(Frame):
             row=2, column=0, sticky="NSWE", padx=2, pady=2
         )
 
+        self.opt_export_raw_path = BooleanVar(
+            master=self, value=getenv("DICOGIS_EXPORT_RAW_PATH", True)
+        )
+        caz_opt_export_raw_path = Checkbutton(
+            self.FrOptExport,
+            text="Export: raw path",
+            variable=self.opt_export_raw_path,
+        )
+        caz_opt_export_raw_path.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
+
         self.opt_end_process_notification_sound = BooleanVar(
             master=self, value=getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", True)
         )
@@ -137,7 +147,7 @@ class TabSettings(Frame):
             variable=self.opt_end_process_notification_sound,
         )
         caz_opt_end_process_notification_sound.grid(
-            row=3, column=0, sticky="NSWE", padx=2, pady=2
+            row=4, column=0, sticky="NSWE", padx=2, pady=2
         )
 
         # positionning frames
