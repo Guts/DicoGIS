@@ -85,6 +85,10 @@ class TextsManager:
         if "_" in language_code:
             language_code = language_code.split("_")[1]
 
+        # handle some aliases
+        if language_code.upper() in ("GB", "US"):
+            language_code = "EN"
+
         # if language not available, fallback to English
         if not AvailableLocales.has_value(language_code):
             logger.warning(
