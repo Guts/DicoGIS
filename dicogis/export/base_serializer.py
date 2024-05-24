@@ -22,11 +22,17 @@ logger = logging.getLogger(__name__)
 class MetadatasetSerializerBase:
     """Base class for metadataset serializers."""
 
-    def __init__(self, translated_texts: dict, opt_size_prettify: bool = True) -> None:
+    def __init__(
+        self,
+        translated_texts: dict,
+        opt_raw_path: bool = False,
+        opt_size_prettify: bool = True,
+    ) -> None:
         """Store metadata into JSON files."""
         self.translated_texts = translated_texts
 
         # options
+        self.opt_raw_path = opt_raw_path
         self.opt_size_prettify = opt_size_prettify
 
     def pre_serializing(

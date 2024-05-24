@@ -146,16 +146,18 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         "gdal_err",
     ]
 
-    def __init__(self, translated_texts: dict, opt_size_prettify: bool = True) -> None:
+    def __init__(
+        self,
+        translated_texts: dict,
+        opt_raw_path: bool = False,
+        opt_size_prettify: bool = True,
+    ) -> None:
         """Store metadata into Excel worksheets.
 
         Args:
             texts (dict, optional): dictionary of translated texts. Defaults to {}.
             opt_size_prettify (bool, optional): option to prettify size or not. Defaults to False.
         """
-        super().__init__(
-            translated_texts=translated_texts, opt_size_prettify=opt_size_prettify
-        )
         self.workbook = Workbook(iso_dates=True)
         # styles
         s_date = NamedStyle(name="date")
@@ -168,6 +170,13 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         # deleting the default worksheet
         ws = self.workbook.active
         self.workbook.remove(worksheet=ws)
+
+        # initiate with parent
+        super().__init__(
+            translated_texts=translated_texts,
+            opt_raw_path=opt_raw_path,
+            opt_size_prettify=opt_size_prettify,
+        )
 
     # ------------ Setting workbook ---------------------
 
@@ -319,8 +328,6 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             #             dims[cell.column] = max((dims.get(cell.column, 0), len(val)))
             # for col, value in dims.items():
             #     sheet.column_dimensions[col].width = value
-        # end of method
-        return
 
     @lru_cache(maxsize=128, typed=True)
     def format_as_hyperlink(self, target: Union[str, Path], label: str) -> str:
@@ -539,10 +546,14 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             row_index = self.row_index_vector_files
 
         # Path of parent folder formatted to be a hyperlink
-        worksheet[f"B{row_index}"] = self.format_as_hyperlink(
-            target=metadataset.path.parent, label=self.translated_texts.get("browse")
-        )
-        worksheet[f"B{row_index}"].style = "Hyperlink"
+        if self.opt_raw_path:
+            worksheet[f"B{row_index}"] = metadataset.path_as_str
+        else:
+            worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+                target=metadataset.path.parent,
+                label=self.translated_texts.get("browse"),
+            )
+            worksheet[f"B{row_index}"].style = "Hyperlink"
 
         # Name of parent folder with an exception if this is the format name
         worksheet[f"C{row_index}"] = metadataset.parent_folder_name
@@ -600,10 +611,14 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             row_index = self.row_index_raster_files
 
         # Path of parent folder formatted to be a hyperlink
-        worksheet[f"B{row_index}"] = self.format_as_hyperlink(
-            target=metadataset.path.parent, label=self.translated_texts.get("browse")
-        )
-        worksheet[f"B{row_index}"].style = "Hyperlink"
+        if self.opt_raw_path:
+            worksheet[f"B{row_index}"] = metadataset.path_as_str
+        else:
+            worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+                target=metadataset.path.parent,
+                label=self.translated_texts.get("browse"),
+            )
+            worksheet[f"B{row_index}"].style = "Hyperlink"
 
         # Name of parent folder with an exception if this is the format name
         worksheet[f"C{row_index}"] = metadataset.parent_folder_name
@@ -672,10 +687,14 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             row_index = self.row_index_flat_geodatabases
 
         # writing metadata
-        worksheet[f"B{row_index}"] = self.format_as_hyperlink(
-            target=metadataset.path.parent, label=self.translated_texts.get("browse")
-        )
-        worksheet[f"B{row_index}"].style = "Hyperlink"
+        if self.opt_raw_path:
+            worksheet[f"B{row_index}"] = metadataset.path_as_str
+        else:
+            worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+                target=metadataset.path.parent,
+                label=self.translated_texts.get("browse"),
+            )
+            worksheet[f"B{row_index}"].style = "Hyperlink"
         worksheet[f"C{row_index}"] = metadataset.parent_folder_name
         worksheet[f"D{row_index}"] = metadataset.storage_size
         worksheet[f"E{row_index}"] = metadataset.storage_date_created
@@ -748,11 +767,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         champs = ""
 
         # Path of parent folder formatted to be a hyperlink
-        link = r'=HYPERLINK("{}","{}")'.format(
-            metadataset.get("folder"), self.translated_texts.get("browse")
-        )
-        worksheet[f"B{row_index}"] = link
-        worksheet[f"B{row_index}"].style = "Hyperlink"
+        if self.opt_raw_path:
+            worksheet[f"B{row_index}"] = metadataset.path_as_str
+        else:
+            worksheet[f"B{row_index}"] = self.format_as_hyperlink(
+                target=metadataset.path.parent,
+                label=self.translated_texts.get("browse"),
+            )
+            worksheet[f"B{row_index}"].style = "Hyperlink"
+
         worksheet[f"C{row_index}"] = path.dirname(metadataset.get("folder"))
         worksheet[f"E{row_index}"] = metadataset.get("creator_prod")
         worksheet[f"F{row_index}"] = metadataset.get("keywords")
@@ -851,9 +874,6 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
             # Once all fieds explored, write them
             self.sheet_flat_geodatabases[f"T{row_index}"] = champs
-
-        # end of method
-        return
 
     def store_md_geodatabases_server(
         self,

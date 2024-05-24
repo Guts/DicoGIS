@@ -36,6 +36,7 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
 
     def __init__(self, translated_texts: dict, opt_size_prettify: bool = True) -> None:
         """Store metadata into JSON files."""
+
         super().__init__(
             translated_texts=translated_texts, opt_size_prettify=opt_size_prettify
         )
