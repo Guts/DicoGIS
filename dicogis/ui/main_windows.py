@@ -626,7 +626,7 @@ class DicoGIS(ThemedTk):
             dest_dir=self.tab_files.target_path.get(),
             dest_filename=self.ent_outxl_filename.get(),
             ftype="Excel Workbook",
-            dlg_title=self.localized_strings.get("gui_excel"),
+            dlg_title=self.localized_strings.get("gui_excel", "Excel Workbook(.xlsx)"),
         )
         logger.info(f"Workbook saved: {self.ent_outxl_filename.get()}")
 
