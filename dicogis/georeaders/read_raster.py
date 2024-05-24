@@ -16,7 +16,7 @@ from osgeo import gdal
 
 # package
 from dicogis.georeaders.base_georeader import GeoReaderBase
-from dicogis.models.dataset import MetaRasterDataset
+from dicogis.models.metadataset import MetaRasterDataset
 from dicogis.utils.check_path import check_var_can_be_path
 
 # ############################################################################

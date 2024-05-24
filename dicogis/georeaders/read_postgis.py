@@ -17,7 +17,7 @@ from osgeo import gdal, ogr
 from dicogis.constants import GDAL_POSTGIS_OPEN_OPTIONS
 from dicogis.georeaders.base_georeader import GeoReaderBase
 from dicogis.models.database_connection import DatabaseConnection
-from dicogis.models.dataset import MetaDatabaseTable
+from dicogis.models.metadataset import MetaDatabaseTable
 
 # ############################################################################
 # ######### Globals ############

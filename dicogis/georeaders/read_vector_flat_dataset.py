@@ -24,7 +24,7 @@ from osgeo import ogr
 
 # package
 from dicogis.georeaders.base_georeader import GeoReaderBase
-from dicogis.models.dataset import MetaDatabaseFlat, MetaVectorDataset
+from dicogis.models.metadataset import MetaDatabaseFlat, MetaVectorDataset
 from dicogis.utils.check_path import check_var_can_be_path
 
 # ############################################################################

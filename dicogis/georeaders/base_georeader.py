@@ -18,8 +18,8 @@ from osgeo import gdal, ogr, osr
 # project
 from dicogis.constants import GDAL_POSTGIS_OPEN_OPTIONS
 from dicogis.georeaders.gdal_exceptions_handler import GdalErrorHandler
-from dicogis.models.dataset import MetaDataset
 from dicogis.models.feature_attributes import AttributeField
+from dicogis.models.metadataset import MetaDataset
 from dicogis.utils.check_path import check_var_can_be_path
 from dicogis.utils.texts import TextsManager
 
