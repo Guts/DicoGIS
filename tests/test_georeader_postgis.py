@@ -21,7 +21,7 @@ from osgeo import gdal
 
 # package
 from dicogis.georeaders.read_postgis import ReadPostGIS
-from dicogis.models.dataset import MetaDatabaseTable, MetaDataset
+from dicogis.models.metadataset import MetaDatabaseTable, MetaDataset
 
 # #############################################################################
 # ########## Classes ###############

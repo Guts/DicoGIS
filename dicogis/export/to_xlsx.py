@@ -18,7 +18,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
 # project
-from dicogis.models.dataset import (
+from dicogis.models.metadataset import (
     MetaDatabaseFlat,
     MetaDatabaseTable,
     MetaDataset,
