@@ -52,6 +52,7 @@ class OutputFormats(str, ExtendedEnum):
     """Supported output formats."""
 
     excel = "excel"
+    json = "json"
 
 
 class FormatsVector(ExtendedEnum):

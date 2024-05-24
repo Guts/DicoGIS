@@ -18,6 +18,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
 # project
+from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.models.metadataset import (
     MetaDatabaseFlat,
     MetaDatabaseTable,
@@ -40,7 +41,7 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class MetadataToXlsx(Workbook):
+class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
     """Export into a XLSX worksheet."""
 
     li_cols_vector = [
@@ -145,34 +146,32 @@ class MetadataToXlsx(Workbook):
         "gdal_err",
     ]
 
-    def __init__(self, translated_texts: dict, opt_size_prettify: bool = True):
+    def __init__(self, translated_texts: dict, opt_size_prettify: bool = True) -> None:
         """Store metadata into Excel worksheets.
 
         Args:
             texts (dict, optional): dictionary of translated texts. Defaults to {}.
             opt_size_prettify (bool, optional): option to prettify size or not. Defaults to False.
         """
-        super().__init__(iso_dates=True)
-        self.translated_texts = translated_texts
-
-        # options
-        self.opt_size_prettify = opt_size_prettify
-
+        super().__init__(
+            translated_texts=translated_texts, opt_size_prettify=opt_size_prettify
+        )
+        self.workbook = Workbook(iso_dates=True)
         # styles
         s_date = NamedStyle(name="date")
         s_date.number_format = "dd/mm/yyyy"
         s_wrap = NamedStyle(name="wrap")
         s_wrap.alignment = Alignment(wrap_text=True)
-        self.add_named_style(s_date)
-        self.add_named_style(s_wrap)
+        self.workbook.add_named_style(s_date)
+        self.workbook.add_named_style(s_wrap)
 
         # deleting the default worksheet
-        ws = self.active
-        self.remove(worksheet=ws)
+        ws = self.workbook.active
+        self.workbook.remove(worksheet=ws)
 
     # ------------ Setting workbook ---------------------
 
-    def set_worksheets(
+    def pre_serializing(
         self,
         has_vector: bool = False,
         has_raster: bool = False,
@@ -181,7 +180,7 @@ class MetadataToXlsx(Workbook):
         has_cad: bool = False,
         has_sgbd: bool = False,
     ):
-        """Set workbook's sheets accordingly to metadata types.
+        """Prepare workbooks.
 
         Args:
             has_vector (bool, optional): _description_. Defaults to False.
@@ -195,9 +194,10 @@ class MetadataToXlsx(Workbook):
         # SHEETS & HEADERS
         if (
             has_vector
-            and self.translated_texts.get("sheet_vectors") not in self.sheetnames
+            and self.translated_texts.get("sheet_vectors")
+            not in self.workbook.sheetnames
         ):
-            self.sheet_vector_files = self.create_sheet(
+            self.sheet_vector_files = self.workbook.create_sheet(
                 title=self.translated_texts.get("sheet_vectors")
             )
             # headers
@@ -210,9 +210,10 @@ class MetadataToXlsx(Workbook):
 
         if (
             has_raster
-            and self.translated_texts.get("sheet_rasters") not in self.sheetnames
+            and self.translated_texts.get("sheet_rasters")
+            not in self.workbook.sheetnames
         ):
-            self.sheet_raster_files = self.create_sheet(
+            self.sheet_raster_files = self.workbook.create_sheet(
                 title=self.translated_texts.get("sheet_rasters")
             )
             # headers
@@ -225,9 +226,10 @@ class MetadataToXlsx(Workbook):
 
         if (
             has_filedb
-            and self.translated_texts.get("sheet_filedb") not in self.sheetnames
+            and self.translated_texts.get("sheet_filedb")
+            not in self.workbook.sheetnames
         ):
-            self.sheet_flat_geodatabases = self.create_sheet(
+            self.sheet_flat_geodatabases = self.workbook.create_sheet(
                 title=self.translated_texts.get("sheet_filedb")
             )
             # headers
@@ -240,9 +242,10 @@ class MetadataToXlsx(Workbook):
 
         if (
             has_mapdocs
-            and self.translated_texts.get("sheet_maplans") not in self.sheetnames
+            and self.translated_texts.get("sheet_maplans")
+            not in self.workbook.sheetnames
         ):
-            self.sheet_map_workspaces = self.create_sheet(
+            self.sheet_map_workspaces = self.workbook.create_sheet(
                 title=self.translated_texts.get("sheet_maplans")
             )
             # headers
@@ -253,8 +256,11 @@ class MetadataToXlsx(Workbook):
             # initialize line counter
             self.row_index_map_worskpaces = 1
 
-        if has_cad and self.translated_texts.get("sheet_cdao") not in self.sheetnames:
-            self.sheet_cad_files = self.create_sheet(
+        if (
+            has_cad
+            and self.translated_texts.get("sheet_cdao") not in self.workbook.sheetnames
+        ):
+            self.sheet_cad_files = self.workbook.create_sheet(
                 title=self.translated_texts.get("sheet_cdao")
             )
             # headers
@@ -265,8 +271,8 @@ class MetadataToXlsx(Workbook):
             # initialize line counter
             self.row_index_cad_files = 1
 
-        if has_sgbd and "PostGIS" not in self.sheetnames:
-            self.sheet_server_geodatabases = self.create_sheet(title="PostGIS")
+        if has_sgbd and "PostGIS" not in self.workbook.sheetnames:
+            self.sheet_server_geodatabases = self.workbook.create_sheet(title="PostGIS")
             # headers
             self.sheet_server_geodatabases.append(
                 [self.translated_texts.get(i) for i in self.li_cols_sgbd]
@@ -274,9 +280,9 @@ class MetadataToXlsx(Workbook):
             # initialize line counter
             self.row_index_server_geodatabases = 1
 
-    def tunning_worksheets(self):
+    def post_serializing(self):
         """Clean up and tunning worksheet."""
-        for sheet in self.worksheets:
+        for sheet in self.workbook.worksheets:
             # Freezing panes
             c_freezed = sheet["B2"]
             sheet.freeze_panes = c_freezed

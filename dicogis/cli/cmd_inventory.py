@@ -18,7 +18,7 @@ from rich import print
 # project
 from dicogis.__about__ import __package_name__, __title__, __version__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
-from dicogis.export.to_xlsx import MetadataToXlsx
+from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
@@ -188,7 +188,7 @@ def inventory(
     # output format
     if output_format == "excel":
         # creating the Excel workbook
-        xl_workbook = MetadataToXlsx(
+        xl_workbook = MetadatasetSerializerXlsx(
             translated_texts=localized_strings,
             opt_size_prettify=opt_prettify_size,
         )
@@ -255,7 +255,7 @@ def inventory(
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
-            output_workbook=xl_workbook,
+            format_or_serializer=xl_workbook,
             localized_strings=localized_strings,
             # list by tabs
             li_vectors=li_vectors,
@@ -293,13 +293,13 @@ def inventory(
         total_files = geofiles_processor.count_files_to_process()
         print(f"Start analyzing {total_files} files...")
 
-        geofiles_processor.process_files_in_queue()
+        geofiles_processor.process_datasets_in_queue()
 
         # output file path
         if output_path is None:
             output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}.xlsx")
 
-        xl_workbook.tunning_worksheets()
+        xl_workbook.post_serializing()
         saved = Utilities.safe_save(
             output_object=xl_workbook,
             dest_dir=f"{output_path.parent.resolve()}",
@@ -325,7 +325,7 @@ def inventory(
             raise typer.Exit(1)
 
         # configure output workbook
-        xl_workbook.set_worksheets(has_sgbd=True)
+        xl_workbook.pre_serializing(has_sgbd=True)
 
         for pg_service in pg_services:
 
@@ -358,7 +358,7 @@ def inventory(
         if output_path is None:
             output_path = Path(f"DicoGIS_PostGIS_{date.today()}.xlsx")
 
-        xl_workbook.tunning_worksheets()
+        xl_workbook.post_serializing()
         saved = Utilities.safe_save(
             output_object=xl_workbook,
             dest_dir=f"{output_path.parent.resolve()}",
