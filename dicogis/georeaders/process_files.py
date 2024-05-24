@@ -214,7 +214,7 @@ class ProcessingFiles:
 
         try:
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path.name}..."
+                message_to_display=f"Reading {dataset_to_process.file_path}..."
             )
             metadataset = dataset_to_process.georeader().infos_dataset(
                 source_path=path.abspath(dataset_to_process.file_path),
