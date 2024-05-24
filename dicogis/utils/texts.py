@@ -57,9 +57,10 @@ class TextsManager:
 
         # set params as attributes
         self.locale_folder = locale_folder
+        self.language_code: str | None = None
 
     def load_texts(
-        self, dico_texts: Optional[dict] = None, language_code: str = "EN"
+        self, dico_texts: Optional[dict] = None, language_code: str | tuple = "EN"
     ) -> dict:
         """Load texts according to the specified language code.
 
@@ -81,9 +82,15 @@ class TextsManager:
         if dico_texts is None:
             dico_texts = {}
 
+        # handle locale.getlocale()
+        if isinstance(language_code, tuple):
+            language_code = language_code[0]
+
         # handle en_EN form
         if "_" in language_code:
             language_code = language_code.split("_")[1]
+
+        self.language_code = language_code.upper()
 
         # check file, if not exists log the error and return the default language
         lang_file = self.locale_folder / f"lang_{language_code.upper()}.xml"
