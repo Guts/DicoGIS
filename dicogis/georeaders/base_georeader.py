@@ -62,7 +62,7 @@ class GeoReaderBase:
         self.localized_strings = localized_strings
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts(
-                dico_texts=localized_strings, language_code=getlocale()[0]
+                dico_texts=localized_strings, language_code=getlocale()
             )
         # attributes to be used later
         self.counter_alerts: int = 0

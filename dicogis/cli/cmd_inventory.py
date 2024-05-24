@@ -179,7 +179,7 @@ def inventory(
     # i18n
     localized_strings: dict = {}
     if language is None:
-        language = getlocale()[0]
+        language = getlocale()
     TextsManager().load_texts(dico_texts=localized_strings, language_code=language)
 
     # output format
