@@ -485,7 +485,6 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             self.store_error(
                 metadataset=metadataset, worksheet=worksheet, row_index=row_index
             )
-            # return False
 
         # Dataset name
         worksheet[f"A{row_index}"] = metadataset.name
@@ -726,8 +725,6 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
                 worksheet[f"H{row_index}"].style = "Warning Text"
                 worksheet[f"I{row_index}"] = err_mess
                 worksheet[f"I{row_index}"].style = "Warning Text"
-                # Interruption of function
-                continue
 
             worksheet[f"H{row_index}"] = layer_metadataset.name
             worksheet[f"I{row_index}"] = layer_metadataset.count_feature_attributes

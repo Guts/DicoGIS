@@ -62,4 +62,4 @@ if __name__ == "__main__":
         source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gdb"
     )
     print(metadataset.name, metadataset.count_layers, metadataset.dataset_type)
-    pprint(metadataset)
+    pprint(metadataset.layers[1])
