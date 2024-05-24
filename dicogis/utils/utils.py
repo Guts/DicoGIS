@@ -25,7 +25,7 @@ if opersys == "win32":
 
 # package
 from dicogis.__about__ import __package_name__
-from dicogis.export.to_xlsx import MetadataToXlsx
+from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.utils.check_path import check_path
 
 # ##############################################################################
@@ -117,7 +117,7 @@ class Utilities:
     @classmethod
     def safe_save(
         cls,
-        output_object: MetadataToXlsx,
+        output_object: MetadatasetSerializerXlsx,
         dest_dir: str = r".",
         dest_filename: str = "DicoGIS.xlsx",
         ftype: str = "Excel Workbook",

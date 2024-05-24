@@ -46,7 +46,7 @@ from ttkthemes import ThemedTk
 # Project
 from dicogis import __about__
 from dicogis.constants import AvailableLocales
-from dicogis.export.to_xlsx import MetadataToXlsx
+from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
@@ -528,7 +528,7 @@ class DicoGIS(ThemedTk):
                 return
 
         # creating the Excel workbook
-        self.xl_workbook = MetadataToXlsx(
+        self.xl_workbook = MetadatasetSerializerXlsx(
             translated_texts=self.localized_strings,
             opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
         )
@@ -542,7 +542,7 @@ class DicoGIS(ThemedTk):
             self.process_files()
         elif self.typo == 1:
             self.nb.select(1)
-            self.xl_workbook.set_worksheets(has_sgbd=1)
+            self.xl_workbook.pre_serializing(has_sgbd=1)
             logger.info("PROCESS LAUNCHED: SGBD")
             # launching the process
             self.process_db(sgbd_reader=pg_reader)
@@ -569,7 +569,7 @@ class DicoGIS(ThemedTk):
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
-            output_workbook=self.xl_workbook,
+            format_or_serializer="excel",
             localized_strings=self.localized_strings,
             # list by tabs
             li_vectors=self.li_vectors,
@@ -599,18 +599,18 @@ class DicoGIS(ThemedTk):
             opt_analyze_raster=self.tab_files.opt_rast.get(),
             opt_analyze_shapefiles=self.tab_files.opt_shp.get(),
             opt_analyze_spatialite=self.tab_files.opt_spadb.get(),
+            # progress
+            progress_counter=self.progress,
+            progress_message_displayer=self.status,
+            progress_callback_cmd=self.update,
         )
 
         # sheets and progress bar
         total_files = geofiles_processor.count_files_to_process()
-
         self.prog_layers["maximum"] = total_files
 
-        geofiles_processor.process_files_in_queue(
-            progress_value_count=self.progress,
-            progress_value_message=self.status,
-            progress_callback_cmd=self.update,
-        )
+        # launch processing
+        geofiles_processor.process_datasets_in_queue()
 
         # saving dictionary
         send_system_notify(
@@ -620,7 +620,7 @@ class DicoGIS(ThemedTk):
             notification_sound=self.tab_options.opt_end_process_notification_sound.get(),
         )
         self.val.config(state=ACTIVE)
-        self.xl_workbook.tunning_worksheets()
+        self.xl_workbook.post_serializing()
         saved = utils_global.safe_save(
             output_object=self.xl_workbook,
             dest_dir=self.tab_files.target_path.get(),
@@ -684,7 +684,7 @@ class DicoGIS(ThemedTk):
             notification_sound=self.tab_options.opt_end_process_notification_sound.get(),
         )
         self.val.config(state=ACTIVE)
-        self.xl_workbook.tunning_worksheets()
+        self.xl_workbook.post_serializing()
         saved = utils_global.safe_save(
             output_object=self.xl_workbook,
             dest_filename=self.ent_outxl_filename.get(),

@@ -13,14 +13,19 @@ from dataclasses import dataclass
 from locale import getlocale
 from os import path
 from pathlib import Path
-from typing import Callable, Optional
+from tkinter import IntVar, StringVar
+from typing import Callable, Optional, Union
 
 # package
-from dicogis.export.to_xlsx import MetadataToXlsx
+from dicogis.constants import OutputFormats
+from dicogis.export.base_serializer import MetadatasetSerializerBase
+from dicogis.export.to_json import MetadatasetSerializerJson
+from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.read_dxf import ReadCadDxf
 from dicogis.georeaders.read_raster import ReadRasters
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
+from dicogis.models.metadataset import MetaDataset
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -40,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class FileToProcess:
+class DatasetToProcess:
     """Model of a geofile to process."""
 
     file_path: Path
@@ -72,7 +77,7 @@ class ProcessingFiles:
 
     def __init__(
         self,
-        output_workbook: MetadataToXlsx,
+        format_or_serializer: OutputFormats | MetadatasetSerializerBase,
         localized_strings: Optional[dict],
         # input lists of files to process
         li_cdao: Optional[Iterable],
@@ -103,9 +108,13 @@ class ProcessingFiles:
         opt_analyze_cdao: bool = True,
         opt_analyze_shapefiles: bool = True,
         opt_analyze_spatialite: bool = True,
+        # progress
+        progress_message_displayer: Optional[StringVar] = None,
+        progress_counter: Optional[IntVar] = None,
+        progress_callback_cmd: Optional[Callable] = None,
     ) -> None:
         # -- STORE PARAMETERS AS ATTRIBUTES --
-        self.output_workbook = output_workbook
+        self.serializer = self.serializer_from_output_format(format_or_serializer)
 
         # List of files
         self.li_dxf = li_dxf
@@ -151,88 +160,139 @@ class ProcessingFiles:
 
         # others
         self.total_files: Optional[int] = None
-        self.li_files_to_process: list[Optional[FileToProcess]] = []
+        self.li_files_to_process: list[Optional[DatasetToProcess]] = []
         self.localized_strings = localized_strings
         if self.localized_strings is None:
             self.localized_strings = txt_manager.load_texts(language_code=getlocale())
 
-    def process_files_in_queue(
-        self,
-        progress_value_message: Optional[str] = None,
-        progress_value_count: Optional[int] = None,
-        progress_callback_cmd: Optional[Callable] = None,
-    ) -> bool:
+        # progress
+        self.progress_message_displayer = progress_message_displayer
+        self.progress_counter = progress_counter
+        self.progress_callback_cmd = progress_callback_cmd
+
+    def serializer_from_output_format(
+        self, format_or_serializer: OutputFormats | MetadatasetSerializerBase
+    ) -> Union[MetadatasetSerializerJson, MetadatasetSerializerXlsx]:
+        if isinstance(format_or_serializer, MetadatasetSerializerBase):
+            return format_or_serializer
+
+        if (
+            isinstance(format_or_serializer, OutputFormats)
+            and format_or_serializer.value == "excel"
+        ):
+            return MetadatasetSerializerXlsx
+        elif (
+            isinstance(format_or_serializer, OutputFormats)
+            and format_or_serializer.value == "json"
+        ):
+            return MetadatasetSerializerJson
+
+    def process_datasets_in_queue(self):
+        """Process datasets in queue."""
         for geofile in self.li_files_to_process:
             if geofile.processed is True:
                 logger.warning(f"File has already been processed: {geofile.file_path}")
                 continue
 
-            # progression
-            logger.info(f"Processing: {geofile}")
-            if progress_value_message is not None:
-                if hasattr(progress_value_message, "set"):
-                    progress_value_message.set(
-                        f"Reading: {Path(geofile.file_path).name}"
-                    )
-                else:
-                    progress_value_message = f"Reading: {Path(geofile.file_path).name}"
-            if progress_value_count is not None:
-                if hasattr(progress_value_count, "set"):
-                    progress_value_count.set(progress_value_count.get() + 1)
-                else:
-                    progress_value_count += 1
-            if progress_callback_cmd is not None:
-                progress_callback_cmd()
-
-            # getting the informations
-            try:
-                metadataset = geofile.georeader().infos_dataset(
-                    source_path=path.abspath(geofile.file_path),
-                )
-                logger.debug(f"Reading {geofile} succeeded.")
-                geofile.processed = True
-            except Exception as err:
+            # extract dataset metadata
+            geofile, metadataset = self.read_dataset(dataset_to_process=geofile)
+            if metadataset is None:
                 logger.error(
-                    f"Reading and extraction information on file {geofile.file_path} "
-                    f"(format: {geofile.file_format}) failed. Trace: {err}"
+                    f"Reading {geofile.file_path} failed. It can't be serialized."
                 )
-                geofile.processed = True
-                geofile.process_error = err
                 continue
 
             # storing informations into the output file
-            try:
-                if progress_value_message is not None:
-                    progress_value_message = f"Storing: {geofile.file_path}"
-                # writing to the Excel file
-                self.output_workbook.serialize_metadaset(metadataset=metadataset)
-                geofile.exported = True
-                logger.debug(f"Metadata stored into workbook for {geofile.file_path}")
-            except Exception as err:
-                geofile.exported = False
-                geofile.exported = err
-                logger.error(
-                    f"Storing metadata of {geofile.file_path} into the output file "
-                    f"failed. Trace: {err}"
-                )
+            geofile, metadataset = self.export_metadataset(
+                dataset_to_process=geofile, metadataset_to_serialize=metadataset
+            )
+
+    def read_dataset(
+        self, dataset_to_process: DatasetToProcess
+    ) -> tuple[DatasetToProcess, MetaDataset | None]:
+        metadataset = None
+
+        try:
+            self.update_progress(
+                message_to_display=f"Reading {dataset_to_process.file_path.name}..."
+            )
+            metadataset = dataset_to_process.georeader().infos_dataset(
+                source_path=path.abspath(dataset_to_process.file_path),
+            )
+            logger.debug(f"Reading {dataset_to_process} succeeded.")
+            self.update_progress(
+                message_to_display=f"Reading {dataset_to_process.file_path}: OK",
+                increment_counter=True,
+            )
+            dataset_to_process.processed = True
+        except Exception as err:
+            self.update_progress(
+                message_to_display=f"Reading {dataset_to_process.file_path}: FAIL"
+            )
+            logger.error(
+                f"Reading {dataset_to_process.file_path} "
+                f"(format: {dataset_to_process.file_format}) failed. Trace: {err}"
+            )
+            dataset_to_process.processed = True
+            dataset_to_process.process_error = err
+
+        return dataset_to_process, metadataset
+
+    def export_metadataset(
+        self,
+        dataset_to_process: DatasetToProcess,
+        metadataset_to_serialize: MetaDataset,
+    ) -> tuple[DatasetToProcess, MetaDataset | None]:
+        try:
+            self.update_progress(
+                message_to_display="Exporting metadata of "
+                f"{dataset_to_process.file_path}..."
+            )
+            # writing to the Excel file
+            self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
+            self.update_progress(
+                message_to_display="Exporting metadata of "
+                f"{dataset_to_process.file_path}: OK",
+                increment_counter=True,
+            )
+            logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
+            dataset_to_process.exported = True
+        except Exception as err:
+            dataset_to_process.exported = False
+            dataset_to_process.exported = err
+            logger.error(
+                f"Exporting metadata of {dataset_to_process.file_path} failed. "
+                f"Trace: {err}"
+            )
+
+        return dataset_to_process, metadataset_to_serialize
 
     def add_files_to_process_queue(
-        self, list_of_files: list, file_format: str
-    ) -> list[FileToProcess]:
+        self, list_of_datasets: list, dataset_format: str
+    ) -> list[DatasetToProcess]:
+        """Add dataset to the processing queue.
+
+        Args:
+            list_of_datasets: list of datasets where to register the dataets
+            dataset_format: _description_
+
+        Returns:
+            _description_
+        """
         out_list: list = []
 
-        for geofile in list_of_files:
+        for geofile in list_of_datasets:
             out_list.append(
-                FileToProcess(
+                DatasetToProcess(
                     file_path=geofile,
-                    file_format=file_format,
-                    georeader=self.MATRIX_FORMAT_GEOREADER.get(file_format),
+                    file_format=dataset_format,
+                    georeader=self.MATRIX_FORMAT_GEOREADER.get(dataset_format),
                 )
             )
 
         self.li_files_to_process.extend(out_list)
         logger.debug(
-            f"{len(out_list)} files (format: {file_format}) added to the "
+            f"{len(out_list)} files (format: {dataset_format}) added to the "
             "process queue."
         )
         return out_list
@@ -241,90 +301,111 @@ class ProcessingFiles:
         total_files: int = 0
         if self.opt_analyze_shapefiles and len(self.li_shapefiles):
             total_files += len(self.li_shapefiles)
-            self.output_workbook.set_worksheets(has_vector=1)
+            self.serializer.pre_serializing(has_vector=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_shapefiles, file_format="esri_shapefile"
+                list_of_datasets=self.li_shapefiles, dataset_format="esri_shapefile"
             )
 
         if self.opt_analyze_mapinfo_tab and len(self.li_mapinfo_tab):
             total_files += len(self.li_mapinfo_tab)
-            self.output_workbook.set_worksheets(has_vector=1)
+            self.serializer.pre_serializing(has_vector=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_mapinfo_tab, file_format="mapinfo_tab"
+                list_of_datasets=self.li_mapinfo_tab, dataset_format="mapinfo_tab"
             )
 
         if self.opt_analyze_kml and len(self.li_kml):
             total_files += len(self.li_kml)
-            self.output_workbook.set_worksheets(has_vector=1)
+            self.serializer.pre_serializing(has_vector=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_kml, file_format="kml"
+                list_of_datasets=self.li_kml, dataset_format="kml"
             )
 
         if self.opt_analyze_gml and len(self.li_gml):
             total_files += len(self.li_gml)
-            self.output_workbook.set_worksheets(has_vector=1)
+            self.serializer.pre_serializing(has_vector=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_gml, file_format="gml"
+                list_of_datasets=self.li_gml, dataset_format="gml"
             )
 
         if self.opt_analyze_geojson and len(self.li_geojson):
             total_files += len(self.li_geojson)
-            self.output_workbook.set_worksheets(has_vector=1)
+            self.serializer.pre_serializing(has_vector=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_geojson, file_format="geojson"
+                list_of_datasets=self.li_geojson, dataset_format="geojson"
             )
 
         if self.opt_analyze_geotiff and len(self.li_geotiff):
             total_files += len(self.li_geotiff)
-            self.output_workbook.set_worksheets(has_raster=1)
+            self.serializer.pre_serializing(has_raster=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_geotiff, file_format="geotiff"
+                list_of_datasets=self.li_geotiff, dataset_format="geotiff"
             )
 
         if self.opt_analyze_gxt and len(self.li_gxt):
             total_files += len(self.li_gxt)
-            self.output_workbook.set_worksheets(has_vector=1)
+            self.serializer.pre_serializing(has_vector=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_gxt, file_format="gxt"
+                list_of_datasets=self.li_gxt, dataset_format="gxt"
             )
 
         if self.opt_analyze_raster and len(self.li_rasters):
             total_files += len(self.li_rasters)
-            self.output_workbook.set_worksheets(has_raster=1)
+            self.serializer.pre_serializing(has_raster=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_tif, file_format="raster"
+                list_of_datasets=self.li_tif, dataset_format="raster"
             )
 
         if self.opt_analyze_esri_filegdb and len(self.li_flat_geodatabase_esri_filegdb):
             total_files += len(self.li_flat_geodatabase_esri_filegdb)
-            self.output_workbook.set_worksheets(has_filedb=1)
+            self.serializer.pre_serializing(has_filedb=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_flat_geodatabase_esri_filegdb,
-                file_format="file_geodatabase_esri",
+                list_of_datasets=self.li_flat_geodatabase_esri_filegdb,
+                dataset_format="file_geodatabase_esri",
             )
 
         if self.opt_analyze_geopackage and len(self.li_flat_geodatabase_geopackage):
             total_files += len(self.li_flat_geodatabase_geopackage)
-            self.output_workbook.set_worksheets(has_filedb=1)
+            self.serializer.pre_serializing(has_filedb=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_flat_geodatabase_geopackage,
-                file_format="file_geodatabase_geopackage",
+                list_of_datasets=self.li_flat_geodatabase_geopackage,
+                dataset_format="file_geodatabase_geopackage",
             )
 
         if self.opt_analyze_spatialite and len(self.li_flat_geodatabase_spatialite):
             total_files += len(self.li_flat_geodatabase_spatialite)
-            self.output_workbook.set_worksheets(has_filedb=1)
+            self.serializer.pre_serializing(has_filedb=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_flat_geodatabase_spatialite,
-                file_format="file_geodatabase_spatialite",
+                list_of_datasets=self.li_flat_geodatabase_spatialite,
+                dataset_format="file_geodatabase_spatialite",
             )
 
         if self.opt_analyze_cdao and len(self.li_cdao):
             total_files += len(self.li_cdao)
-            self.output_workbook.set_worksheets(has_cad=1)
+            self.serializer.pre_serializing(has_cad=1)
             self.add_files_to_process_queue(
-                list_of_files=self.li_cdao, file_format="file_cad"
+                list_of_datasets=self.li_cdao, dataset_format="file_cad"
             )
 
         self.total_files = total_files
         return total_files
+
+    def update_progress(
+        self, message_to_display: str | None = None, increment_counter: bool = False
+    ):
+        """Helper method to update progress bar/status/counter.
+
+        Args:
+            message_to_display: message to display. Defaults to None.
+            increment_counter: option to increment progress counter. Defaults to False.
+        """
+        if hasattr(self.progress_message_displayer, "set"):
+            self.progress_message_displayer.set(message_to_display)
+        if increment_counter and self.progress_counter is not None:
+            if hasattr(self.progress_counter, "set") and hasattr(
+                self.progress_counter, "get"
+            ):
+                self.progress_counter.set(self.progress_counter.get() + 1)
+            else:
+                self.progress_counter += 1
+        if self.progress_callback_cmd is not None:
+            self.progress_callback_cmd()
