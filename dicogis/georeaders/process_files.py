@@ -14,7 +14,7 @@ from locale import getlocale
 from os import path
 from pathlib import Path
 from tkinter import IntVar, StringVar
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 # package
 from dicogis.constants import OutputFormats
@@ -172,7 +172,7 @@ class ProcessingFiles:
 
     def serializer_from_output_format(
         self, format_or_serializer: OutputFormats | MetadatasetSerializerBase
-    ) -> MetadatasetSerializerJson | MetadatasetSerializerXlsx:
+    ) -> Union[MetadatasetSerializerJson, MetadatasetSerializerXlsx]:
         if isinstance(format_or_serializer, MetadatasetSerializerBase):
             return format_or_serializer
 
