@@ -62,9 +62,8 @@ def main(
     """Common options to commands or option only applicable to the main command.
 
     Args:
-        verbose (bool, optional): enable verbose mode. Defaults to False.
-        version (Annotated[ Optional[bool], typer.Option, optional): show version and
-            exit. Defaults to version_callback.
+        verbose: enable verbose mode. Defaults to False.
+        version: show version and exit. Defaults to version_callback.
     """
     if verbose:
         state["verbose"] = True
@@ -78,6 +77,8 @@ def main(
 # integrate subcommands
 dicogis_cli.command()(inventory)
 
+# exposed for documentation
+click_object = typer.main.get_command(dicogis_cli)
 
 # ############################################################################
 # #### Stand alone program ########

@@ -27,6 +27,6 @@
     "isort.check": true,
     // extensions
     "autoDocstring.guessTypes": true,
-    "autoDocstring.docstringFormat": "google",
+    "autoDocstring.docstringFormat": "google-notypes",
     "autoDocstring.generateDocstringOnEnter": false,
 }
