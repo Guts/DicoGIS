@@ -154,9 +154,7 @@ class ProcessingFiles:
         self.li_files_to_process: list[Optional[FileToProcess]] = []
         self.localized_strings = localized_strings
         if self.localized_strings is None:
-            txt_manager.load_texts(
-                dico_texts=localized_strings, language_code=getlocale()
-            )
+            self.localized_strings = txt_manager.load_texts(language_code=getlocale())
 
     def process_files_in_queue(
         self,

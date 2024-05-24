@@ -8,20 +8,6 @@ from enum import Enum
 GDAL_POSTGIS_OPEN_OPTIONS: list[str] = []
 
 
-class AvailableLocales(str, Enum):
-    """Supported locale."""
-
-    english = "EN"
-    french = "FR"
-    spanish = "ES"
-
-
-class OutputFormats(str, Enum):
-    """Supported output formats."""
-
-    excel = "excel"
-
-
 class ExtendedEnum(Enum):
     """Custom Enum with extended methods."""
 
@@ -52,6 +38,20 @@ class ExtendedEnum(Enum):
             bool: True is the value exists.
         """
         return value in cls._value2member_map_
+
+
+class AvailableLocales(str, ExtendedEnum):
+    """Supported locale."""
+
+    english = "EN"
+    french = "FR"
+    spanish = "ES"
+
+
+class OutputFormats(str, ExtendedEnum):
+    """Supported output formats."""
+
+    excel = "excel"
 
 
 class FormatsVector(ExtendedEnum):
@@ -97,3 +97,4 @@ if __name__ == "__main__":
         print(f.name)
 
     print([v.value for v in AvailableLocales])
+    print("EN" in AvailableLocales)

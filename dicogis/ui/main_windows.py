@@ -212,7 +212,7 @@ class DicoGIS(ThemedTk):
         )  # tab_id = 3
 
         # fillfulling text
-        self.txt_manager.load_texts(dico_texts=self.blabla, language_code=self.def_lang)
+        self.blabla = self.txt_manager.load_texts(language_code=self.def_lang)
 
         # =================================================================================
         # ## TAB 1: FILES ##
@@ -325,7 +325,7 @@ class DicoGIS(ThemedTk):
         """Update the texts dictionary with the language selected."""
         new_lang = self.ddl_lang.get()
         # change to the new language selected
-        self.txt_manager.load_texts(dico_texts=self.blabla, language_code=new_lang)
+        self.blabla = self.txt_manager.load_texts(language_code=new_lang)
         # update widgets text
         self.welcome.config(text=self.blabla.get("hi") + self.uzer)
         self.can.config(text=self.blabla.get("gui_quit"))
@@ -723,15 +723,13 @@ class DicoGIS(ThemedTk):
                 self.tab_sgbd.ent_H.delete(0, END)
                 self.status.set(f"Host is a {self.blabla.get('err_pg_empty_field')}")
                 return False
-            else:
-                pass
+
             if not self.tab_sgbd.ent_P.get():
                 self.tab_sgbd.ent_P.configure(foreground="red")
                 self.tab_sgbd.ent_P.delete(0, END)
                 self.status.set(f"Port is a {self.blabla.get('err_pg_empty_field')}")
                 return False
-            else:
-                pass
+
             if (
                 self.tab_sgbd.dbnb.get() == ""
                 or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
@@ -742,8 +740,7 @@ class DicoGIS(ThemedTk):
                     f"Database is a {self.blabla.get('err_pg_empty_field')}"
                 )
                 return False
-            else:
-                pass
+
             if (
                 self.tab_sgbd.user.get() == ""
                 or self.tab_sgbd.host.get() == self.blabla.get("err_pg_empty_field")
@@ -752,8 +749,7 @@ class DicoGIS(ThemedTk):
                 self.tab_sgbd.ent_U.delete(0, END)
                 self.status.set(f"User is a {self.blabla.get('err_pg_empty_field')}")
                 return False
-            else:
-                pass
+
             if (
                 self.tab_sgbd.pswd.get() == ""
                 or self.tab_sgbd.pswd.get() == self.blabla.get("err_pg_empty_field")
@@ -765,8 +761,7 @@ class DicoGIS(ThemedTk):
                 )
                 self.tab_sgbd.ent_M.configure(foreground="red")
                 return False
-            else:
-                pass
+
         # no error detected: let's test connection
         logger.info("Required fields are OK.")
 
@@ -795,8 +790,7 @@ class DicoGIS(ThemedTk):
                 # username/password or not (NTLM)
                 gdal.SetConfigOption("GDAL_PROXY_AUTH", "NTLM")
                 gdal.SetConfigOption("GDAL_HTTP_PROXYUSERPWD", " : ")
-            else:
-                pass
+
         else:
             logger.info("No proxy configured.")
 

@@ -177,10 +177,9 @@ def inventory(
     # TODO: check if specified formats are supported
 
     # i18n
-    localized_strings: dict = {}
     if language is None:
         language = getlocale()
-    TextsManager().load_texts(dico_texts=localized_strings, language_code=language)
+    localized_strings = TextsManager().load_texts(language_code=language)
 
     # output format
     if output_format == "excel":

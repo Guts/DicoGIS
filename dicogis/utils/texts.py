@@ -15,11 +15,13 @@
 # Standard library
 import gettext
 import logging
+from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 from xml.etree import ElementTree as ET
 
 # package
+from dicogis.constants import AvailableLocales
 from dicogis.utils.utils import Utilities
 
 # #############################################################################
@@ -59,13 +61,11 @@ class TextsManager:
         self.locale_folder = locale_folder
         self.language_code: str | None = None
 
-    def load_texts(
-        self, dico_texts: Optional[dict] = None, language_code: str | tuple = "EN"
-    ) -> dict:
+    @lru_cache
+    def load_texts(self, language_code: str | tuple = "EN") -> dict:
         """Load texts according to the specified language code.
 
         Args:
-            dico_texts (dict): dictonary to fill with localized strings
             language_code (str, optional): 2 letters prefix to pick the correct
                 language. Defaults to "EN".
 
@@ -75,12 +75,7 @@ class TextsManager:
         Returns:
             dict: dictonary filled by methods
         """
-
-        # clearing the text dictionary
-        if isinstance(dico_texts, dict):
-            dico_texts.clear()
-        if dico_texts is None:
-            dico_texts = {}
+        translated_texts: dict[str] = {}
 
         # handle locale.getlocale()
         if isinstance(language_code, tuple):
@@ -89,6 +84,14 @@ class TextsManager:
         # handle en_EN form
         if "_" in language_code:
             language_code = language_code.split("_")[1]
+
+        # if language not available, fallback to English
+        if not AvailableLocales.has_value(language_code):
+            logger.warning(
+                f"'{language_code}' is not part of available languages. "
+                "Fallbacking to English."
+            )
+            language_code = "EN"
 
         self.language_code = language_code.upper()
 
@@ -100,14 +103,22 @@ class TextsManager:
                     _("Language file not found: {}").format(lang_file.resolve())
                 )
             )
-            return self.load_texts(dico_texts=dico_texts)
+            return self.load_texts(language_code="EN")
 
         # open xml cursor
         xml = ET.parse(lang_file)
 
         # Looping and gathering texts from the xml file
         for elem in xml.getroot().iter():
-            dico_texts[elem.tag] = elem.text
+            translated_texts[elem.tag] = elem.text
 
         # end of fonction
-        return dico_texts
+        return translated_texts
+
+
+# #############################################################################
+# ##### Main #######################
+# ##################################
+if __name__ == "__main__":
+    txtmngr = TextsManager(locale_folder=Path("locale"))
+    translated_texts = txtmngr.load_texts(language_code="CH")

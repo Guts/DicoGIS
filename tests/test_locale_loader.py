@@ -31,7 +31,7 @@ class TestLocaleLoader(unittest.TestCase):
         self.assertIsNone(txtmngr.language_code)
 
         # English
-        en_txts = txtmngr.load_texts(dico_texts={}, language_code="EN")
+        en_txts = txtmngr.load_texts(language_code="EN")
         self.assertIsInstance(en_txts, dict)
         self.assertIsInstance(txtmngr.language_code, str)
         self.assertEqual(txtmngr.language_code, "EN")
@@ -40,7 +40,7 @@ class TestLocaleLoader(unittest.TestCase):
         txtmngr = TextsManager(locale_folder=Path("locale"))
         self.assertIsNone(txtmngr.language_code)
         # French
-        fr_txts = txtmngr.load_texts(dico_texts={}, language_code="FR")
+        fr_txts = txtmngr.load_texts(language_code="FR")
         self.assertIsInstance(fr_txts, dict)
         self.assertIsInstance(txtmngr.language_code, str)
         self.assertEqual(txtmngr.language_code, "FR")
@@ -49,7 +49,7 @@ class TestLocaleLoader(unittest.TestCase):
         txtmngr = TextsManager(locale_folder=Path("locale"))
         self.assertIsNone(txtmngr.language_code)
         # Spanish
-        sp_txts = txtmngr.load_texts(dico_texts={}, language_code="ES")
+        sp_txts = txtmngr.load_texts(language_code="ES")
         self.assertIsInstance(sp_txts, dict)
         self.assertIsInstance(txtmngr.language_code, str)
         self.assertEqual(txtmngr.language_code, "ES")
@@ -58,7 +58,7 @@ class TestLocaleLoader(unittest.TestCase):
         txtmngr = TextsManager(locale_folder=Path("locale"))
         self.assertIsNone(txtmngr.language_code)
         # Spanish
-        translated_txts = txtmngr.load_texts()
+        translated_txts = txtmngr.load_texts(language_code="CH")
         self.assertIsInstance(translated_txts, dict)
         self.assertIsInstance(txtmngr.language_code, str)
         self.assertEqual(txtmngr.language_code, "EN")
@@ -67,18 +67,16 @@ class TestLocaleLoader(unittest.TestCase):
         txtmngr = TextsManager(locale_folder=Path("locale"))
         self.assertIsNone(txtmngr.language_code)
         # default
-        default_txts = txtmngr.load_texts(
-            dico_texts={}, language_code=locale.getlocale()
-        )
+        default_txts = txtmngr.load_texts(language_code=locale.getlocale())
         self.assertIsInstance(default_txts, dict)
 
     def test_translated_text_isolentgh(self):
         txtmngr = TextsManager(locale_folder=Path("locale"))
         self.assertIsNone(txtmngr.language_code)
 
-        en_txts = txtmngr.load_texts(dico_texts={}, language_code="EN")
-        sp_txts = txtmngr.load_texts(dico_texts={}, language_code="ES")
-        fr_txts = txtmngr.load_texts(dico_texts={}, language_code="FR")
+        en_txts = txtmngr.load_texts(language_code="EN")
+        sp_txts = txtmngr.load_texts(language_code="ES")
+        fr_txts = txtmngr.load_texts(language_code="FR")
 
         # checks
         self.assertTrue(len(en_txts) == len(fr_txts) == len(sp_txts))
