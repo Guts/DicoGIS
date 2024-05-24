@@ -21,8 +21,7 @@ from typing import Optional
 if opersys == "win32":
     """windows"""
     from os import startfile  # to open a folder/file
-else:
-    pass
+
 
 # package
 from dicogis.__about__ import __package_name__
@@ -45,7 +44,7 @@ class Utilities:
     """DicoGIS specific utilities."""
 
     @classmethod
-    def resolve_internal_path(self, internal_path: Path) -> Path:
+    def resolve_internal_path(cls, internal_path: Path) -> Path:
         """Determine the path to internal resources, handling normal Python execution
         and frozen mode (typically PyInstaller).
 
@@ -71,7 +70,7 @@ class Utilities:
         return internal_path
 
     @classmethod
-    def open_dir_file(self, target: str | Path) -> subprocess.Popen | None:
+    def open_dir_file(cls, target: str | Path) -> subprocess.Popen | None:
         """Open a file or directory in the explorer of the operating system.
 
         Args:
@@ -117,7 +116,7 @@ class Utilities:
 
     @classmethod
     def safe_save(
-        self,
+        cls,
         output_object: MetadataToXlsx,
         dest_dir: str = r".",
         dest_filename: str = "DicoGIS.xlsx",
@@ -178,7 +177,7 @@ class Utilities:
         return out_name, out_path
 
     @classmethod
-    def ui_switch(self, cb_value, parent):
+    def ui_switch(cls, cb_value, parent):
         """Change state of  all children widgets within a parent class.
 
         cb_value=boolean
@@ -190,5 +189,3 @@ class Utilities:
         else:
             for child in parent.winfo_children():
                 child.configure(state=DISABLED)
-        # end of function
-        return
