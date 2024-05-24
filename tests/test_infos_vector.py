@@ -9,9 +9,9 @@
 # ########## Libraries #############
 # ##################################
 
-import unittest
-
 # Standard library
+import unittest
+from datetime import datetime
 from pathlib import Path
 
 # package
@@ -47,10 +47,9 @@ class TestInfosFlatVector(unittest.TestCase):
                 metadaset.feature_attributes,
                 (list, tuple),
                 fixture_filepath,
-                fixture_filepath,
             )
             self.assertIsInstance(
-                metadaset.feature_attributes_count, int, fixture_filepath
+                metadaset.count_feature_attributes, int, fixture_filepath
             )
             self.assertIsInstance(metadaset.bbox, tuple, fixture_filepath)
             self.assertIsInstance(metadaset.crs_name, str, fixture_filepath)
@@ -70,8 +69,12 @@ class TestInfosFlatVector(unittest.TestCase):
             self.assertIsInstance(metadaset.geometry_type, str, fixture_filepath)
             self.assertIsInstance(metadaset.name, str, fixture_filepath)
             self.assertIsInstance(metadaset.parent_folder_name, str, fixture_filepath)
-            self.assertIsInstance(metadaset.storage_date_created, str, fixture_filepath)
-            self.assertIsInstance(metadaset.storage_date_updated, str, fixture_filepath)
+            self.assertIsInstance(
+                metadaset.storage_date_created, datetime, fixture_filepath
+            )
+            self.assertIsInstance(
+                metadaset.storage_date_updated, datetime, fixture_filepath
+            )
             self.assertIsInstance(metadaset.storage_size, int, fixture_filepath)
 
 
