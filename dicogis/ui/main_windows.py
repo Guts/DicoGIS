@@ -599,18 +599,18 @@ class DicoGIS(ThemedTk):
             opt_analyze_raster=self.tab_files.opt_rast.get(),
             opt_analyze_shapefiles=self.tab_files.opt_shp.get(),
             opt_analyze_spatialite=self.tab_files.opt_spadb.get(),
-        )
-
-        # sheets and progress bar
-        total_files = geofiles_processor.count_files_to_process()
-
-        self.prog_layers["maximum"] = total_files
-
-        geofiles_processor.process_datasets_in_queue(
+            # progress
             progress_counter=self.progress,
             progress_message_displayer=self.status,
             progress_callback_cmd=self.update,
         )
+
+        # sheets and progress bar
+        total_files = geofiles_processor.count_files_to_process()
+        self.prog_layers["maximum"] = total_files
+
+        # launch processing
+        geofiles_processor.process_datasets_in_queue()
 
         # saving dictionary
         send_system_notify(
