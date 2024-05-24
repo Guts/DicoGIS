@@ -254,7 +254,6 @@ def find_geodata_files(
     li_dgn = tuple(sorted(li_dgn))
     li_cdao = tuple(sorted(li_cdao))
 
-    print(li_flat_geodatabases_geopackage, li_flat_geodatabases_spatialite)
     # End of function
     return (
         num_folders,
