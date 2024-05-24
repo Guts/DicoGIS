@@ -427,7 +427,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         """
         err_mess = self.translated_texts.get(metadataset.processing_error_type)
         logger.warning(
-            f"Problem detected on {metadataset.name} (in {metadataset.path}). "
+            f"Problem detected on {metadataset.name} (in {metadataset.path_as_str}). "
             f"Error: {err_mess}"
         )
         worksheet[f"A{row_index}"] = metadataset.name
@@ -485,7 +485,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             self.store_error(
                 metadataset=metadataset, worksheet=worksheet, row_index=row_index
             )
-            return False
+            # return False
 
         # Dataset name
         worksheet[f"A{row_index}"] = metadataset.name
@@ -719,7 +719,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
                 )
                 logger.warning(
                     f"Problem detected on layer {layer_metadataset.name} "
-                    f"(part of dataset '{metadataset.path.resolve}'). "
+                    f"(part of dataset '{metadataset.path_as_str}'). "
                     f"Error: {err_mess}"
                 )
                 worksheet[f"H{row_index}"] = layer_metadataset.name
