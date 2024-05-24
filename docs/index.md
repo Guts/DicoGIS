@@ -18,11 +18,19 @@ A quickview video:
 ```{toctree}
 ---
 maxdepth: 1
-caption: Available languages
+caption: Global tour
 ---
 introduction/en
 introduction/fr
 introduction/es
+```
+
+```{toctree}
+---
+maxdepth: 1
+caption: Usage
+---
+usage/cli
 ```
 
 ```{toctree}
