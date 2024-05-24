@@ -45,6 +45,7 @@ extensions = [
     # 3rd party
     "myst_parser",
     "sphinx_autodoc_typehints",
+    "sphinx_click",
     "sphinx_copybutton",
     "sphinxcontrib.mermaid",
     "sphinxext.opengraph",

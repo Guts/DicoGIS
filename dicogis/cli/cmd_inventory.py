@@ -128,19 +128,23 @@ def inventory(
     ] = None,
     verbose: bool = False,
 ):
-    """Main command. Make an inventory of geodata files starting from a folder and/or
+    """Main command.
+
+    Make an inventory of geodata files starting from a folder and/or
     databases using connection listed in pg_service.conf and store everything in an
     output file.
 
     Args:
-        input_folder (Annotated[Optional[Path], typer.Option): starting folder for files.
+        input_folder: starting folder for files. Defaults to None.
+        formats: List of files extensions to include into listing. Defaults to every
+            supported formats.
+        pg_services: name(s) of PostgreSQL services to use. Repeatable. If None,
+            database listing is ignored. Defaults to None.
+        pg_services: name(s) of PostgreSQL services to use. Repeatable. If None,
+            database listing is ignored. Defaults to None.
+        language: language code to use. If not set, the current default locale is used.
             Defaults to None.
-        formats (Annotated[ str, typer.Option, optional): list of format extensions to
-            list. Defaults to every supported format.
-        pg_services (Annotated[Optional[list[str]], typer.Option, optional): name(s) of
-            PostgreSQL services to use. Repeatable. If None, database listing is
-            ignored. Defaults to None.
-        verbose (bool, optional): enable verbose mode. Defaults to False.
+        verbose: enable verbose mode. Defaults to False.
     """
     if verbose:
         state["verbose"] = True
