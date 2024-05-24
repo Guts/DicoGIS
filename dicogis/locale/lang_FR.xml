@@ -78,6 +78,7 @@
     <geom_ligne>Ligne</geom_ligne>
     <geom_polyg>Polygone</geom_polyg>
     <li_chps>Attributs</li_chps>
+    <binary>Binaire</binary>
     <entier>Numérique (entier)</entier>
     <reel>Numérique (réel)</reel>
     <string>Texte</string>

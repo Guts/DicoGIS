@@ -78,6 +78,7 @@
     <geom_ligne>Línea</geom_ligne>
     <geom_polyg>Polígono</geom_polyg>
     <li_chps>Atributos</li_chps>
+    <binary>Binario</binary>
     <entier>Numérico (entero)</entier>
     <reel>Numérico (real)</reel>
     <string>Texto</string>

@@ -78,6 +78,7 @@
     <geom_ligne>Line</geom_ligne>
     <geom_polyg>Polygon</geom_polyg>
     <li_chps>Fields definition</li_chps>
+    <binary>Binary</binary>
     <entier>Numeric (integer)</entier>
     <reel>Numeric (float)</reel>
     <string>String</string>
