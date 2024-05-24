@@ -118,6 +118,14 @@ def inventory(
             "Example: 1 ko instead of 1024.",
         ),
     ] = False,
+    opt_raw_path: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_EXPORT_RAW_PATH",
+            is_flag=False,
+            help="Enable raw path instead of hyperlink in formats which support it.",
+        ),
+    ] = False,
     language: Annotated[
         Optional[AvailableLocales],
         typer.Option(
@@ -190,6 +198,7 @@ def inventory(
         # creating the Excel workbook
         xl_workbook = MetadatasetSerializerXlsx(
             translated_texts=localized_strings,
+            opt_raw_path=opt_raw_path,
             opt_size_prettify=opt_prettify_size,
         )
     else:
