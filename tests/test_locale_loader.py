@@ -36,6 +36,16 @@ class TestLocaleLoader(unittest.TestCase):
         self.assertIsInstance(txtmngr.language_code, str)
         self.assertEqual(txtmngr.language_code, "EN")
 
+    def test_translated_text_english_alias(self):
+        txtmngr = TextsManager(locale_folder=Path("locale"))
+        self.assertIsNone(txtmngr.language_code)
+
+        # English
+        en_txts = txtmngr.load_texts(language_code="GB")
+        self.assertIsInstance(en_txts, dict)
+        self.assertIsInstance(txtmngr.language_code, str)
+        self.assertEqual(txtmngr.language_code, "EN")
+
     def test_translated_text_french(self):
         txtmngr = TextsManager(locale_folder=Path("locale"))
         self.assertIsNone(txtmngr.language_code)
