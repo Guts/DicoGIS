@@ -330,7 +330,7 @@ def inventory(
             sgbd_reader.get_connection()
 
             # check connection state
-            if not sgbd_reader.conn:
+            if sgbd_reader.conn is None:
                 fail_reason = sgbd_reader.db_connection.state_msg
                 logger.error(
                     f"Connection failed using pg_service {pg_service}. Trace: {fail_reason}."

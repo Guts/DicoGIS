@@ -823,8 +823,8 @@ class DicoGIS(ThemedTk):
         )
 
         # check connection state
-        if not sgbd_reader.conn:
-            fail_reason = self.dico_dataset.get("conn_state")
+        if sgbd_reader.conn is None:
+            fail_reason = sgbd_reader.db_connection.state_msg
             self.status.set(f"Connection failed: {fail_reason}.")
             logger.error(f"PostGIS connection failed: {fail_reason}.")
             avert(
