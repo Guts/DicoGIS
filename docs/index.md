@@ -51,5 +51,6 @@ development/ubuntu
 development/tests
 development/documentation
 development/packaging
+development/releasing
 Code documentation <_apidoc/modules>
 ```
