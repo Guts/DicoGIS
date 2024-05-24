@@ -151,7 +151,7 @@ class Utilities:
         # save
         if out_path.name != ".xlsx":
             try:
-                output_object.save(filename=out_path)
+                output_object.workbook.save(filename=out_path)
             except OSError:
                 if gui:
                     avert(
