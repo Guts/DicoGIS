@@ -666,10 +666,11 @@ class DicoGIS(ThemedTk):
         # parsing the layers
         for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
             layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
+            self.status.set(f"Reading: {layer.GetName()}")
             metadataset = sgbd_reader.infos_dataset(layer)
-            logger.info(f"Table examined: {layer.GetName()}")
+            logger.info(f"Table examined: {metadataset.name}")
             self.xl_workbook.serialize_metadaset(metadataset=metadataset)
-            logger.debug("Layer metadata stored into workbook.")
+            logger.debug("Layer metadata stored into workbook: {metadataset.name}")
             # increment the progress bar
             self.prog_layers["value"] = self.prog_layers["value"] + 1
             self.update()
