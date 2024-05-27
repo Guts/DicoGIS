@@ -6,6 +6,7 @@
 
 # Standard library
 import logging
+from collections.abc import Iterable
 from functools import lru_cache
 from os import path
 from pathlib import Path
@@ -706,6 +707,12 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"J{row_index}"] = metadataset.cumulated_count_feature_objects
 
         # parsing layers
+        if not isinstance(metadataset.layers, Iterable):
+            logger.warning(
+                f"'{metadataset.name}' ({metadataset.path_as_str}) has no layers."
+            )
+            return
+
         for layer_metadataset in metadataset.layers:
             # increment line
             self.row_index_flat_geodatabases += 1
