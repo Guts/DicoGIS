@@ -118,11 +118,19 @@ def inventory(
             "Example: 1 ko instead of 1024.",
         ),
     ] = False,
+    opt_quick_fail: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_QUICK_FAIL",
+            is_flag=True,
+            help="Enable quick fail instead of passing errors. Useful for debug.",
+        ),
+    ] = False,
     opt_raw_path: Annotated[
         bool,
         typer.Option(
             envvar="DICOGIS_EXPORT_RAW_PATH",
-            is_flag=False,
+            is_flag=True,
             help="Enable raw path instead of hyperlink in formats which support it.",
         ),
     ] = False,
@@ -296,6 +304,8 @@ def inventory(
             ),
             opt_analyze_shapefiles="esri_shapefile" in formats,
             opt_analyze_spatialite="file_geodatabase_spatialite" in formats,
+            # misc
+            opt_quick_fail=opt_quick_fail,
         )
 
         # sheets and progress bar
