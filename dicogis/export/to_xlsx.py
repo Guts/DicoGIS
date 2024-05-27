@@ -8,7 +8,6 @@
 import logging
 from collections.abc import Iterable
 from functools import lru_cache
-from os import path
 from pathlib import Path
 from typing import Union
 
@@ -348,6 +347,14 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
     @lru_cache(maxsize=128, typed=True)
     def format_bbox(self, bbox: tuple[float, float, float, float] | None) -> str:
+        """Format bounding-box tuple to fit Excel constraints.
+
+        Args:
+            bbox: input bounding-box tuple
+
+        Returns:
+            formatted bbox as Excel-compliant string
+        """
         if isinstance(bbox, tuple) and all(
             [isinstance(coord, (float, int)) for coord in bbox]
         ):
@@ -451,6 +458,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         self,
         metadataset: MetaDataset,
     ) -> tuple[Worksheet, int]:
+        """Helper method to get the worksheet and row index corresponding to a type of
+        metadataset.
+
+        Args:
+            metadataset: input metadataset
+
+        Returns:
+            worksheet, row index
+        """
         if (
             isinstance(metadataset, MetaVectorDataset)
             and metadataset.dataset_type == "flat_vector"
@@ -540,7 +556,13 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet: Worksheet | None = None,
         row_index: int | None = None,
     ):
-        """Store metadata about a vector dataset."""
+        """Serialize a vector metadataset into an Excel worksheet's row.
+
+        Args:
+            metadataset (MetaDatabaseTable): metadataset to serialize
+            worksheet (Workbook | None, optional): Excel workbook's sheet where to store. Defaults to None.
+            row_index (int | None, optional): worksheet's row index. Defaults to None.
+        """
         # if args not defined use class attributes
         if worksheet is None:
             worksheet = self.sheet_vector_files
@@ -605,7 +627,13 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet: Worksheet | None = None,
         row_index: int | None = None,
     ):
-        """Store metadata about a raster dataset."""
+        """Serialize a raster metadataset into an Excel worksheet's row.
+
+        Args:
+            metadataset (MetaDatabaseTable): metadataset to serialize
+            worksheet (Workbook | None, optional): Excel workbook's sheet where to store. Defaults to None.
+            row_index (int | None, optional): worksheet's row index. Defaults to None.
+        """
         # if args not defined use class attributes
         if worksheet is None:
             worksheet = self.sheet_raster_files
@@ -782,22 +810,22 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             )
             worksheet[f"B{row_index}"].style = "Hyperlink"
 
-        worksheet[f"C{row_index}"] = path.dirname(metadataset.get("folder"))
+        worksheet[f"C{row_index}"] = metadataset.parent_folder_name
         worksheet[f"E{row_index}"] = metadataset.get("creator_prod")
-        worksheet[f"F{row_index}"] = metadataset.get("keywords")
-        worksheet[f"G{row_index}"] = metadataset.get("subject")
-        worksheet[f"H{row_index}"] = metadataset.get("dpi")
-        worksheet[f"I{row_index}"] = metadataset.get("total_size")
-        worksheet[f"J{row_index}"] = metadataset.get("date_crea")
-        worksheet[f"K{row_index}"] = metadataset.get("date_actu")
+        worksheet[f"F{row_index}"] = metadataset.tags
+        worksheet[f"G{row_index}"] = metadataset.subject
+        worksheet[f"H{row_index}"] = metadataset.print_resolution_dpi
+        worksheet[f"I{row_index}"] = metadataset.storage_size
+        worksheet[f"J{row_index}"] = metadataset.storage_date_created
+        worksheet[f"K{row_index}"] = metadataset.storage_date_updated
         worksheet[f"L{row_index}"] = metadataset.get("xOrigin")
         worksheet[f"M{row_index}"] = metadataset.get("yOrigin")
         worksheet[f"N{row_index}"] = metadataset.crs_name
         worksheet[f"O{row_index}"] = metadataset.crs_type
         worksheet[f"P{row_index}"] = metadataset.crs_registry_code
-        worksheet[f"Q{row_index}"] = metadataset.get("layers_count")
-        worksheet[f"R{row_index}"] = metadataset.get("total_fields")
-        worksheet[f"S{row_index}"] = metadataset.get("total_objs")
+        worksheet[f"Q{row_index}"] = metadataset.format_gdal_long_name
+        worksheet[f"R{row_index}"] = metadataset.count_feature_attributes
+        worksheet[f"S{row_index}"] = metadataset.features_objects_count
 
         for layer_idx, layer_name in zip(
             metadataset.get("layers_idx"), metadataset.get("layers_names")
