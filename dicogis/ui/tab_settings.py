@@ -129,7 +129,7 @@ class TabSettings(Frame):
         )
 
         self.opt_export_raw_path = BooleanVar(
-            master=self, value=getenv("DICOGIS_EXPORT_RAW_PATH", True)
+            master=self, value=getenv("DICOGIS_EXPORT_RAW_PATH", False)
         )
         caz_opt_export_raw_path = Checkbutton(
             self.FrOptExport,
@@ -137,6 +137,16 @@ class TabSettings(Frame):
             variable=self.opt_export_raw_path,
         )
         caz_opt_export_raw_path.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
+
+        self.opt_quick_fail = BooleanVar(
+            master=self, value=getenv("DICOGIS_QUICK_FAIL", False)
+        )
+        caz_opt_quick_fail = Checkbutton(
+            self.FrOptExport,
+            text="Quick fail",
+            variable=self.opt_quick_fail,
+        )
+        caz_opt_quick_fail.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
 
         self.opt_end_process_notification_sound = BooleanVar(
             master=self, value=getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", True)

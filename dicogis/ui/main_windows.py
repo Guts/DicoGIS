@@ -604,6 +604,8 @@ class DicoGIS(ThemedTk):
             progress_counter=self.progress,
             progress_message_displayer=self.status,
             progress_callback_cmd=self.update,
+            # misc
+            opt_quick_fail=self.tab_options.opt_quick_fail.get(),
         )
 
         # sheets and progress bar

@@ -112,6 +112,8 @@ class ProcessingFiles:
         progress_message_displayer: Optional[StringVar] = None,
         progress_counter: Optional[IntVar] = None,
         progress_callback_cmd: Optional[Callable] = None,
+        # misc
+        opt_quick_fail: bool = False,
     ) -> None:
         # -- STORE PARAMETERS AS ATTRIBUTES --
         self.serializer = self.serializer_from_output_format(format_or_serializer)
@@ -159,6 +161,7 @@ class ProcessingFiles:
         self.opt_analyze_geopackage = opt_analyze_geopackage
 
         # others
+        self.opt_quick_fail = opt_quick_fail
         self.total_files: Optional[int] = None
         self.li_files_to_process: list[Optional[DatasetToProcess]] = []
         self.localized_strings = localized_strings
@@ -210,7 +213,30 @@ class ProcessingFiles:
     def read_dataset(
         self, dataset_to_process: DatasetToProcess
     ) -> tuple[DatasetToProcess, MetaDataset | None]:
+        """Read dataset and store into metadataset.
+
+        Args:
+            dataset_to_process: dataset path or URI to read
+
+        Returns:
+            dataset and metadataset, None if an error occurs
+        """
         metadataset = None
+
+        if self.opt_quick_fail:
+            self.update_progress(
+                message_to_display=f"Reading {dataset_to_process.file_path}..."
+            )
+            metadataset = dataset_to_process.georeader().infos_dataset(
+                source_path=path.abspath(dataset_to_process.file_path),
+            )
+            logger.debug(f"Reading {dataset_to_process} succeeded.")
+            self.update_progress(
+                message_to_display=f"Reading {dataset_to_process.file_path}: OK",
+                increment_counter=True,
+            )
+            dataset_to_process.processed = True
+            return dataset_to_process, metadataset
 
         try:
             self.update_progress(
@@ -243,13 +269,28 @@ class ProcessingFiles:
         dataset_to_process: DatasetToProcess,
         metadataset_to_serialize: MetaDataset,
     ) -> tuple[DatasetToProcess, MetaDataset | None]:
+        self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
+        if self.opt_quick_fail:
+            self.update_progress(
+                message_to_display="Exporting metadata of "
+                f"{dataset_to_process.file_path}..."
+            )
+            # writing to the Excel file
+            self.update_progress(
+                message_to_display="Exporting metadata of "
+                f"{dataset_to_process.file_path}: OK",
+                increment_counter=True,
+            )
+            logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
+            dataset_to_process.exported = True
+            return dataset_to_process, metadataset_to_serialize
+
         try:
             self.update_progress(
                 message_to_display="Exporting metadata of "
                 f"{dataset_to_process.file_path}..."
             )
             # writing to the Excel file
-            self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
                 f"{dataset_to_process.file_path}: OK",
