@@ -72,7 +72,7 @@ class MetaDataset:
             str | None: path or connection uri (without password)
         """
         if isinstance(self.path, Path):
-            return self.path.resolve()
+            return f"{self.path.resolve()}"
         elif isinstance(self, MetaDatabaseTable) and isinstance(
             self.database_connection, DatabaseConnection
         ):
