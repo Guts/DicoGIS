@@ -97,3 +97,10 @@ jobs:
           name: Code Coverage for unittests on Ubuntu (Python-${{ env.PYTHON_VERSION }}]
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Minimal integration test
+        run: |
+          dicogis-cli --help
+          dicogis-cli --version
+          dicogis-cli inventory --input-folder ./tests/ --language ES --output-path tests/ci/ubuntu/dicogis_ubuntu_$${{ env.GDAL_VERSION }}.xlsx --verbose
+          dicogis-cli inventory --input-folder ./tests/ --language FR --output-format json --output-path tests/ci/ubuntu --verbose

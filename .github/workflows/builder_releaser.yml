@@ -109,6 +109,13 @@ jobs:
           ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-path tests/ci/ubuntu/dicogis_ubuntu_$${{ env.GDAL_VERSION }}.xlsx --verbose
           ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path tests/ci/ubuntu --verbose
 
+      - name: Save generated files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dicogis_results_ubuntu
+          path: tests/ci/ubuntu/
+          if-no-files-found: error
+
   build-windows:
     name: "🏠 Windows"
     runs-on: windows-latest
@@ -177,6 +184,13 @@ jobs:
           ./dist/DicoGIS-cli.exe --version
           ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-path tests/ci/dicogis_.xlsx --verbose
           ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-format json --output-path tests/ci --verbose
+
+      - name: Save generated files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dicogis_results_windows
+          path: tests/ci/windows/
+          if-no-files-found: error
 
   release:
     name: "🚀 GitHub Release"
