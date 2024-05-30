@@ -192,6 +192,7 @@ class ProcessingFiles:
 
     def process_datasets_in_queue(self):
         """Process datasets in queue."""
+
         for geofile in self.li_files_to_process:
             if geofile.processed is True:
                 logger.warning(f"File has already been processed: {geofile.file_path}")
@@ -209,6 +210,8 @@ class ProcessingFiles:
             geofile, metadataset = self.export_metadataset(
                 dataset_to_process=geofile, metadataset_to_serialize=metadataset
             )
+
+        self.serializer.post_serializing()
 
     def read_dataset(
         self, dataset_to_process: DatasetToProcess
@@ -269,13 +272,13 @@ class ProcessingFiles:
         dataset_to_process: DatasetToProcess,
         metadataset_to_serialize: MetaDataset,
     ) -> tuple[DatasetToProcess, MetaDataset | None]:
-        self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
         if self.opt_quick_fail:
             self.update_progress(
                 message_to_display="Exporting metadata of "
                 f"{dataset_to_process.file_path}..."
             )
             # writing to the Excel file
+            self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
                 f"{dataset_to_process.file_path}: OK",
@@ -291,6 +294,7 @@ class ProcessingFiles:
                 f"{dataset_to_process.file_path}..."
             )
             # writing to the Excel file
+            self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
                 f"{dataset_to_process.file_path}: OK",

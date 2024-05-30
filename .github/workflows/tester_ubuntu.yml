@@ -27,6 +27,8 @@ env:
 jobs:
   test-ubuntu:
     runs-on: ubuntu-22.04
+    env:
+      export_output_folder: tests/ci/ubuntu
 
     permissions:
       packages: read
@@ -97,3 +99,22 @@ jobs:
           name: Code Coverage for unittests on Ubuntu (Python-${{ env.PYTHON_VERSION }}]
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Minimal integration test - help
+        run: dicogis-cli --help
+
+      - name: Minimal integration test - version
+        run: dicogis-cli --version
+
+      - name: Minimal integration test - export xlsx
+        run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-path "${{ env.export_output_folder }}/dicogis_ubuntu_tests.xlsx" --verbose
+
+      - name: Minimal integration test - export JSON
+        run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}" --verbose
+
+      - name: Save generated files as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dicogis_results_ubuntu
+          path: ${{ env.export_output_folder }}/*
+          if-no-files-found: error

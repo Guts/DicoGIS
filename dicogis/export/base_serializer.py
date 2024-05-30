@@ -7,6 +7,7 @@
 
 # Standard library
 import logging
+from pathlib import Path
 
 # ############################################################################
 # ######### Globals ############
@@ -25,33 +26,24 @@ class MetadatasetSerializerBase:
     def __init__(
         self,
         translated_texts: dict,
+        output_path: Path | None = None,
         opt_raw_path: bool = False,
         opt_size_prettify: bool = True,
     ) -> None:
-        """Store metadata into JSON files."""
+        """Initialize object."""
         self.translated_texts = translated_texts
+
+        # output path
+        self.output_path = output_path
 
         # options
         self.opt_raw_path = opt_raw_path
         self.opt_size_prettify = opt_size_prettify
 
-    def pre_serializing(
-        self,
-        has_vector: bool = False,
-        has_raster: bool = False,
-        has_filedb: bool = False,
-        has_mapdocs: bool = False,
-        has_cad: bool = False,
-        has_sgbd: bool = False,
-    ):
-        """Set workbook's sheets accordingly to metadata types.
+    def pre_serializing(self, **kwargs):
+        """Operations to run before serialization."""
+        pass
 
-        Args:
-            has_vector (bool, optional): _description_. Defaults to False.
-            has_raster (bool, optional): _description_. Defaults to False.
-            has_filedb (bool, optional): _description_. Defaults to False.
-            has_mapdocs (bool, optional): _description_. Defaults to False.
-            has_cad (bool, optional): _description_. Defaults to False.
-            has_sgbd (bool, optional): _description_. Defaults to False.
-        """
+    def post_serializing(self, **kwargs):
+        """Operations to run after serialization."""
         pass
