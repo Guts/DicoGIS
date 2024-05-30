@@ -272,13 +272,13 @@ class ProcessingFiles:
         dataset_to_process: DatasetToProcess,
         metadataset_to_serialize: MetaDataset,
     ) -> tuple[DatasetToProcess, MetaDataset | None]:
-        self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
         if self.opt_quick_fail:
             self.update_progress(
                 message_to_display="Exporting metadata of "
                 f"{dataset_to_process.file_path}..."
             )
             # writing to the Excel file
+            self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
                 f"{dataset_to_process.file_path}: OK",
@@ -294,6 +294,7 @@ class ProcessingFiles:
                 f"{dataset_to_process.file_path}..."
             )
             # writing to the Excel file
+            self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
                 f"{dataset_to_process.file_path}: OK",

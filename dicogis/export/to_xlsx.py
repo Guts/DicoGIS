@@ -296,6 +296,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         self.tunning_workbook()
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
         self.workbook.save(filename=self.output_path)
+        logger.info(f"Workbook saved under {self.output_path}")
 
     def tunning_workbook(self):
         """Clean up and tunning worksheet."""

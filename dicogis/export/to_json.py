@@ -83,4 +83,8 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
                 sort_keys=True,
             )
 
+        logger.debug(
+            f"Metadataset {metadataset.path} serialized into JSON file "
+            f"{output_json_filepath}"
+        )
         return output_json_filepath
