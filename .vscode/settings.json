@@ -1,7 +1,29 @@
 {
     // Editor
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": "active",
     "files.associations": {
         "./requirements/*.txt": "pip-requirements"
+    },
+    // JSON
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features",
+        "editor.formatOnSave": true,
+        "editor.quickSuggestions": {
+            "strings": true
+        },
+        "editor.suggest.insertMode": "replace"
+    },
+    // Markdown
+    "markdown.updateLinksOnFileMove.enabled": "prompt",
+    "markdown.updateLinksOnFileMove.enableForDirectories": true,
+    "markdown.validate.enabled": true,
+    "markdown.validate.fileLinks.markdownFragmentLinks": "warning",
+    "markdown.validate.fragmentLinks.enabled": "warning",
+    "[markdown]": {
+        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+        "editor.formatOnSave": true,
+        "files.trimTrailingWhitespace": false,
     },
     // Python
     "[python]": {
@@ -16,6 +38,23 @@
         ],
         "editor.wordWrapColumn": 88,
     },
+    // YAML
+    "[yaml]": {
+        "editor.autoIndent": "keep",
+        "editor.formatOnSave": true,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        }
+    },
+    // extensions
+    "autoDocstring.guessTypes": true,
+    "autoDocstring.docstringFormat": "google-notypes",
+    "autoDocstring.generateDocstringOnEnter": false,
     "flake8.args": [
         "--config=setup.cfg",
         "--verbose"
@@ -25,8 +64,12 @@
         "black"
     ],
     "isort.check": true,
-    // extensions
-    "autoDocstring.guessTypes": true,
-    "autoDocstring.docstringFormat": "google-notypes",
-    "autoDocstring.generateDocstringOnEnter": false,
+    "markdownlint.config": {
+        "MD007": {
+            "indent": 4
+        },
+        "MD024": {
+            "allow_different_nesting": true
+        },
+    }
 }
