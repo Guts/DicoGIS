@@ -31,7 +31,7 @@ maxdepth: 1
 caption: Usage
 ---
 usage/cli
-settings
+usage/settings
 ```
 
 ```{toctree}
