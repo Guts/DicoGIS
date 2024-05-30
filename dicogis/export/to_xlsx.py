@@ -294,6 +294,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
     def post_serializing(self):
         """Run post serialization steps."""
         self.tunning_workbook()
+        self.output_path.parent.mkdir(parents=True, exist_ok=True)
         self.workbook.save(filename=self.output_path)
 
     def tunning_workbook(self):
