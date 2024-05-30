@@ -35,6 +35,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
+      export_output_folder: tests/ci/ubuntu
       GDAL_VERSION: 3.8.*
 
     steps:
@@ -109,16 +110,16 @@ jobs:
         run: ./dist/DicoGIS-cli.bin --version
 
       - name: Minimal integration test - export xlsx
-        run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-path tests/ci/ubuntu/dicogis_ubuntu_${{ env.GDAL_VERSION }}.xlsx --verbose
+        run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-path "${{ env.export_output_folder }}"/ubuntu/dicogis_ubuntu_build_tests.xlsx --verbose
 
       - name: Minimal integration test - export xlsx
-        run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path tests/ci/ubuntu --verbose
+        run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path path "${{ env.export_output_folder }}" --verbose
 
       - name: Save generated files as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dicogis_results_ubuntu
-          path: tests/ci/ubuntu/
+          name: ubuntu_dicogis_integration_tests
+          path: ${{ env.export_output_folder }}/*
           if-no-files-found: error
 
   build-windows:
@@ -126,6 +127,7 @@ jobs:
     runs-on: windows-latest
 
     env:
+      export_output_folder: tests/ci/windows
       GDAL_VERSION: 3.8.4
 
     steps:
@@ -187,14 +189,14 @@ jobs:
         run: |
           ./dist/DicoGIS-cli.exe --help
           ./dist/DicoGIS-cli.exe --version
-          ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-path tests/ci/dicogis_.xlsx --verbose
-          ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-format json --output-path tests/ci --verbose
+          ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-path "${{ env.export_output_folder }}/dicogis_windows_build_tests.xlsx" --verbose
+          ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}" --verbose
 
       - name: Save generated files as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dicogis_results_windows
-          path: tests/ci/windows/
+          name: windows_dicogis_integration_tests
+          path: ${{ env.export_output_folder }}/*
           if-no-files-found: error
 
   release:
