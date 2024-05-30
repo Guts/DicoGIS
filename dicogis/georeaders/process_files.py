@@ -192,6 +192,7 @@ class ProcessingFiles:
 
     def process_datasets_in_queue(self):
         """Process datasets in queue."""
+
         for geofile in self.li_files_to_process:
             if geofile.processed is True:
                 logger.warning(f"File has already been processed: {geofile.file_path}")
@@ -209,6 +210,8 @@ class ProcessingFiles:
             geofile, metadataset = self.export_metadataset(
                 dataset_to_process=geofile, metadataset_to_serialize=metadataset
             )
+
+        self.serializer.post_serializing()
 
     def read_dataset(
         self, dataset_to_process: DatasetToProcess

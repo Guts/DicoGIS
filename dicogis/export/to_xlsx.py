@@ -149,6 +149,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
     def __init__(
         self,
         translated_texts: dict,
+        output_path: Path | None = None,
         opt_raw_path: bool = False,
         opt_size_prettify: bool = True,
     ) -> None:
@@ -174,6 +175,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         # initiate with parent
         super().__init__(
             translated_texts=translated_texts,
+            output_path=output_path,
             opt_raw_path=opt_raw_path,
             opt_size_prettify=opt_size_prettify,
         )
@@ -290,6 +292,11 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             self.row_index_server_geodatabases = 1
 
     def post_serializing(self):
+        """Run post serialization steps."""
+        self.tunning_workbook()
+        self.workbook.save(filename=self.output_path)
+
+    def tunning_workbook(self):
         """Clean up and tunning worksheet."""
         for sheet in self.workbook.worksheets:
             # Freezing panes
@@ -328,6 +335,18 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             #             dims[cell.column] = max((dims.get(cell.column, 0), len(val)))
             # for col, value in dims.items():
             #     sheet.column_dimensions[col].width = value
+
+    @lru_cache
+    def is_style_registered(self, style_name: str) -> bool:
+        """Function to check if a named style already exists/
+
+        Args:
+            style_name: name of style to check
+
+        Returns:
+            True if a style with the same name already exist in the worksheet
+        """
+        return any(style.name == style_name for style in self.workbook.named_styles)
 
     @lru_cache(maxsize=128, typed=True)
     def format_as_hyperlink(self, target: Union[str, Path], label: str) -> str:

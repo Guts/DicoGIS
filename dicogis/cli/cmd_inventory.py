@@ -18,6 +18,7 @@ from rich import print
 # project
 from dicogis.__about__ import __package_name__, __title__, __version__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
+from dicogis.export.to_json import MetadatasetSerializerJson
 from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
@@ -75,7 +76,7 @@ def inventory(
     output_path: Annotated[
         Optional[Path],
         typer.Option(
-            dir_okay=False,
+            dir_okay=True,
             envvar="DICOGIS_OUTPUT_FILEPATH",
             file_okay=True,
             help="If not set, the file is created in the current working directory "
@@ -201,13 +202,22 @@ def inventory(
         language = getlocale()
     localized_strings = TextsManager().load_texts(language_code=language)
 
+    # output file path
+    if output_path is None:
+        output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}.xlsx")
+
     # output format
     if output_format == "excel":
         # creating the Excel workbook
-        xl_workbook = MetadatasetSerializerXlsx(
+        output_serializer = MetadatasetSerializerXlsx(
             translated_texts=localized_strings,
             opt_raw_path=opt_raw_path,
             opt_size_prettify=opt_prettify_size,
+            output_path=output_path,
+        )
+    elif output_format == "json":
+        output_serializer = MetadatasetSerializerJson(
+            translated_texts=localized_strings, output_path=output_path
         )
     else:
         logger.error(
@@ -272,7 +282,7 @@ def inventory(
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
-            format_or_serializer=xl_workbook,
+            format_or_serializer=output_serializer,
             localized_strings=localized_strings,
             # list by tabs
             li_vectors=li_vectors,
@@ -314,19 +324,6 @@ def inventory(
 
         geofiles_processor.process_datasets_in_queue()
 
-        # output file path
-        if output_path is None:
-            output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}.xlsx")
-
-        xl_workbook.post_serializing()
-        saved = Utilities.safe_save(
-            output_object=xl_workbook,
-            dest_dir=f"{output_path.parent.resolve()}",
-            dest_filename=f"{output_path.resolve()}",
-            ftype="Excel Workbook",
-            gui=False,
-        )
-        logger.info(f"Workbook saved: {saved[1]}")
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files.",
@@ -344,7 +341,7 @@ def inventory(
             raise typer.Exit(1)
 
         # configure output workbook
-        xl_workbook.pre_serializing(has_sgbd=True)
+        output_serializer.pre_serializing(has_sgbd=True)
 
         for pg_service in pg_services:
 
@@ -370,16 +367,16 @@ def inventory(
                 layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
                 metadataset = sgbd_reader.infos_dataset(layer=layer)
                 logger.info(f"Table examined: {metadataset.name}")
-                xl_workbook.serialize_metadaset(metadataset=metadataset)
+                output_serializer.serialize_metadaset(metadataset=metadataset)
                 logger.debug("Layer metadata stored into workbook.")
 
         # output file path
         if output_path is None:
             output_path = Path(f"DicoGIS_PostGIS_{date.today()}.xlsx")
 
-        xl_workbook.post_serializing()
+        output_serializer.post_serializing()
         saved = Utilities.safe_save(
-            output_object=xl_workbook,
+            output_object=output_serializer,
             dest_dir=f"{output_path.parent.resolve()}",
             dest_filename=f"{output_path.resolve()}",
             ftype="Excel Workbook",
