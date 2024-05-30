@@ -109,8 +109,8 @@ jobs:
       - name: Minimal integration test - export xlsx
         run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-path "${{ env.export_output_folder }}/dicogis_ubuntu_${{ env.GDAL_VERSION }}.xlsx" --verbose
 
-      - name: Minimal integration test - export xlsx
-        run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}"" --verbose
+      - name: Minimal integration test - export JSON
+        run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}" --verbose
 
       - name: Save generated files as artifact
         uses: actions/upload-artifact@v4

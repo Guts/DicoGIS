@@ -102,12 +102,17 @@ jobs:
           repository: qgis/QGIS-Training-Data
           path: tests/fixtures/qgisdata
 
-      - name: Minimal integration test
-        run: |
-          ./dist/DicoGIS-cli.bin --help
-          ./dist/DicoGIS-cli.bin --version
-          ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-path tests/ci/ubuntu/dicogis_ubuntu_$${{ env.GDAL_VERSION }}.xlsx --verbose
-          ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path tests/ci/ubuntu --verbose
+      - name: Minimal integration test - help
+        run: ./dist/DicoGIS-cli.bin --help
+
+      - name: Minimal integration test - version
+        run: ./dist/DicoGIS-cli.bin --version
+
+      - name: Minimal integration test - export xlsx
+        run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-path tests/ci/ubuntu/dicogis_ubuntu_${{ env.GDAL_VERSION }}.xlsx --verbose
+
+      - name: Minimal integration test - export xlsx
+        run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path tests/ci/ubuntu --verbose
 
       - name: Save generated files as artifact
         uses: actions/upload-artifact@v4
