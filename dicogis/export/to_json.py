@@ -79,7 +79,7 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
             json.dump(
                 asdict(metadataset),
                 out_json,
-                default=self.json_path_encoder,
+                default=self.json_encoder_for_unsupported_types,
                 sort_keys=True,
             )
 
