@@ -1,5 +1,11 @@
 # Configuration
 
+## Using graphical interface
+
+Options are accessible through the `Settings` tab:
+
+![DicoGIS GUI settings tags](../static/img/dicogis_gui_settings.webp)
+
 ## Using environment variables
 
 Some options and arguments can be set with environment variables.

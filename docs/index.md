@@ -31,6 +31,7 @@ maxdepth: 1
 caption: Usage
 ---
 usage/cli
+settings
 ```
 
 ```{toctree}
@@ -39,7 +40,6 @@ maxdepth: 2
 caption: Miscellaneous
 titlesonly: true
 ---
-settings
 misc/formats_matrix
 misc/compatibility
 misc/credits
@@ -54,6 +54,7 @@ misc/credits
 maxdepth: 2
 caption: Development
 ---
+development/contribute
 development/windows
 development/ubuntu
 development/tests
