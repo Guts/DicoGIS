@@ -96,11 +96,18 @@ jobs:
       - name: Install tests fixtures
         run: python -m pip install -U gisdata -t ./tests/fixtures
 
+      - name: Get QGIS training data
+        uses: actions/checkout@v4
+        with:
+          repository: qgis/QGIS-Training-Data
+          path: tests/fixtures/qgisdata
+
       - name: Minimal integration test
         run: |
           ./dist/DicoGIS-cli.bin --help
           ./dist/DicoGIS-cli.bin --version
-          ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN
+          ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-path tests/ci/ubuntu/dicogis_ubuntu_$${{ env.GDAL_VERSION }}.xlsx --verbose
+          ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path tests/ci/ubuntu --verbose
 
   build-windows:
     name: "🏠 Windows"
@@ -158,11 +165,18 @@ jobs:
       - name: Install tests fixtures
         run: python -m pip install -U gisdata -t ./tests/fixtures
 
+      - name: Get QGIS training data
+        uses: actions/checkout@v4
+        with:
+          repository: qgis/QGIS-Training-Data
+          path: tests/fixtures/qgisdata
+
       - name: Minimal integration test
         run: |
           ./dist/DicoGIS-cli.exe --help
           ./dist/DicoGIS-cli.exe --version
-          ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/  --language EN
+          ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-path tests/ci/dicogis_.xlsx --verbose
+          ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-format json --output-path tests/ci --verbose
 
   release:
     name: "🚀 GitHub Release"
