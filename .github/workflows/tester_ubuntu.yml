@@ -107,7 +107,7 @@ jobs:
         run: dicogis-cli --version
 
       - name: Minimal integration test - export xlsx
-        run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-path "${{ env.export_output_folder }}/dicogis_ubuntu_${{ env.GDAL_VERSION }}.xlsx" --verbose
+        run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-path "${{ env.export_output_folder }}/dicogis_ubuntu_tests.xlsx" --verbose
 
       - name: Minimal integration test - export JSON
         run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}" --verbose
@@ -116,5 +116,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dicogis_results_ubuntu
-          path: ${{ env.export_output_folder }}
+          path: ${{ env.export_output_folder }}/*
           if-no-files-found: error
