@@ -102,5 +102,5 @@ jobs:
         run: |
           dicogis-cli --help
           dicogis-cli --version
-          dicogis-cli inventory --input-folder ./tests/ --language ES --output-path tests/ci/ubuntu/dicogis_ubuntu_$${{ env.GDAL_VERSION }}.xlsx --verbose
+          dicogis-cli inventory --input-folder ./tests/ --language ES --output-path tests/ci/ubuntu/dicogis_ubuntu_${{ env.GDAL_VERSION }}.xlsx --verbose
           dicogis-cli inventory --input-folder ./tests/ --language FR --output-format json --output-path tests/ci/ubuntu --verbose
