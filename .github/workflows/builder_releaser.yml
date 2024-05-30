@@ -113,7 +113,7 @@ jobs:
         run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-path "${{ env.export_output_folder }}"/ubuntu/dicogis_ubuntu_build_tests.xlsx --verbose
 
       - name: Minimal integration test - export xlsx
-        run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path path "${{ env.export_output_folder }}" --verbose
+        run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}" --verbose
 
       - name: Save generated files as artifact
         uses: actions/upload-artifact@v4
