@@ -158,6 +158,7 @@ class ReadPostGIS(GeoReaderBase):
                 format_gdal_long_name=self.conn.GetDriver().LongName,
                 format_gdal_short_name=self.conn.GetDriver().ShortName,
                 database_connection=self.db_connection,
+                dataset_type="sgbd_postgis",
             )
 
         # check layer type
