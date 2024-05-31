@@ -247,7 +247,14 @@ class GeoReaderBase:
             tuple[str, str, str]: crs_name, crs_code, crs_type
         """
         # SRS
-        srs = dataset_or_layer.GetSpatialRef()
+        srs = None
+        try:
+            srs = dataset_or_layer.GetSpatialRef()
+        except Exception as err:
+            logger.error(
+                "Error occurred getting spatiale reference for "
+                f"'{dataset_or_layer.GetName()}'. Trace: {err}"
+            )
         if not srs:
             return (
                 self.localized_strings.get("srs_undefined", ""),
