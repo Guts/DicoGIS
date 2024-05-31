@@ -19,7 +19,6 @@ import getpass
 import locale
 import logging
 import platform
-from logging.handlers import RotatingFileHandler
 from sys import exit
 from sys import platform as opersys
 from time import strftime
@@ -52,7 +51,6 @@ from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
 from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
 from dicogis.utils.checknorris import CheckNorris
-from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.options import OptionsManager
 from dicogis.utils.texts import TextsManager
@@ -66,18 +64,8 @@ from dicogis.utils.utils import Utilities
 utils_global = Utilities()
 
 # LOG
-logger = logging.getLogger("DicoGIS")
-logging.captureWarnings(True)
-logger.setLevel(logging.DEBUG)  # all errors will be get
-log_form = logging.Formatter(
-    "%(asctime)s || %(levelname)s "
-    "|| %(module)s - %(lineno)d ||"
-    " %(funcName)s || %(message)s"
-)
-logfile = RotatingFileHandler("LOG_DicoGIS.log", "a", 5000000, 1)
-logfile.setLevel(logging.DEBUG)
-logfile.setFormatter(log_form)
-logger.addHandler(logfile)
+logger = logging.getLogger(__name__)
+
 
 # ##############################################################################
 # ############ Classes #############
@@ -88,24 +76,18 @@ class DicoGIS(ThemedTk):
     """Main DicoGIS GUI object.
 
     Args:
-        ThemedTk (_type_): themed tk object.
+        ThemedTk: themed tk object.
     """
 
     # attributes
     package_about = __about__
 
     def __init__(self, theme: str = "radiance"):
-        """Main window constructor
-        Creates 1 frame and 2 labelled subframes"""
-        logger.info(
-            "\t============== {} =============".format(
-                self.package_about.__title_clean__
-            )
-        )
-        logger.info(f"Version: {self.package_about.__version__}")
-        logger.info(f"GDAL: {get_gdal_version()}")
-        logger.info(f"PROJ: {get_proj_version()}")
+        """Main window constructor.
 
+        Args:
+            theme: _description_. Defaults to "radiance".
+        """
         # store vars as attr
         self.txt_manager = TextsManager()
         self.dir_imgs = utils_global.resolve_internal_path(internal_path="bin/img")
@@ -121,18 +103,12 @@ class DicoGIS(ThemedTk):
         self.title(f"DicoGIS {self.package_about.__version__}")
         self.uzer = getpass.getuser()
         if opersys == "win32":
-            logger.info(f"Operating system: {platform.platform()}")
             self.iconbitmap(self.dir_imgs / "DicoGIS.ico")  # windows icon
         elif opersys.startswith("linux"):
-            logger.info(f"Operating system: {platform.platform()}")
             icon = Image("photo", file=self.dir_imgs / "DicoGIS_logo.gif")
             self.call("wm", "iconphoto", self._w, icon)
-
-        elif opersys == "darwin":
-            logger.info(f"Operating system: {platform.platform()}")
         else:
-            logger.warning("Operating system unknown")
-            logger.info(f"Operating system: {platform.platform()}")
+            logger.warning(f"Unknown operating system: {platform.platform()}")
         self.resizable(width=False, height=False)
         self.focus_force()
 

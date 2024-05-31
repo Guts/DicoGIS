@@ -47,7 +47,11 @@ def version_callback(value: bool):
 def main(
     verbose: Annotated[
         bool,
-        typer.Option(is_flag=True, help="Increase verbosity to show debug logs."),
+        typer.Option(
+            is_flag=True,
+            help="Increase verbosity to show debug logs.",
+            envvar="DICOGIS_DEBUG",
+        ),
     ] = False,
     version: Annotated[
         Optional[bool],

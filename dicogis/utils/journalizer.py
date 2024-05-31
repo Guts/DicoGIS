@@ -14,8 +14,6 @@
 
 
 # Standard library
-
-import gettext
 import logging
 from getpass import getuser
 from logging.handlers import RotatingFileHandler
@@ -30,13 +28,14 @@ from urllib.request import getproxies
 # modules
 from dicogis.__about__ import __title_clean__ as package_name
 from dicogis.__about__ import __version__
+from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.slugger import sluggy
 
 # #############################################################################
 # ########## Globals ###############
 # ##################################
 
-_ = gettext.gettext  # i18n
+
 logger = logging.getLogger(__name__)  # logs
 
 
@@ -61,7 +60,14 @@ class LogManager:
         label: str = package_name,
         folder: Optional[Path] = None,
     ):
-        """Instanciation method."""
+        """Initialize.
+
+        Args:
+            console_level: log level for console handler. Defaults to logging.WARNING.
+            file_level: log level for file handler. Defaults to logging.INFO.
+            label: log file name. Defaults to package_name.
+            folder: where to store log files. Defaults to None.
+        """
         # store parameters as attributes
         self.console_level = console_level
         self.file_level = file_level
@@ -72,27 +78,25 @@ class LogManager:
         try:
             self.folder.mkdir(exist_ok=True, parents=True)
         except PermissionError as err:
-            msg_err = _(
-                "Impossible to create the logs folder. Does the user '{}' ({}) have "
-                "write permissions on: {}. Trace: {}"
-            ).format(environ.get("userdomain"), getuser(), self.folder, err)
+            msg_err = (
+                f"Impossible to create the logs folder. Does the user '{getuser}' have "
+                f"write permissions on: {self.folder}. Trace: {err}"
+            )
             logger.error(msg_err)
 
         # create logger
         self.initial_logger_config()
 
     def initial_logger_config(self) -> logging.Logger:
-        """Configure root logger. \
-        BE CAREFUL: it depends a lot of how click implemented logging facilities. \
-        So, sadly, every option is not available.
+        """Configure root logger.
 
-        :return: configured logger
-        :rtype: logging.Logger
+        Returns:
+            configured logger
         """
         #  create main logger
         logging.captureWarnings(False)
         logger = logging.getLogger()
-        logger.setLevel(self.console_level)
+        logger.setLevel(logging.INFO)
 
         # create console handler - seems to be ignored by click
         log_console_handler = logging.StreamHandler()
@@ -125,12 +129,14 @@ class LogManager:
         return logger
 
     def headers(self):
-        """Basic information to log before other message."""
+        """Log basic information before other message."""
         # initialize the log
-        logger.info(f"\t ========== {package_name} - Version {__version__} ==========")
-        logger.info(_("Operating System: {}").format(opersys()))
-        logger.info(_("Architecture: {}").format(architecture()[0]))
-        logger.info(_("Computer: {}").format(gethostname()))
-        logger.info(_("Launched by: {}").format(getuser()))
-        logger.info(_("OS Domain: {}").format(environ.get("userdomain")))
-        logger.info(_("Network proxies detected: {}").format(len(getproxies())))
+        logger.info(f"{'='*10} {package_name} - Version {__version__} {'='*10}")
+        logger.info(f"Operating System: {opersys()}")
+        logger.info(f"Architecture: {architecture()[0]}")
+        logger.info(f"Computer: {gethostname()}")
+        logger.info(f"Launched by: {getuser()}")
+        logger.info(f"OS Domain: {environ.get('userdomain')}")
+        logger.info(f"Network proxies detected: {len(getproxies())}")
+        logger.info(f"GDAL: {get_gdal_version()}")
+        logger.info(f"PROJ: {get_proj_version()}")

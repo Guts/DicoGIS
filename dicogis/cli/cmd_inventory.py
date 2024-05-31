@@ -16,14 +16,13 @@ import typer
 from rich import print
 
 # project
-from dicogis.__about__ import __package_name__, __title__, __version__
+from dicogis.__about__ import __package_name__, __title__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.to_json import MetadatasetSerializerJson
 from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
-from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.texts import TextsManager
@@ -163,6 +162,8 @@ def inventory(
             Defaults to None.
         verbose: enable verbose mode. Defaults to False.
     """
+    app_dir = typer.get_app_dir(app_name=__title__, force_posix=True)
+    # start logging
     if verbose:
         state["verbose"] = True
 
@@ -170,21 +171,15 @@ def inventory(
         console_level=logging.DEBUG if verbose else logging.WARNING,
         file_level=logging.DEBUG if verbose else logging.INFO,
         label=f"{__package_name__}-cli",
+        folder=Path(app_dir).joinpath("logs"),
     )
     # add headers
     logmngr.headers()
-
+    logger.debug(f"DicoGIS working folder: {app_dir}")
     logger.debug(
-        f"Passed parameters: {input_folder=} - {formats=} - {pg_services=} - "
+        f"CLI passed parameters: {input_folder=} - {formats=} - {pg_services=} - "
         f"{verbose=} -{language=}"
     )
-    app_dir = typer.get_app_dir(__title__)
-
-    # log some context information
-    logger.info(f"DicoGIS version: {__version__}")
-    logger.debug(f"DicoGIS working folder: {app_dir}")
-    logger.info(f"GDAL: {get_gdal_version()}")
-    logger.info(f"PROJ: {get_proj_version()}")
 
     # check minimal parameters
     # note: pg_services defaults to [] not to None
@@ -394,3 +389,5 @@ def inventory(
 
         if opt_open_output:
             Utilities.open_dir_file(target=output_path)
+
+    logger.info(f"Logs stored in {Path(app_dir).joinpath('logs')}")
