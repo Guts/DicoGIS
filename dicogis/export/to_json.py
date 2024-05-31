@@ -41,7 +41,6 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         opt_size_prettify: bool = True,
     ) -> None:
         """Store metadata into JSON files."""
-
         output_path.mkdir(parents=True, exist_ok=True)
 
         super().__init__(

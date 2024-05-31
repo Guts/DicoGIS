@@ -25,6 +25,7 @@ from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
+from dicogis.utils.slugger import sluggy
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -39,6 +40,56 @@ default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 # ############################################################################
 # ########## Functions #############
 # ##################################
+
+
+def determine_output_path(
+    output_path: Path | str | None,
+    output_format: str = "excel",
+    input_folder: Path | None = None,
+    pg_services: list[str] | None = None,
+) -> Path:
+    """Get the output path depending on options passed.
+
+    Args:
+        output_path: output path passed to inventory CLI
+        output_format: input output format passed to inventory CLI
+        input_folder: input folder passed to inventory CLI
+
+    Raises:
+        ValueError: if output format is not supported
+
+    Returns:
+        output path to use. A folder if output_format=='json',
+            a file if output_format=='excel'
+    """
+    final_output_path = None
+    if isinstance(pg_services, list):
+        pg_srv_names = "__".join(
+            sluggy(pg_service_name) for pg_service_name in pg_services
+        )
+
+    # output file path
+    if output_path is None:
+        if output_format == "excel":
+            if isinstance(input_folder, Path):
+                final_output_path = Path(
+                    f"DicoGIS_{input_folder.name}_{date.today()}.xlsx"
+                )
+            elif isinstance(pg_services, list):
+                final_output_path = Path(
+                    f"DicoGIS_PostGIS_{pg_srv_names}_{date.today()}.xlsx"
+                )
+        elif output_format == "json":
+            if isinstance(input_folder, Path):
+                final_output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}")
+            elif isinstance(pg_services, list):
+                final_output_path = Path(f"DicoGIS_{pg_srv_names}_{date.today()}")
+        else:
+            raise ValueError(f"Unsupported output format: {output_format}.")
+    else:
+        final_output_path = output_path
+
+    return final_output_path
 
 
 def inventory(
@@ -197,10 +248,6 @@ def inventory(
         language = getlocale()
     localized_strings = TextsManager().load_texts(language_code=language)
 
-    # output file path
-    if output_path is None:
-        output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}.xlsx")
-
     # output format
     if output_format == "excel":
         # creating the Excel workbook
@@ -224,6 +271,12 @@ def inventory(
 
     # look for geographic data files
     if input_folder is not None:
+        output_path = determine_output_path(
+            output_path=output_path,
+            output_format=output_format,
+            input_folder=input_folder,
+        )
+
         li_vectors = []
         (
             num_folders,
@@ -329,12 +382,20 @@ def inventory(
 
     # look for geographic database
     if pg_services:
-        print("Start looking for geographic table in PostGIS...")
+        # check if at least one pg_service name is referenced
         pg_services = check_usable_pg_services(requested_pg_services=pg_services)
         if not len(pg_services):
             logger.error("None of the specified pg_services is available.")
             raise typer.Exit(1)
 
+        output_path = determine_output_path(
+            output_path=output_path,
+            output_format=output_format,
+            input_folder=input_folder,
+            pg_services=pg_services,
+        )
+
+        print("Start looking for geographic table in PostGIS...")
         # configure output workbook
         output_serializer.pre_serializing(has_sgbd=True)
 
@@ -364,10 +425,6 @@ def inventory(
                 logger.info(f"Table examined: {metadataset.name}")
                 output_serializer.serialize_metadaset(metadataset=metadataset)
                 logger.debug("Layer metadata stored into workbook.")
-
-        # output file path
-        if output_path is None:
-            output_path = Path(f"DicoGIS_PostGIS_{date.today()}.xlsx")
 
         output_serializer.post_serializing()
         saved = Utilities.safe_save(
