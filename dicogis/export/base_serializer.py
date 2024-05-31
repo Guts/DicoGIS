@@ -9,6 +9,9 @@
 import logging
 from pathlib import Path
 
+# project
+from dicogis.utils.texts import TextsManager
+
 # ############################################################################
 # ######### Globals ############
 # ##############################
@@ -25,13 +28,15 @@ class MetadatasetSerializerBase:
 
     def __init__(
         self,
-        translated_texts: dict,
+        localized_strings: dict | None = None,
         output_path: Path | None = None,
         opt_raw_path: bool = False,
         opt_size_prettify: bool = True,
     ) -> None:
         """Initialize object."""
-        self.translated_texts = translated_texts
+        self.localized_strings = localized_strings
+        if self.localized_strings is None:
+            self.localized_strings = TextsManager().load_texts()
 
         # output path
         self.output_path = output_path

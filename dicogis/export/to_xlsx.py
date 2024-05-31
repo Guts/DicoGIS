@@ -148,7 +148,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
     def __init__(
         self,
-        translated_texts: dict,
+        localized_strings: dict | None = None,
         output_path: Path | None = None,
         opt_raw_path: bool = False,
         opt_size_prettify: bool = True,
@@ -174,7 +174,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
         # initiate with parent
         super().__init__(
-            translated_texts=translated_texts,
+            localized_strings=localized_strings,
             output_path=output_path,
             opt_raw_path=opt_raw_path,
             opt_size_prettify=opt_size_prettify,
@@ -205,15 +205,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         # SHEETS & HEADERS
         if (
             has_vector
-            and self.translated_texts.get("sheet_vectors")
+            and self.localized_strings.get("sheet_vectors")
             not in self.workbook.sheetnames
         ):
             self.sheet_vector_files = self.workbook.create_sheet(
-                title=self.translated_texts.get("sheet_vectors")
+                title=self.localized_strings.get("sheet_vectors")
             )
             # headers
             self.sheet_vector_files.append(
-                [self.translated_texts.get(i) for i in self.li_cols_vector]
+                [self.localized_strings.get(i) for i in self.li_cols_vector]
             )
 
             # initialize line counter
@@ -221,15 +221,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
         if (
             has_raster
-            and self.translated_texts.get("sheet_rasters")
+            and self.localized_strings.get("sheet_rasters")
             not in self.workbook.sheetnames
         ):
             self.sheet_raster_files = self.workbook.create_sheet(
-                title=self.translated_texts.get("sheet_rasters")
+                title=self.localized_strings.get("sheet_rasters")
             )
             # headers
             self.sheet_raster_files.append(
-                [self.translated_texts.get(i) for i in self.li_cols_raster]
+                [self.localized_strings.get(i) for i in self.li_cols_raster]
             )
 
             # initialize line counter
@@ -237,15 +237,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
         if (
             has_filedb
-            and self.translated_texts.get("sheet_filedb")
+            and self.localized_strings.get("sheet_filedb")
             not in self.workbook.sheetnames
         ):
             self.sheet_flat_geodatabases = self.workbook.create_sheet(
-                title=self.translated_texts.get("sheet_filedb")
+                title=self.localized_strings.get("sheet_filedb")
             )
             # headers
             self.sheet_flat_geodatabases.append(
-                [self.translated_texts.get(i) for i in self.li_cols_filedb]
+                [self.localized_strings.get(i) for i in self.li_cols_filedb]
             )
 
             # initialize line counter
@@ -253,15 +253,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
         if (
             has_mapdocs
-            and self.translated_texts.get("sheet_maplans")
+            and self.localized_strings.get("sheet_maplans")
             not in self.workbook.sheetnames
         ):
             self.sheet_map_workspaces = self.workbook.create_sheet(
-                title=self.translated_texts.get("sheet_maplans")
+                title=self.localized_strings.get("sheet_maplans")
             )
             # headers
             self.sheet_map_workspaces.append(
-                [self.translated_texts.get(i) for i in self.li_cols_mapdocs]
+                [self.localized_strings.get(i) for i in self.li_cols_mapdocs]
             )
 
             # initialize line counter
@@ -269,14 +269,14 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
         if (
             has_cad
-            and self.translated_texts.get("sheet_cdao") not in self.workbook.sheetnames
+            and self.localized_strings.get("sheet_cdao") not in self.workbook.sheetnames
         ):
             self.sheet_cad_files = self.workbook.create_sheet(
-                title=self.translated_texts.get("sheet_cdao")
+                title=self.localized_strings.get("sheet_cdao")
             )
             # headers
             self.sheet_cad_files.append(
-                [self.translated_texts.get(i) for i in self.li_cols_caodao]
+                [self.localized_strings.get(i) for i in self.li_cols_caodao]
             )
 
             # initialize line counter
@@ -286,7 +286,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             self.sheet_server_geodatabases = self.workbook.create_sheet(title="PostGIS")
             # headers
             self.sheet_server_geodatabases.append(
-                [self.translated_texts.get(i) for i in self.li_cols_sgbd]
+                [self.localized_strings.get(i) for i in self.li_cols_sgbd]
             )
             # initialize line counter
             self.row_index_server_geodatabases = 1
@@ -394,18 +394,21 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         """
         out_attributes_str = ""
 
+        if not isinstance(metadataset.feature_attributes, (list, tuple)):
+            return out_attributes_str
+
         for feature_attribute in metadataset.feature_attributes:
             # field type
             if "integer" in feature_attribute.data_type.lower():
-                translated_feature_attribute_type = self.translated_texts.get("entier")
+                translated_feature_attribute_type = self.localized_strings.get("entier")
             elif feature_attribute.data_type.lower() == "real":
-                translated_feature_attribute_type = self.translated_texts.get("reel")
+                translated_feature_attribute_type = self.localized_strings.get("reel")
             elif feature_attribute.data_type.lower() == "string":
-                translated_feature_attribute_type = self.translated_texts.get("string")
+                translated_feature_attribute_type = self.localized_strings.get("string")
             elif feature_attribute.data_type.lower() in ("date", "datetime"):
-                translated_feature_attribute_type = self.translated_texts.get("date")
+                translated_feature_attribute_type = self.localized_strings.get("date")
             elif feature_attribute.data_type.lower() == "binary":
-                translated_feature_attribute_type = self.translated_texts.get("binary")
+                translated_feature_attribute_type = self.localized_strings.get("binary")
             else:
                 translated_feature_attribute_type = feature_attribute.data_type
                 logger.warning(
@@ -418,9 +421,9 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
                 out_attributes_str,
                 feature_attribute.name,
                 translated_feature_attribute_type,
-                self.translated_texts.get("longueur"),
+                self.localized_strings.get("longueur"),
                 feature_attribute.length,
-                self.translated_texts.get("precision"),
+                self.localized_strings.get("precision"),
                 feature_attribute.precision,
             )
 
@@ -454,16 +457,14 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             worksheet (Worksheet): Excel workbook's sheet where to store
             row_index (int): worksheet's row index
         """
-        err_mess = self.translated_texts.get(metadataset.processing_error_type)
-        logger.warning(
-            f"Problem detected on {metadataset.name} (in {metadataset.path_as_str}). "
-            f"Error: {err_mess}"
+        err_mess = self.localized_strings.get(
+            metadataset.processing_error_type, metadataset.processing_error_msg
         )
         worksheet[f"A{row_index}"] = metadataset.name
         worksheet[f"A{row_index}"].style = "Warning Text"
         worksheet[f"B{row_index}"] = self.format_as_hyperlink(
             target=metadataset.path_as_str,
-            label=self.translated_texts.get("browse"),
+            label=self.localized_strings.get("browse"),
         )
         worksheet[f"B{row_index}"].style = "Warning Text"
         worksheet[f"C{row_index}"] = err_mess
@@ -474,6 +475,10 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             f"{metadataset.processing_error_msg}"
         )
         worksheet[f"Q{row_index}"].style = "Warning Text"
+        logger.debug(
+            f"Processing error detected on {metadataset.name} (in "
+            f"{metadataset.path_as_str}) ({err_mess}) has been stored."
+        )
 
     def get_sheet_and_incremented_row_index_from_type(
         self,
@@ -596,7 +601,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         else:
             worksheet[f"B{row_index}"] = self.format_as_hyperlink(
                 target=metadataset.path.parent,
-                label=self.translated_texts.get("browse"),
+                label=self.localized_strings.get("browse"),
             )
             worksheet[f"B{row_index}"].style = "Hyperlink"
 
@@ -611,12 +616,18 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"F{row_index}"] = metadataset.geometry_type
 
         # Name of srs
-        worksheet[f"G{row_index}"] = metadataset.crs_name
+        worksheet[f"G{row_index}"] = self.localized_strings.get(
+            metadataset.crs_name, ""
+        )
 
         # Type of SRS
-        worksheet[f"H{row_index}"] = metadataset.crs_type
+        worksheet[f"H{row_index}"] = self.localized_strings.get(
+            metadataset.crs_type, ""
+        )
         # EPSG code
-        worksheet[f"I{row_index}"] = metadataset.crs_registry_code
+        worksheet[f"I{row_index}"] = self.localized_strings.get(
+            metadataset.crs_registry_code, ""
+        )
         # Spatial extent
         worksheet[f"J{row_index}"].style = "wrap"
         worksheet[f"J{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
@@ -667,7 +678,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         else:
             worksheet[f"B{row_index}"] = self.format_as_hyperlink(
                 target=metadataset.path.parent,
-                label=self.translated_texts.get("browse"),
+                label=self.localized_strings.get("browse"),
             )
             worksheet[f"B{row_index}"].style = "Hyperlink"
 
@@ -743,7 +754,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         else:
             worksheet[f"B{row_index}"] = self.format_as_hyperlink(
                 target=metadataset.path.parent,
-                label=self.translated_texts.get("browse"),
+                label=self.localized_strings.get("browse"),
             )
             worksheet[f"B{row_index}"].style = "Hyperlink"
         worksheet[f"C{row_index}"] = metadataset.parent_folder_name
@@ -769,7 +780,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
             # in case of a source error
             if metadataset.processing_succeeded is False:
-                err_mess = self.translated_texts.get(
+                err_mess = self.localized_strings.get(
                     layer_metadataset.processing_error_type
                 )
                 logger.warning(
@@ -786,9 +797,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             worksheet[f"I{row_index}"] = layer_metadataset.count_feature_attributes
             worksheet[f"J{row_index}"] = layer_metadataset.features_objects_count
             worksheet[f"K{row_index}"] = layer_metadataset.geometry_type
-            worksheet[f"L{row_index}"] = layer_metadataset.crs_name
-            worksheet[f"M{row_index}"] = layer_metadataset.crs_type
-            worksheet[f"N{row_index}"] = layer_metadataset.crs_registry_code
+            worksheet[f"L{row_index}"] = self.localized_strings.get(
+                metadataset.crs_name, ""
+            )
+            worksheet[f"M{row_index}"] = self.localized_strings.get(
+                metadataset.crs_type, ""
+            )
+            worksheet[f"N{row_index}"] = self.localized_strings.get(
+                metadataset.crs_registry_code, ""
+            )
 
             # Spatial extent
             worksheet[f"O{row_index}"].style = "wrap"
@@ -827,7 +844,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         else:
             worksheet[f"B{row_index}"] = self.format_as_hyperlink(
                 target=metadataset.path.parent,
-                label=self.translated_texts.get("browse"),
+                label=self.localized_strings.get("browse"),
             )
             worksheet[f"B{row_index}"].style = "Hyperlink"
 
@@ -841,9 +858,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"K{row_index}"] = metadataset.storage_date_updated
         worksheet[f"L{row_index}"] = metadataset.get("xOrigin")
         worksheet[f"M{row_index}"] = metadataset.get("yOrigin")
-        worksheet[f"N{row_index}"] = metadataset.crs_name
-        worksheet[f"O{row_index}"] = metadataset.crs_type
-        worksheet[f"P{row_index}"] = metadataset.crs_registry_code
+        worksheet[f"N{row_index}"] = self.localized_strings.get(
+            metadataset.crs_name, ""
+        )
+        worksheet[f"O{row_index}"] = self.localized_strings.get(
+            metadataset.crs_type, ""
+        )
+        worksheet[f"P{row_index}"] = self.localized_strings.get(
+            metadataset.crs_registry_code, ""
+        )
         worksheet[f"Q{row_index}"] = metadataset.format_gdal_long_name
         worksheet[f"R{row_index}"] = metadataset.count_feature_attributes
         worksheet[f"S{row_index}"] = metadataset.features_objects_count
@@ -864,7 +887,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
                 )
             # in case of a source error
             if mdoc_layer.get("error"):
-                err_mess = self.translated_texts.get(mdoc_layer.get("error"))
+                err_mess = self.localized_strings.get(mdoc_layer.get("error"))
                 logger.warning(
                     "Problem detected: {} in {}".format(
                         err_mess, mdoc_layer.get("title")
@@ -888,13 +911,13 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             for chp in fields.keys():
                 # field type
                 if "Integer" in fields[chp][0]:
-                    tipo = self.translated_texts.get("entier")
+                    tipo = self.localized_strings.get("entier")
                 elif fields[chp][0] == "Real":
-                    tipo = self.translated_texts.get("reel")
+                    tipo = self.localized_strings.get("reel")
                 elif fields[chp][0] == "String":
-                    tipo = self.translated_texts.get("string")
+                    tipo = self.localized_strings.get("string")
                 elif fields[chp][0] == "Date":
-                    tipo = self.translated_texts.get("date")
+                    tipo = self.localized_strings.get("date")
                 else:
                     tipo = "unknown"
                     logger.warning(chp + " unknown type")
@@ -905,9 +928,9 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
                         champs,
                         chp.decode("utf8", "replace"),
                         tipo,
-                        self.translated_texts.get("longueur"),
+                        self.localized_strings.get("longueur"),
                         fields[chp][1],
-                        self.translated_texts.get("precision"),
+                        self.localized_strings.get("precision"),
                         fields[chp][2],
                     )
                 except UnicodeDecodeError:
@@ -961,9 +984,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"F{row_index}"] = metadataset.geometry_type
 
         # SRS
-        worksheet[f"G{row_index}"] = metadataset.crs_name
-        worksheet[f"H{row_index}"] = metadataset.crs_type
-        worksheet[f"I{row_index}"] = metadataset.crs_registry_code
+        worksheet[f"G{row_index}"] = self.localized_strings.get(
+            metadataset.crs_name, ""
+        )
+        worksheet[f"H{row_index}"] = self.localized_strings.get(
+            metadataset.crs_type, ""
+        )
+        worksheet[f"I{row_index}"] = self.localized_strings.get(
+            metadataset.crs_registry_code, ""
+        )
 
         # Spatial extent
         worksheet[f"J{row_index}"].style = "wrap"
