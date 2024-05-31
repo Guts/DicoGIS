@@ -17,22 +17,28 @@
 # standard library
 import logging
 import sys
-from logging.handlers import RotatingFileHandler
 from os import getenv
+from pathlib import Path
 from sys import platform as opersys
 
 # GUI
 from tkinter import TkVersion
 
+# 3rd party
+from typer import get_app_dir
+
 # Project
+from dicogis.__about__ import __package_name__, __title__
 from dicogis.ui.main_windows import DicoGIS
+from dicogis.utils.journalizer import LogManager
+from dicogis.utils.str2bool import str2bool
 
 # ##############################################################################
 # ############ Globals ############
 # #################################
 
-
-logger = logging.getLogger("DicoGIS")
+app_dir = get_app_dir(app_name=__title__, force_posix=True)
+logger = logging.getLogger(__name__)
 
 # ##############################################################################
 # ############ Functions ###########
@@ -42,17 +48,20 @@ logger = logging.getLogger("DicoGIS")
 def dicogis_gui():
     """Launch DicoGIS GUI."""
     # LOG
-    logging.captureWarnings(True)
-    logger.setLevel(logging.DEBUG)  # all errors will be get
-    log_form = logging.Formatter(
-        "%(asctime)s || %(levelname)s "
-        "|| %(module)s - %(lineno)d ||"
-        " %(funcName)s || %(message)s"
+    logmngr = LogManager(
+        console_level=(
+            logging.DEBUG
+            if str2bool(getenv("DICOGIS_DEBUG", False))
+            else logging.WARNING
+        ),
+        file_level=(
+            logging.DEBUG if str2bool(getenv("DICOGIS_DEBUG", False)) else logging.INFO
+        ),
+        label=f"{__package_name__}-gui",
+        folder=Path(app_dir).joinpath("logs"),
     )
-    logfile = RotatingFileHandler("LOG_DicoGIS.log", "a", 5000000, 1)
-    logfile.setLevel(logging.DEBUG)
-    logfile.setFormatter(log_form)
-    logger.addHandler(logfile)
+    # add headers
+    logmngr.headers()
 
     # 3rd party
     # condition import
@@ -60,7 +69,7 @@ def dicogis_gui():
         import distro
 
     # check Tk version
-    logger.info(f"{TkVersion=}")
+    logger.info(f"Tk: {TkVersion}")
     if TkVersion < 8.6:
         logger.critical("DicoGIS requires Tkversion >= 8.6.")
         sys.exit(1)
