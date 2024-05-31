@@ -14,7 +14,7 @@
 import unittest
 
 # project
-from dicogis.utils import str2bool
+from dicogis.utils.str2bool import str2bool
 
 # ############################################################################
 # ########## Classes #############
