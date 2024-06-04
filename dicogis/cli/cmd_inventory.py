@@ -27,7 +27,6 @@ from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.slugger import sluggy
 from dicogis.utils.texts import TextsManager
-from dicogis.utils.utils import Utilities
 
 # ############################################################################
 # ########## Globals ###############
@@ -241,7 +240,8 @@ def inventory(
     ] = None,
     verbose: bool = False,
 ):
-    """Main command.
+    """List, extract metadata from geospatial datasets (files or database) and store it
+    as files.
 
     Make an inventory of geodata files starting from a folder and/or
     databases using connection listed in pg_service.conf and store everything in an
@@ -412,7 +412,7 @@ def inventory(
             notification_sound=opt_notify_sound,
         )
         if opt_open_output:
-            Utilities.open_dir_file(target=output_path)
+            typer.launch(url=f"{output_path.resolve()}")
 
     # look for geographic database
     if pg_services:
@@ -478,6 +478,6 @@ def inventory(
         )
 
         if opt_open_output:
-            Utilities.open_dir_file(target=output_path)
+            typer.launch(url=f"{output_path.resolve()}")
 
     logger.info(f"Logs stored in {Path(app_dir).joinpath('logs')}")
