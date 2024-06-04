@@ -7,8 +7,10 @@
 # #################################
 
 # Standard library
+import logging
 from dataclasses import dataclass
 from datetime import datetime
+from hashlib import sha256
 from pathlib import Path
 from typing import Literal
 
@@ -17,6 +19,14 @@ from dicogis.models.database_connection import DatabaseConnection
 from dicogis.models.feature_attributes import AttributeField
 from dicogis.utils.formatters import convert_octets
 from dicogis.utils.slugger import sluggy
+
+# ############################################################################
+# ########## Globals ###############
+# ##################################
+
+
+logger = logging.getLogger(__name__)
+
 
 # ############################################################################
 # ######### Classes #############
@@ -58,6 +68,8 @@ class MetaDataset:
     crs_registry_code: str | None = None
     crs_type: str | None = None
 
+    # related objects
+
     # properties
     is_3d: bool = False
     # processing
@@ -84,7 +96,7 @@ class MetaDataset:
             description += f"- Features objects count: {self.features_objects_count}\n"
 
         if (
-            self.crs_name
+            (self.crs_name and self.crs_name != "srs_undefined")
             or self.crs_registry
             or self.crs_registry_code
             or self.crs_type
@@ -101,7 +113,10 @@ class MetaDataset:
             description += f"- Size: {convert_octets(self.storage_size)}\n"
 
         if self.files_dependencies:
-            description += f"- Related files: {', '.join(self.files_dependencies)}\n"
+            description += (
+                "- Related files: "
+                + f"{', '.join([str(filepath.resolve()) for filepath  in self.files_dependencies])}\n"
+            )
 
         if isinstance(self, MetaVectorDataset) and self.feature_attributes:
             description += (
@@ -109,7 +124,7 @@ class MetaDataset:
             )
             description += self.as_markdown_feature_attributes
         elif isinstance(self, MetaRasterDataset):
-            description += "\n\n## Image metadata\n"
+            description += "\n\n### Image metadata\n"
             description += self.as_markdown_image_metadata
 
         return description
@@ -165,6 +180,58 @@ class MetaDataset:
 
         return sluggy(to_slug)
 
+    def signature(
+        self,
+        hashable_attributes: tuple = (
+            "bands_count",
+            "crs_name",
+            "crs_type",
+            "dataset_type",
+            "envelope",
+            "features_objects_count",
+            "feature_attributes",
+            "format_gdal_long_name",
+            "geometry_type",
+            "name",
+            "path_as_str",
+            "schema_name",
+            "storage_type",
+        ),
+    ) -> str:
+        """Calculate a hash cumulating certain attributes values.
+
+        hashable_attributes: object attributes to include in hash.
+        """
+        # instanciate the hash
+        hasher = sha256(usedforsecurity=False)
+
+        # parse attributes
+        for obj_attribute in hashable_attributes:
+            # because hash.update requires a
+            if attr_value := getattr(self, obj_attribute, None):
+                try:
+                    if isinstance(attr_value, str):
+                        hasher.update(attr_value.encode("UTF-8"))
+                    elif isinstance(attr_value, (float, int)):
+                        hasher.update(str(attr_value).encode("UTF-8"))
+                    elif isinstance(attr_value, dict):
+                        hasher.update(hash(frozenset(attr_value.items())))
+                    elif (
+                        isinstance(attr_value, tuple)
+                        and obj_attribute == "feature_attributes"
+                    ):
+                        for feature_attribute in attr_value:
+                            hasher.update(feature_attribute.signature.encode("UTF-8"))
+                    else:
+                        hasher.update(hash(str(attr_value).encode("UTF-8")))
+                except TypeError as err:
+                    logger.info(
+                        f"Impossible to hash {obj_attribute} value "
+                        f"({attr_value, type(attr_value)}). Trace: {err}",
+                    )
+
+        return hasher.hexdigest()
+
 
 @dataclass
 class MetaVectorDataset(MetaDataset):
@@ -198,7 +265,7 @@ class MetaVectorDataset(MetaDataset):
             return ""
 
         out_markdown = "\n| name | type | length | precision |\n"
-        out_markdown += "| :---- | :-: | :----: | :-------: |\n"
+        out_markdown += "| :--- | :--: | :----: | :-------: |\n"
         for feature_attribute in self.feature_attributes:
             out_markdown += (
                 f"| {feature_attribute.name} | "
