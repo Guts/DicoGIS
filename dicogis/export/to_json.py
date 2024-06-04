@@ -83,11 +83,15 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
             "title": metadataset.name,
             "slug": sluggy(text_to_slugify=metadataset.slug),
             "description": metadataset.as_markdown_description,
-            "extras": {"dicogis_version": __version__},
+            "extras": {
+                "dicogis_original_path": metadataset.path_as_str,
+                "dicogis_signature": metadataset.signature(),
+                "dicogis_version": __version__,
+            },
             "tags": [
                 metadataset.format_gdal_long_name,
                 metadataset.format_gdal_short_name,
-                metadataset.crs_name,
+                metadataset.crs_name if metadataset.crs_name else "srs_undefined",
             ],
         }
 
