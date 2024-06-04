@@ -36,7 +36,7 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
 
     def __init__(
         self,
-        translated_texts: dict,
+        localized_strings: dict | None = None,
         output_path: Path | None = None,
         opt_size_prettify: bool = True,
     ) -> None:
@@ -44,7 +44,7 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         output_path.mkdir(parents=True, exist_ok=True)
 
         super().__init__(
-            translated_texts=translated_texts,
+            localized_strings=localized_strings,
             opt_size_prettify=opt_size_prettify,
             output_path=output_path,
         )

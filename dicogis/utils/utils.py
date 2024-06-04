@@ -5,6 +5,8 @@
 # ######## Libraries #############
 # ################################
 
+from __future__ import annotations
+
 # Standard library
 import logging
 import subprocess
@@ -15,7 +17,6 @@ from sys import platform as opersys
 from tkinter import ACTIVE, DISABLED
 from tkinter.filedialog import asksaveasfilename  # dialogs
 from tkinter.messagebox import showerror as avert
-from typing import Optional
 
 # Imports depending on operating system
 if opersys == "win32":
@@ -25,7 +26,6 @@ if opersys == "win32":
 
 # package
 from dicogis.__about__ import __package_name__
-from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.utils.check_path import check_path
 
 # ##############################################################################
@@ -117,11 +117,11 @@ class Utilities:
     @classmethod
     def safe_save(
         cls,
-        output_object: MetadatasetSerializerXlsx,
+        output_object,
         dest_dir: str = r".",
         dest_filename: str = "DicoGIS.xlsx",
         ftype: str = "Excel Workbook",
-        dlg_title: Optional[str] = "DicoGIS - Save output Excel Workbook",
+        dlg_title: str | None = "DicoGIS - Save output Excel Workbook",
         gui: bool = True,
     ):
         """Safe save output file."""

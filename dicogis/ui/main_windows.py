@@ -505,7 +505,7 @@ class DicoGIS(ThemedTk):
 
         # creating the Excel workbook
         self.xl_workbook = MetadatasetSerializerXlsx(
-            translated_texts=self.localized_strings,
+            localized_strings=self.localized_strings,
             opt_raw_path=self.tab_options.opt_export_raw_path.get(),
             opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
         )

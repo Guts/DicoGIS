@@ -247,12 +247,19 @@ class GeoReaderBase:
             tuple[str, str, str]: crs_name, crs_code, crs_type
         """
         # SRS
-        srs = dataset_or_layer.GetSpatialRef()
+        srs = None
+        try:
+            srs = dataset_or_layer.GetSpatialRef()
+        except Exception as err:
+            logger.error(
+                "Error occurred getting spatial reference for "
+                f"'{dataset_or_layer.GetName()}'. Trace: {err}"
+            )
         if not srs:
             return (
-                self.localized_strings.get("srs_undefined", ""),
-                self.localized_strings.get("srs_no_epsg", ""),
-                self.localized_strings.get("srs_nr", ""),
+                "srs_undefined",
+                "srs_no_epsg",
+                "srs_nr",
             )
 
         srs.AutoIdentifyEPSG()
@@ -261,17 +268,14 @@ class GeoReaderBase:
 
         # srs type
         srsmetod = [
-            (srs.IsDynamic(), self.localized_strings.get("srs_dyna", "Dynamic")),
-            (srs.IsCompound(), self.localized_strings.get("srs_comp", "Compound")),
-            (
-                srs.IsDerivedGeographic(),
-                self.localized_strings.get("srs_derg", "Derived geographic"),
-            ),
-            (srs.IsGeocentric(), self.localized_strings.get("srs_geoc", "Geocentric")),
-            (srs.IsGeographic(), self.localized_strings.get("srs_geog", "Geographic")),
-            (srs.IsLocal(), self.localized_strings.get("srs_loca", "Local")),
-            (srs.IsProjected(), self.localized_strings.get("srs_proj", "Projected")),
-            (srs.IsVertical(), self.localized_strings.get("srs_vert", "Vertical")),
+            (srs.IsDynamic(), "srs_dyna"),
+            (srs.IsCompound(), "srs_comp"),
+            (srs.IsDerivedGeographic(), "srs_derg"),
+            (srs.IsGeocentric(), "srs_geoc"),
+            (srs.IsGeographic(), "srs_geog"),
+            (srs.IsLocal(), "srs_loca"),
+            (srs.IsProjected(), "srs_proj"),
+            (srs.IsVertical(), "srs_vert"),
         ]
         # searching for a match with one of srs types
         for srsmet in srsmetod:
@@ -283,7 +287,7 @@ class GeoReaderBase:
         try:
             srs_type = typsrs
         except UnboundLocalError:
-            typsrs = self.localized_strings.get("srs_nr")
+            typsrs = "srs_nr"
             srs_type = typsrs
 
         # handling exceptions in srs names'encoding

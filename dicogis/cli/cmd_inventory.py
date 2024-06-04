@@ -42,6 +42,51 @@ default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 # ##################################
 
 
+def get_serializer_from_parameters(
+    output_format: str,
+    output_path: Path,
+    opt_raw_path: bool,
+    opt_prettify_size: bool,
+    localized_strings: dict | None = None,
+) -> MetadatasetSerializerJson | MetadatasetSerializerXlsx:
+    """Initiate the adequat serializer depending on parameters.
+
+    Args:
+        output_format: output format
+        output_path: output path
+        opt_raw_path: option to serialize dataset raw path without any sugar syntax
+        opt_prettify_size: option to prettify size in octets (typically: 1 ko instead
+            of 1024 octects)
+        localized_strings: localized texts. Defaults to None.
+
+    Returns:
+        _description_
+    """
+    if output_format == "excel":
+        # creating the Excel workbook
+        output_serializer = MetadatasetSerializerXlsx(
+            opt_raw_path=opt_raw_path,
+            opt_size_prettify=opt_prettify_size,
+            output_path=output_path,
+            localized_strings=localized_strings,
+        )
+    elif output_format == "json":
+        output_serializer = MetadatasetSerializerJson(
+            output_path=output_path,
+            localized_strings=localized_strings,
+            opt_size_prettify=opt_prettify_size,
+        )
+    else:
+        logger.error(
+            NotImplementedError(
+                f"Specified output format '{output_format}' is not available."
+            )
+        )
+        typer.Exit(1)
+
+    return output_serializer
+
+
 def determine_output_path(
     output_path: Path | str | None,
     output_format: str = "excel",
@@ -54,6 +99,7 @@ def determine_output_path(
         output_path: output path passed to inventory CLI
         output_format: input output format passed to inventory CLI
         input_folder: input folder passed to inventory CLI
+        pg_services: list of ppostgres services names to use
 
     Raises:
         ValueError: if output format is not supported
@@ -249,25 +295,6 @@ def inventory(
     localized_strings = TextsManager().load_texts(language_code=language)
 
     # output format
-    if output_format == "excel":
-        # creating the Excel workbook
-        output_serializer = MetadatasetSerializerXlsx(
-            translated_texts=localized_strings,
-            opt_raw_path=opt_raw_path,
-            opt_size_prettify=opt_prettify_size,
-            output_path=output_path,
-        )
-    elif output_format == "json":
-        output_serializer = MetadatasetSerializerJson(
-            translated_texts=localized_strings, output_path=output_path
-        )
-    else:
-        logger.error(
-            NotImplementedError(
-                f"Specified output format '{output_format}' is not available."
-            )
-        )
-        typer.Exit(1)
 
     # look for geographic data files
     if input_folder is not None:
@@ -275,6 +302,13 @@ def inventory(
             output_path=output_path,
             output_format=output_format,
             input_folder=input_folder,
+        )
+
+        output_serializer = get_serializer_from_parameters(
+            output_format=output_format,
+            output_path=output_path,
+            opt_prettify_size=opt_prettify_size,
+            opt_raw_path=opt_raw_path,
         )
 
         li_vectors = []
@@ -391,8 +425,14 @@ def inventory(
         output_path = determine_output_path(
             output_path=output_path,
             output_format=output_format,
-            input_folder=input_folder,
             pg_services=pg_services,
+        )
+
+        output_serializer = get_serializer_from_parameters(
+            output_format=output_format,
+            output_path=output_path,
+            opt_prettify_size=opt_prettify_size,
+            opt_raw_path=opt_raw_path,
         )
 
         print("Start looking for geographic table in PostGIS...")
@@ -400,6 +440,7 @@ def inventory(
         output_serializer.pre_serializing(has_sgbd=True)
 
         for pg_service in pg_services:
+            print(f"Start processing using PostgreSQL service: {pg_service}")
 
             # testing connection settings
             sgbd_reader = ReadPostGIS(service=pg_service)
@@ -427,14 +468,6 @@ def inventory(
                 logger.debug("Layer metadata stored into workbook.")
 
         output_serializer.post_serializing()
-        saved = Utilities.safe_save(
-            output_object=output_serializer,
-            dest_dir=f"{output_path.parent.resolve()}",
-            dest_filename=f"{output_path.resolve()}",
-            ftype="Excel Workbook",
-            gui=False,
-        )
-        logger.info(f"Workbook saved: {saved[1]}")
 
         send_system_notify(
             notification_title="DicoGIS analysis ended",
