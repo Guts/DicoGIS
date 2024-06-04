@@ -195,6 +195,7 @@ arcpy.pth
 # tests
 junit/
 tests/dev/tmp/
+DicoGIS_*/*.json
 
 # geodatabase
 \test\datatestGDB*
