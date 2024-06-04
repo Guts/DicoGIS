@@ -148,6 +148,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
     def __init__(
         self,
+        # inherited
         localized_strings: dict | None = None,
         output_path: Path | None = None,
         opt_raw_path: bool = False,

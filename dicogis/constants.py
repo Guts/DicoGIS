@@ -48,11 +48,19 @@ class AvailableLocales(str, ExtendedEnum):
     spanish = "ES"
 
 
+class JsonFlavors(str, ExtendedEnum):
+    """JSON flavors."""
+
+    dicogis = "dicogis"
+    udata = "udata"
+
+
 class OutputFormats(str, ExtendedEnum):
     """Supported output formats."""
 
     excel = "excel"
     json = "json"
+    udata = "udata"
 
 
 class FormatsVector(ExtendedEnum):

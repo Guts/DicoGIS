@@ -12,8 +12,11 @@ import json
 import logging
 from dataclasses import asdict
 from pathlib import Path
+from typing import Literal
 
 # project
+from dicogis.__about__ import __version__
+from dicogis.constants import JsonFlavors
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.models.metadataset import MetaDataset
 from dicogis.utils.slugger import sluggy
@@ -36,12 +39,16 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
 
     def __init__(
         self,
+        # custom
+        flavor: Literal[JsonFlavors.dicogis, JsonFlavors.udata] = "dicogis",
+        # inherited
         localized_strings: dict | None = None,
         output_path: Path | None = None,
         opt_size_prettify: bool = True,
     ) -> None:
         """Store metadata into JSON files."""
         output_path.mkdir(parents=True, exist_ok=True)
+        self.flavor = flavor
 
         super().__init__(
             localized_strings=localized_strings,
@@ -62,6 +69,27 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         if isinstance(obj_to_encode, Path):
             return str(obj_to_encode)
 
+    def as_udata(self, metadataset: MetaDataset) -> dict:
+        """Serialize metadaset in a data structure matching udata dataset schema.
+
+        Args:
+            metadataset: input metadataset to serialize
+
+        Returns:
+            serialized as dict
+        """
+
+        return {
+            "title": metadataset.name,
+            "slug": sluggy(text_to_slugify=metadataset.slug),
+            "description": metadataset.as_markdown_description,
+            "extras": {"dicogis_version": __version__},
+            "tags": [
+                metadataset.format_gdal_long_name,
+                metadataset.format_gdal_short_name,
+            ],
+        }
+
     def serialize_metadaset(self, metadataset: MetaDataset) -> Path:
         """Serialize input metadataset as JSON file stored in output_path.
 
@@ -74,13 +102,22 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         output_json_filepath = self.output_path.joinpath(
             f"{sluggy(metadataset.name)}.json"
         )
+
         with output_json_filepath.open(mode="w", encoding="UTF-8") as out_json:
-            json.dump(
-                asdict(metadataset),
-                out_json,
-                default=self.json_encoder_for_unsupported_types,
-                sort_keys=True,
-            )
+            if self.flavor == "dicogis":
+                json.dump(
+                    asdict(metadataset),
+                    out_json,
+                    default=self.json_encoder_for_unsupported_types,
+                    sort_keys=True,
+                )
+            elif self.flavor == "udata":
+                json.dump(
+                    self.as_udata(metadataset),
+                    out_json,
+                    default=self.json_encoder_for_unsupported_types,
+                    sort_keys=True,
+                )
 
         logger.debug(
             f"Metadataset {metadataset.path} serialized into JSON file "

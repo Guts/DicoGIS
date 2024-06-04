@@ -75,6 +75,13 @@ def get_serializer_from_parameters(
             localized_strings=localized_strings,
             opt_size_prettify=opt_prettify_size,
         )
+    elif output_format == "udata":
+        output_serializer = MetadatasetSerializerJson(
+            flavor="udata",
+            output_path=output_path,
+            localized_strings=localized_strings,
+            opt_size_prettify=opt_prettify_size,
+        )
     else:
         logger.error(
             NotImplementedError(
@@ -124,7 +131,7 @@ def determine_output_path(
                 final_output_path = Path(
                     f"DicoGIS_PostGIS_{pg_srv_names}_{date.today()}.xlsx"
                 )
-        elif output_format == "json":
+        elif output_format in ("json", "udata"):
             if isinstance(input_folder, Path):
                 final_output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}")
             elif isinstance(pg_services, list):
