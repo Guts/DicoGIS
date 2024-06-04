@@ -14,6 +14,7 @@ import typer
 # project
 from dicogis.__about__ import __title__, __version__
 from dicogis.cli.cmd_inventory import inventory
+from dicogis.cli.cmd_publish import publish
 
 # ############################################################################
 # ########## Globals ###############
@@ -80,6 +81,7 @@ def main(
 
 # integrate subcommands
 dicogis_cli.command()(inventory)
+dicogis_cli.command()(publish)
 
 # exposed for documentation
 click_object = typer.main.get_command(dicogis_cli)
