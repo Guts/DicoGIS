@@ -87,6 +87,7 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
             "tags": [
                 metadataset.format_gdal_long_name,
                 metadataset.format_gdal_short_name,
+                metadataset.crs_name,
             ],
         }
 

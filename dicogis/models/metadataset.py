@@ -90,7 +90,7 @@ class MetaDataset:
             or self.crs_type
         ):
             description += (
-                f"- Spatial Reference System: {self.crs_name} {self.crs_type}"
+                f"- Spatial Reference System: {self.crs_name} {self.crs_type}\n"
             )
             if self.crs_registry_code:
                 description += f"{self.crs_registry}:{self.crs_registry_code}\n"
@@ -150,12 +150,18 @@ class MetaDataset:
         Returns:
             slugified metadataset name and other attributes
         """
-        to_slug = f"{self.name}"
+        to_slug = ""
 
         if isinstance(self, MetaDatabaseTable):
-            to_slug += f" {self.schema_name}.{self.database_connection.database_name} "
+            if self.database_connection.database_name:
+                to_slug += f" {self.database_connection.database_name} "
+            elif self.database_connection.service_name:
+                to_slug += f" {self.database_connection.service_name} "
+            to_slug += f" {self.schema_name} "
         elif isinstance(self, (MetaVectorDataset, MetaRasterDataset)):
-            to_slug += f"{self.parent_folder_name}"
+            to_slug += f" {self.parent_folder_name} "
+
+        to_slug += f" {self.name}"
 
         return sluggy(to_slug)
 
@@ -191,7 +197,7 @@ class MetaVectorDataset(MetaDataset):
         if self.feature_attributes is None:
             return ""
 
-        out_markdown = "| name | type | length | precision |\n"
+        out_markdown = "\n| name | type | length | precision |\n"
         out_markdown += "| :---- | :-: | :----: | :-------: |\n"
         for feature_attribute in self.feature_attributes:
             out_markdown += (
@@ -278,7 +284,7 @@ class MetaRasterDataset(MetaDataset):
         Returns:
             string containing markdown table
         """
-        out_markdown = "| Key | value |\n"
+        out_markdown = "\n| Key | value |\n"
         out_markdown += "| :---- | :-: |\n"
         out_markdown += f"| Bands count | {self.bands_count}\n"
         out_markdown += f"| Columns count | {self.columns_count}\n"
