@@ -11,6 +11,7 @@
 import json
 import logging
 from dataclasses import asdict
+from os import getenv
 from pathlib import Path
 from typing import Literal
 
@@ -78,8 +79,7 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         Returns:
             serialized as dict
         """
-
-        return {
+        out_dict = {
             "title": metadataset.name,
             "slug": sluggy(text_to_slugify=metadataset.slug),
             "description": metadataset.as_markdown_description,
@@ -94,6 +94,12 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
                 metadataset.crs_name if metadataset.crs_name else "srs_undefined",
             ],
         }
+
+        # add udata organization if set as environment variable
+        if udata_organization_id := getenv("DICOGIS_UDATA_ORGANIZATION_ID"):
+            out_dict["organization"] = f"{udata_organization_id}"
+
+        return out_dict
 
     def serialize_metadaset(self, metadataset: MetaDataset) -> Path:
         """Serialize input metadataset as JSON file stored in output_path.

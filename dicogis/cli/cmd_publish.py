@@ -74,6 +74,14 @@ def publish(
             help="API's version of the uData instance.",
         ),
     ] = "1",
+    udata_organization_id: Annotated[
+        Optional[str],
+        typer.Option(
+            envvar="DICOGIS_UDATA_ORGANIZATION_ID",
+            help="Organization ID in uData instance. If set, datasets will be added to "
+            "the organization instead of the user authenticated with the API key.",
+        ),
+    ] = None,
     opt_notify_sound: Annotated[
         bool,
         typer.Option(
@@ -144,6 +152,9 @@ def publish(
         try:
             with json_file.open(mode="r", encoding="UTF-8") as f:
                 data = json.load(f)
+
+            if isinstance(data, dict) and udata_organization_id:
+                data["organization"] = {"id": udata_organization_id}
 
         except Exception as err:
             err_msg = f"Impossible to load {json_file}. Trace: {err}"
