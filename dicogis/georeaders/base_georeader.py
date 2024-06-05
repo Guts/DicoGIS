@@ -247,7 +247,7 @@ class GeoReaderBase:
         Returns:
             crs_name, crs_registry, crs_code, crs_type
         """
-        # SRS
+        layer_spatial_ref: osr.SpatialReference | None = None
         srs_code: str | None = None
         srs_name: str | None = None
         srs_registry: str | None = None
