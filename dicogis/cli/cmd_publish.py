@@ -7,7 +7,6 @@
 # standard lib
 import json
 import logging
-from os import getenv
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -51,6 +50,30 @@ def publish(
             resolve_path=True,
         ),
     ] = None,
+    udata_api_key: Annotated[
+        Optional[str],
+        typer.Option(
+            envvar="DICOGIS_UDATA_API_KEY",
+            help="API key of the account uData instance.",
+            prompt=True,
+            confirmation_prompt=True,
+            hide_input=True,
+        ),
+    ] = None,
+    udata_api_url_base: Annotated[
+        Optional[str],
+        typer.Option(
+            envvar="DICOGIS_UDATA_API_URL_BASE",
+            help="API URL of the uData instance.",
+        ),
+    ] = "https://demo.data.gouv.fr/api/",
+    udata_api_version: Annotated[
+        Optional[str],
+        typer.Option(
+            envvar="DICOGIS_UDATA_API_VERSION",
+            help="API's version of the uData instance.",
+        ),
+    ] = "1",
     opt_notify_sound: Annotated[
         bool,
         typer.Option(
@@ -86,13 +109,7 @@ def publish(
         )
         raise typer.Exit(code=1)
 
-    api_key = getenv("DICOGIS_UDATA_API_KEY")
-    api_version = getenv("DICOGIS_UDATA_API_VERSION", "1")
-    api_url_base = getenv(
-        "DICOGIS_UDATA_API_URL_BASE", "https://demo.data.gouv.fr/api/"
-    )
-
-    if not api_key:
+    if not udata_api_key:
         console_err.print(
             ":boom: [bold red]Error![/bold red] No API key defined for uData. "
             "Please set your API key as environment variable 'DICOGIS_UDATA_API_KEY'."
@@ -101,10 +118,13 @@ def publish(
 
     # prepare http session
     req_session = Session()
-    req_session.headers = {"Content-Type": "application/json", "X-API-KEY": api_key}
+    req_session.headers = {
+        "Content-Type": "application/json",
+        "X-API-KEY": udata_api_key,
+    }
 
     already_published_datasets = req_session.get(
-        url=f"{api_url_base}{api_version}/me/datasets/"
+        url=f"{udata_api_url_base}{udata_api_version}/me/datasets/"
     ).json()
     already_published_slugs = tuple([d.get("slug") for d in already_published_datasets])
     already_published_signature = tuple(
@@ -157,11 +177,13 @@ def publish(
         # publish
         try:
             req_response = req_session.post(
-                url=f"{api_url_base}{api_version}/datasets", json=data
+                url=f"{udata_api_url_base}{udata_api_version}/datasets", json=data
             )
             req_response.raise_for_status()
         except Exception as err:
-            err_msg = f"Publish {json_file} to {api_url_base} failed. Trace: {err}"
+            err_msg = (
+                f"Publish {json_file} to {udata_api_url_base} failed. Trace: {err}"
+            )
             logger.error(err_msg)
             console_err.print(err_msg)
             counter_failed += 1
@@ -172,7 +194,7 @@ def publish(
     console_out.print(
         "==Publish report ==\n"
         f":white_check_mark: {counter_correctly_published} files published to "
-        f"{api_url_base}\n"
+        f"{udata_api_url_base}.\n"
         f":white_circle: {counter_ignored} files ignored.\n"
         f":red_square: {counter_failed} files failed."
     )
