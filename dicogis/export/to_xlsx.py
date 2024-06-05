@@ -73,7 +73,8 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         "pixel_w",
         "pixel_h",
         "origin_x",
-        "origin_y",
+        "origin_y",  # I
+        "srs",  # J
         "srs_type",
         "codepsg",
         "emprise",
@@ -617,17 +618,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"F{row_index}"] = metadataset.geometry_type
 
         # Name of srs
-        worksheet[f"G{row_index}"] = self.localized_strings.get(
-            metadataset.crs_name, ""
-        )
+        worksheet[f"G{row_index}"] = metadataset.crs_name
 
         # Type of SRS
         worksheet[f"H{row_index}"] = self.localized_strings.get(
-            metadataset.crs_type, ""
+            metadataset.crs_type, str(metadataset.crs_type)
         )
-        # EPSG code
-        worksheet[f"I{row_index}"] = self.localized_strings.get(
-            metadataset.crs_registry_code, ""
+        # SRS code
+        worksheet[f"I{row_index}"] = (
+            f"{metadataset.crs_registry}:{metadataset.crs_registry_code}"
         )
         # Spatial extent
         worksheet[f"J{row_index}"].style = "wrap"
@@ -698,35 +697,44 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"H{row_index}"] = metadataset.origin_x
         worksheet[f"I{row_index}"] = metadataset.origin_y
 
+        # Name of srs
+        worksheet[f"J{row_index}"] = metadataset.crs_name
+
         # Type of SRS
-        worksheet[f"J{row_index}"] = metadataset.crs_type
-        # EPSG code
-        worksheet[f"K{row_index}"] = metadataset.crs_registry_code
+        worksheet[f"K{row_index}"] = self.localized_strings.get(
+            metadataset.crs_type, str(metadataset.crs_type)
+        )
+        # SRS code
+        worksheet[f"L{row_index}"] = metadataset.crs_registry_code
+
+        # Spatial extent
+        worksheet[f"M{row_index}"].style = "wrap"
+        worksheet[f"M{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
         # Creation date
-        worksheet[f"M{row_index}"] = metadataset.storage_date_created
+        worksheet[f"N{row_index}"] = metadataset.storage_date_created
         # Last update date
-        worksheet[f"N{row_index}"] = metadataset.storage_date_updated
+        worksheet[f"O{row_index}"] = metadataset.storage_date_updated
 
         # Number of bands
-        worksheet[f"O{row_index}"] = metadataset.bands_count
+        worksheet[f"P{row_index}"] = metadataset.bands_count
 
         # Format of data
-        worksheet[f"P{row_index}"] = metadataset.format_gdal_long_name
+        worksheet[f"Q{row_index}"] = metadataset.format_gdal_long_name
         # Compression rate
-        worksheet[f"Q{row_index}"] = metadataset.compression_rate
+        worksheet[f"R{row_index}"] = metadataset.compression_rate
 
         # Color referential
-        worksheet[f"R{row_index}"] = metadataset.color_space
+        worksheet[f"S{row_index}"] = metadataset.color_space
 
         # Dependencies
-        worksheet[f"S{row_index}"].style = "wrap"
-        worksheet[f"S{row_index}"] = " |\n ".join(
+        worksheet[f"T{row_index}"].style = "wrap"
+        worksheet[f"U{row_index}"] = " |\n ".join(
             f.resolve() for f in metadataset.files_dependencies
         )
 
         # total size of file and its dependencies
-        worksheet[f"O{row_index}"] = self.format_size(
+        worksheet[f"V{row_index}"] = self.format_size(
             in_size_in_octets=metadataset.storage_size
         )
 
@@ -798,19 +806,19 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             worksheet[f"I{row_index}"] = layer_metadataset.count_feature_attributes
             worksheet[f"J{row_index}"] = layer_metadataset.features_objects_count
             worksheet[f"K{row_index}"] = layer_metadataset.geometry_type
-            worksheet[f"L{row_index}"] = self.localized_strings.get(
-                metadataset.crs_name, ""
-            )
+            worksheet[f"L{row_index}"] = layer_metadataset.crs_name
             worksheet[f"M{row_index}"] = self.localized_strings.get(
-                metadataset.crs_type, ""
+                layer_metadataset.crs_type, str(layer_metadataset.crs_type)
             )
-            worksheet[f"N{row_index}"] = self.localized_strings.get(
-                metadataset.crs_registry_code, ""
+
+            # SRS code
+            worksheet[f"N{row_index}"] = (
+                f"{layer_metadataset.crs_registry}:{layer_metadataset.crs_registry_code}"
             )
 
             # Spatial extent
             worksheet[f"O{row_index}"].style = "wrap"
-            worksheet[f"O{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
+            worksheet[f"O{row_index}"] = self.format_bbox(bbox=layer_metadataset.bbox)
 
             # Field informations
             worksheet[f"P{row_index}"] = self.format_feature_attributes(
@@ -985,15 +993,14 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"F{row_index}"] = metadataset.geometry_type
 
         # SRS
-        worksheet[f"G{row_index}"] = self.localized_strings.get(
-            metadataset.crs_name, ""
-        )
+        # Name of srs
+        worksheet[f"G{row_index}"] = metadataset.crs_name
+        # Type of SRS
         worksheet[f"H{row_index}"] = self.localized_strings.get(
-            metadataset.crs_type, ""
+            metadataset.crs_type, str(metadataset.crs_type)
         )
-        worksheet[f"I{row_index}"] = self.localized_strings.get(
-            metadataset.crs_registry_code, ""
-        )
+        # SRS code
+        worksheet[f"I{row_index}"] = metadataset.crs_registry_code
 
         # Spatial extent
         worksheet[f"J{row_index}"].style = "wrap"
