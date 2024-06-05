@@ -96,7 +96,7 @@ class LogManager:
         #  create main logger
         logging.captureWarnings(False)
         logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
+        logger.setLevel(min(self.console_level, self.file_level))
 
         # create console handler - seems to be ignored by click
         log_console_handler = logging.StreamHandler()

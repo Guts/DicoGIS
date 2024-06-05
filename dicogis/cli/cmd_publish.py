@@ -100,8 +100,8 @@ def publish(
 
     logmngr = LogManager(
         console_level=logging.DEBUG if verbose else logging.WARNING,
-        file_level=logging.DEBUG if verbose else logging.INFO,
-        label=f"{__package_name__}-cli",
+        file_level=logging.DEBUG if verbose else logging.WARNING,
+        label=f"{__package_name__}-cli-publish",
         folder=Path(app_dir).joinpath("logs"),
     )
     # add headers
@@ -193,11 +193,12 @@ def publish(
             or data.get("extras", {}).get("dicogis_signature")
             in already_published_signature
         ):
-            console_out.print(
-                f"JSON file {json_file} has the same slug or the same signature "
-                f"compared with {len(already_published_datasets)} already published "
-                "datasets. It's not gonna be published."
-            )
+            if verbose:
+                console_out.print(
+                    f"JSON file {json_file} has the same slug or the same signature "
+                    f"compared with {len(already_published_datasets)} already published "
+                    "datasets. It's not gonna be published."
+                )
             counter_ignored += 1
             continue
 

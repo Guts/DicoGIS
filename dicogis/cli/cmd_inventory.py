@@ -274,7 +274,7 @@ def inventory(
     logmngr = LogManager(
         console_level=logging.DEBUG if verbose else logging.WARNING,
         file_level=logging.DEBUG if verbose else logging.INFO,
-        label=f"{__package_name__}-cli",
+        label=f"{__package_name__}-cli-inventory",
         folder=Path(app_dir).joinpath("logs"),
     )
     # add headers
