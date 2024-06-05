@@ -131,9 +131,25 @@ def publish(
         "X-API-KEY": udata_api_key,
     }
 
-    already_published_datasets = req_session.get(
-        url=f"{udata_api_url_base}{udata_api_version}/me/datasets/"
-    ).json()
+    # retrieve already published datasets to avoid duplicated publication
+    if udata_organization_id:
+        already_published_datasets = req_session.get(
+            url=f"{udata_api_url_base}{udata_api_version}/organizations/"
+            f"{udata_organization_id}/datasets/?page_size=100",
+            allow_redirects=True,
+        )
+        already_published_datasets.raise_for_status()
+        already_published_datasets = already_published_datasets.json().get(
+            "data"
+        )  # be careful: this route stores the list in a 'data' attribute key
+    else:
+        already_published_datasets = req_session.get(
+            url=f"{udata_api_url_base}{udata_api_version}/me/datasets/?page_size=100",
+            allow_redirects=True,
+        )
+        already_published_datasets.raise_for_status()
+        already_published_datasets = already_published_datasets.json()
+
     already_published_slugs = tuple([d.get("slug") for d in already_published_datasets])
     already_published_signature = tuple(
         [
