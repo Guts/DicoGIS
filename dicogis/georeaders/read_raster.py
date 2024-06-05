@@ -7,7 +7,6 @@
 # Standard library
 import logging
 from datetime import datetime
-from os import path
 from pathlib import Path
 from typing import Optional, Union
 
@@ -105,10 +104,12 @@ class ReadRasters(GeoReaderBase):
         )
 
         # SRS
-        srs_details = self.get_srs_details(dataset.GetProjection())
-        metadataset.crs_name = srs_details[0]
-        metadataset.crs_registry_code = srs_details[1]
-        metadataset.crs_type = srs_details[2]
+        (
+            metadataset.crs_name,
+            metadataset.crs_registry,
+            metadataset.crs_registry_code,
+            metadataset.crs_type,
+        ) = self.get_srs_details(dataset_or_layer=dataset)
 
         # basic informations
         dataset_gdal_metadata = dataset.GetMetadata()
@@ -144,67 +145,3 @@ class ReadRasters(GeoReaderBase):
         del dataset
 
         return metadataset
-
-
-# ############################################################################
-# #### Stand alone program ########
-# #################################
-
-if __name__ == "__main__":
-    """standalone execution for tests. Paths are relative considering a test
-    within the official repository (https://github.com/Guts/DicoShapes/)"""
-    # listing test files by formats
-    li_ecw = [r"..\..\test\datatest\rasters\ECW\0468_6740.ecw"]  # ECW
-    li_gtif = [
-        r"..\..\test\datatest\rasters\GeoTiff\BDP_07_0621_0049_020_LZ1.tif",
-        r"..\..\test\datatest\rasters\GeoTiff\TrueMarble_16km_2700x1350.tif",
-        r"..\..\test\datatest\rasters\GeoTiff\ASTGTM_S17W069_dem.tif",
-        r"..\..\test\datatest\rasters\GeoTiff\completo1-2.tif",
-    ]  # GeoTIFF
-    li_jpg2 = [r"..\..\test\datatest\rasters\JPEG2000\image_jpg2000.jp2"]  # JPEG2000
-    li_rasters = (
-        path.abspath(li_ecw[0]),
-        path.abspath(li_gtif[0]),
-        path.abspath(li_gtif[1]),
-        path.abspath(li_gtif[2]),
-        path.abspath(li_gtif[3]),
-        path.abspath(li_jpg2[0]),
-    )
-
-    # test text dictionary
-    textos = {}
-    textos["srs_comp"] = "Compound"
-    textos["srs_geoc"] = "Geocentric"
-    textos["srs_geog"] = "Geographic"
-    textos["srs_loca"] = "Local"
-    textos["srs_proj"] = "Projected"
-    textos["srs_vert"] = "Vertical"
-    textos["geom_point"] = "Point"
-    textos["geom_ligne"] = "Line"
-    textos["geom_polyg"] = "Polygon"
-
-    # execution
-    for raster in li_rasters:
-        """looping on raster files"""
-        # recipient datas
-        dico_raster = {}  # dictionary where will be stored informations
-        dico_bands = {}  # dictionary for fields information
-        # getting the informations
-        if not path.isfile(raster):
-            print("\n\t==> File doesn't exist: " + raster)
-            continue
-        else:
-            pass
-        print(("\n======================\n\t", path.basename(raster)))
-        # handling odd warnings
-        info_raster = ReadRasters(
-            path.abspath(raster),
-            dico_raster,
-            dico_bands,
-            path.splitext(raster)[1],
-            textos,
-        )
-        print(f"\n\n{dico_raster}\n{dico_bands}")
-
-        # deleting dictionaries
-        del dico_raster, dico_bands, raster

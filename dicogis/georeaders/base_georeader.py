@@ -237,98 +237,127 @@ class GeoReaderBase:
 
     def get_srs_details(
         self, dataset_or_layer: Union[ogr.Layer, gdal.Dataset]
-    ) -> tuple[str, str, str]:
-        """Get coordinates system.
+    ) -> tuple[str, str, str, str]:
+        """Get coordinates system name, type and registry code.
 
         Args:
-            dataset_or_layer (Union[ogr.Layer, gdal.Dataset]): input dataset or OGR layer
+            dataset_or_layer (Union[ogr.Layer, gdal.Dataset]): input dataset or OGR
+                layer
 
         Returns:
-            tuple[str, str, str]: crs_name, crs_code, crs_type
+            crs_name, crs_registry, crs_code, crs_type
         """
         # SRS
-        srs = None
+        srs_code: str | None = None
+        srs_name: str | None = None
+        srs_registry: str | None = None
+        srs_type: str | None = None
+
         try:
-            srs = dataset_or_layer.GetSpatialRef()
+            layer_spatial_ref: osr.SpatialReference = dataset_or_layer.GetSpatialRef()
         except Exception as err:
             logger.error(
                 "Error occurred getting spatial reference for "
                 f"'{dataset_or_layer.GetName()}'. Trace: {err}"
             )
-        if not srs:
+        if not layer_spatial_ref:
             return (
+                "srs_undefined",
                 "srs_undefined",
                 "srs_no_epsg",
                 "srs_nr",
             )
 
-        srs.AutoIdentifyEPSG()
-        prj = osr.SpatialReference(str(srs))
-        srs_epsg = prj.GetAuthorityCode(None)
+        layer_spatial_ref.AutoIdentifyEPSG()
+        srs_code = layer_spatial_ref.GetAuthorityCode(None)
+        if not srs_code:
+            if layer_spatial_ref.GetAttrValue("AUTHORITY", 1):
+                srs_code = layer_spatial_ref.GetAttrValue("AUTHORITY", 1)
+            else:
+                srs_code = "srs_no_epsg"
+
+        srs_registry = layer_spatial_ref.GetAuthorityName(None)
 
         # srs type
-        srsmetod = [
-            (srs.IsDynamic(), "srs_dyna"),
-            (srs.IsCompound(), "srs_comp"),
-            (srs.IsDerivedGeographic(), "srs_derg"),
-            (srs.IsGeocentric(), "srs_geoc"),
-            (srs.IsGeographic(), "srs_geog"),
-            (srs.IsLocal(), "srs_loca"),
-            (srs.IsProjected(), "srs_proj"),
-            (srs.IsVertical(), "srs_vert"),
-        ]
-        # searching for a match with one of srs types
-        for srsmet in srsmetod:
-            if srsmet[0] == 1:
-                typsrs = srsmet[1]
-            else:
-                continue
-        # in case of not match
-        try:
-            srs_type = typsrs
-        except UnboundLocalError:
-            typsrs = "srs_nr"
-            srs_type = typsrs
+        srs_type = self.get_srs_type(object_spatial_reference=layer_spatial_ref)
 
         # handling exceptions in srs names'encoding
-        try:
-            if srs.GetName() is not None:
-                srs_name = srs.GetName()
-            elif srs.IsGeographic() and srs.GetAttrValue("GEOGCS"):
-                srs_name = srs.GetAttrValue("GEOGCS").replace("_", " ")
-            elif srs.IsProjected() and srs.GetAttrValue("PROJCS"):
-                srs_name = srs.GetAttrValue("PROJCS").replace("_", " ")
-            else:
-                srs_name = srs.GetAttrValue("PROJECTION").replace("_", " ")
-        except UnicodeDecodeError:
-            if srs.GetAttrValue("PROJCS") != "unnamed":
-                srs_name = srs.GetAttrValue("PROJCS").decode("latin1").replace("_", " ")
-            else:
-                srs_name = (
-                    srs.GetAttrValue("PROJECTION").decode("latin1").replace("_", " ")
-                )
-        finally:
-            srs_epsg = srs.GetAttrValue("AUTHORITY", 1)
+        srs_name = self.get_srs_name(object_spatial_reference=layer_spatial_ref)
 
-        # World SRS default
-        if srs_epsg == "4326" and srs_name == "None":
-            srs_name = "WGS 84"
+        return (srs_name, srs_registry, srs_code, srs_type)
 
-        return (srs_name, srs_epsg, srs_type)
+    def get_srs_name(self, object_spatial_reference: osr.SpatialReference) -> str:
+        """Get SRS name from an osr object.
 
-    def get_title(self, layer: ogr.Layer) -> str:
-        """Get layer title preventing encoding errors."""
-        try:
-            layer_title = layer.GetName()
-        except UnicodeDecodeError:
-            layer_title = layer.GetName().decode("latin1", errors="replace")
-        return layer_title
+        Args:
+            object_spatial_reference: osr object. Typically obtained with
+                ogr.Layer.GetSpatialReference()
+
+        Returns:
+            name of spatial reference
+        """
+
+        if object_spatial_reference.GetName() is not None:
+            srs_name = object_spatial_reference.GetName()
+        elif (
+            object_spatial_reference.IsGeographic()
+            and object_spatial_reference.GetAttrValue("GEOGCS")
+        ):
+            srs_name = object_spatial_reference.GetAttrValue("GEOGCS").replace("_", " ")
+        elif (
+            object_spatial_reference.IsProjected()
+            and object_spatial_reference.GetAttrValue("PROJCS")
+        ):
+            srs_name = object_spatial_reference.GetAttrValue("PROJCS").replace("_", " ")
+        else:
+            srs_name = object_spatial_reference.GetAttrValue("PROJECTION").replace(
+                "_", " "
+            )
+
+        return srs_name
+
+    def get_srs_type(self, object_spatial_reference: osr.SpatialReference) -> str:
+        """Get SRS type from an osr object.
+
+        Args:
+            object_spatial_reference: osr object. Typically obtained with
+                ogr.Layer.GetSpatialReference()
+
+        Returns:
+            type of spatial reference
+        """
+        srs_type = "srs_nr"
+        # srs type
+        srs_types_matrix = (
+            (object_spatial_reference.IsDynamic(), "srs_dyna"),
+            (object_spatial_reference.IsCompound(), "srs_comp"),
+            (object_spatial_reference.IsDerivedGeographic(), "srs_derg"),
+            (object_spatial_reference.IsGeocentric(), "srs_geoc"),
+            (object_spatial_reference.IsGeographic(), "srs_geog"),
+            (object_spatial_reference.IsLocal(), "srs_loca"),
+            (object_spatial_reference.IsProjected(), "srs_proj"),
+            (object_spatial_reference.IsVertical(), "srs_vert"),
+        )
+        # searching for a match with one of srs types
+        for srs_type_check in srs_types_matrix:
+            if srs_type_check[0] == 1:
+                srs_type = srs_type_check[1]
+                break
+
+        return srs_type
 
     def list_dependencies(
         self,
         main_dataset: Union[Path, str, gdal.Dataset],
     ) -> list[Path]:
-        """List dependant files around a main file."""
+        """List dependant files around a main file.
+
+        Args:
+            main_dataset: gdal.Dataset or ogr.Layer or path to the source dataset
+
+        Returns:
+            list of file paths related to the main dataset
+        """
         if isinstance(main_dataset, str):
             check_var_can_be_path(input_var=main_dataset, raise_error=True)
             main_dataset = Path(main_dataset)
