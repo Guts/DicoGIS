@@ -19,14 +19,13 @@ import getpass
 import locale
 import logging
 import platform
-from sys import exit
+from pathlib import Path
 from sys import platform as opersys
 from time import strftime
 
 # GUI
 from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, IntVar, StringVar
 from tkinter.messagebox import showerror as avert
-from tkinter.messagebox import showinfo
 from tkinter.ttk import (
     Button,
     Combobox,
@@ -41,10 +40,12 @@ from typing import Optional
 # 3rd party
 from osgeo import gdal
 from ttkthemes import ThemedTk
+from typer import launch
 
 # Project
 from dicogis import __about__
-from dicogis.constants import AvailableLocales
+from dicogis.constants import AvailableLocales, OutputFormats
+from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
@@ -500,12 +501,19 @@ class DicoGIS(ThemedTk):
                 self.nb.select(self.typo)
                 return
 
-        # creating the Excel workbook
-        self.xl_workbook = MetadatasetSerializerXlsx(
-            localized_strings=self.localized_strings,
-            opt_raw_path=self.tab_options.opt_export_raw_path.get(),
-            opt_size_prettify=self.tab_options.opt_export_size_prettify.get(),
+        # creating the output serializer
+        self.serializer: MetadatasetSerializerXlsx = (
+            MetadatasetSerializerBase.get_serializer_from_parameters(
+                format_or_serializer=OutputFormats.excel,
+                localized_strings=self.localized_strings,
+                output_path=Path(self.tab_files.target_path.get()).joinpath(
+                    self.ent_outxl_filename.get()
+                ),
+                opt_prettify_size=self.tab_options.opt_export_size_prettify.get(),
+                opt_raw_path=self.tab_options.opt_export_raw_path.get(),
+            )
         )
+
         self.lbl_status.configure(foreground="DodgerBlue")
         self.status.set("Excel worbook object instanciated")
 
@@ -516,12 +524,12 @@ class DicoGIS(ThemedTk):
             self.process_files()
         elif self.typo == 1:
             self.nb.select(1)
-            self.xl_workbook.pre_serializing(has_sgbd=1)
+            self.serializer.pre_serializing(has_sgbd=1)
             logger.info("PROCESS LAUNCHED: SGBD")
             # launching the process
             self.process_db(sgbd_reader=pg_reader)
         else:
-            pass
+            logger.critical("Unrecognized data type to process. Report it!")
         self.val.config(state=ACTIVE)
         # end of function
         return self.typo
@@ -543,7 +551,7 @@ class DicoGIS(ThemedTk):
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
-            format_or_serializer="excel",
+            serializer=self.serializer,
             localized_strings=self.localized_strings,
             # list by tabs
             li_vectors=self.li_vectors,
@@ -588,7 +596,8 @@ class DicoGIS(ThemedTk):
         # launch processing
         geofiles_processor.process_datasets_in_queue()
 
-        # saving dictionary
+        # opening and notifying
+        launch(url=f"{self.serializer.output_path.resolve()}")
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files. "
@@ -596,28 +605,6 @@ class DicoGIS(ThemedTk):
             notification_sound=self.tab_options.opt_end_process_notification_sound.get(),
         )
         self.val.config(state=ACTIVE)
-        self.xl_workbook.post_serializing()
-        saved = utils_global.safe_save(
-            output_object=self.xl_workbook,
-            dest_dir=self.tab_files.target_path.get(),
-            dest_filename=self.ent_outxl_filename.get(),
-            ftype="Excel Workbook",
-            dlg_title=self.localized_strings.get("gui_excel", "Excel Workbook(.xlsx)"),
-        )
-        logger.info(f"Workbook saved: {self.ent_outxl_filename.get()}")
-
-        # quit and exit
-        if saved is not None:
-            utils_global.open_dir_file(saved[1])
-        else:
-            showinfo(
-                title=self.localized_strings.get(
-                    "no_output_file_selected", "No output file selected"
-                ),
-                message=self.localized_strings.get(
-                    "no_output_file_selected", "Dictionary has not been saved."
-                ),
-            )
 
     def process_db(self, sgbd_reader: ReadPostGIS):
         """Process PostGIS DB analisis.
@@ -645,7 +632,7 @@ class DicoGIS(ThemedTk):
             self.status.set(f"Reading: {layer.GetName()}")
             metadataset = sgbd_reader.infos_dataset(layer)
             logger.info(f"Table examined: {metadataset.name}")
-            self.xl_workbook.serialize_metadaset(metadataset=metadataset)
+            self.serializer.serialize_metadaset(metadataset=metadataset)
             logger.debug("Layer metadata stored into workbook: {metadataset.name}")
             # increment the progress bar
             self.prog_layers["value"] = self.prog_layers["value"] + 1
@@ -660,24 +647,16 @@ class DicoGIS(ThemedTk):
             notification_sound=self.tab_options.opt_end_process_notification_sound.get(),
         )
         self.val.config(state=ACTIVE)
-        self.xl_workbook.post_serializing()
-        saved = utils_global.safe_save(
-            output_object=self.xl_workbook,
-            dest_filename=self.ent_outxl_filename.get(),
-            ftype="Excel Workbook",
-            dlg_title=self.localized_strings.get("gui_excel"),
-        )
-        logger.info(
-            f"Workbook saved: {self.ent_outxl_filename.get()}",
-        )
-
-        # quit and exit
-        utils_global.open_dir_file(saved[1])
-        self.destroy()
-        exit()
 
     def check_fields(self, tab_data_type: int) -> bool:
-        """Check if required fields are not empty"""
+        """Check if required form fields are not empty.
+
+        Args:
+            tab_data_type: form's tab to check
+
+        Returns:
+            True if everything is OK
+        """
         # error counter
         # checking empty fields
         if tab_data_type == 0:
