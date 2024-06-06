@@ -14,13 +14,10 @@ from locale import getlocale
 from os import path
 from pathlib import Path
 from tkinter import IntVar, StringVar
-from typing import Callable, Optional, Union
+from typing import Callable, Optional
 
 # package
-from dicogis.constants import OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
-from dicogis.export.to_json import MetadatasetSerializerJson
-from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.read_dxf import ReadCadDxf
 from dicogis.georeaders.read_raster import ReadRasters
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
@@ -77,7 +74,7 @@ class ProcessingFiles:
 
     def __init__(
         self,
-        format_or_serializer: OutputFormats | MetadatasetSerializerBase,
+        serializer: MetadatasetSerializerBase,
         localized_strings: Optional[dict],
         # input lists of files to process
         li_cdao: Optional[Iterable],
@@ -115,8 +112,7 @@ class ProcessingFiles:
         # misc
         opt_quick_fail: bool = False,
     ) -> None:
-        # -- STORE PARAMETERS AS ATTRIBUTES --
-        self.serializer = self.serializer_from_output_format(format_or_serializer)
+        self.serializer = serializer
 
         # List of files
         self.li_dxf = li_dxf
@@ -173,26 +169,8 @@ class ProcessingFiles:
         self.progress_counter = progress_counter
         self.progress_callback_cmd = progress_callback_cmd
 
-    def serializer_from_output_format(
-        self, format_or_serializer: OutputFormats | MetadatasetSerializerBase
-    ) -> Union[MetadatasetSerializerJson, MetadatasetSerializerXlsx]:
-        if isinstance(format_or_serializer, MetadatasetSerializerBase):
-            return format_or_serializer
-
-        if (
-            isinstance(format_or_serializer, OutputFormats)
-            and format_or_serializer.value == "excel"
-        ):
-            return MetadatasetSerializerXlsx
-        elif (
-            isinstance(format_or_serializer, OutputFormats)
-            and format_or_serializer.value == "json"
-        ):
-            return MetadatasetSerializerJson
-
     def process_datasets_in_queue(self):
         """Process datasets in queue."""
-
         for geofile in self.li_files_to_process:
             if geofile.processed is True:
                 logger.warning(f"File has already been processed: {geofile.file_path}")
@@ -272,6 +250,15 @@ class ProcessingFiles:
         dataset_to_process: DatasetToProcess,
         metadataset_to_serialize: MetaDataset,
     ) -> tuple[DatasetToProcess, MetaDataset | None]:
+        """Serialize metadataset in a generic way.
+
+        Args:
+            dataset_to_process: dataset to process used to store status
+            metadataset_to_serialize: metadataset to serialize
+
+        Returns:
+            dataset to process, metadataset or None if something went wrong
+        """
         if self.opt_quick_fail:
             self.update_progress(
                 message_to_display="Exporting metadata of "
@@ -322,7 +309,7 @@ class ProcessingFiles:
             dataset_format: _description_
 
         Returns:
-            _description_
+            list of files to process
         """
         out_list: list = []
 
@@ -343,6 +330,11 @@ class ProcessingFiles:
         return out_list
 
     def count_files_to_process(self) -> int:
+        """Count number of files to process.
+
+        Returns:
+            total of files to process
+        """
         total_files: int = 0
         if self.opt_analyze_shapefiles and len(self.li_shapefiles):
             total_files += len(self.li_shapefiles)
