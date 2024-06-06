@@ -213,7 +213,7 @@ class ProcessingFiles:
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: OK",
+                message_to_display=f"Reading {dataset_to_process.file_path.name}: OK",
                 increment_counter=True,
             )
             dataset_to_process.processed = True
@@ -228,7 +228,7 @@ class ProcessingFiles:
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: OK",
+                message_to_display=f"Reading {dataset_to_process.file_path.name}: OK",
                 increment_counter=True,
             )
             dataset_to_process.processed = True
