@@ -16,7 +16,6 @@
 import logging
 import socket
 from os import environ as env
-from os import path
 from urllib.request import (
     ProxyHandler,
     build_opener,
@@ -39,59 +38,16 @@ logger = logging.getLogger(__name__)
 class CheckNorris:
     """Check Norris never fails, always tests."""
 
-    def __init__(self):
-        """Check Norris welcomes you."""
-        super().__init__()
-
-    # -- 1 method, 1 check ----------------------------------------------------
-
-    def check_gdal(self):
-        """Check if OSGeo libs work and if GDAL_DATA is well refrenced.
-
-        Returns:
-        -- 1: GDAL_DATA already exists as environment variable
-        -- 2: GDAL_DATA didn't exist as env variable then has been added
-        -- 3: GDAL_DATA didn't exist as env variable and could'nt be added
-        """
-        # GDAL install
-        try:
-            try:
-                from osgeo import gdal
-            except ImportError:
-                import gdal
-            logger.info(f"GDAL version: {gdal.__version__}")
-        except Exception as err:
-            logger.error(
-                "GDAL is not installed or not reachable."
-                " DicoGIS is going to close. Trace: {}".format(err)
-            )
-            return 1
-
-        # GDAL_DATA variable
-        if "GDAL_DATA" not in env.keys():
-            try:
-                gdal.SetConfigOption("GDAL_DATA", str(path.abspath(r"data/gdal")))
-                logger.info(
-                    "GDAL_DATA path not found in environment variable."
-                    " DicoGIS'll use its own: " + path.abspath(r"data/gdal")
-                )
-                return 2
-            except Exception as err:
-                logger.error(f"Oups! Something's wrong with GDAL_DATA path: {err}")
-                return 3
-        else:
-            logger.info(
-                "GDAL_DATA path found in environment variable: {}."
-                " DicoGIS'll use it.".format(env.get("GDAL_DATA"))
-            )
-            return 4
-        # end of method
-        return
-
-    def check_internet_connection(self, remote_server: str = "www.google.com"):
+    def check_internet_connection(self, remote_server: str = "www.google.com") -> bool:
         """Check if an internet connection is operational.
 
-        source: http://stackoverflow.com/a/20913928/2556577
+        Source: http://stackoverflow.com/a/20913928/2556577
+
+        Args:
+            remote_server: internet address to try. Defaults to "www.google.com".
+
+        Returns:
+            True if connection works
         """
         try:
             # see if we can resolve the host name -- tells us if there is
@@ -136,11 +92,3 @@ class CheckNorris:
             install_opener(opener)
             urlopen("http://www.google.com")
             return 3, os_proxies
-
-
-# ##############################################################################
-# ##### Stand alone program ########
-# ##################################
-if __name__ == "__main__":
-    """Standalone execution."""
-    pass
