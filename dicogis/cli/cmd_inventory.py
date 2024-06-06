@@ -18,8 +18,7 @@ from rich import print
 # project
 from dicogis.__about__ import __package_name__, __title__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
-from dicogis.export.to_json import MetadatasetSerializerJson
-from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
+from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
@@ -35,62 +34,9 @@ from dicogis.utils.texts import TextsManager
 state = {"verbose": False}
 logger = logging.getLogger(__name__)
 default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
-
 # ############################################################################
 # ########## Functions #############
 # ##################################
-
-
-def get_serializer_from_parameters(
-    output_format: str,
-    output_path: Path,
-    opt_raw_path: bool,
-    opt_prettify_size: bool,
-    localized_strings: dict | None = None,
-) -> MetadatasetSerializerJson | MetadatasetSerializerXlsx:
-    """Initiate the adequat serializer depending on parameters.
-
-    Args:
-        output_format: output format
-        output_path: output path
-        opt_raw_path: option to serialize dataset raw path without any sugar syntax
-        opt_prettify_size: option to prettify size in octets (typically: 1 ko instead
-            of 1024 octects)
-        localized_strings: localized texts. Defaults to None.
-
-    Returns:
-        _description_
-    """
-    if output_format == "excel":
-        # creating the Excel workbook
-        output_serializer = MetadatasetSerializerXlsx(
-            opt_raw_path=opt_raw_path,
-            opt_size_prettify=opt_prettify_size,
-            output_path=output_path,
-            localized_strings=localized_strings,
-        )
-    elif output_format == "json":
-        output_serializer = MetadatasetSerializerJson(
-            output_path=output_path,
-            localized_strings=localized_strings,
-            opt_size_prettify=opt_prettify_size,
-        )
-    elif output_format == "udata":
-        output_serializer = MetadatasetSerializerJson(
-            flavor="udata",
-            output_path=output_path,
-            localized_strings=localized_strings,
-            opt_size_prettify=opt_prettify_size,
-        )
-    else:
-        logger.error(
-            NotImplementedError(
-                f"Specified output format '{output_format}' is not available."
-            )
-        )
-        typer.Exit(1)
-
-    return output_serializer
 
 
 def determine_output_path(
@@ -311,8 +257,8 @@ def inventory(
             input_folder=input_folder,
         )
 
-        output_serializer = get_serializer_from_parameters(
-            output_format=output_format,
+        output_serializer = MetadatasetSerializerBase.get_serializer_from_parameters(
+            format_or_serializer=output_format,
             output_path=output_path,
             opt_prettify_size=opt_prettify_size,
             opt_raw_path=opt_raw_path,
@@ -371,7 +317,7 @@ def inventory(
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
-            format_or_serializer=output_serializer,
+            serializer=output_serializer,
             localized_strings=localized_strings,
             # list by tabs
             li_vectors=li_vectors,
@@ -435,8 +381,8 @@ def inventory(
             pg_services=pg_services,
         )
 
-        output_serializer = get_serializer_from_parameters(
-            output_format=output_format,
+        output_serializer = MetadatasetSerializerBase.get_serializer_from_parameters(
+            format_or_serializer=output_format,
             output_path=output_path,
             opt_prettify_size=opt_prettify_size,
             opt_raw_path=opt_raw_path,
