@@ -112,10 +112,7 @@ class DicoGIS(ThemedTk):
         self.resizable(width=False, height=False)
         self.focus_force()
 
-        # GDAL settings
-        checker.check_gdal()
-
-        # # Variables
+        # -- Variables --
         # settings
         self.num_folders = 0
         self.def_rep = ""  # default folder to search for
