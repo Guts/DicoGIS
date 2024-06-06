@@ -12,7 +12,6 @@ import logging
 from pathlib import Path
 
 # project
-from dicogis import export
 from dicogis.constants import OutputFormats
 from dicogis.utils.texts import TextsManager
 
@@ -71,10 +70,7 @@ class MetadatasetSerializerBase:
         opt_raw_path: bool = False,
         opt_prettify_size: bool = True,
         localized_strings: dict | None = None,
-    ) -> (
-        export.to_json.MetadatasetSerializerJson
-        | export.to_xlsx.MetadatasetSerializerXlsx
-    ):
+    ) -> MetadatasetSerializerBase:
         """Initiate the adequat serializer depending on parameters.
 
         Args:
