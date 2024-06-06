@@ -276,7 +276,10 @@ class GeoReaderBase:
             else:
                 srs_code = "srs_no_epsg"
 
+        # registry
         srs_registry = layer_spatial_ref.GetAuthorityName(None)
+        if not srs_registry and srs_code:
+            srs_registry = "EPSG"
 
         # srs type
         srs_type = self.get_srs_type(object_spatial_reference=layer_spatial_ref)
