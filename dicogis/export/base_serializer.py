@@ -88,7 +88,10 @@ class MetadatasetSerializerBase:
         Returns:
             serializer already initialized
         """
-        print("ho", type(format_or_serializer))
+        # import only now to avoid circular imports
+        from dicogis.export.to_json import MetadatasetSerializerJson
+        from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
+
         if isinstance(format_or_serializer, MetadatasetSerializerBase):
             return format_or_serializer
 
@@ -97,20 +100,20 @@ class MetadatasetSerializerBase:
 
         if format_or_serializer == OutputFormats.excel:
             # creating the Excel workbook
-            output_serializer = export.to_xlsx.MetadatasetSerializerXlsx(
+            output_serializer = MetadatasetSerializerXlsx(
                 localized_strings=localized_strings,
                 opt_raw_path=opt_raw_path,
                 opt_size_prettify=opt_prettify_size,
                 output_path=output_path,
             )
         elif format_or_serializer == OutputFormats.json:
-            output_serializer = export.to_json.MetadatasetSerializerJson(
+            output_serializer = MetadatasetSerializerJson(
                 localized_strings=localized_strings,
                 opt_size_prettify=opt_prettify_size,
                 output_path=output_path,
             )
         elif format_or_serializer == OutputFormats.udata:
-            output_serializer = export.to_json.MetadatasetSerializerJson(
+            output_serializer = MetadatasetSerializerJson(
                 flavor="udata",
                 localized_strings=localized_strings,
                 opt_size_prettify=opt_prettify_size,
