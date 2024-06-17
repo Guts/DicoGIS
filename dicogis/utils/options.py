@@ -17,6 +17,7 @@ import configparser
 import logging
 import platform
 from os import path
+from pathlib import Path
 
 # #############################################################################
 # ############ Classes #############
@@ -24,12 +25,11 @@ from os import path
 
 
 class OptionsManager:
-    def __init__(self, confile=r"..\..\options.ini"):
+    def __init__(self, confile: str = r"..\..\options.ini"):
         """
         Main window constructor
         Creates 1 frame and 2 labelled subframes
         """
-        super().__init__()
         self.confile = path.realpath(confile)
         # first use or not
         if not path.isfile(self.confile):
@@ -38,7 +38,6 @@ class OptionsManager:
         else:
             logging.info("Options.ini file found. ")
             self.first_use = 0
-            pass
 
         # using safe parser
         self.config = configparser.ConfigParser()
@@ -48,7 +47,9 @@ class OptionsManager:
         """load settings from last execution"""
         # basics
         parent.def_lang = self.config.get("basics", "def_codelang")
-        parent.def_rep = self.config.get("basics", "def_rep")
+        parent.tab_files.listing_initial_folder_path = Path(
+            self.config.get("basics", "def_rep")
+        )
         parent.nb.select(self.config.get("basics", "def_tab"))
         # filters
         parent.tab_files.opt_shp.set(self.config.get("filters", "opt_shp"))
@@ -79,9 +80,6 @@ class OptionsManager:
         # log
         logging.info("Last options loaded")
 
-        # End of function
-        return
-
     def save_settings(self, parent):
         """save last options in order to make the next excution more easy"""
 
@@ -92,8 +90,6 @@ class OptionsManager:
             self.config.add_section("filters")
             self.config.add_section("database")
             self.config.add_section("proxy")
-        else:
-            pass
 
         # config
         self.config.set("config", "DicoGIS_version", parent.package_about.__version__)
@@ -104,8 +100,30 @@ class OptionsManager:
         if parent.tab_files.target_path.get():
             self.config.set("basics", "def_rep", parent.tab_files.target_path.get())
         else:
-            self.config.set("basics", "def_rep", parent.def_rep)
+            self.config.set(
+                "basics", "def_rep", parent.tab_files.listing_initial_folder_path
+            )
         self.config.set("basics", "def_tab", str(parent.nb.index(parent.nb.select())))
+        self.config.set(
+            "basics",
+            "export_prettify_size",
+            str(parent.tab_options.opt_export_size_prettify),
+        )
+        self.config.set(
+            "basics",
+            "export_raw_path",
+            str(parent.tab_options.opt_export_raw_path),
+        )
+        self.config.set(
+            "basics",
+            "quick_fail",
+            str(parent.tab_options.opt_quick_fail),
+        )
+        self.config.set(
+            "basics",
+            "notification_sound",
+            str(parent.tab_options.opt_end_process_notification_sound),
+        )
 
         # filters
         self.config.set("filters", "opt_shp", str(parent.tab_files.opt_shp.get()))
@@ -136,22 +154,11 @@ class OptionsManager:
         self.config.set("proxy", "proxy_user", parent.tab_options.prox_user.get())
 
         # Writing the configuration file
-        with open(self.confile, "w") as configfile:
+        with open(file=self.confile, mode="w", encoding="UTF-8") as configfile:
             try:
                 self.config.write(configfile)
                 logging.info("Options saved.")
                 return True
-            except (UnicodeEncodeError, UnicodeDecodeError) as e:
-                logging.error(f"Options couldn't be saved because of: {e}")
+            except Exception as err:
+                logging.error(f"Options couldn't be saved because of: {err}")
                 return False
-
-        # End of function
-        return
-
-
-# ##############################################################################
-# ##### Stand alone program ########
-# ##################################
-if __name__ == "__main__":
-    """standalone execution"""
-    pass
