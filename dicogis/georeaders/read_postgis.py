@@ -99,7 +99,7 @@ class ReadPostGIS(GeoReaderBase):
 
         try:
             conn: gdal.Dataset = gdal.OpenEx(
-                self.db_connection.pg_connection_string,
+                self.db_connection.pg_connection_uri,
                 gdal.OF_READONLY | gdal.OF_VECTOR | gdal.OF_VERBOSE_ERROR,
                 open_options=gdal_open_options,
             )
