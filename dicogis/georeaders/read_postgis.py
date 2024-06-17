@@ -8,6 +8,7 @@
 
 # Standard library
 import logging
+from functools import lru_cache
 from typing import Optional
 
 # 3rd party libraries
@@ -113,6 +114,7 @@ class ReadPostGIS(GeoReaderBase):
             logger.error(f"Connection failed. Check settings. Trace: {err}")
             return None
 
+    @lru_cache
     def get_postgis_version(self) -> Optional[str]:
         """Returns the version of PostGIS extension.
 
@@ -131,6 +133,7 @@ class ReadPostGIS(GeoReaderBase):
             logger.error(f"Trying to retrieve PostGIS versions failed. Trace: {err}")
             return None
 
+    @lru_cache
     def get_schemas(self) -> set[str]:
         """Return unique set of schemas names accessible by the logged user.
 
@@ -175,8 +178,10 @@ class ReadPostGIS(GeoReaderBase):
             return metadataset
 
         # sgbd info
-        self.db_connection.sgbd_schemas = self.get_schemas()
-        self.db_connection.sgbd_version = self.get_postgis_version()
+        if not self.db_connection.sgbd_schemas:
+            self.db_connection.sgbd_schemas = self.get_schemas()
+        if not self.db_connection.sgbd_version:
+            self.db_connection.sgbd_version = self.get_postgis_version()
 
         # layer name
         metadataset.name = layer.GetName()
