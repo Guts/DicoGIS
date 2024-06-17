@@ -642,14 +642,16 @@ class DicoGIS(ThemedTk):
             layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
             self.status.set(f"Reading: {layer.GetName()}")
             metadataset = sgbd_reader.infos_dataset(layer)
-            logger.info(f"Table examined: {metadataset.name}")
+            logger.debug(f"Table examined: {metadataset.name}")
             self.serializer.serialize_metadaset(metadataset=metadataset)
-            logger.debug("Layer metadata stored into workbook: {metadataset.name}")
+            logger.debug(f"Layer metadata stored into workbook: {metadataset.name}")
             # increment the progress bar
             self.prog_layers["value"] = self.prog_layers["value"] + 1
             self.update()
 
         # saving dictionary
+        self.serializer.post_serializing()
+
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "
@@ -788,6 +790,7 @@ class DicoGIS(ThemedTk):
             password=self.tab_sgbd.password.get(),
             views_included=self.tab_sgbd.opt_pg_views.get(),
         )
+        sgbd_reader.get_connection()
 
         # check connection state
         if sgbd_reader.conn is None:
