@@ -18,13 +18,12 @@ import logging
 from os import getenv
 from tkinter import ACTIVE, DISABLED, BooleanVar, IntVar, StringVar, Tk
 from tkinter.ttk import Checkbutton, Entry, Frame, Label, Labelframe
-from typing import Callable
+from typing import Callable, Optional
 
 # ##############################################################################
 # ############ Globals ############
 # #################################
 
-# LOG
 logger = logging.getLogger(__name__)
 
 # ##############################################################################
@@ -33,37 +32,51 @@ logger = logging.getLogger(__name__)
 
 
 class TabSettings(Frame):
-    def __init__(self, parent, txt: dict, switcher: Callable = None):
-        """Instanciating the output workbook."""
+    """Tab form for end-user settings.
+
+    Args:
+        Frame: inherited ttk.Frame
+    """
+
+    def __init__(
+        self,
+        parent,
+        localized_strings: Optional[dict] = None,
+        switcher: Callable = None,
+    ):
+        """Initializes UI tab for end-user options.
+
+        Args:
+            parent: tkinter parent object
+            localized_strings: translated strings. Defaults to None.
+        """
         self.parent = parent
         Frame.__init__(self)
 
-        # subframes
-        self.FrOptNetwork = Labelframe(
-            self, name="lfr_settings_network", text=txt.get("Network", "Network")
-        )
+        # handle empty localized strings
+        if not localized_strings:
+            localized_strings = {}
 
-        self.FrOptExport = Labelframe(
-            self,
-            name="lfr_settings_export",
-            text=txt.get("Export", "Export"),
-        )
-
-        # options values
-        self.opt_proxy = IntVar(self)  # proxy option
-
-        # Options form widgets
+        # -- Subframes --
+        # Proxy subframe with a check button
+        self.opt_proxy = BooleanVar(self, False)  # proxy optio
         caz_prox = Checkbutton(
-            self.FrOptNetwork,
+            self,
             text="Proxy",
             variable=self.opt_proxy,
             command=lambda: switcher(self.opt_proxy, self.FrOptProxy),
         )
         self.FrOptProxy = Labelframe(
-            self.FrOptNetwork,
+            self,
             name="lfr_settings_network_proxy",
-            # text=txt.get("Proxy", "Proxy"),
+            text=localized_strings.get("Proxy", "Proxy settings"),
             labelwidget=caz_prox,
+        )
+
+        self.FrOptExport = Labelframe(
+            self,
+            name="lfr_settings_export",
+            text=localized_strings.get("Export", "Export"),
         )
 
         # -- NETWORK OPTIONS -----------------------------------------------------------
@@ -76,44 +89,38 @@ class TabSettings(Frame):
         self.prox_pswd = StringVar(self.FrOptProxy, "****")
 
         # widgets
-        self.prox_ent_H = Entry(self.FrOptProxy, textvariable=self.prox_server)
-        self.prox_ent_P = Entry(self.FrOptProxy, textvariable=self.prox_port)
-        self.prox_ent_M = Entry(self.FrOptProxy, textvariable=self.prox_pswd, show="*")
+        self.prox_ent_host = Entry(self.FrOptProxy, textvariable=self.prox_server)
+        self.prox_ent_port = Entry(self.FrOptProxy, textvariable=self.prox_port)
+        self.prox_ent_user = Entry(self.FrOptProxy, textvariable=self.prox_user)
+        self.prox_ent_password = Entry(
+            self.FrOptProxy, textvariable=self.prox_pswd, show="*"
+        )
 
-        self.prox_lb_H = Label(self.FrOptProxy, text=txt.get("gui_prox_server", "Host"))
-        self.prox_lb_P = Label(self.FrOptProxy, text=txt.get("gui_port", "Port"))
+        self.prox_lb_host = Label(
+            self.FrOptProxy, text=localized_strings.get("gui_prox_server", "Host:")
+        )
+        self.prox_lb_port = Label(
+            self.FrOptProxy, text=localized_strings.get("gui_port", "Port:")
+        )
         caz_ntlm = Checkbutton(self.FrOptProxy, text="NTLM", variable=self.opt_ntlm)
-        self.prox_lb_M = Label(self.FrOptProxy, text=txt.get("gui_mdp", "Password"))
+        self.prox_lb_user = Label(
+            self.FrOptProxy, text=localized_strings.get("gui_user", "User name:")
+        )
+
+        self.prox_lb_password = Label(
+            self.FrOptProxy, text=localized_strings.get("gui_mdp", "User password:")
+        )
 
         # proxy widgets position
-        self.prox_lb_H.grid(row=1, column=0, sticky="NSEW", padx=2, pady=2)
-        self.prox_ent_H.grid(
-            row=1, column=1, columnspan=2, sticky="NSEW", padx=2, pady=2
-        )
-        self.prox_lb_P.grid(row=1, column=2, sticky="NSEW", padx=2, pady=2)
-        self.prox_ent_P.grid(
-            row=1, column=3, columnspan=2, sticky="NSEW", padx=2, pady=2
-        )
-        caz_ntlm.grid(row=2, column=0, sticky="NSEW", padx=2, pady=2)
-        self.prox_lb_M.grid(row=2, column=1, sticky="NSEW", padx=2, pady=2)
-        self.prox_ent_M.grid(
-            row=2, column=2, columnspan=2, sticky="NSEW", padx=2, pady=2
-        )
-
-        self.FrOptProxy.grid(
-            row=0,
-            column=0,
-            sticky="NSWE",
-            padx=2,
-            pady=2,
-        )
-        self.FrOptNetwork.grid(
-            row=0,
-            column=0,
-            sticky="NSWE",
-            padx=2,
-            pady=2,
-        )
+        self.prox_lb_host.grid(row=1, column=0, sticky="NSW", padx=2, pady=2)
+        self.prox_ent_host.grid(row=1, column=1, sticky="NSE", padx=2, pady=2)
+        self.prox_lb_port.grid(row=2, column=0, sticky="NSEW", padx=2, pady=2)
+        self.prox_ent_port.grid(row=2, column=1, sticky="NSEW", padx=2, pady=2)
+        self.prox_lb_user.grid(row=3, column=0, sticky="NSEW", padx=2, pady=2)
+        self.prox_ent_user.grid(row=3, column=1, sticky="NSEW", padx=2, pady=2)
+        self.prox_lb_password.grid(row=4, column=0, sticky="NSEW", padx=2, pady=2)
+        self.prox_ent_password.grid(row=4, column=1, sticky="NSEW", padx=2, pady=2)
+        caz_ntlm.grid(row=3, column=0, sticky="NSEW", padx=2, pady=2)
 
         # -- GENERAL OPTIONS -----------------------------------------------------------
         self.opt_export_size_prettify = BooleanVar(
@@ -121,7 +128,9 @@ class TabSettings(Frame):
         )
         caz_opt_export_size_prettify = Checkbutton(
             self.FrOptExport,
-            text="Export: prettify files size",
+            text=localized_strings.get(
+                "gui_options_export_size_prettify", "Export: prettify files size"
+            ),
             variable=self.opt_export_size_prettify,
         )
         caz_opt_export_size_prettify.grid(
@@ -133,7 +142,9 @@ class TabSettings(Frame):
         )
         caz_opt_export_raw_path = Checkbutton(
             self.FrOptExport,
-            text="Export: raw path",
+            text=localized_strings.get(
+                "gui_options_export_raw_path", "Export: raw path"
+            ),
             variable=self.opt_export_raw_path,
         )
         caz_opt_export_raw_path.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
@@ -143,7 +154,7 @@ class TabSettings(Frame):
         )
         caz_opt_quick_fail = Checkbutton(
             self.FrOptExport,
-            text="Quick fail",
+            text=localized_strings.get("gui_options_quick_fail", "Quick fail"),
             variable=self.opt_quick_fail,
         )
         caz_opt_quick_fail.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
@@ -153,7 +164,10 @@ class TabSettings(Frame):
         )
         caz_opt_end_process_notification_sound = Checkbutton(
             self.FrOptExport,
-            text="Play a notification sound when processing has finished.",
+            text=localized_strings.get(
+                "gui_options_notification_sound",
+                "Play a notification sound when processing has finished.",
+            ),
             variable=self.opt_end_process_notification_sound,
         )
         caz_opt_end_process_notification_sound.grid(
@@ -161,8 +175,10 @@ class TabSettings(Frame):
         )
 
         # positionning frames
+        self.FrOptProxy.grid(sticky="NSWE", padx=2, pady=2)
+        self.FrOptExport.grid(sticky="NSWE", padx=2, pady=2)
 
-        self.FrOptExport.grid(row=1, column=0, sticky="NSWE", padx=2, pady=2)
+        switcher(self.opt_proxy, self.FrOptProxy)
 
 
 # #############################################################################
@@ -172,8 +188,8 @@ class TabSettings(Frame):
 if __name__ == "__main__":
     """To test"""
 
-    #
-    def ui_switch(cb_value, parent):
+    # faking switch method
+    def ui_switch(cb_value: bool, parent):
         """Change state of  all children widgets within a parent class.
 
         cb_value=boolean
@@ -185,8 +201,6 @@ if __name__ == "__main__":
         else:
             for child in parent.winfo_children():
                 child.configure(state=DISABLED)
-        # end of function
-        return
 
     # try it
     root = Tk()
