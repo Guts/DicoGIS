@@ -14,26 +14,28 @@
 
 
 # Standard library
-import gettext
 import logging
 import threading
+from datetime import date
 from os import path
 from pathlib import Path
-from time import strftime
 
 # GUI
 from tkinter import END, IntVar, StringVar, Tk
 from tkinter.filedialog import askdirectory
 from tkinter.messagebox import showinfo
 from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Labelframe
+from typing import Optional
+
+# project
+from dicogis.constants import FormatsRaster
+from dicogis.utils.check_path import check_path
 
 # ##############################################################################
 # ############ Globals ############
 # #################################
 
-_ = gettext.gettext
-today = strftime("%Y-%m-%d")
-logger = logging.getLogger(__name__)  # LOG
+logger = logging.getLogger(__name__)
 
 # ##############################################################################
 # ########## Classes ###############
@@ -41,57 +43,58 @@ logger = logging.getLogger(__name__)  # LOG
 
 
 class TabFiles(Frame):
-    def __init__(self, parent, txt: dict = {}):
-        """Instanciating the output workbook."""
-        self.p = parent
-        self.txt = txt
+    """Tab for listing and picking geodata files formats.
+
+    Args:
+        Frame: inherited ttk.Frame
+    """
+
+    def __init__(
+        self,
+        parent,
+        listing_initial_folder: Path | None = None,
+        localized_strings: dict | None = None,
+    ):
+        """Initializes UI tab for files browsing and filtering.
+
+        Args:
+            parent: tkinter parent object
+            listing_initial_folder: initial folder fro ask directory dialog. Defaults
+                to Path().home().
+            localized_strings: translated strings. Defaults to None.
+        """
+        self.parent = parent
         Frame.__init__(self)
+
+        # localized strings
+        self.localized_strings = localized_strings
+        if not self.localized_strings:
+            self.localized_strings = {}
+
+        # browse default path
+        self.listing_initial_folder_path = listing_initial_folder
+        if not self.listing_initial_folder_path:
+            self.listing_initial_folder_path = Path().home()
 
         # -- VARIABLES -------------------------------------------------------
         self.target_path = StringVar()
-        # formats / type: vectors
-        self.li_vectors_formats = (
-            ".shp",
-            ".tab",
-            ".kml",
-            ".gml",
-            ".geojson",
-        )  # vectors handled
-        self.li_shp = []  # list for shapefiles path
-        self.li_tab = []  # list for MapInfo tables path
-        self.li_kml = []  # list for KML path
-        self.li_gml = []  # list for GML path
-        self.li_geoj = []  # list for GeoJSON paths
-        self.li_gxt = []  # list for GXT paths
-        self.li_vectors = []  # list for all vectors
-        # formats / type: rasters
-        self.li_raster = []  # list for rasters paths
-        self.li_raster_formats = (".ecw", ".tif", ".jp2")  # raster handled
-        # formats / type: file databases
-        self.li_fdb = []  # list for all files databases
-        self.li_egdb = []  # list for Esri File Geodatabases
-        self.li_spadb = []  # list for Spatialite Geodatabases
-        # formats / type: CAO/DAO
-        self.li_cdao = []  # list for all CAO/DAO files
-        self.li_dxf = []  # list for AutoCAD DXF paths
-        self.li_dwg = []  # list for AutoCAD DWG paths
-        self.li_dgn = []  # list for MicroStation DGN paths
-        # formats / type: maps documents
-        self.li_mapdocs = []  # list for all map & documents
-        self.li_qgs = []  # list for QGS path
 
         # -- Source path -----------------------------------------------------
-        self.FrPath = Labelframe(self, name="files", text=txt.get("gui_fr1", "Path"))
+        self.FrPath = Labelframe(
+            self, name="files", text=self.localized_strings.get("gui_fr1", "Path")
+        )
 
         # target folder
-        self.lb_target = Label(self.FrPath, text=txt.get("gui_path"))
+        self.lb_target = Label(
+            self.FrPath, text=self.localized_strings.get("gui_path", "Folder path: ")
+        )
         self.ent_target = Entry(
             master=self.FrPath, width=35, textvariable=self.target_path
         )
         self.btn_browse = Button(
             self.FrPath,
-            text=txt.get("gui_choix", "Browse"),
-            command=lambda: self.get_target_path(r"."),
+            text=self.localized_strings.get("gui_choix", "Browse"),
+            command=lambda: self.on_browse_get_initial_listing_folder_path(),
             takefocus=True,
         )
         self.btn_browse.focus_force()
@@ -107,7 +110,7 @@ class TabFiles(Frame):
 
         # -- Format filters --------------------------------------------------
         self.FrFilters = Labelframe(
-            self, name="filters", text=txt.get("gui_fr3", "Filters")
+            self, name="filters", text=self.localized_strings.get("gui_fr3", "Filters")
         )
         # formats options
         self.opt_shp = IntVar(self.FrFilters)  # able/disable shapefiles
@@ -136,7 +139,9 @@ class TabFiles(Frame):
         )
         caz_rast = Checkbutton(
             self.FrFilters,
-            text="rasters ({})".format(", ".join(self.li_raster_formats)),
+            text="rasters ({})".format(
+                ", ".join([raster_format.value for raster_format in FormatsRaster])
+            ),
             variable=self.opt_rast,
         )
         caz_dxf = Checkbutton(self.FrFilters, text="DXF", variable=self.opt_dxf)
@@ -156,13 +161,31 @@ class TabFiles(Frame):
         self.FrPath.grid(row=3, column=1, padx=2, pady=2, sticky="NSWE")
         self.FrFilters.grid(row=4, column=1, padx=2, pady=2, sticky="NSWE")
 
-    def get_target_path(self, def_rep) -> str:
-        """Browse and insert the path of target folder."""
+    def on_browse_get_initial_listing_folder_path(self) -> Optional[Path]:
+        """Browse and insert the path of target folder.
+
+        Returns:
+            selected folder path or None if something went wrong
+        """
+        try:
+            check_path(
+                input_path=self.listing_initial_folder_path,
+                must_be_a_folder=True,
+                must_be_a_file=False,
+                must_exists=True,
+            )
+        except Exception as err:
+            logger.error(
+                f"Initial listing folder ({self.listing_initial_folder_path}) is not a "
+                f"valid existing folder. Fallback to user's home. Trace: {err}"
+            )
+            self.listing_initial_folder_path = Path().home()
+
         foldername = askdirectory(
-            parent=self.p,
-            initialdir=def_rep,
+            parent=self.parent,
+            initialdir=self.listing_initial_folder_path,
             mustexist=True,
-            title=_("Pick DicoGIS start folder"),
+            title=self.localized_strings.get("nofolder", "Pick DicoGIS start folder"),
         )
 
         # check if a folder has been choosen
@@ -173,27 +196,35 @@ class TabFiles(Frame):
             except Exception as err:
                 logger.warning(err)
                 showinfo(
-                    title=self.txt.get("nofolder"), message=self.txt.get("nofolder")
+                    title=self.localized_strings.get("nofolder", "No folder selected"),
+                    message=self.localized_strings.get(
+                        "nofolder", "A folder is required."
+                    ),
                 )
-                return False
+                return None
         else:
-            showinfo(title=self.txt.get("nofolder"), message=self.txt.get("nofolder"))
-            return False
+            showinfo(
+                title=self.localized_strings.get("nofolder", "No folder selected"),
+                message=self.localized_strings.get("nofolder", "A folder is required."),
+            )
+            return None
 
         # set the default output file
-        self.p.master.ent_outxl_filename.delete(0, END)
-        self.p.master.ent_outxl_filename.insert(
+        self.parent.master.ent_outxl_filename.delete(0, END)
+        self.parent.master.ent_outxl_filename.insert(
             0,
-            f"DicoGIS_{path.split(self.target_path.get())[1]}_{today}.xlsx",
+            f"DicoGIS_{path.split(self.target_path.get())[1]}_{date.today()}.xlsx",
         )
 
         # count geofiles in a separated thread
-        proc = threading.Thread(target=self.p.master.ligeofiles, args=(foldername,))
+        proc = threading.Thread(
+            target=self.parent.master.ligeofiles, args=(foldername,)
+        )
         proc.daemon = True
         proc.start()
 
         # end of function
-        return foldername
+        return Path(foldername)
 
 
 # #############################################################################
@@ -202,15 +233,8 @@ class TabFiles(Frame):
 
 if __name__ == "__main__":
     """To test"""
-
-    #
-    def browse():
-        print("Launch files browser")
-        logger.info("Launch files browser")
-
-    #
     root = Tk()
     target_path = StringVar(root)
-    frame = TabFiles(root, path_browser=browse, path_var=target_path)
+    frame = TabFiles(root)
     frame.pack()
     root.mainloop()
