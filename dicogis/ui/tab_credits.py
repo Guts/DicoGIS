@@ -3,7 +3,7 @@
 
 """
     Name:         TabCredits
-    Purpose:      Tab containing credits and licencse informations in DicoGIS Notebook.
+    Purpose:      Tab containing credits and license informations in DicoGIS Notebook.
 
     Author:       Julien Moura (@geojulien)
 """
@@ -15,14 +15,16 @@
 # Standard library
 import logging
 import platform
-from tkinter import ACTIVE, DISABLED, Tk
+from tkinter import ACTIVE, DISABLED, Tk, TkVersion
 from tkinter.ttk import Frame, Label
 
 # 3rd party
 from lxml import __version__ as lxml_version
 from numpy import __version__ as numpy_version
 from openpyxl import __version__ as openpyxl_version
-from osgeo import __version__ as gdal_version
+
+# project
+from dicogis.utils.environment import get_gdal_version, get_proj_version
 
 # ##############################################################################
 # ############ Globals ############
@@ -37,8 +39,18 @@ logger = logging.getLogger(__name__)
 
 
 class TabCredits(Frame):
-    def __init__(self, parent, txt={}, switcher=None):
-        """Instanciating the output workbook."""
+    """Tab displaying project credits. Displayed during data processing.
+
+    Args:
+        Frame: inherited ttk.Frame
+    """
+
+    def __init__(self, parent):
+        """UI tab for databases initialization.
+
+        Args:
+            parent: tkinter parent object
+        """
         self.parent = parent
         Frame.__init__(self)
 
@@ -50,7 +62,11 @@ class TabCredits(Frame):
         # -- Widgets definition --------------------------------------------------------
         # GDAL
         self.cred_lb_gdal_name = Label(self.FrCreditsVersions, text="GDAL")
-        self.cred_lb_gdal_value = Label(self.FrCreditsVersions, text=gdal_version)
+        self.cred_lb_gdal_value = Label(self.FrCreditsVersions, text=get_gdal_version())
+
+        # PROJ
+        self.cred_lb_proj_name = Label(self.FrCreditsVersions, text="PROJ")
+        self.cred_lb_proj_value = Label(self.FrCreditsVersions, text=get_proj_version())
 
         # LXML
         self.cred_lb_lxml_name = Label(self.FrCreditsVersions, text="LXML")
@@ -66,6 +82,10 @@ class TabCredits(Frame):
             self.FrCreditsVersions, text=openpyxl_version
         )
 
+        # Tkinter
+        self.cred_lb_tkinter_name = Label(self.FrCreditsVersions, text="Tkinter (Tk)")
+        self.cred_lb_tkinter_value = Label(self.FrCreditsVersions, text=TkVersion)
+
         # Python
         self.cred_lb_python_name = Label(self.FrCreditsVersions, text="Python")
         self.cred_lb_python_value = Label(
@@ -75,14 +95,18 @@ class TabCredits(Frame):
         # -- Widgets placement ---------------------------------------------------------
         self.cred_lb_gdal_name.grid(row=0, column=0, sticky="WE", padx=2, pady=2)
         self.cred_lb_gdal_value.grid(row=0, column=1, sticky="WE", padx=2, pady=2)
-        self.cred_lb_lxml_name.grid(row=1, column=0, sticky="WE", padx=2, pady=2)
-        self.cred_lb_lxml_value.grid(row=1, column=1, sticky="WE", padx=2, pady=2)
-        self.cred_lb_numpy_name.grid(row=2, column=0, sticky="WE", padx=2, pady=2)
-        self.cred_lb_numpy_value.grid(row=2, column=1, sticky="WE", padx=2, pady=2)
-        self.cred_lb_openpyxl_name.grid(row=3, column=0, sticky="WE", padx=2, pady=2)
-        self.cred_lb_openpyxl_value.grid(row=3, column=1, sticky="WE", padx=2, pady=2)
-        self.cred_lb_python_name.grid(row=4, column=0, sticky="WE", padx=3, pady=2)
-        self.cred_lb_python_value.grid(row=4, column=1, sticky="WE", padx=3, pady=2)
+        self.cred_lb_proj_name.grid(column=0, sticky="WE", padx=3, pady=2)
+        self.cred_lb_proj_value.grid(row=1, column=1, sticky="WE", padx=3, pady=2)
+        self.cred_lb_lxml_name.grid(column=0, sticky="WE", padx=2, pady=2)
+        self.cred_lb_lxml_value.grid(row=2, column=1, sticky="WE", padx=2, pady=2)
+        self.cred_lb_numpy_name.grid(column=0, sticky="WE", padx=2, pady=2)
+        self.cred_lb_numpy_value.grid(row=3, column=1, sticky="WE", padx=2, pady=2)
+        self.cred_lb_openpyxl_name.grid(column=0, sticky="WE", padx=2, pady=2)
+        self.cred_lb_openpyxl_value.grid(row=4, column=1, sticky="WE", padx=2, pady=2)
+        self.cred_lb_tkinter_name.grid(column=0, sticky="WE", padx=3, pady=2)
+        self.cred_lb_tkinter_value.grid(row=5, column=1, sticky="WE", padx=3, pady=2)
+        self.cred_lb_python_name.grid(column=0, sticky="WE", padx=3, pady=2)
+        self.cred_lb_python_value.grid(row=6, column=1, sticky="WE", padx=3, pady=2)
 
 
 # #############################################################################
@@ -104,11 +128,9 @@ if __name__ == "__main__":
         else:
             for child in parent.winfo_children():
                 child.configure(state=DISABLED)
-        # end of function
-        return
 
     # try it
     root = Tk()
-    frame = TabCredits(root, switcher=ui_switch)
+    frame = TabCredits(parent=root)
     frame.pack()
     root.mainloop()
