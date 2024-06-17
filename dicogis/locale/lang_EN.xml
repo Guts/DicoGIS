@@ -18,7 +18,7 @@
     <gui_tab5> Settings </gui_tab5>
     <gui_tab6> Credits </gui_tab6>
     <gui_fr1> Folders structure target </gui_fr1>
-    <gui_fr2> Database target </gui_fr2>
+    <gui_fr2> Database connection settings </gui_fr2>
     <gui_fr3> Formats </gui_fr3>
     <gui_fr4> Output file </gui_fr4>
     <gui_path>Folder path: </gui_path>
