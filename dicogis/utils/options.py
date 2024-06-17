@@ -66,9 +66,9 @@ class OptionsManager:
         # database settings
         parent.tab_sgbd.host.set(self.config.get("database", "host"))
         parent.tab_sgbd.port.set(self.config.get("database", "port"))
-        parent.tab_sgbd.dbnb.set(self.config.get("database", "db_name"))
+        parent.tab_sgbd.db_name.set(self.config.get("database", "db_name"))
         parent.tab_sgbd.user.set(self.config.get("database", "user"))
-        parent.tab_sgbd.opt_pgvw.set(self.config.get("database", "opt_views"))
+        parent.tab_sgbd.opt_pg_views.set(self.config.get("database", "opt_views"))
 
         # proxy settings
         parent.tab_options.opt_proxy.set(self.config.get("proxy", "proxy_needed"))
@@ -101,7 +101,9 @@ class OptionsManager:
             self.config.set("basics", "def_rep", parent.tab_files.target_path.get())
         else:
             self.config.set(
-                "basics", "def_rep", parent.tab_files.listing_initial_folder_path
+                "basics",
+                "def_rep",
+                str(parent.tab_files.listing_initial_folder_path.resolve()),
             )
         self.config.set("basics", "def_tab", str(parent.nb.index(parent.nb.select())))
         self.config.set(
@@ -140,9 +142,11 @@ class OptionsManager:
         # database settings
         self.config.set("database", "host", parent.tab_sgbd.host.get())
         self.config.set("database", "port", str(parent.tab_sgbd.port.get()))
-        self.config.set("database", "db_name", parent.tab_sgbd.dbnb.get())
+        self.config.set("database", "db_name", parent.tab_sgbd.db_name.get())
         self.config.set("database", "user", parent.tab_sgbd.user.get())
-        self.config.set("database", "opt_views", str(parent.tab_sgbd.opt_pgvw.get()))
+        self.config.set(
+            "database", "opt_views", str(parent.tab_sgbd.opt_pg_views.get())
+        )
 
         # proxy settings
         self.config.set(
@@ -157,7 +161,7 @@ class OptionsManager:
         with open(file=self.confile, mode="w", encoding="UTF-8") as configfile:
             try:
                 self.config.write(configfile)
-                logging.info("Options saved.")
+                logging.info(f"Options saved to {self.confile}")
                 return True
             except Exception as err:
                 logging.error(f"Options couldn't be saved because of: {err}")

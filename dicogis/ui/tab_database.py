@@ -12,9 +12,9 @@
 # ########## Libraries #############
 # ##################################
 
-import logging
 
 # Standard library
+import logging
 from tkinter import IntVar, StringVar, Tk
 from tkinter.ttk import Checkbutton, Entry, Frame, Label, Labelframe
 
@@ -31,53 +31,76 @@ logger = logging.getLogger(__name__)
 
 
 class TabSGBD(Frame):
-    def __init__(self, parent, txt={}):
-        """Instanciating the output workbook."""
+    """Tab form for server database connections.
+
+    Args:
+        Frame: inherited ttk.Frame
+    """
+
+    def __init__(self, parent, localized_strings: dict | None = None):
+        """UI tab for databases initialization.
+
+        Args:
+            parent: tkinter parent object
+            localized_strings: translated strings. Defaults to None.
+        """
         self.parent = parent
         Frame.__init__(self)
 
+        # handle empty localized strings
+        if not localized_strings:
+            localized_strings = {}
+
         # subframe
-        self.FrDb = Labelframe(self, name="database", text=txt.get("gui_fr2", "SGBD"))
+        self.FrDb = Labelframe(
+            self, name="database", text=localized_strings.get("gui_fr2", "PostGIS")
+        )
 
         # DB variables
-        self.opt_pgvw = IntVar(self.FrDb)  # able/disable PostGIS views
+        self.opt_pg_views = IntVar(self.FrDb)  # able/disable PostGIS views
         self.host = StringVar(self.FrDb, "localhost")
         self.port = IntVar(self.FrDb, 5432)
-        self.dbnb = StringVar(self.FrDb)
+        self.db_name = StringVar(self.FrDb)
         self.user = StringVar(self.FrDb, "postgres")
-        self.pswd = StringVar(self.FrDb)
+        self.password = StringVar(self.FrDb)
 
         # Form widgets
-        self.ent_H = Entry(self.FrDb, textvariable=self.host)
-        self.ent_P = Entry(self.FrDb, textvariable=self.port, width=5)
-        self.ent_D = Entry(self.FrDb, textvariable=self.dbnb)
-        self.ent_U = Entry(self.FrDb, textvariable=self.user)
-        self.ent_M = Entry(self.FrDb, textvariable=self.pswd, show="*")
+        self.ent_host = Entry(self.FrDb, textvariable=self.host)
+        self.ent_port = Entry(self.FrDb, textvariable=self.port, width=5)
+        self.ent_db_name = Entry(self.FrDb, textvariable=self.db_name)
+        self.ent_user = Entry(self.FrDb, textvariable=self.user)
+        self.ent_password = Entry(self.FrDb, textvariable=self.password, show="*")
 
-        caz_pgvw = Checkbutton(
+        caz_pg_views = Checkbutton(
             self.FrDb,
-            text=txt.get("gui_views", "Views enabled"),
-            variable=self.opt_pgvw,
+            text=localized_strings.get("gui_views", "Views enabled"),
+            variable=self.opt_pg_views,
         )
 
         # Label widgets
-        self.lb_H = Label(self.FrDb, text=txt.get("gui_host", "Host"))
-        self.lb_P = Label(self.FrDb, text=txt.get("gui_port", "Port"))
-        self.lb_D = Label(self.FrDb, text=txt.get("gui_db", "Database"))
-        self.lb_U = Label(self.FrDb, text=txt.get("gui_user", "User"))
-        self.lb_M = Label(self.FrDb, text=txt.get("gui_mdp", "Password"))
+        self.lb_host = Label(self.FrDb, text=localized_strings.get("gui_host", "Host:"))
+        self.lb_port = Label(self.FrDb, text=localized_strings.get("gui_port", "Port:"))
+        self.lb_db_name = Label(
+            self.FrDb, text=localized_strings.get("gui_db", "Database:")
+        )
+        self.lb_user = Label(
+            self.FrDb, text=localized_strings.get("gui_user", "Username:")
+        )
+        self.lb_password = Label(
+            self.FrDb, text=localized_strings.get("gui_mdp", "Password:")
+        )
         # widgets placement
-        self.ent_H.grid(row=1, column=1, columnspan=2, sticky="NSEW", padx=2, pady=2)
-        self.ent_P.grid(row=1, column=3, columnspan=1, sticky="NSE", padx=2, pady=2)
-        self.ent_D.grid(row=2, column=1, columnspan=1, sticky="NSEW", padx=2, pady=2)
-        self.ent_U.grid(row=2, column=3, columnspan=1, sticky="NSEW", padx=2, pady=2)
-        self.ent_M.grid(row=3, column=1, columnspan=3, sticky="NSEW", padx=2, pady=2)
-        self.lb_H.grid(row=1, column=0, sticky="NSEW", padx=2, pady=2)
-        self.lb_P.grid(row=1, column=3, sticky="NSW", padx=2, pady=2)
-        self.lb_D.grid(row=2, column=0, sticky="NSW", padx=2, pady=2)
-        self.lb_U.grid(row=2, column=2, sticky="NSW", padx=2, pady=2)
-        self.lb_M.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
-        caz_pgvw.grid(row=4, column=0, sticky="NSWE", padx=2, pady=2)
+        self.lb_host.grid(row=0, column=0, sticky="NSWE", padx=2, pady=2)
+        self.ent_host.grid(row=0, column=1, sticky="NSWE", padx=2, pady=2)
+        self.lb_port.grid(row=1, column=0, sticky="NSWE", padx=2, pady=2)
+        self.ent_port.grid(row=1, column=1, sticky="NSWE", padx=2, pady=2)
+        self.lb_db_name.grid(row=2, column=0, sticky="NSWE", padx=2, pady=2)
+        self.ent_db_name.grid(row=2, column=1, sticky="NSWE", padx=2, pady=2)
+        self.lb_user.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
+        self.ent_user.grid(row=3, column=1, sticky="NSWE", padx=2, pady=2)
+        self.lb_password.grid(row=4, column=0, sticky="NSWE", padx=2, pady=2)
+        self.ent_password.grid(row=4, column=1, sticky="NSWE", padx=2, pady=2)
+        caz_pg_views.grid(row=5, column=0, sticky="NSWE", padx=2, pady=2)
 
         # frame position
         self.FrDb.grid(row=0, column=0, sticky="NSWE", padx=2, pady=2)

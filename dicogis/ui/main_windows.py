@@ -88,7 +88,7 @@ class DicoGIS(ThemedTk):
         """Main window constructor.
 
         Args:
-            theme: _description_. Defaults to "radiance".
+            theme: Tkinter theme to use. Defaults to "radiance".
         """
         # store vars as attr
         self.txt_manager = TextsManager()
@@ -117,7 +117,6 @@ class DicoGIS(ThemedTk):
         # -- Variables --
         # settings
         self.num_folders = 0
-        self.def_rep = ""  # default folder to search for
         self.def_lang = "EN"  # default language to start
         self.localized_strings = {}  # texts dictionary
 
@@ -181,9 +180,7 @@ class DicoGIS(ThemedTk):
         self.tab_options = TabSettings(
             self.nb, self.localized_strings, utils_global.ui_switch
         )  # tab_id = 2
-        self.tab_credits = TabCredits(
-            self.nb, self.localized_strings, utils_global.ui_switch
-        )  # tab_id = 3
+        self.tab_credits = TabCredits(self.nb)  # tab_id = 3
 
         # fillfulling text
         self.localized_strings = self.txt_manager.load_texts(
@@ -324,18 +321,29 @@ class DicoGIS(ThemedTk):
         # sgbd tab
         self.nb.tab(1, text=self.localized_strings.get("gui_tab2"))
         self.tab_sgbd.FrDb.config(text=self.localized_strings.get("gui_fr2"))
-        self.tab_sgbd.lb_H.config(text=self.localized_strings.get("gui_host"))
-        self.tab_sgbd.lb_P.config(text=self.localized_strings.get("gui_port"))
-        self.tab_sgbd.lb_D.config(text=self.localized_strings.get("gui_db"))
-        self.tab_sgbd.lb_U.config(text=self.localized_strings.get("gui_user"))
-        self.tab_sgbd.lb_M.config(text=self.localized_strings.get("gui_mdp"))
+        self.tab_sgbd.lb_host.config(text=self.localized_strings.get("gui_host"))
+        self.tab_sgbd.lb_port.config(text=self.localized_strings.get("gui_port"))
+        self.tab_sgbd.lb_db_name.config(text=self.localized_strings.get("gui_db"))
+        self.tab_sgbd.lb_user.config(text=self.localized_strings.get("gui_user"))
+        self.tab_sgbd.lb_password.config(text=self.localized_strings.get("gui_mdp"))
 
         # options
         self.nb.tab(2, text=self.localized_strings.get("gui_tab5"))
-        self.tab_options.prox_lb_H.config(text=self.localized_strings.get("gui_host"))
-        self.tab_options.prox_lb_P.config(text=self.localized_strings.get("gui_port"))
-        self.tab_options.prox_lb_M.config(text=self.localized_strings.get("gui_mdp"))
-        self.tab_options.prox_lb_H.config(text=self.localized_strings.get("gui_host"))
+        self.tab_options.prox_lb_host.config(
+            text=self.localized_strings.get("gui_host")
+        )
+        self.tab_options.prox_lb_port.config(
+            text=self.localized_strings.get("gui_port")
+        )
+        self.tab_options.prox_lb_user.config(
+            text=self.localized_strings.get("gui_user")
+        )
+        self.tab_options.prox_lb_password.config(
+            text=self.localized_strings.get("gui_mdp")
+        )
+        self.tab_options.prox_lb_host.config(
+            text=self.localized_strings.get("gui_host")
+        )
 
         # credits
         self.nb.tab(3, text=self.localized_strings.get("gui_tab6"))
@@ -687,28 +695,28 @@ class DicoGIS(ThemedTk):
                 or self.tab_sgbd.host.get()
                 == self.localized_strings.get("err_pg_empty_field")
             ):
-                self.tab_sgbd.ent_H.configure(foreground="red")
-                self.tab_sgbd.ent_H.delete(0, END)
+                self.tab_sgbd.ent_host.configure(foreground="red")
+                self.tab_sgbd.ent_host.delete(0, END)
                 self.status.set(
                     f"Host is a {self.localized_strings.get('err_pg_empty_field')}"
                 )
                 return False
 
-            if not self.tab_sgbd.ent_P.get():
-                self.tab_sgbd.ent_P.configure(foreground="red")
-                self.tab_sgbd.ent_P.delete(0, END)
+            if not self.tab_sgbd.ent_port.get():
+                self.tab_sgbd.ent_port.configure(foreground="red")
+                self.tab_sgbd.ent_port.delete(0, END)
                 self.status.set(
                     f"Port is a {self.localized_strings.get('err_pg_empty_field')}"
                 )
                 return False
 
             if (
-                self.tab_sgbd.dbnb.get() == ""
+                self.tab_sgbd.db_name.get() == ""
                 or self.tab_sgbd.host.get()
                 == self.localized_strings.get("err_pg_empty_field")
             ):
-                self.tab_sgbd.ent_D.configure(foreground="red")
-                self.tab_sgbd.ent_D.delete(0, END)
+                self.tab_sgbd.ent_db_name.configure(foreground="red")
+                self.tab_sgbd.ent_db_name.delete(0, END)
                 self.status.set(
                     f"Database is a {self.localized_strings.get('err_pg_empty_field')}"
                 )
@@ -719,24 +727,24 @@ class DicoGIS(ThemedTk):
                 or self.tab_sgbd.host.get()
                 == self.localized_strings.get("err_pg_empty_field")
             ):
-                self.tab_sgbd.ent_U.configure(foreground="red")
-                self.tab_sgbd.ent_U.delete(0, END)
+                self.tab_sgbd.ent_user.configure(foreground="red")
+                self.tab_sgbd.ent_user.delete(0, END)
                 self.status.set(
                     f"User is a {self.localized_strings.get('err_pg_empty_field')}"
                 )
                 return False
 
             if (
-                self.tab_sgbd.pswd.get() == ""
-                or self.tab_sgbd.pswd.get()
+                self.tab_sgbd.password.get() == ""
+                or self.tab_sgbd.password.get()
                 == self.localized_strings.get("err_pg_empty_field")
             ):
-                self.tab_sgbd.ent_M.configure(foreground="red")
-                self.tab_sgbd.ent_M.delete(0, END)
+                self.tab_sgbd.ent_password.configure(foreground="red")
+                self.tab_sgbd.ent_password.delete(0, END)
                 self.status.set(
                     f"Password is a {self.localized_strings.get('err_pg_empty_field')}"
                 )
-                self.tab_sgbd.ent_M.configure(foreground="red")
+                self.tab_sgbd.ent_password.configure(foreground="red")
                 return False
 
         # no error detected: let's test connection
@@ -775,10 +783,10 @@ class DicoGIS(ThemedTk):
         sgbd_reader = ReadPostGIS(
             host=self.tab_sgbd.host.get(),
             port=self.tab_sgbd.port.get(),
-            db_name=self.tab_sgbd.dbnb.get(),
+            db_name=self.tab_sgbd.db_name.get(),
             user=self.tab_sgbd.user.get(),
-            password=self.tab_sgbd.pswd.get(),
-            views_included=self.tab_sgbd.opt_pgvw.get(),
+            password=self.tab_sgbd.password.get(),
+            views_included=self.tab_sgbd.opt_pg_views.get(),
         )
 
         # check connection state
