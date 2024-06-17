@@ -90,12 +90,18 @@ class ReadPostGIS(GeoReaderBase):
             Optional[ogr.DataSource]: OGR connection
         """
         gdal_open_options = GDAL_POSTGIS_OPEN_OPTIONS
-        if self.views_included:
-            gdal_open_options.append("SKIP_VIEWS=NO")
-            logger.info("PostgreSQL views enabled.")
+        gdal_version_major, gdal_version_minor, _ = gdal.__version__.split(".")
+        if int(gdal_version_major) >= 3 and int(gdal_version_minor) >= 7:
+            if self.views_included:
+                gdal_open_options.append("SKIP_VIEWS=NO")
+                logger.info("PostgreSQL views enabled.")
+            else:
+                gdal_open_options.append("SKIP_VIEWS=YES")
+                logger.info("PostgreSQL views disabled.")
         else:
-            gdal_open_options.append("SKIP_VIEWS=YES")
-            logger.info("PostgreSQL views disabled.")
+            logger.info(
+                "Your GDAL version is too old (< 3.7) to handle SKIP_VIEWS option."
+            )
 
         try:
             conn: gdal.Dataset = gdal.OpenEx(
