@@ -19,9 +19,9 @@ import getpass
 import locale
 import logging
 import platform
+from datetime import date
 from pathlib import Path
 from sys import platform as opersys
-from time import strftime
 
 # GUI
 from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, IntVar, StringVar
@@ -54,6 +54,7 @@ from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
 from dicogis.utils.checknorris import CheckNorris
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.options import OptionsManager
+from dicogis.utils.slugger import sluggy
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -118,7 +119,6 @@ class DicoGIS(ThemedTk):
         self.num_folders = 0
         self.def_rep = ""  # default folder to search for
         self.def_lang = "EN"  # default language to start
-        self.today = strftime("%Y-%m-%d")  # date of the day
         self.localized_strings = {}  # texts dictionary
 
         # formats / type: vectors
@@ -619,8 +619,11 @@ class DicoGIS(ThemedTk):
         self.ent_outxl_filename.delete(0, END)
         self.ent_outxl_filename.insert(
             0,
-            "DicoGIS_{}-{}_{}.xlsx".format(
-                self.tab_sgbd.dbnb.get(), self.tab_sgbd.host.get(), self.today
+            sluggy(
+                "DicoGIS_"
+                f"{self.tab_sgbd.db_name.get()}-"
+                f"{self.tab_sgbd.host.get()}_"
+                f"{date.today()}.xlsx"
             ),
         )
 
