@@ -1,8 +1,6 @@
 #! python3  # noqa: E265
 
-"""
-    Simple function to load database configuration files (= ini structure).
-"""
+"""Simple function to load database configuration files (= ini structure)."""
 
 # #############################################################################
 # ########## Libraries #############
@@ -41,19 +39,19 @@ def read_db_conf(dbconf_path: Path) -> Union[list, dict]:
 
     :Example:
 
-    .. code-block:: python
+        .. code-block:: python
 
-        # here comes an example in Python
-        pprint(read_db_conf("./sample.dbconf"))
-        {
-            "name": "database_name",
-            "host": "database_server_url",
-            "port": "5432",
-            "username": "db_user_name",
-            "password": "db_user_password",
-            "schemas": "db_schemas",
-            "esri_sde": False
-        }
+            # here comes an example in Python
+            pprint(read_db_conf("./sample.dbconf"))
+            {
+                "name": "database_name",
+                "host": "database_server_url",
+                "port": "5432",
+                "username": "db_user_name",
+                "password": "db_user_password",
+                "schemas": "db_schemas",
+                "esri_sde": False
+            }
 
     """
     # checks
