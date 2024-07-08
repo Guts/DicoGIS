@@ -14,7 +14,7 @@
 _DicoGIS CLI and GUI side by side_
 ```
 
-## Whats is it?
+## What is it?
 
 A self-porting utility that generates a spreadsheet with technical metadata from a geographic data source. Features:
 
