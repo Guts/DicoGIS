@@ -47,6 +47,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_click",
     "sphinx_copybutton",
+    "sphinx_design",
     "sphinxcontrib.mermaid",
     "sphinxext.opengraph",
     "sphinx_sitemap",
@@ -115,6 +116,9 @@ html_extra_path = ["robots.txt"]
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ["static"]
+html_css_files = [
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -137,11 +141,16 @@ html_search_language = "en"
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
+    "gdal": ("https://gdal.org/", None),
     "python": ("https://docs.python.org/3/", None),
 }
 
 
 # -- Extension configuration -------------------------------------------------
+
+autodoc_default_options = {
+    "special-members": "__init__",
+}
 
 # mermaid
 mermaid_params = [
@@ -152,6 +161,7 @@ mermaid_params = [
     "--backgroundColor",
     "transparent",
 ]
+mermaid_d3_zoom = True
 
 # MyST Parser
 myst_enable_extensions = [
@@ -170,6 +180,7 @@ myst_substitutions = {
     "author": author,
     "date_update": datetime.now().strftime("%d %B %Y"),
     "description": description,
+    "license": __about__.__license__,
     "repo_url": __about__.__uri__,
     "title": project,
     "version": version,
@@ -184,6 +195,7 @@ ogp_custom_meta_tags = [
     "<meta name='twitter:card' content='summary_large_image'>",
     f'<meta property="twitter:description" content="{description}" />',
     f'<meta property="twitter:title" content="{project}" />',
+    '<meta property="twitter:site" content="@geojulien" />',
 ]
 
 # sitemap

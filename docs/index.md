@@ -1,8 +1,10 @@
 # {{ title }} - Documentation
 
+> **Description:** {{ description }}  
 > **Author and contributors:** {{ author }}  
 > **Version:** {{ version }}  
 > **Source code:** {{ repo_url }}  
+> **License:** {{ license }}  
 > **Last documentation build:** {{ date_update }}
 
 ----
@@ -40,6 +42,7 @@ maxdepth: 2
 caption: Miscellaneous
 titlesonly: true
 ---
+misc/funding
 misc/formats_matrix
 misc/compatibility
 misc/credits
