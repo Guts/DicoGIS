@@ -7,3 +7,4 @@ sphinx-click>=5
 sphinx-copybutton<1
 sphinxcontrib-mermaid<1
 sphinxext-opengraph>=0.9
+sphinx-sitemap>=2.4,<3

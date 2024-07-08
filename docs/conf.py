@@ -49,6 +49,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinxcontrib.mermaid",
     "sphinxext.opengraph",
+    "sphinx_sitemap",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -94,6 +95,9 @@ pygments_style = "sphinx"
 
 # -- Options for HTML output -------------------------------------------------
 
+# final URL
+html_baseurl = __about__.__uri_homepage__
+
 # Theme
 html_favicon = "static/img/DicoGIS_logo_200px.png"
 html_logo = "static/img/DicoGIS_logo_200px.png"
@@ -103,6 +107,8 @@ html_theme_options = {
     "source_branch": "master",
     "source_directory": "docs/",
 }
+
+html_extra_path = ["robots.txt"]
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -179,6 +185,9 @@ ogp_custom_meta_tags = [
     f'<meta property="twitter:description" content="{description}" />',
     f'<meta property="twitter:title" content="{project}" />',
 ]
+
+# sitemap
+sitemap_url_scheme = "{link}"
 
 
 # -- Options for Sphinx API doc ----------------------------------------------
