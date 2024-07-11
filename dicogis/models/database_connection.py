@@ -56,13 +56,15 @@ class DatabaseConnection:
         Returns:
             connection parameters as dict
         """
-        return {
-            "dbname": self.database_name,
-            "host": self.host,
-            "port": self.port,
-            "user": self.user_name,
-            "password": self.user_password,
+        as_dict = {
+            "dbname": str(self.database_name) if self.database_name else None,
+            "host": str(self.host) if self.host else None,
+            "port": str(self.port) if self.port else None,
+            "user": str(self.user_name) if self.user_name else None,
+            "password": str(self.user_password) if self.user_password else None,
         }
+
+        return {key: value for (key, value) in as_dict.items() if value is not None}
 
     @property
     def pg_connection_string(self) -> str:
@@ -116,9 +118,15 @@ class DatabaseConnection:
             a tuple with the store status and a log message
         """
         try:
+            if not self.connection_params_as_dict:
+                raise ValueError(
+                    "Database connection results as an empty dictionary and can't be saved."
+                )
+
             pgserviceparser.write_service(
                 service_name=self.service_name,
                 settings=self.connection_params_as_dict,
+                add_if_not_exists=True,
             )
             return True, f"{self.service_name} saved to {pgserviceparser.conf_path()}"
         except Exception as err:
