@@ -1,15 +1,13 @@
 #! python3  # noqa: E265
 
-"""
-    Dataset model
-
-"""
+"""Model for database connection."""
 
 # ############################################################################
 # ######### Libraries #############
 # #################################
 
 # Standard library
+import logging
 from dataclasses import dataclass
 from typing import Optional
 
@@ -18,6 +16,13 @@ import pgserviceparser
 
 # package
 from dicogis.__about__ import __title_clean__
+
+# ##############################################################################
+# ############ Globals ############
+# #################################
+
+# LOG
+logger = logging.getLogger(__name__)
 
 
 # ############################################################################
@@ -42,6 +47,22 @@ class DatabaseConnection:
     sgbd_version: Optional[str] = None
     # special
     state_msg: Optional[str] = None
+
+    @property
+    def connection_params_as_dict(self) -> dict | None:
+        """Return connection parameters as dictionary. Useful to create a service in a
+            pg_service.conf file.
+
+        Returns:
+            connection parameters as dict
+        """
+        return {
+            "dbname": self.database_name,
+            "host": self.host,
+            "port": self.port,
+            "user": self.user_name,
+            "password": self.user_password,
+        }
 
     @property
     def pg_connection_string(self) -> str:
@@ -86,3 +107,24 @@ class DatabaseConnection:
                 f"postgresql://{self.user_name}:{self.user_password}@{self.host}:{self.port}/"
                 f"{self.database_name}?application_name={__title_clean__}"
             )
+
+    def store_in_pgservice_file(self) -> tuple[bool, str]:
+        """Store database connection to service file (typically on Linux
+            ~/.pg_service.conf).
+
+        Returns:
+            a tuple with the store status and a log message
+        """
+        try:
+            pgserviceparser.write_service(
+                service_name=self.service_name,
+                settings=self.connection_params_as_dict,
+            )
+            return True, f"{self.service_name} saved to {pgserviceparser.conf_path()}"
+        except Exception as err:
+            err_msg = (
+                "Saving database connection as service in "
+                f"{pgserviceparser.conf_path()} failed. Trace: {err}"
+            )
+            logger.error(err_msg, stack_info=True)
+            return False, err_msg
