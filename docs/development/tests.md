@@ -26,7 +26,7 @@ In your virtual environment:
 ## Try it out on test dataset
 
 ```sh
-dicogis-cli --verbose --input-folder tests/fixtures
+dicogis-cli inventory --verbose --input-folder tests/fixtures
 ```
 
 ## Run tests suite
