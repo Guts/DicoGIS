@@ -44,11 +44,11 @@ class TestDatabaseConnection(unittest.TestCase):
         expected_result = {
             "dbname": "test_db",
             "host": "localhost",
-            "port": 5432,
+            "port": "5432",
             "user": "test_user",
             "password": "test_password",
         }
-        self.assertEqual(self.db_conn.connection_params_as_dict, expected_result)
+        self.assertDictEqual(self.db_conn.connection_params_as_dict, expected_result)
 
     @patch("pgserviceparser.service_names", return_value=["test_service"])
     def test_pg_connection_string_with_service(
