@@ -83,7 +83,7 @@ def dicogis_gui():
     elif opersys == "linux":
         theme = "radiance"
         if distro.name().lower() == "ubuntu":
-            theme = "yaru"
+            theme = "ubuntu"
     elif opersys == "win32":
         theme = "breeze"
     else:
