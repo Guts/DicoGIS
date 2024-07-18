@@ -136,3 +136,26 @@ class DatabaseConnection:
             )
             logger.error(err_msg, stack_info=True)
             return False, err_msg
+
+
+if __name__ == "__main__":
+    db = DatabaseConnection(service_name="empty")
+    print(db.connection_params_as_dict, bool(db.connection_params_as_dict))
+    db.store_in_pgservice_file()
+
+    db = DatabaseConnection(service_name="minimal", host="localhost")
+    print(db.connection_params_as_dict, bool(db.connection_params_as_dict))
+    db.store_in_pgservice_file()
+
+    pgserviceparser.remove_service("minimal")
+
+    new_srv_settings = {
+        "host": "localhost",
+        "dbname": "best_database_ever",
+        "port": 5432,
+        "user": "ro_gis_user",
+    }
+    new_srv = pgserviceparser.write_service(
+        service_name="gis_prod_ro", settings=new_srv_settings, add_if_not_exists=True
+    )
+    assert isinstance(new_srv, dict)
