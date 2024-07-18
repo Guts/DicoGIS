@@ -519,9 +519,7 @@ class DicoGIS(ThemedTk):
             MetadatasetSerializerBase.get_serializer_from_parameters(
                 format_or_serializer=OutputFormats.excel,
                 localized_strings=self.localized_strings,
-                output_path=Path(self.tab_files.target_path.get()).joinpath(
-                    self.ent_outxl_filename.get()
-                ),
+                output_path=None,
                 opt_prettify_size=self.tab_options.opt_export_size_prettify.get(),
                 opt_raw_path=self.tab_options.opt_export_raw_path.get(),
             )
@@ -630,7 +628,7 @@ class DicoGIS(ThemedTk):
 
         pg_service_name = self.tab_sgbd.ddl_pg_services.get()
 
-        # set the default output file
+        # set the default output file in UI and as serializer attribute
         self.ent_outxl_filename.delete(0, END)
         self.ent_outxl_filename.insert(
             0,
@@ -638,6 +636,7 @@ class DicoGIS(ThemedTk):
                 output_path=None, output_format="excel", pg_services=[pg_service_name]
             ),
         )
+        self.serializer.output_path = Path(self.ent_outxl_filename.get())
 
         # setting progress bar
         self.prog_layers["maximum"] = sgbd_reader.conn.GetLayerCount()
@@ -656,6 +655,7 @@ class DicoGIS(ThemedTk):
         # saving dictionary
         self.serializer.post_serializing()
 
+        launch(url=f"{self.serializer.output_path.resolve()}")
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "
