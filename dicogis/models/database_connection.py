@@ -126,7 +126,7 @@ class DatabaseConnection:
             pgserviceparser.write_service(
                 service_name=self.service_name,
                 settings=self.connection_params_as_dict,
-                add_if_not_exists=True,
+                create_if_not_found=True,
             )
             return True, f"{self.service_name} saved to {pgserviceparser.conf_path()}"
         except Exception as err:
@@ -156,6 +156,6 @@ if __name__ == "__main__":
         "user": "ro_gis_user",
     }
     new_srv = pgserviceparser.write_service(
-        service_name="gis_prod_ro", settings=new_srv_settings, add_if_not_exists=True
+        service_name="gis_prod_ro", settings=new_srv_settings, create_if_not_found=True
     )
     assert isinstance(new_srv, dict)
