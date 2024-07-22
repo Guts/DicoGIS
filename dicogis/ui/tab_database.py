@@ -280,6 +280,7 @@ class DatabaseNewConnectionForm(Toplevel):
         """Collect data from the entries and process it."""
         # Collect the data from the entries and do something with it
         self.out_database_connection = DatabaseConnection(
+            database_name=self.database_name.get(),
             service_name=self.service_name.get(),
             host=self.host.get(),
             port=self.port.get(),
