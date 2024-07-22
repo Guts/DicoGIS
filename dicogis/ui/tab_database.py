@@ -146,7 +146,9 @@ class TabDatabaseServer(Frame):
         save_status, log_msg = form.out_database_connection.store_in_pgservice_file()
         if save_status:
             logger.info(log_msg)
-            self.ddl_pg_services.values += pgserviceparser.service_names()
+            self.li_pg_services = self.ddl_pg_services["values"] = tuple(
+                pgserviceparser.service_names()
+            )
         else:
             logger.error(log_msg, stack_info=True)
             showerror(
