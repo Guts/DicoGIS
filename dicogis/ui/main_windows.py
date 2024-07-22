@@ -19,7 +19,6 @@ import getpass
 import locale
 import logging
 import platform
-from datetime import date
 from pathlib import Path
 from sys import platform as opersys
 
@@ -44,17 +43,17 @@ from typer import launch
 
 # Project
 from dicogis import __about__
+from dicogis.cli.cmd_inventory import determine_output_path
 from dicogis.constants import AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
-from dicogis.ui import MiscButtons, TabCredits, TabFiles, TabSettings, TabSGBD
+from dicogis.ui import MiscButtons, TabCredits, TabDatabaseServer, TabFiles, TabSettings
 from dicogis.utils.checknorris import CheckNorris
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.options import OptionsManager
-from dicogis.utils.slugger import sluggy
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -176,7 +175,7 @@ class DicoGIS(ThemedTk):
         self.nb = Notebook(self)
         # tabs
         self.tab_files = TabFiles(self.nb, self.localized_strings)  # tab_id = 0
-        self.tab_sgbd = TabSGBD(self.nb)  # tab_id = 1
+        self.tab_sgbd = TabDatabaseServer(self.nb)  # tab_id = 1
         self.tab_options = TabSettings(
             self.nb, self.localized_strings, utils_global.ui_switch
         )  # tab_id = 2
@@ -320,12 +319,18 @@ class DicoGIS(ThemedTk):
         self.tab_files.btn_browse.config(text=self.localized_strings.get("gui_choix"))
         # sgbd tab
         self.nb.tab(1, text=self.localized_strings.get("gui_tab2"))
-        self.tab_sgbd.FrDb.config(text=self.localized_strings.get("gui_fr2"))
-        self.tab_sgbd.lb_host.config(text=self.localized_strings.get("gui_host"))
-        self.tab_sgbd.lb_port.config(text=self.localized_strings.get("gui_port"))
-        self.tab_sgbd.lb_db_name.config(text=self.localized_strings.get("gui_db"))
-        self.tab_sgbd.lb_user.config(text=self.localized_strings.get("gui_user"))
-        self.tab_sgbd.lb_password.config(text=self.localized_strings.get("gui_mdp"))
+        self.tab_sgbd.FrameDatabaseServicePicker.config(
+            text=self.localized_strings.get("gui_fr2")
+        )
+        self.tab_sgbd.caz_pg_views.config(
+            text=self.localized_strings.get("gui_views", "Views enabled")
+        )
+        self.tab_sgbd.lb_pg_services.config(
+            text=self.localized_strings.get("gui_pg_service", "PG service:")
+        )
+        self.tab_sgbd.open_form_button.config(
+            text=self.localized_strings.get("gui_database_form", "+")
+        )
 
         # options
         self.nb.tab(2, text=self.localized_strings.get("gui_tab5"))
@@ -514,9 +519,7 @@ class DicoGIS(ThemedTk):
             MetadatasetSerializerBase.get_serializer_from_parameters(
                 format_or_serializer=OutputFormats.excel,
                 localized_strings=self.localized_strings,
-                output_path=Path(self.tab_files.target_path.get()).joinpath(
-                    self.ent_outxl_filename.get()
-                ),
+                output_path=None,
                 opt_prettify_size=self.tab_options.opt_export_size_prettify.get(),
                 opt_raw_path=self.tab_options.opt_export_raw_path.get(),
             )
@@ -623,17 +626,17 @@ class DicoGIS(ThemedTk):
         # getting the info from shapefiles and compile it in the excel
         logger.info("Start processing PostGIS tables...")
 
-        # set the default output file
+        pg_service_name = self.tab_sgbd.ddl_pg_services.get()
+
+        # set the default output file in UI and as serializer attribute
         self.ent_outxl_filename.delete(0, END)
         self.ent_outxl_filename.insert(
             0,
-            sluggy(
-                "DicoGIS_"
-                f"{self.tab_sgbd.db_name.get()}-"
-                f"{self.tab_sgbd.host.get()}_"
-                f"{date.today()}.xlsx"
+            determine_output_path(
+                output_path=None, output_format="excel", pg_services=[pg_service_name]
             ),
         )
+        self.serializer.output_path = Path(self.ent_outxl_filename.get())
 
         # setting progress bar
         self.prog_layers["maximum"] = sgbd_reader.conn.GetLayerCount()
@@ -652,6 +655,7 @@ class DicoGIS(ThemedTk):
         # saving dictionary
         self.serializer.post_serializing()
 
+        launch(url=f"{self.serializer.output_path.resolve()}")
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "
@@ -693,60 +697,13 @@ class DicoGIS(ThemedTk):
 
         elif tab_data_type == 1:
             if (
-                self.tab_sgbd.host.get() == ""
-                or self.tab_sgbd.host.get()
-                == self.localized_strings.get("err_pg_empty_field")
+                self.tab_sgbd.ddl_pg_services.get() == ""
+                or not self.tab_sgbd.ddl_pg_services.get()
             ):
-                self.tab_sgbd.ent_host.configure(foreground="red")
-                self.tab_sgbd.ent_host.delete(0, END)
+                self.tab_sgbd.ddl_pg_services.configure(foreground="red")
                 self.status.set(
-                    f"Host is a {self.localized_strings.get('err_pg_empty_field')}"
+                    f"PG service name is a {self.localized_strings.get('err_pg_empty_field')}"
                 )
-                return False
-
-            if not self.tab_sgbd.ent_port.get():
-                self.tab_sgbd.ent_port.configure(foreground="red")
-                self.tab_sgbd.ent_port.delete(0, END)
-                self.status.set(
-                    f"Port is a {self.localized_strings.get('err_pg_empty_field')}"
-                )
-                return False
-
-            if (
-                self.tab_sgbd.db_name.get() == ""
-                or self.tab_sgbd.host.get()
-                == self.localized_strings.get("err_pg_empty_field")
-            ):
-                self.tab_sgbd.ent_db_name.configure(foreground="red")
-                self.tab_sgbd.ent_db_name.delete(0, END)
-                self.status.set(
-                    f"Database is a {self.localized_strings.get('err_pg_empty_field')}"
-                )
-                return False
-
-            if (
-                self.tab_sgbd.user.get() == ""
-                or self.tab_sgbd.host.get()
-                == self.localized_strings.get("err_pg_empty_field")
-            ):
-                self.tab_sgbd.ent_user.configure(foreground="red")
-                self.tab_sgbd.ent_user.delete(0, END)
-                self.status.set(
-                    f"User is a {self.localized_strings.get('err_pg_empty_field')}"
-                )
-                return False
-
-            if (
-                self.tab_sgbd.password.get() == ""
-                or self.tab_sgbd.password.get()
-                == self.localized_strings.get("err_pg_empty_field")
-            ):
-                self.tab_sgbd.ent_password.configure(foreground="red")
-                self.tab_sgbd.ent_password.delete(0, END)
-                self.status.set(
-                    f"Password is a {self.localized_strings.get('err_pg_empty_field')}"
-                )
-                self.tab_sgbd.ent_password.configure(foreground="red")
                 return False
 
         # no error detected: let's test connection
@@ -783,11 +740,7 @@ class DicoGIS(ThemedTk):
 
         # testing connection settings
         sgbd_reader = ReadPostGIS(
-            host=self.tab_sgbd.host.get(),
-            port=self.tab_sgbd.port.get(),
-            db_name=self.tab_sgbd.db_name.get(),
-            user=self.tab_sgbd.user.get(),
-            password=self.tab_sgbd.password.get(),
+            service=self.tab_sgbd.ddl_pg_services.get(),
             views_included=self.tab_sgbd.opt_pg_views.get(),
         )
         sgbd_reader.get_connection()

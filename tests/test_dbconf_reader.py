@@ -9,9 +9,9 @@
 # ########## Libraries #############
 # ##################################
 
-import unittest
 
 # Standard library
+import unittest
 from pathlib import Path
 
 # package

@@ -64,10 +64,11 @@ class OptionsManager:
         parent.tab_files.opt_dxf.set(self.config.get("filters", "opt_dxf"))
 
         # database settings
-        parent.tab_sgbd.host.set(self.config.get("database", "host"))
-        parent.tab_sgbd.port.set(self.config.get("database", "port"))
-        parent.tab_sgbd.db_name.set(self.config.get("database", "db_name"))
-        parent.tab_sgbd.user.set(self.config.get("database", "user"))
+        last_used_pg_service = self.config.get("database", "last_used_pg_service")
+        if last_used_pg_service in self.parent.tab_sgbd.ddl_pg_services.get("values"):
+            parent.tab_sgbd.ddl_pg_services.set(
+                self.config.get("database", "last_used_pg_service")
+            )
         parent.tab_sgbd.opt_pg_views.set(self.config.get("database", "opt_views"))
 
         # proxy settings
@@ -140,10 +141,9 @@ class OptionsManager:
         self.config.set("filters", "opt_dxf", str(parent.tab_files.opt_dxf.get()))
 
         # database settings
-        self.config.set("database", "host", parent.tab_sgbd.host.get())
-        self.config.set("database", "port", str(parent.tab_sgbd.port.get()))
-        self.config.set("database", "db_name", parent.tab_sgbd.db_name.get())
-        self.config.set("database", "user", parent.tab_sgbd.user.get())
+        self.config.set(
+            "database", "last_used_pg_service", parent.tab_sgbd.ddl_pg_services.get()
+        )
         self.config.set(
             "database", "opt_views", str(parent.tab_sgbd.opt_pg_views.get())
         )

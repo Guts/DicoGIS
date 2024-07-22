@@ -1,15 +1,13 @@
 #! python3  # noqa: E265
 
-"""
-    Dataset model
-
-"""
+"""Model for database connection."""
 
 # ############################################################################
 # ######### Libraries #############
 # #################################
 
 # Standard library
+import logging
 from dataclasses import dataclass
 from typing import Optional
 
@@ -18,6 +16,13 @@ import pgserviceparser
 
 # package
 from dicogis.__about__ import __title_clean__
+
+# ##############################################################################
+# ############ Globals ############
+# #################################
+
+# LOG
+logger = logging.getLogger(__name__)
 
 
 # ############################################################################
@@ -42,6 +47,24 @@ class DatabaseConnection:
     sgbd_version: Optional[str] = None
     # special
     state_msg: Optional[str] = None
+
+    @property
+    def connection_params_as_dict(self) -> dict | None:
+        """Return connection parameters as dictionary. Useful to create a service in a
+            pg_service.conf file.
+
+        Returns:
+            connection parameters as dict
+        """
+        as_dict = {
+            "dbname": str(self.database_name) if self.database_name else None,
+            "host": str(self.host) if self.host else None,
+            "port": str(self.port) if self.port else None,
+            "user": str(self.user_name) if self.user_name else None,
+            "password": str(self.user_password) if self.user_password else None,
+        }
+
+        return {key: value for (key, value) in as_dict.items() if value is not None}
 
     @property
     def pg_connection_string(self) -> str:
@@ -86,3 +109,53 @@ class DatabaseConnection:
                 f"postgresql://{self.user_name}:{self.user_password}@{self.host}:{self.port}/"
                 f"{self.database_name}?application_name={__title_clean__}"
             )
+
+    def store_in_pgservice_file(self) -> tuple[bool, str]:
+        """Store database connection to service file (typically on Linux
+            ~/.pg_service.conf).
+
+        Returns:
+            a tuple with the store status and a log message
+        """
+        try:
+            if not self.connection_params_as_dict:
+                raise ValueError(
+                    "Database connection results as an empty dictionary and can't be saved."
+                )
+
+            pgserviceparser.write_service(
+                service_name=self.service_name,
+                settings=self.connection_params_as_dict,
+                create_if_not_found=True,
+            )
+            return True, f"{self.service_name} saved to {pgserviceparser.conf_path()}"
+        except Exception as err:
+            err_msg = (
+                "Saving database connection as service in "
+                f"{pgserviceparser.conf_path()} failed. Trace: {err}"
+            )
+            logger.error(err_msg, stack_info=True)
+            return False, err_msg
+
+
+if __name__ == "__main__":
+    db = DatabaseConnection(service_name="empty")
+    print(db.connection_params_as_dict, bool(db.connection_params_as_dict))
+    db.store_in_pgservice_file()
+
+    db = DatabaseConnection(service_name="minimal", host="localhost")
+    print(db.connection_params_as_dict, bool(db.connection_params_as_dict))
+    db.store_in_pgservice_file()
+
+    pgserviceparser.remove_service("minimal")
+
+    new_srv_settings = {
+        "host": "localhost",
+        "dbname": "best_database_ever",
+        "port": 5432,
+        "user": "ro_gis_user",
+    }
+    new_srv = pgserviceparser.write_service(
+        service_name="gis_prod_ro", settings=new_srv_settings, create_if_not_found=True
+    )
+    assert isinstance(new_srv, dict)
