@@ -106,6 +106,7 @@ misc/credits
 ```{toctree}
 ---
 maxdepth: 1
+caption: Contribute
 ---
 misc/funding
 development/contribute
