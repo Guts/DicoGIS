@@ -68,9 +68,6 @@ class ScrollableTable(Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # Autosize the height of the table based on the number of rows
-        self.autosize_treeview_height()
-
     def disable_event(self, event: Event) -> str:
         """
         Disable the event to make the Treeview read-only.
@@ -82,9 +79,3 @@ class ScrollableTable(Frame):
             str: "break" to indicate that the event should be ignored.
         """
         return "break"
-
-    def autosize_treeview_height(self) -> None:
-        """Autosize the height of the Treeview based on the number of rows."""
-        num_rows = len(self.tree.get_children())
-        max_visible_rows = 10
-        height = min(num_rows, max_visible_rows)
