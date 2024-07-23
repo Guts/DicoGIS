@@ -171,20 +171,27 @@ class DicoGIS(ThemedTk):
         self.global_ignored = 0  # files ignored by an user filter
         self.global_dico_fields = {}
 
-        # Notebook
-        self.nb = Notebook(self)
-        # tabs
-        self.tab_files = TabFiles(self.nb, self.localized_strings)  # tab_id = 0
-        self.tab_sgbd = TabDatabaseServer(self.nb)  # tab_id = 1
-        self.tab_options = TabSettings(
-            self.nb, self.localized_strings, utils_global.ui_switch
-        )  # tab_id = 2
-        self.tab_credits = TabCredits(self.nb)  # tab_id = 3
-
         # fillfulling text
         self.localized_strings = self.txt_manager.load_texts(
             language_code=self.def_lang
         )
+
+        # Notebook
+        self.nb = Notebook(self)
+        # tabs
+        self.tab_files = TabFiles(
+            parent=self.nb, localized_strings=self.localized_strings
+        )  # tab_id = 0
+        self.tab_sgbd = TabDatabaseServer(
+            parent=self.nb, localized_strings=self.localized_strings, init_widgets=True
+        )  # tab_id = 1
+        self.tab_options = TabSettings(
+            parent=self.nb,
+            localized_strings=self.localized_strings,
+            init_widgets=True,
+            switcher=utils_global.ui_switch,
+        )  # tab_id = 2
+        self.tab_credits = TabCredits(parent=self.nb)  # tab_id = 3
 
         # =================================================================================
         # ## TAB 1: FILES ##

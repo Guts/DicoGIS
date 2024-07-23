@@ -15,10 +15,17 @@
 
 # Standard library
 import logging
-from os import getenv
-from tkinter import ACTIVE, DISABLED, BooleanVar, IntVar, StringVar, Tk
-from tkinter.ttk import Checkbutton, Entry, Frame, Label, Labelframe
-from typing import Callable, Optional
+from os import environ, getenv
+from tkinter import ACTIVE, DISABLED, RAISED, BooleanVar, IntVar, StringVar
+from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Labelframe, Widget
+from typing import Callable
+from webbrowser import open_new_tab
+
+# project
+from dicogis.__about__ import __uri_homepage__
+from dicogis.ui.collapsible_frame import ToggledFrame
+from dicogis.ui.scrollable_table import ScrollableTable
+from dicogis.utils.texts import TextsManager
 
 # ##############################################################################
 # ############ Globals ############
@@ -40,8 +47,9 @@ class TabSettings(Frame):
 
     def __init__(
         self,
-        parent,
-        localized_strings: Optional[dict] = None,
+        parent: Widget,
+        localized_strings: dict | None = None,
+        init_widgets: bool = True,
         switcher: Callable = None,
     ):
         """Initializes UI tab for end-user options.
@@ -49,14 +57,22 @@ class TabSettings(Frame):
         Args:
             parent: tkinter parent object
             localized_strings: translated strings. Defaults to None.
+            init_widgets: option to create widgets during init or not. Defaults to True.
         """
-        self.parent = parent
-        Frame.__init__(self)
+        super().__init__(parent)
 
         # handle empty localized strings
-        if not localized_strings:
-            localized_strings = {}
+        self.localized_strings = localized_strings
+        if self.localized_strings is None:
+            self.localized_strings = TextsManager().load_texts()
 
+        self.switcher = switcher
+
+        if init_widgets:
+            self.create_widgets()
+
+    def create_widgets(self) -> None:
+        """Create and layout the widgets for the frame."""
         # -- Subframes --
         # Proxy subframe with a check button
         self.opt_proxy = BooleanVar(self, False)  # proxy optio
@@ -64,19 +80,33 @@ class TabSettings(Frame):
             self,
             text="Proxy",
             variable=self.opt_proxy,
-            command=lambda: switcher(self.opt_proxy, self.FrOptProxy),
+            command=lambda: self.switcher(self.opt_proxy, self.FrOptProxy),
         )
         self.FrOptProxy = Labelframe(
             self,
             name="lfr_settings_network_proxy",
-            text=localized_strings.get("Proxy", "Proxy settings"),
+            text=self.localized_strings.get("Proxy", "Proxy settings"),
             labelwidget=caz_prox,
         )
 
-        self.FrOptExport = Labelframe(
+        self.FrOptExport = ToggledFrame(
             self,
             name="lfr_settings_export",
-            text=localized_strings.get("Export", "Export"),
+            in_text=self.localized_strings.get("Export", "Export"),
+            start_opened=False,
+            borderwidth=1,
+            relief=RAISED,
+        )
+
+        self.FrOptEnv = ToggledFrame(
+            self,
+            name="lfr_settings_env_vars",
+            in_text=self.localized_strings.get(
+                "environment_variables", "Environment variables"
+            ),
+            start_opened=False,
+            borderwidth=1,
+            relief=RAISED,
         )
 
         # -- NETWORK OPTIONS -----------------------------------------------------------
@@ -97,18 +127,19 @@ class TabSettings(Frame):
         )
 
         self.prox_lb_host = Label(
-            self.FrOptProxy, text=localized_strings.get("gui_prox_server", "Host:")
+            self.FrOptProxy, text=self.localized_strings.get("gui_prox_server", "Host:")
         )
         self.prox_lb_port = Label(
-            self.FrOptProxy, text=localized_strings.get("gui_port", "Port:")
+            self.FrOptProxy, text=self.localized_strings.get("gui_port", "Port:")
         )
         caz_ntlm = Checkbutton(self.FrOptProxy, text="NTLM", variable=self.opt_ntlm)
         self.prox_lb_user = Label(
-            self.FrOptProxy, text=localized_strings.get("gui_user", "User name:")
+            self.FrOptProxy, text=self.localized_strings.get("gui_user", "User name:")
         )
 
         self.prox_lb_password = Label(
-            self.FrOptProxy, text=localized_strings.get("gui_mdp", "User password:")
+            self.FrOptProxy,
+            text=self.localized_strings.get("gui_mdp", "User password:"),
         )
 
         # proxy widgets position
@@ -127,8 +158,8 @@ class TabSettings(Frame):
             master=self, value=getenv("DICOGIS_EXPORT_SIZE_PRETTIFY", True)
         )
         caz_opt_export_size_prettify = Checkbutton(
-            self.FrOptExport,
-            text=localized_strings.get(
+            self.FrOptExport.sub_frame,
+            text=self.localized_strings.get(
                 "gui_options_export_size_prettify", "Export: prettify files size"
             ),
             variable=self.opt_export_size_prettify,
@@ -141,8 +172,8 @@ class TabSettings(Frame):
             master=self, value=getenv("DICOGIS_EXPORT_RAW_PATH", False)
         )
         caz_opt_export_raw_path = Checkbutton(
-            self.FrOptExport,
-            text=localized_strings.get(
+            self.FrOptExport.sub_frame,
+            text=self.localized_strings.get(
                 "gui_options_export_raw_path", "Export: raw path"
             ),
             variable=self.opt_export_raw_path,
@@ -153,8 +184,8 @@ class TabSettings(Frame):
             master=self, value=getenv("DICOGIS_QUICK_FAIL", False)
         )
         caz_opt_quick_fail = Checkbutton(
-            self.FrOptExport,
-            text=localized_strings.get("gui_options_quick_fail", "Quick fail"),
+            self.FrOptExport.sub_frame,
+            text=self.localized_strings.get("gui_options_quick_fail", "Quick fail"),
             variable=self.opt_quick_fail,
         )
         caz_opt_quick_fail.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
@@ -163,8 +194,8 @@ class TabSettings(Frame):
             master=self, value=getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", True)
         )
         caz_opt_end_process_notification_sound = Checkbutton(
-            self.FrOptExport,
-            text=localized_strings.get(
+            self.FrOptExport.sub_frame,
+            text=self.localized_strings.get(
                 "gui_options_notification_sound",
                 "Play a notification sound when processing has finished.",
             ),
@@ -174,11 +205,39 @@ class TabSettings(Frame):
             row=4, column=0, sticky="NSWE", padx=2, pady=2
         )
 
+        # -- Environment variables --
+        btn_doc_env_vars = Button(
+            self.FrOptEnv.sub_frame,
+            text=self.localized_strings.get(
+                "gui_options_supported_env_vars", "See supported variables"
+            ),
+            command=lambda: open_new_tab(
+                f"{__uri_homepage__}usage/settings.html#using-environment-variables"
+            ),
+        )
+
+        tab_env_vars = ScrollableTable(self.FrOptEnv.sub_frame)
+        dicogis_env_vars = {
+            env_var: value
+            for env_var, value in environ.items()
+            if env_var.startswith("DICOGIS_")
+        }
+        if nb_dicogis_envvars := len(dicogis_env_vars):
+            logger.debug(
+                f"{nb_dicogis_envvars} environment variables related to DicoGIS: "
+            )
+            for var_name, var_value in dicogis_env_vars.items():
+                logger.debug(f"{var_name}={var_value}")
+                tab_env_vars.tree.insert("", "end", values=(var_name, var_value))
+        btn_doc_env_vars.grid(padx=2, pady=2, sticky="WE")
+        tab_env_vars.grid(padx=2, pady=2, sticky="NSWE")
+
         # positionning frames
         self.FrOptProxy.grid(sticky="NSWE", padx=2, pady=2)
         self.FrOptExport.grid(sticky="NSWE", padx=2, pady=2)
+        self.FrOptEnv.grid(sticky="NSWE", padx=2, pady=2)
 
-        switcher(self.opt_proxy, self.FrOptProxy)
+        self.switcher(self.opt_proxy, self.FrOptProxy)
 
 
 # #############################################################################
@@ -187,6 +246,7 @@ class TabSettings(Frame):
 
 if __name__ == "__main__":
     """To test"""
+    from tkinter import Tk
 
     # faking switch method
     def ui_switch(cb_value: bool, parent):
