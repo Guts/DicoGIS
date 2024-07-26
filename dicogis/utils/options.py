@@ -16,8 +16,22 @@
 import configparser
 import logging
 import platform
-from os import path
 from pathlib import Path
+
+# 3rd party
+from typer import get_app_dir
+
+# project
+from dicogis.__about__ import __title__
+from dicogis.utils.check_path import check_path
+
+# ############ Globals ############
+# #################################
+
+app_dir = get_app_dir(app_name=__title__, force_posix=True)
+logger = logging.getLogger(__name__)
+
+default_configuration_filepath: Path = Path(app_dir).joinpath("dicogis.ini")
 
 # #############################################################################
 # ############ Classes #############
@@ -25,23 +39,32 @@ from pathlib import Path
 
 
 class OptionsManager:
-    def __init__(self, confile: str = r"..\..\options.ini"):
-        """
-        Main window constructor
-        Creates 1 frame and 2 labelled subframes
-        """
-        self.confile = path.realpath(confile)
+    """Object to save and load application settings."""
+
+    def __init__(self, configuration_filepath: Path | None = None):
+        """Initialize settings management."""
+        if configuration_filepath is None:
+            logger.info(
+                f"Using default configuration file: {default_configuration_filepath}"
+            )
+
         # first use or not
-        if not path.isfile(self.confile):
-            logging.info("No options.ini file found. First use: welcome!")
+        if not check_path(
+            input_path=configuration_filepath,
+            must_be_a_file=True,
+            must_be_a_folder=False,
+            must_exists=False,
+            raise_error=False,
+        ):
+            logging.info("No configuration file found. First use: welcome!")
             self.first_use = 1
         else:
-            logging.info("Options.ini file found. ")
+            logging.info(f"Configuration file found: {configuration_filepath}")
             self.first_use = 0
 
         # using safe parser
         self.config = configparser.ConfigParser()
-        self.config.read(confile)
+        self.config.read(configuration_filepath)
 
     def load_settings(self, parent):
         """load settings from last execution"""
