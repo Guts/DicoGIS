@@ -65,7 +65,7 @@ class OptionsManager:
 
         # database settings
         last_used_pg_service = self.config.get("database", "last_used_pg_service")
-        if last_used_pg_service in parent.tab_sgbd.ddl_pg_services.get("values"):
+        if last_used_pg_service in parent.tab_sgbd.ddl_pg_services["values"]:
             parent.tab_sgbd.ddl_pg_services.set(
                 self.config.get("database", "last_used_pg_service")
             )
