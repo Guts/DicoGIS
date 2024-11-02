@@ -2,7 +2,7 @@ furo>=2024
 matplotlib>=3.8,<4
 myst-parser[linkify]>=2
 sphinx-autobuild>=2021
-sphinx-autodoc-typehints>=2.2.2,<2.5
+sphinx-autodoc-typehints>=2.2.2,<2.6
 sphinx-click>=5
 sphinx-copybutton<1
 sphinx-design>=0.5,<1
