@@ -21,6 +21,13 @@ on:
       - "builder/"
       - "requirements/packaging.txt"
 
+  workflow_dispatch:
+
+# cancel running jobs on new commit to PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 # Globals
 env:
   PROJECT_FOLDER: "dicogis"
@@ -30,8 +37,46 @@ env:
 
 # Jobs definition
 jobs:
-  build-ubuntu:
-    name: "🐧 Ubuntu LTS"
+  build-wheels-linux:
+    name: "🐧 Linux wheels 🎡"
+    runs-on: "ubuntu-20.04"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          buildkitd-flags: --debug
+
+      - name: Build Docker image with vcpkg and gdal
+        # using build-push-action (without push) to make use of cache arguments
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ci/manylinux2014_x86_64-vcpkg-gdal.Dockerfile
+          tags: manylinux-vcpkg-gdal:latest
+          push: false
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+        env:
+          BUILDKIT_PROGRESS: plain
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.17.0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dicogis-wheel-linux
+          path: ./wheelhouse/*.whl
+          compression-level: 0
+
+  build-ubuntu-bin:
+    name: "🐧 Ubuntu executable"
     runs-on: ubuntu-22.04
 
     env:
@@ -84,8 +129,8 @@ jobs:
 
       - name: Generates executable for graphical version
         run: |
-            python -O ./builder/pyinstaller_build_ubuntu_gui.py
-            chmod +x dist/DicoGIS-gui.bin
+          python -O ./builder/pyinstaller_build_ubuntu_gui.py
+          chmod +x dist/DicoGIS-gui.bin
 
       - name: Save it as artifact
         uses: actions/upload-artifact@v4
@@ -122,8 +167,8 @@ jobs:
           path: ${{ env.export_output_folder }}/*
           if-no-files-found: error
 
-  build-windows:
-    name: "🏠 Windows"
+  build-windows-exe:
+    name: "🏠 Windows executable"
     runs-on: windows-latest
 
     env:
@@ -167,7 +212,7 @@ jobs:
 
       - name: Generates executable for graphical version
         run: |
-            python -O ./builder/pyinstaller_build_windows_gui.py
+          python -O ./builder/pyinstaller_build_windows_gui.py
 
       - name: Save it as artifact
         uses: actions/upload-artifact@v4
@@ -203,11 +248,12 @@ jobs:
     name: "🚀 GitHub Release"
     runs-on: ubuntu-latest
     needs:
-        - build-ubuntu
-        - build-windows
+      - build-wheels-linux
+      - build-ubuntu-bin
+      - build-windows-exe
     permissions:
-        contents: write
-        discussions: write
+      contents: write
+      discussions: write
 
     if: startsWith(github.ref, 'refs/tags/')
 
