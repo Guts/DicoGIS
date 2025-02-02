@@ -6,4 +6,4 @@ flake8-builtins>=2
 flake8-docstrings>=1.6
 flake8-eradicate>=1
 flake8-isort>=5
-pre-commit>=3,<4
+pre-commit>=3,<5
