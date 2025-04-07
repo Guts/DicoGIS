@@ -1,7 +1,7 @@
 #! python3  # noqa: E265
 
 """
-    Look for geographic datasets.
+Look for geographic datasets.
 """
 
 # #############################################################################

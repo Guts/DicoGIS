@@ -2,10 +2,10 @@
 
 
 """
-    Name:         Texts Manager
-    Purpose:      Load texts from localized files to display in a parent program
+Name:         Texts Manager
+Purpose:      Load texts from localized files to display in a parent program
 
-    Author:       Julien Moura (@geojulien)
+Author:       Julien Moura (@geojulien)
 """
 
 # #############################################################################

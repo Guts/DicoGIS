@@ -2,13 +2,13 @@
 
 
 """
-    Name:         Custom collapsible frame
-    Purpose:      Allow toggle a frame in pure Python Tkinter.
+Name:         Custom collapsible frame
+Purpose:      Allow toggle a frame in pure Python Tkinter.
 
-    Author:       Julien Moura (@geojulien)
-    Sources:
-        - ttkwidgets (GPL 3)
-        - Onlyjus (https://stackoverflow.com/a/13169685/2556577)
+Author:       Julien Moura (@geojulien)
+Sources:
+    - ttkwidgets (GPL 3)
+    - Onlyjus (https://stackoverflow.com/a/13169685/2556577)
 
 """
 

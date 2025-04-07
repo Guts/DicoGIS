@@ -2,10 +2,10 @@
 
 
 """
-    Name:         TabCredits
-    Purpose:      Tab containing credits and license informations in DicoGIS Notebook.
+Name:         TabCredits
+Purpose:      Tab containing credits and license informations in DicoGIS Notebook.
 
-    Author:       Julien Moura (@geojulien)
+Author:       Julien Moura (@geojulien)
 """
 
 # ##############################################################################

@@ -2,10 +2,10 @@
 
 
 """
-    Name:         TabSettings
-    Purpose:      Tab containing settings widgets in DicoGIS Notebook.
+Name:         TabSettings
+Purpose:      Tab containing settings widgets in DicoGIS Notebook.
 
-    Author:       Julien Moura (@geojulien)
+Author:       Julien Moura (@geojulien)
 """
 
 # ##############################################################################

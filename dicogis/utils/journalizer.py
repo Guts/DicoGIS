@@ -1,11 +1,11 @@
 #! python3  # noqa: E265
 
 """
-    Log management.
+Log management.
 
-    Author: Julien Moura
+Author: Julien Moura
 
-    See: https://docs.python.org/fr/3/howto/logging.html
+See: https://docs.python.org/fr/3/howto/logging.html
 """
 
 # #############################################################################

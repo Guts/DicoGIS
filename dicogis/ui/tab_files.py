@@ -2,10 +2,10 @@
 
 
 """
-    Name:         TabFiles
-    Purpose:      Tab containing files widgets in DicoGIS Notebook.
+Name:         TabFiles
+Purpose:      Tab containing files widgets in DicoGIS Notebook.
 
-    Author:       Julien Moura (@geojulien)
+Author:       Julien Moura (@geojulien)
 """
 
 # ##############################################################################

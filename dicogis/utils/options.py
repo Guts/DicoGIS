@@ -2,10 +2,10 @@
 
 
 """
-    Name:         Options Manager
-    Purpose:      Load & save settings of a parent module
+Name:         Options Manager
+Purpose:      Load & save settings of a parent module
 
-    Author:       Julien Moura (@geojulien)
+Author:       Julien Moura (@geojulien)
 """
 
 # #############################################################################
