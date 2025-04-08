@@ -1,12 +1,12 @@
 #! python3  # noqa: E265
 
 """
-    Name:         InfosSHP
-    Purpose:      Use GDAL/OGR library to extract informations about
-                       geographic data. It permits a more friendly use as
-                       submodule.
+Name:         InfosSHP
+Purpose:      Use GDAL/OGR library to extract informations about
+                   geographic data. It permits a more friendly use as
+                   submodule.
 
-    Author:       Julien Moura (https://github.com/Guts/)
+Author:       Julien Moura (https://github.com/Guts/)
 """
 
 # ############################################################################

@@ -2,10 +2,10 @@
 
 
 """
-    Name:         TabDatabase
-    Purpose:      Tab containing database widgets in DicoGIS Notebook.
+Name:         TabDatabase
+Purpose:      Tab containing database widgets in DicoGIS Notebook.
 
-    Author:       Julien Moura (@geojulien)
+Author:       Julien Moura (@geojulien)
 """
 
 # ##############################################################################

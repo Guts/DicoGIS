@@ -1,9 +1,9 @@
 #! python3
 
 """
-    Usage from the repo root folder:
+Usage from the repo root folder:
 
-        python -m unittest tests.test_georeader_postgis
+    python -m unittest tests.test_georeader_postgis
 """
 
 # #############################################################################

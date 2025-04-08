@@ -1,7 +1,7 @@
 #! python3  # noqa: E265
 
 """
-    Feature attribute model.
+Feature attribute model.
 """
 
 # ############################################################################

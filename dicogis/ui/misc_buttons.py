@@ -1,10 +1,10 @@
 #! python3  # noqa: E265
 
 """
-    Name:         MiscButtons
-    Purpose:      Miscellaneous widgets for DicoGIS Notebook.
+Name:         MiscButtons
+Purpose:      Miscellaneous widgets for DicoGIS Notebook.
 
-    Author:       Julien Moura (@geojulien)
+Author:       Julien Moura (@geojulien)
 """
 
 # ##############################################################################

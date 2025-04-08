@@ -1,8 +1,8 @@
 #! python3
 
 """
-    Usage from the repo root folder:
-        python -m unittest tests.test_infos_vector
+Usage from the repo root folder:
+    python -m unittest tests.test_infos_vector
 """
 
 # #############################################################################
