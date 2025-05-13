@@ -99,7 +99,6 @@ def find_geodata_files(
     li_geoj: list[str] = []
     li_geotiff: list[str] = []
     li_gxt: list[str] = []
-    li_vectors: list[str] = []
     li_dxf: list[str] = []
     li_dwg: list[str] = []
     li_dgn: list[str] = []

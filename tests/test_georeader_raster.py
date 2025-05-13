@@ -16,6 +16,7 @@ from pathlib import Path
 
 # package
 from dicogis.georeaders.read_raster import ReadRasters
+from dicogis.models.metadataset import MetaRasterDataset
 
 # #############################################################################
 # ######## Globals #################
@@ -38,6 +39,7 @@ class TestInfosFlatRaster(unittest.TestCase):
         georeader = ReadRasters()
         for fixture_file in fixtures_files:
             metadataset = georeader.infos_dataset(fixture_file)
+            self.assertIsInstance(metadataset, MetaRasterDataset)
 
 
 # #############################################################################
