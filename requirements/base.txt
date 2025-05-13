@@ -1,6 +1,3 @@
-# Common requirements
-# -----------------------
-
 distro==1.9.* ; sys_platform == 'linux'
 lxml>=4.9,<5.4
 notify-py>=0.3.42,<0.4
@@ -10,3 +7,5 @@ pgserviceparser>=2.2,<3
 requests>=2.32.3,<3
 ttkthemes>=3.2,<3.3
 typer>=0.12,<1
+
+-c constraints.txt
