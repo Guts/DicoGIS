@@ -115,7 +115,7 @@ class MetaDataset:
         if self.files_dependencies:
             description += (
                 "- Related files: "
-                + f"{', '.join([str(filepath.resolve()) for filepath  in self.files_dependencies])}\n"
+                + f"{', '.join([str(filepath.resolve()) for filepath in self.files_dependencies])}\n"
             )
 
         if isinstance(self, MetaVectorDataset) and self.feature_attributes:

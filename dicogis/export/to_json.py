@@ -6,7 +6,6 @@
 # ########## Libraries #############
 # ##################################
 
-
 # Standard library
 import json
 import logging

@@ -78,7 +78,6 @@ class ReadVectorFlatDataset(GeoReaderBase):
                     dataset_type=self.dataset_type,
                 )
             elif self.dataset_type == "flat_database":
-
                 metadataset = MetaDatabaseFlat(
                     path=source_path,
                     name=source_path.stem,
