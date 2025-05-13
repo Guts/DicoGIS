@@ -1,3 +1,84 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "dicogis"
+description = "Create Excel spreadsheet describing geographical data from a PostGIS Database or a file tree structure."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10, <4"
+authors = [{ name = "Julien Moura", email = "dev@ingeoveritas.com" }]
+keywords = ["GDAL", "GIS", "INSPIRE", "OGR", "data management", "metadata"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Information Technology",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+dependencies = [
+    "distro==1.9.* ; sys_platform == 'linux'",
+    "lxml>=5.1,<5.4",
+    "notify-py>=0.3.42,<0.4",
+    "numpy>=2.0.2,<2.6",
+    "openpyxl>=3.0,<3.2",
+    "pgserviceparser>=2.2,<3",
+    "requests>=2.32.3,<3",
+    "ttkthemes>=3.2,<3.3",
+    "typer>=0.12,<1",
+]
+version = "4.0.0-beta10"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8-bugbear>=23",
+    "flake8-builtins>=2",
+    "flake8-docstrings>=1.6",
+    "flake8-eradicate>=1",
+    "flake8-isort>=5",
+    "pre-commit>=4,<5",
+    "ruff>=0.11.5,<0.12.0",
+]
+doc = [
+    "furo>=2024",
+    "matplotlib>=3.8,<4",
+    "myst-parser[linkify]>=2",
+    "sphinx-autobuild>=2021",
+    "sphinx-autodoc-typehints>=2.2.2,<3.1",
+    "sphinx-click>=5",
+    "sphinx-copybutton<1",
+    "sphinx-design>=0.5,<1",
+    "sphinx-sitemap>=2.4,<3",
+    "sphinxcontrib-mermaid<2",
+    "sphinxext-opengraph>=0.9",
+]
+gdal = ["gdal==3.9.1"]
+test = ["packaging>=20,<25", "pytest-cov>=4,<7", "validators>=0.29.0,<0.36"]
+
+[project.scripts]
+dicogis-cli = "dicogis.cli.main:dicogis_cli"
+
+[project.gui-scripts]
+dicogis-gui = "dicogis.ui.main:dicogis_gui"
+
+[project.urls]
+"Bug Reports" = "https://github.com/Guts/DicoGIS/issues/"
+Docs = "https://guts.github.io/DicoGIS/"
+Homepage = "https://github.com/Guts/DicoGIS/"
+Source = "https://github.com/Guts/DicoGIS/"
+
+[tool.setuptools.dynamic]
+version = {attr = "dicogis.__about__.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["dicogis"]

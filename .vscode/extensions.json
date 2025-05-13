@@ -1,11 +1,12 @@
 {
     "recommendations": [
+        "charliermarsh.ruff",
         "github.vscode-pull-request-github",
         "grapecity.gc-excelviewer",
         "ms-python.python",
         "ms-python.flake8",
         "ms-python.isort",
         "njpwerner.autodocstring",
-        "tamasfe.even-better-toml"
+        "tamasfe.even-better-toml",
     ]
 }

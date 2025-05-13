@@ -4,11 +4,8 @@ channels:
   - defaults
 dependencies:
   - nomkl
-  - gdal=3.4.3
+  - gdal=3.9.1
   - pip
   - pyinstaller>=5
   - setuptools
   - wheel
-  - pip:
-      - -r base.txt
-      - -r development.txt
