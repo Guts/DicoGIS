@@ -18,7 +18,6 @@ on:
     paths:
       - ".github/workflows/docs_builder.yml"
       - docs/**/*
-      - requirements/documentation.txt
 
   workflow_dispatch:
 
@@ -50,7 +49,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
-          cache-dependency-path: "requirements/documentation.txt"
+          cache-dependency-path: pyproject.toml
 
       - name: Install GDAL binaries
         run: |
@@ -70,8 +69,6 @@ jobs:
           python -m pip install -U pip setuptools wheel
           # Install GDAL first
           python -m pip install GDAL=="`gdal-config --version`.*"
-          # then project
-          python -m pip install -U -r requirements/base.txt
 
       # this job must run before installing other dependencies to avoid listing everything
       - name: Generates dependencies graph page with pipdetree
@@ -87,13 +84,8 @@ jobs:
           python -m pip install -U "pip-licenses<5"
           pip-licenses --format=markdown --with-authors --with-description --with-urls --ignore-packages dicogis --output-file=docs/misc/licenses.md
 
-      - name: Install documentation requirements
-        run: |
-          # python -m pip install -U -r requirements/development.txt
-          python -m pip install -U -r requirements/documentation.txt
-
       - name: Install project as a package
-        run: python -m pip install .[gdal]
+        run: python -m pip install .[doc,gdal]
 
       - name: Build doc using Sphinx
         run: sphinx-build -b html -d docs/_build/cache -j auto -q docs docs/_build/html

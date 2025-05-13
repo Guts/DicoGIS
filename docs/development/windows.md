@@ -49,14 +49,12 @@ py -3.10 -m venv .venv
 
 ```powershell
 python -m pip install -U pip setuptools wheel
-python -m pip install -U -r requirements/development.txt
-python -m pip install -U -r requirements/windows.txt
 ```
 
 ## Install project
 
 ```sh
-python -m pip install -U -e .[dev]
+python -m pip install -U -e .[dev,windows]
 ```
 
 ### Try it
