@@ -55,10 +55,6 @@
     "autoDocstring.guessTypes": true,
     "autoDocstring.docstringFormat": "google-notypes",
     "autoDocstring.generateDocstringOnEnter": false,
-    "flake8.args": [
-        "--config=setup.cfg",
-        "--verbose"
-    ],
     "isort.args": [
         "--profile",
         "black"

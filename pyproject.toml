@@ -46,6 +46,7 @@ dev = [
     "flake8-docstrings>=1.6",
     "flake8-eradicate>=1",
     "flake8-isort>=5",
+    "Flake8-pyproject>=1.2.3",
     "pre-commit>=4,<5",
     "ruff>=0.11.5,<0.12.0",
 ]
@@ -77,8 +78,74 @@ Docs = "https://guts.github.io/DicoGIS/"
 Homepage = "https://github.com/Guts/DicoGIS/"
 Source = "https://github.com/Guts/DicoGIS/"
 
+
+[tool.coverage.report]
+exclude_lines = [
+    "if self.debug:",
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+ignore_errors = true
+show_missing = true
+
+[tool.coverage.run]
+branch = true
+include = ["dicogis/*"]
+omit = [".venv/*", "*migrations*", "*tests*"]
+
+
+[tool.flake8]
+count = true
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs/conf.py",
+    "old",
+    "build",
+    "dist",
+    ".venv*",
+    "tests",
+]
+ignore = ["E121", "E123", "E126", "E203", "E226", "E24", "E704", "W503", "W504"]
+max-complexity = 15
+max-doc-length = 130
+max-line-length = 100
+output-file = "dev_flake8_report.txt"
+statistics = true
+tee = true
+
+
+[tool.isort]
+ensure_newline_before_comments = true
+force_grid_wrap = 0
+include_trailing_comma = true
+line_length = 88
+multi_line_output = 3
+profile = "black"
+use_parentheses = true
+
+
+[tool.pytest.ini_options]
+addopts = """
+    --junitxml=junit/test-results.xml
+    --cov-config=setup.cfg
+    --cov=dicogis
+    --cov-report=html
+    --cov-report=term
+    --cov-report=xml
+    --cov-append tests/
+    --ignore=tests/_wip/
+"""
+junit_family = "xunit2"
+minversion = "5.0"
+norecursedirs = ".* build dev development dist docs CVS fixtures _darcs {arch} *.egg venv _wip"
+python_files = "test_*.py"
+testpaths = ["tests"]
+
+
 [tool.setuptools.dynamic]
-version = {attr = "dicogis.__about__.__version__"}
+version = { attr = "dicogis.__about__.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["dicogis"]
