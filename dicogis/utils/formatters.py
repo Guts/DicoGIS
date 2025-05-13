@@ -2,7 +2,6 @@
 
 """Helpers to format text and variables."""
 
-
 # standard library
 import logging
 from functools import lru_cache

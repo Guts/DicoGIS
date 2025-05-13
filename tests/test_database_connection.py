@@ -9,7 +9,6 @@ Usage from the repo root folder:
 # ########## Libraries #############
 # ##################################
 
-
 # Standard library
 import unittest
 from unittest.mock import MagicMock, patch

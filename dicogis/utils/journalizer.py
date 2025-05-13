@@ -12,7 +12,6 @@ See: https://docs.python.org/fr/3/howto/logging.html
 # ########## Libraries #############
 # ##################################
 
-
 # Standard library
 import logging
 from getpass import getuser
@@ -131,7 +130,7 @@ class LogManager:
     def headers(self):
         """Log basic information before other message."""
         # initialize the log
-        logger.info(f"{'='*10} {package_name} - Version {__version__} {'='*10}")
+        logger.info(f"{'=' * 10} {package_name} - Version {__version__} {'=' * 10}")
         logger.info(f"Operating System: {opersys()}")
         logger.info(f"Architecture: {architecture()[0]}")
         logger.info(f"Computer: {gethostname()}")

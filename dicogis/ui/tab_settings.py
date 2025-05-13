@@ -12,7 +12,6 @@ Author:       Julien Moura (@geojulien)
 # ########## Libraries #############
 # ##################################
 
-
 # Standard library
 import logging
 from os import environ, getenv

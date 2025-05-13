@@ -473,8 +473,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"C{row_index}"].style = "Warning Text"
         # gdal info
         worksheet[f"Q{row_index}"] = (
-            f"{metadataset.processing_error_type}: "
-            f"{metadataset.processing_error_msg}"
+            f"{metadataset.processing_error_type}: {metadataset.processing_error_msg}"
         )
         worksheet[f"Q{row_index}"].style = "Warning Text"
         logger.debug(
