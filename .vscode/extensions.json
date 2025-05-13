@@ -5,6 +5,7 @@
         "ms-python.python",
         "ms-python.flake8",
         "ms-python.isort",
-        "njpwerner.autodocstring"
+        "njpwerner.autodocstring",
+        "tamasfe.even-better-toml"
     ]
 }
