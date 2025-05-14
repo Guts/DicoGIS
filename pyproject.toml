@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64",  "setuptools-scm>8"]
+requires = ["setuptools>=64", "setuptools-scm>8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -35,7 +35,10 @@ dependencies = [
     "requests>=2.32.3,<3",
     "ttkthemes>=3.2.2,<3.3",
     "typer>=0.15.3,<1",
+    # constraints
+    "click<8.2.0", # see https://github.com/Guts/DicoGIS/pull/375
 ]
+
 version = "4.0.0-beta10"
 
 [project.optional-dependencies]
@@ -152,5 +155,8 @@ testpaths = ["tests"]
 [tool.setuptools.dynamic]
 version = { attr = "dicogis.__about__.__version__" }
 
+[tool.setuptools.package-data]
+dicogis = ["locale/*", "bin/img/*", "bin/audio/*"]
+
 [tool.setuptools.packages.find]
-include = ["dicogis"]
+where = ["dicogis"]
