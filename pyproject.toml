@@ -159,4 +159,5 @@ version = { attr = "dicogis.__about__.__version__" }
 dicogis = ["locale/*", "bin/img/*", "bin/audio/*"]
 
 [tool.setuptools.packages.find]
-where = ["dicogis"]
+where = ["."]
+include = ["dicogis"]
