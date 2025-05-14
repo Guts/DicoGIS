@@ -7,8 +7,7 @@ on:
     paths:
       - ".github/workflows/tester_ubuntu.yml"
       - "**/*.py"
-      - "requirements/base.txt"
-      - "requirements/testing.txt"
+
   pull_request:
     branches:
         - master
@@ -16,8 +15,7 @@ on:
     paths:
       - ".github/workflows/tester_ubuntu.yml"
       - "**/*.py"
-      - "requirements/base.txt"
-      - "requirements/testing.txt"
+
 
 env:
   GDAL_VERSION: 3.*
@@ -58,7 +56,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
-          cache-dependency-path: "requirements/testing.txt"
+          cache-dependency-path: pyproject.toml
 
       - name: Install GDAL binaries
         run: |
@@ -78,12 +76,9 @@ jobs:
           python -m pip install -U pip setuptools wheel
           # Install GDAL first
           python -m pip install GDAL=="`gdal-config --version`.*"
-          # then other dependencies
-          python -m pip install -U -r requirements/base.txt
-          python -m pip install -U -r requirements/testing.txt
 
       - name: Install project as a package
-        run: python -m pip install -e .
+        run: python -m pip install .[test]
 
       - name: Install tests fixtures
         run: python -m pip install -U gisdata -t ./tests/fixtures

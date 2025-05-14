@@ -7,7 +7,7 @@ Tested on:
 ## Requirements
 
 - GDAL >= 3.4.1
-- Python >= 3.9
+- Python >= 3.10
 - Network access to:
     - Python Package Index: <https://pypi.org/>
 
@@ -114,7 +114,6 @@ source .venv/bin/activate
 ```sh
 python -m pip install -U pip setuptools wheel
 python -m pip install -U gdal=="$(gdal-config --version).*"
-python -m pip install -U -r requirements/base.txt
 ```
 
 ## Install project

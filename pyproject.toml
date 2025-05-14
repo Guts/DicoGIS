@@ -1,0 +1,163 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dicogis"
+description = "Create Excel spreadsheet describing geographical data from a PostGIS Database or a file tree structure."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10, <4"
+authors = [{ name = "Julien Moura", email = "dev@ingeoveritas.com" }]
+keywords = ["GDAL", "GIS", "INSPIRE", "OGR", "data management", "metadata"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Information Technology",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+dependencies = [
+    "distro==1.9.* ; sys_platform == 'linux'",
+    "lxml>=5.1,<5.4",
+    "notify-py>=0.3.42,<0.4",
+    "numpy>=2.0.2,<2.6",
+    "openpyxl>=3.0,<3.2",
+    "pgserviceparser>=2.2,<3",
+    "requests>=2.32.3,<3",
+    "ttkthemes>=3.2.2,<3.3",
+    "typer>=0.15.3,<1",
+    # constraints
+    "click<8.2.0", # see https://github.com/Guts/DicoGIS/pull/375
+]
+
+version = "4.0.0-beta10"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8-bugbear>=23",
+    "flake8-builtins>=2",
+    "flake8-docstrings>=1.6",
+    "flake8-eradicate>=1",
+    "flake8-isort>=5",
+    "Flake8-pyproject>=1.2.3",
+    "pre-commit>=4,<5",
+    "ruff>=0.11.5,<0.12.0",
+]
+doc = [
+    "furo>=2024",
+    "matplotlib>=3.8,<4",
+    "myst-parser[linkify]>=2",
+    "sphinx-autobuild>=2021",
+    "sphinx-autodoc-typehints>=2.2.2,<3.1",
+    "sphinx-click>=5",
+    "sphinx-copybutton<1",
+    "sphinx-design>=0.5,<1",
+    "sphinx-sitemap>=2.4,<3",
+    "sphinxcontrib-mermaid<2",
+    "sphinxext-opengraph>=0.9",
+]
+gdal = ["gdal[numoy]>=3.5.0,<4"]
+packaging = [
+    "distro==1.9.* ; sys_platform == 'linux'",
+    "pyinstaller>=6.8.0,<6.14",
+    "pypiwin32==223 ; sys_platform == 'win32'",
+]
+test = ["packaging>=20,<25", "pytest-cov>=4,<7", "validators>=0.29.0,<0.36"]
+
+[project.scripts]
+dicogis-cli = "dicogis.cli.main:dicogis_cli"
+
+[project.gui-scripts]
+dicogis-gui = "dicogis.ui.main:dicogis_gui"
+
+[project.urls]
+"Bug Reports" = "https://github.com/Guts/DicoGIS/issues/"
+Docs = "https://guts.github.io/DicoGIS/"
+Homepage = "https://github.com/Guts/DicoGIS/"
+Source = "https://github.com/Guts/DicoGIS/"
+
+
+[tool.coverage.report]
+exclude_lines = [
+    "if self.debug:",
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+ignore_errors = true
+show_missing = true
+
+[tool.coverage.run]
+branch = true
+include = ["dicogis/*"]
+omit = [".venv/*", "*migrations*", "*tests*"]
+
+
+[tool.flake8]
+count = true
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs/conf.py",
+    "old",
+    "build",
+    "dist",
+    ".venv*",
+    "tests",
+]
+ignore = ["E121", "E123", "E126", "E203", "E226", "E24", "E704", "W503", "W504"]
+max-complexity = 15
+max-doc-length = 130
+max-line-length = 100
+output-file = "dev_flake8_report.txt"
+statistics = true
+tee = true
+
+
+[tool.isort]
+ensure_newline_before_comments = true
+force_grid_wrap = 0
+include_trailing_comma = true
+line_length = 88
+multi_line_output = 3
+profile = "black"
+use_parentheses = true
+
+
+[tool.pytest.ini_options]
+addopts = """
+    --junitxml=junit/test-results.xml
+    --cov-config=pyproject.toml
+    --cov=dicogis
+    --cov-report=html
+    --cov-report=term
+    --cov-report=xml
+    --cov-append tests/
+    --ignore=tests/_wip/
+"""
+junit_family = "xunit2"
+minversion = "5.0"
+norecursedirs = ".* build dev development dist docs CVS fixtures _darcs {arch} *.egg venv _wip"
+python_files = "test_*.py"
+testpaths = ["tests"]
+
+
+[tool.setuptools.dynamic]
+version = { attr = "dicogis.__about__.__version__" }
+
+[tool.setuptools.package-data]
+dicogis = ["locale/*", "bin/img/*", "bin/audio/*"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dicogis"]
