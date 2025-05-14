@@ -134,7 +134,7 @@ use_parentheses = true
 [tool.pytest.ini_options]
 addopts = """
     --junitxml=junit/test-results.xml
-    --cov-config=setup.cfg
+    --cov-config=pyproject.toml
     --cov=dicogis
     --cov-report=html
     --cov-report=term
