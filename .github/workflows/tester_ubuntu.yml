@@ -24,7 +24,7 @@ env:
 
 jobs:
   test-ubuntu:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       export_output_folder: tests/ci/ubuntu
 
