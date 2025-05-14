@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=64",  "setuptools-scm>8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -33,8 +33,8 @@ dependencies = [
     "openpyxl>=3.0,<3.2",
     "pgserviceparser>=2.2,<3",
     "requests>=2.32.3,<3",
-    "ttkthemes>=3.2,<3.3",
-    "typer>=0.12,<1",
+    "ttkthemes>=3.2.2,<3.3",
+    "typer>=0.15.3,<1",
 ]
 version = "4.0.0-beta10"
 
@@ -63,7 +63,7 @@ doc = [
     "sphinxcontrib-mermaid<2",
     "sphinxext-opengraph>=0.9",
 ]
-gdal = ["gdal==3.9.1"]
+gdal = ["gdal[numoy]>=3.5.0,<4"]
 packaging = [
     "distro==1.9.* ; sys_platform == 'linux'",
     "pyinstaller>=6.8.0,<6.14",

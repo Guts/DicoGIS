@@ -85,7 +85,7 @@ jobs:
           pip-licenses --format=markdown --with-authors --with-description --with-urls --ignore-packages dicogis --output-file=docs/misc/licenses.md
 
       - name: Install project as a package
-        run: python -m pip install .[doc,gdal]
+        run: python -m pip install .[doc]
 
       - name: Build doc using Sphinx
         run: sphinx-build -b html -d docs/_build/cache -j auto -q docs docs/_build/html
