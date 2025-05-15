@@ -122,19 +122,22 @@ class DatabaseConnection:
                 raise ValueError(
                     "Database connection results as an empty dictionary and can't be saved."
                 )
-
             pgserviceparser.write_service(
                 service_name=self.service_name,
                 settings=self.connection_params_as_dict,
                 create_if_not_found=True,
             )
-            return True, f"{self.service_name} saved to {pgserviceparser.conf_path()}"
+            return (
+                True,
+                f"Postgres service '{self.service_name}' saved to "
+                f"{pgserviceparser.conf_path()}",
+            )
         except Exception as err:
             err_msg = (
-                "Saving database connection as service in "
+                f"Saving database connection as service named '{self.service_name}' in "
                 f"{pgserviceparser.conf_path()} failed. Trace: {err}"
             )
-            logger.error(err_msg, stack_info=True)
+            logger.error(err_msg)
             return False, err_msg
 
 

@@ -69,7 +69,14 @@ class TabDatabaseServer(Frame):
         super().__init__(parent)
 
         # attributes
-        self.pg_services_names = pgserviceparser.service_names()
+        try:
+            self.pg_services_names = pgserviceparser.service_names()
+        except pgserviceparser.ServiceFileNotFound as err:
+            logger.info(
+                f"Unable to find the pg_service.conf file: {err} "
+                "Using empty list for pg_services_names.",
+            )
+            self.pg_services_names = []
 
         # handle empty localized strings
         self.localized_strings = localized_strings
@@ -91,12 +98,11 @@ class TabDatabaseServer(Frame):
         self.opt_pg_views = IntVar(
             self.FrameDatabaseServicePicker
         )  # able/disable PostGIS views
-        self.li_pg_services = pgserviceparser.service_names()
 
         # Form widgets
         self.ddl_pg_services = Combobox(
             self.FrameDatabaseServicePicker,
-            values=self.li_pg_services,
+            values=self.pg_services_names,
             state="readonly",
         )
 
