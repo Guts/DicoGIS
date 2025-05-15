@@ -20,11 +20,19 @@ on:
 env:
   GDAL_VERSION: 3.*
   PROJECT_FOLDER: "dicogis"
-  PYTHON_VERSION: "3.10"
 
 jobs:
   test-ubuntu:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+
     env:
       export_output_folder: tests/ci/ubuntu
 
@@ -54,13 +62,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ matrix.python-version }}
           cache: "pip"
           cache-dependency-path: pyproject.toml
 
       - name: Install GDAL binaries
         run: |
-          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable && sudo apt-get update
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable && sudo apt update
           sudo apt install gdal-bin=${{ env.GDAL_VERSION }}
           sudo apt install libgdal-dev=${{ env.GDAL_VERSION }}
           export CPLUS_INCLUDE_PATH=/usr/include/gdal
@@ -88,12 +96,13 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5.4.2
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          PYTHON: ${{ matrix.python-version }}
         with:
           env_vars: PYTHON
           flags: unittests
-          name: Code Coverage for unittests on Ubuntu (Python-${{ env.PYTHON_VERSION }}]
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          name: Code Coverage for unittests on Ubuntu (python-${{ matrix.python-version }}]
 
       - name: Minimal integration test - help
         run: dicogis-cli --help
@@ -110,6 +119,6 @@ jobs:
       - name: Save generated files as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dicogis_results_ubuntu
+          name: dicogis_results_ubuntu-py${{ matrix.python-version }}
           path: ${{ env.export_output_folder }}/*
           if-no-files-found: error
