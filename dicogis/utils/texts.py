@@ -62,7 +62,7 @@ class TextsManager:
         self.language_code: str | None = None
 
     @lru_cache
-    def load_texts(self, language_code: str | tuple = "EN") -> dict:
+    def load_texts(self, language_code: str | tuple = "EN") -> dict[str, str]:
         """Load texts according to the specified language code.
 
         Args:

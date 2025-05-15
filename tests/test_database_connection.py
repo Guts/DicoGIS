@@ -99,7 +99,8 @@ class TestDatabaseConnection(unittest.TestCase):
         status, message = self.db_conn.store_in_pgservice_file()
         self.assertTrue(status)
         self.assertEqual(
-            message, f"{self.db_conn.service_name} saved to /fake/path/.pg_service.conf"
+            message,
+            f"Postgres service '{self.db_conn.service_name}' saved to /fake/path/.pg_service.conf",
         )
 
     @patch("pgserviceparser.write_service", side_effect=Exception("write error"))
@@ -111,7 +112,7 @@ class TestDatabaseConnection(unittest.TestCase):
         status, message = self.db_conn.store_in_pgservice_file()
         self.assertFalse(status)
         self.assertIn(
-            "Saving database connection as service in /fake/path/.pg_service.conf failed.",
+            "Saving database connection as service named 'test_service' in /fake/path/.pg_service.conf failed. Trace: write error",
             message,
         )
         self.assertIn("write error", message)
