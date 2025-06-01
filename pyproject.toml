@@ -37,7 +37,7 @@ dependencies = [
     "ttkthemes>=3.2.2,<3.3",
     "typer>=0.15.3,<1",
     # constraints
-    "click<8.2.0", # see https://github.com/Guts/DicoGIS/pull/375
+    "click<8.3.0", # see https://github.com/Guts/DicoGIS/pull/375
 ]
 
 version = "4.0.0-beta10"
