@@ -73,7 +73,7 @@ packaging = [
     "pyinstaller>=6.8.0,<6.14",
     "pypiwin32==223 ; sys_platform == 'win32'",
 ]
-test = ["packaging>=20,<25", "pytest-cov>=4,<7", "validators>=0.29.0,<0.36"]
+test = ["packaging>=20,<26", "pytest-cov>=4,<7", "validators>=0.29.0,<0.36"]
 
 [project.scripts]
 dicogis-cli = "dicogis.cli.main:dicogis_cli"
