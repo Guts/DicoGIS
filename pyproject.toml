@@ -28,7 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "distro==1.9.* ; sys_platform == 'linux'",
-    "lxml>=5.1,<5.4",
+    "lxml>=5.1,<5.5",
     "notify-py>=0.3.42,<0.4",
     "numpy>=2.0.2,<2.6",
     "openpyxl>=3.0,<3.2",
