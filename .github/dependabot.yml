@@ -6,8 +6,6 @@ updates:
       interval: monthly
       time: "20:00"
       timezone: Europe/Paris
-    assignees:
-      - guts
     labels:
       - dependencies
 
@@ -15,7 +13,5 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    assignees:
-      - guts
     labels:
       - ci-cd
