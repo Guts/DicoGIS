@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/tester_ubuntu.yml"
       - "**/*.py"
+      - pyproject.toml
 
   pull_request:
     branches:
@@ -15,6 +16,7 @@ on:
     paths:
       - ".github/workflows/tester_ubuntu.yml"
       - "**/*.py"
+      - pyproject.toml
 
 
 env:
