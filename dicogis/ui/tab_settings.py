@@ -24,6 +24,7 @@ from webbrowser import open_new_tab
 from dicogis.__about__ import __uri_homepage__
 from dicogis.ui.collapsible_frame import ToggledFrame
 from dicogis.ui.scrollable_table import ScrollableTable
+from dicogis.utils.str2bool import str2bool
 from dicogis.utils.texts import TextsManager
 
 # ##############################################################################
@@ -74,7 +75,17 @@ class TabSettings(Frame):
         """Create and layout the widgets for the frame."""
         # -- Subframes --
         # Proxy subframe with a check button
-        self.opt_proxy = BooleanVar(self, False)  # proxy optio
+        self.opt_debug = BooleanVar(self, str2bool(getenv("DICOGIS_DEBUG", False)))
+        self.opt_proxy = BooleanVar(self, False)
+
+        self.caz_debug = Checkbutton(
+            self,
+            name="chb_debug_mode",
+            text=self.localized_strings.get("option_debug", "Enable debug mode"),
+            variable=self.opt_debug,
+        )
+        self.caz_debug.grid(sticky="W")
+
         caz_prox = Checkbutton(
             self,
             text="Proxy",
