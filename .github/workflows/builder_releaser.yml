@@ -34,7 +34,7 @@ jobs:
 
     env:
       export_output_folder: tests/ci/ubuntu
-      GDAL_VERSION: 3.10.*
+      GDAL_VERSION: 3.11.*
 
     steps:
       - name: Get source code
