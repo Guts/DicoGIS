@@ -259,16 +259,16 @@ class ProcessingFiles:
         Returns:
             dataset to process, metadataset or None if something went wrong
         """
+        self.update_progress(
+            message_to_display="Exporting metadata of "
+            f"{dataset_to_process.file_path.name}..."
+        )
         if self.opt_quick_fail:
-            self.update_progress(
-                message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}..."
-            )
             # writing to the Excel file
             self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
-                message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}: OK",
+                message_to_display="Metadata of "
+                f"{dataset_to_process.file_path.name}: EXPORTED",
                 increment_counter=True,
             )
             logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
@@ -276,15 +276,11 @@ class ProcessingFiles:
             return dataset_to_process, metadataset_to_serialize
 
         try:
-            self.update_progress(
-                message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}..."
-            )
             # writing to the Excel file
             self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
-                message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}: OK",
+                message_to_display="Metadata of "
+                f"{dataset_to_process.file_path.name}: EXPORTED",
                 increment_counter=True,
             )
             logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
