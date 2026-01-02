@@ -72,7 +72,7 @@ jobs:
           chmod +x dist/DicoGIS-cli.bin
 
       - name: Save CLI binary as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: DicoGIS_executable_ubuntu_CLI
           path: dist/DicoGIS-cli.bin
@@ -84,7 +84,7 @@ jobs:
             chmod +x dist/DicoGIS-gui.bin
 
       - name: Save it as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: DicoGIS_executable_ubuntu_GUI
           path: dist/DicoGIS-gui.bin
@@ -112,7 +112,7 @@ jobs:
         run: ./dist/DicoGIS-cli.bin inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}" --verbose
 
       - name: Save generated files as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ubuntu_dicogis_integration_tests
           path: ${{ env.export_output_folder }}/*
@@ -154,7 +154,7 @@ jobs:
           python -O ./builder/pyinstaller_build_windows_cli.py
 
       - name: Save CLI binary as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: DicoGIS_executable_windows_CLI
           path: dist/DicoGIS-cli.exe
@@ -165,7 +165,7 @@ jobs:
             python -O ./builder/pyinstaller_build_windows_gui.py
 
       - name: Save it as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: DicoGIS_executable_windows_GUI
           path: dist/DicoGIS-gui.exe
@@ -188,7 +188,7 @@ jobs:
           ./dist/DicoGIS-cli.exe inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}" --verbose
 
       - name: Save generated files as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: windows_dicogis_integration_tests
           path: ${{ env.export_output_folder }}/*
