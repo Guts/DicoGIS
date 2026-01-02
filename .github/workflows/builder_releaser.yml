@@ -208,25 +208,25 @@ jobs:
 
     steps:
       - name: Download built package for Linux (Ubuntu) - GUI
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: DicoGIS_executable_ubuntu_GUI
           path: builds/ubuntu/gui/
 
       - name: Download built package for Linux (Ubuntu) - CLI
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: DicoGIS_executable_ubuntu_CLI
           path: builds/ubuntu/cli/
 
       - name: Download built package for Windows - GUI
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: DicoGIS_executable_windows_GUI
           path: builds/windows/gui/
 
       - name: Download built package for Windows - CLI
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: DicoGIS_executable_windows_CLI
           path: builds/windows/cli/
