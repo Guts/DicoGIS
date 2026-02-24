@@ -199,6 +199,7 @@ junit/
 tests/container/data/*
 tests/fixtures/gisdata*
 tests/fixtures/qgisdata
+tests/fixtures/tmp/
 tests/dev/tmp/
 DicoGIS_*/*.json
 
