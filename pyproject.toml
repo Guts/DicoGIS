@@ -35,7 +35,7 @@ dependencies = [
     "pgserviceparser>=2.4,<3",
     "requests>=2.32.3,<3",
     "ttkthemes>=3.2.2,<3.4",
-    "typer>=0.16.0,<1",
+    "typer>=0.24.1,<1",
 ]
 
 version = "4.0.0-beta10"
