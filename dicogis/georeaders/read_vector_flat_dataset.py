@@ -17,7 +17,6 @@ Author:       Julien Moura (https://github.com/Guts/)
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
 
 # 3rd party
 from osgeo import ogr
@@ -48,9 +47,9 @@ class ReadVectorFlatDataset(GeoReaderBase):
 
     def infos_dataset(
         self,
-        source_path: Union[Path, str],
-        metadataset: Optional[MetaVectorDataset] = None,
-        fallback_format: Optional[str] = None,
+        source_path: Path | str,
+        metadataset: MetaVectorDataset | None = None,
+        fallback_format: str | None = None,
     ) -> MetaVectorDataset | MetaDatabaseFlat:
         """Get metadata from dataset.
 

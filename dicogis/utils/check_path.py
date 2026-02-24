@@ -15,7 +15,6 @@ import logging
 from os import R_OK, W_OK, access
 from os.path import expanduser, expandvars
 from pathlib import Path
-from typing import Union
 
 # #############################################################################
 # ########## Globals ###############
@@ -98,7 +97,7 @@ def check_var_can_be_path(
 
 
 def check_path_exists(
-    input_path: Union[str, Path], attempt: int = 1, raise_error: bool = True
+    input_path: str | Path, attempt: int = 1, raise_error: bool = True
 ) -> bool:
     """Check if the input path (file or folder) exists.
 
@@ -218,7 +217,7 @@ def check_path_is_writable(input_path: Path, raise_error: bool = True) -> bool:
 
 
 def check_path(
-    input_path: Union[Path, str],
+    input_path: Path | str,
     must_exists: bool = True,
     must_be_readable: bool = True,
     must_be_writable: bool = False,

@@ -9,7 +9,6 @@ import logging
 from collections.abc import Iterable
 from functools import lru_cache
 from pathlib import Path
-from typing import Union
 
 # 3rd party library
 from openpyxl import Workbook
@@ -353,7 +352,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         return any(style.name == style_name for style in self.workbook.named_styles)
 
     @lru_cache(maxsize=128, typed=True)
-    def format_as_hyperlink(self, target: Union[str, Path], label: str) -> str:
+    def format_as_hyperlink(self, target: str | Path, label: str) -> str:
         """Format a cell hyperlink with a target and a label.
 
         Args:

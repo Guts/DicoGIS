@@ -34,7 +34,6 @@ from tkinter.ttk import (
     Notebook,
     Progressbar,
 )
-from typing import Optional
 
 # 3rd party
 from osgeo import gdal
@@ -719,7 +718,7 @@ class DicoGIS(ThemedTk):
         # End of function
         return True
 
-    def test_connection(self) -> Optional[ReadPostGIS]:
+    def test_connection(self) -> ReadPostGIS | None:
         """Test database connection.
 
         Returns:

@@ -10,7 +10,6 @@
 import logging
 from configparser import ConfigParser
 from pathlib import Path
-from typing import Union
 
 # #############################################################################
 # ########## Globals ###############
@@ -24,7 +23,7 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-def read_db_conf(dbconf_path: Path) -> Union[list, dict]:
+def read_db_conf(dbconf_path: Path) -> list | dict:
     """Read databases configuration files and return parameters as list of dictionaries.
 
     Args:

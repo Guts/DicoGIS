@@ -9,7 +9,6 @@
 # Standard library
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 # 3rd party
 import pgserviceparser
@@ -32,21 +31,21 @@ logger = logging.getLogger(__name__)
 class DatabaseConnection:
     """Database connection abstraction model."""
 
-    name: Optional[str] = None
-    database_name: Optional[str] = None
-    host: Optional[str] = None
-    port: Optional[int] = None
-    service_name: Optional[str] = None
-    user_name: Optional[str] = None
-    user_password: Optional[str] = None
+    name: str | None = None
+    database_name: str | None = None
+    host: str | None = None
+    port: int | None = None
+    service_name: str | None = None
+    user_name: str | None = None
+    user_password: str | None = None
     # spatial extension
     is_esri_sde: bool = False
     is_postgis: bool = True
     # SGBD properties
-    sgbd_schemas: Optional[set[str]] = None
-    sgbd_version: Optional[str] = None
+    sgbd_schemas: set[str] | None = None
+    sgbd_version: str | None = None
     # special
-    state_msg: Optional[str] = None
+    state_msg: str | None = None
 
     @property
     def connection_params_as_dict(self) -> dict | None:

@@ -14,10 +14,10 @@ Author:       Julien Moura (@geojulien)
 
 # Standard library
 import logging
+from collections.abc import Callable
 from os import environ, getenv
 from tkinter import ACTIVE, DISABLED, RAISED, BooleanVar, IntVar, StringVar
 from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Labelframe, Widget
-from typing import Callable
 from webbrowser import open_new_tab
 
 # project

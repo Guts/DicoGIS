@@ -21,7 +21,6 @@ from pathlib import Path
 from platform import architecture
 from platform import platform as opersys
 from socket import gethostname
-from typing import Optional
 from urllib.request import getproxies
 
 # modules
@@ -57,7 +56,7 @@ class LogManager:
         console_level: int = logging.WARNING,
         file_level: int = logging.INFO,
         label: str = package_name,
-        folder: Optional[Path] = None,
+        folder: Path | None = None,
     ):
         """Initialize.
 
