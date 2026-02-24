@@ -146,7 +146,7 @@ addopts = """
 """
 junit_family = "xunit2"
 minversion = "5.0"
-norecursedirs = ".* build dev development dist docs CVS fixtures _darcs {arch} *.egg venv _wip"
+norecursedirs = ".* build dev development dist docs CVS fixtures _darcs {arch} *.egg venv _wip  tests/container/data" 
 python_files = "test_*.py"
 testpaths = ["tests"]
 

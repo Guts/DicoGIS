@@ -196,6 +196,9 @@ arcpy.pth
 
 # tests
 junit/
+tests/container/data/*
+tests/fixtures/gisdata*
+tests/fixtures/qgisdata
 tests/dev/tmp/
 DicoGIS_*/*.json
 
@@ -204,7 +207,6 @@ DicoGIS_*/*.json
 *.xls
 *.xlsx
 arcpy.pth
-tests/fixtures/gisdata*
 
 
 # packaging
