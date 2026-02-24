@@ -10,7 +10,7 @@ import logging
 from locale import getlocale
 from os import path
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Literal
 
 # 3rd party libraries
 from osgeo import gdal, ogr, osr
@@ -47,7 +47,7 @@ class GeoReaderBase:
             "flat_vector",
             "sgbd_postgis",
         ],
-        localized_strings: Optional[dict] = None,
+        localized_strings: dict | None = None,
     ) -> None:
         """Initialization.
 
@@ -76,7 +76,7 @@ class GeoReaderBase:
         ogr.UseExceptions()
 
     def calc_size_full_dataset(
-        self, source_path: Union[Path, str], dependencies: Optional[list[Path]] = None
+        self, source_path: Path | str, dependencies: list[Path] | None = None
     ) -> int:
         """Calculate size of dataset and its dependencies.
 
@@ -110,9 +110,9 @@ class GeoReaderBase:
 
     def erratum(
         self,
-        target_container: Union[dict, MetaDataset],
-        src_path: Optional[str] = None,
-        src_dataset_layer: Optional[ogr.Layer] = None,
+        target_container: dict | MetaDataset,
+        src_path: str | None = None,
+        src_dataset_layer: ogr.Layer | None = None,
         err_type: int = 1,
         err_msg: str = "",
     ):
@@ -144,8 +144,8 @@ class GeoReaderBase:
             return target_container
 
     def get_extent_as_tuple(
-        self, dataset_or_layer: Union[ogr.Layer, gdal.Dataset]
-    ) -> tuple[Optional[float], Optional[float], Optional[float], Optional[float]]:
+        self, dataset_or_layer: ogr.Layer | gdal.Dataset
+    ) -> tuple[float | None, float | None, float | None, float | None]:
         """Get spatial extent (bounding box)."""
         if hasattr(dataset_or_layer, "GetExtent"):
             return (
@@ -236,7 +236,7 @@ class GeoReaderBase:
         return None
 
     def get_srs_details(
-        self, dataset_or_layer: Union[ogr.Layer, gdal.Dataset]
+        self, dataset_or_layer: ogr.Layer | gdal.Dataset
     ) -> tuple[str, str, str, str]:
         """Get coordinates system name, type and registry code.
 
@@ -351,7 +351,7 @@ class GeoReaderBase:
 
     def list_dependencies(
         self,
-        main_dataset: Union[Path, str, gdal.Dataset],
+        main_dataset: Path | str | gdal.Dataset,
     ) -> list[Path]:
         """List dependant files around a main file.
 
@@ -383,7 +383,7 @@ class GeoReaderBase:
 
         return file_dependencies
 
-    def open_dataset_with_gdal(self, source_dataset: Union[Path, str]) -> gdal.Dataset:
+    def open_dataset_with_gdal(self, source_dataset: Path | str) -> gdal.Dataset:
         """Open dataset with GDAL (OGR).
 
         Args:

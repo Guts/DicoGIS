@@ -24,7 +24,6 @@ from tkinter import END, IntVar, StringVar, Tk
 from tkinter.filedialog import askdirectory
 from tkinter.messagebox import showinfo
 from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Labelframe
-from typing import Optional
 
 # project
 from dicogis.constants import FormatsRaster
@@ -160,7 +159,7 @@ class TabFiles(Frame):
         self.FrPath.grid(row=3, column=1, padx=2, pady=2, sticky="NSWE")
         self.FrFilters.grid(row=4, column=1, padx=2, pady=2, sticky="NSWE")
 
-    def on_browse_get_initial_listing_folder_path(self) -> Optional[Path]:
+    def on_browse_get_initial_listing_folder_path(self) -> Path | None:
         """Browse and insert the path of target folder.
 
         Returns:

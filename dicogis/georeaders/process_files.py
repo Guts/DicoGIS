@@ -8,13 +8,12 @@
 
 # standard library
 import logging
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from locale import getlocale
 from os import path
 from pathlib import Path
 from tkinter import IntVar, StringVar
-from typing import Callable, Optional
 
 # package
 from dicogis.export.base_serializer import MetadatasetSerializerBase
@@ -49,9 +48,9 @@ class DatasetToProcess:
     file_format: str
     georeader: object
     processed: bool = False
-    process_error: Optional[str] = None
+    process_error: str | None = None
     exported: bool = False
-    export_error: Optional[str] = None
+    export_error: str | None = None
 
 
 class ProcessingFiles:
@@ -75,23 +74,23 @@ class ProcessingFiles:
     def __init__(
         self,
         serializer: MetadatasetSerializerBase,
-        localized_strings: Optional[dict],
+        localized_strings: dict | None,
         # input lists of files to process
-        li_cdao: Optional[Iterable],
-        li_dxf: Optional[Iterable],
-        li_flat_geodatabase_esri_filegdb: Optional[Iterable],
-        li_flat_geodatabase_geopackage: Optional[Iterable],
-        li_flat_geodatabase_spatialite: Optional[Iterable],
-        li_geojson: Optional[Iterable],
-        li_geotiff: Optional[Iterable],
-        li_gxt: Optional[Iterable],
-        li_gml: Optional[Iterable],
-        li_kml: Optional[Iterable],
-        li_mapinfo_tab: Optional[Iterable],
-        li_shapefiles: Optional[Iterable],
-        li_vectors: Optional[Iterable],
-        li_rasters: Optional[Iterable],
-        li_file_databases: Optional[Iterable],
+        li_cdao: Iterable | None,
+        li_dxf: Iterable | None,
+        li_flat_geodatabase_esri_filegdb: Iterable | None,
+        li_flat_geodatabase_geopackage: Iterable | None,
+        li_flat_geodatabase_spatialite: Iterable | None,
+        li_geojson: Iterable | None,
+        li_geotiff: Iterable | None,
+        li_gxt: Iterable | None,
+        li_gml: Iterable | None,
+        li_kml: Iterable | None,
+        li_mapinfo_tab: Iterable | None,
+        li_shapefiles: Iterable | None,
+        li_vectors: Iterable | None,
+        li_rasters: Iterable | None,
+        li_file_databases: Iterable | None,
         # options
         opt_analyze_esri_filegdb: bool = True,
         opt_analyze_geojson: bool = True,
@@ -106,9 +105,9 @@ class ProcessingFiles:
         opt_analyze_shapefiles: bool = True,
         opt_analyze_spatialite: bool = True,
         # progress
-        progress_message_displayer: Optional[StringVar] = None,
-        progress_counter: Optional[IntVar] = None,
-        progress_callback_cmd: Optional[Callable] = None,
+        progress_message_displayer: StringVar | None = None,
+        progress_counter: IntVar | None = None,
+        progress_callback_cmd: Callable | None = None,
         # misc
         opt_quick_fail: bool = False,
     ) -> None:
@@ -158,8 +157,8 @@ class ProcessingFiles:
 
         # others
         self.opt_quick_fail = opt_quick_fail
-        self.total_files: Optional[int] = None
-        self.li_files_to_process: list[Optional[DatasetToProcess]] = []
+        self.total_files: int | None = None
+        self.li_files_to_process: list[DatasetToProcess | None] = []
         self.localized_strings = localized_strings
         if self.localized_strings is None:
             self.localized_strings = txt_manager.load_texts(language_code=getlocale())

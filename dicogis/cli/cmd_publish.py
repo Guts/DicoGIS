@@ -8,7 +8,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 # 3rd party
 import typer
@@ -39,7 +39,7 @@ state = {"verbose": False}
 
 def publish(
     input_folder: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             dir_okay=True,
             envvar="DICOGIS_PUBLISH_INPUT_FOLDER",
@@ -51,7 +51,7 @@ def publish(
         ),
     ] = None,
     udata_api_key: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             envvar="DICOGIS_UDATA_API_KEY",
             help="API key of the account uData instance.",
@@ -61,21 +61,21 @@ def publish(
         ),
     ] = None,
     udata_api_url_base: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             envvar="DICOGIS_UDATA_API_URL_BASE",
             help="API URL of the uData instance.",
         ),
     ] = "https://demo.data.gouv.fr/api/",
     udata_api_version: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             envvar="DICOGIS_UDATA_API_VERSION",
             help="API's version of the uData instance.",
         ),
     ] = "1",
     udata_organization_id: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             envvar="DICOGIS_UDATA_ORGANIZATION_ID",
             help="Organization ID in uData instance. If set, datasets will be added to "

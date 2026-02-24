@@ -9,7 +9,6 @@
 # Standard library
 import logging
 from functools import lru_cache
-from typing import Optional
 
 # 3rd party libraries
 from osgeo import gdal, ogr
@@ -39,12 +38,12 @@ class ReadPostGIS(GeoReaderBase):
     def __init__(
         self,
         # connection parameters
-        host: Optional[str] = None,
-        port: Optional[int] = None,
-        db_name: Optional[str] = None,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
-        service: Optional[str] = None,
+        host: str | None = None,
+        port: int | None = None,
+        db_name: str | None = None,
+        user: str | None = None,
+        password: str | None = None,
+        service: str | None = None,
         views_included: bool = True,
     ):
         """Uses OGR to extract basic informations about geodata stored into a PostGIS
@@ -65,7 +64,7 @@ class ReadPostGIS(GeoReaderBase):
         """
 
         # Creating variables
-        self.conn: Optional[ogr.DataSource] = None
+        self.conn: ogr.DataSource | None = None
         self.counter_alerts = 0
         self.views_included = views_included
 
@@ -83,7 +82,7 @@ class ReadPostGIS(GeoReaderBase):
 
         super().__init__(dataset_type="sgbd_postgis")
 
-    def get_connection(self) -> Optional[ogr.DataSource]:
+    def get_connection(self) -> ogr.DataSource | None:
         """Open a connection to the PostgreSQL database using GDAL.
 
         Returns:
@@ -121,7 +120,7 @@ class ReadPostGIS(GeoReaderBase):
             return None
 
     @lru_cache
-    def get_postgis_version(self) -> Optional[str]:
+    def get_postgis_version(self) -> str | None:
         """Returns the version of PostGIS extension.
 
         Returns:
@@ -153,8 +152,8 @@ class ReadPostGIS(GeoReaderBase):
     def infos_dataset(
         self,
         layer: ogr.Layer,
-        metadataset: Optional[MetaDatabaseTable] = None,
-    ) -> Optional[MetaDatabaseTable]:
+        metadataset: MetaDatabaseTable | None = None,
+    ) -> MetaDatabaseTable | None:
         """Extract metadata from PostGIS layer and store it into the dictionary.
 
         Args:

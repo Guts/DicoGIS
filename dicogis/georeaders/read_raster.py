@@ -8,7 +8,6 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
 
 # 3rd party libraries
 from osgeo import gdal
@@ -40,9 +39,9 @@ class ReadRasters(GeoReaderBase):
 
     def infos_dataset(
         self,
-        source_path: Union[Path, str],
-        metadataset: Optional[MetaRasterDataset] = None,
-        tipo: Optional[str] = None,
+        source_path: Path | str,
+        metadataset: MetaRasterDataset | None = None,
+        tipo: str | None = None,
     ):
         if isinstance(source_path, str):
             check_var_can_be_path(input_var=source_path, raise_error=True)

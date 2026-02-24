@@ -9,7 +9,7 @@ import logging
 from datetime import date
 from locale import getlocale
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 # 3rd party
 import typer
@@ -92,7 +92,7 @@ def determine_output_path(
 
 def inventory(
     input_folder: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             dir_okay=True,
             envvar="DICOGIS_START_FOLDER",
@@ -114,7 +114,7 @@ def inventory(
         ),
     ] = default_formats,
     pg_services: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             envvar="DICOGIS_POSTGRES_SERVICES",
             help="name(s) of PostgreSQL services to use. It's a repeatable option. "
@@ -122,7 +122,7 @@ def inventory(
         ),
     ] = None,
     output_path: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             dir_okay=True,
             envvar="DICOGIS_OUTPUT_FILEPATH",
@@ -184,7 +184,7 @@ def inventory(
         ),
     ] = False,
     language: Annotated[
-        Optional[AvailableLocales],
+        AvailableLocales | None,
         typer.Option(
             case_sensitive=False,
             envvar="DICOGIS_DEFAULT_LANGUAGE",

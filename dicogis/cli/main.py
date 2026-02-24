@@ -6,7 +6,7 @@
 
 # standard lib
 import logging
-from typing import Annotated, Optional
+from typing import Annotated
 
 # 3rd party
 import typer
@@ -55,7 +55,7 @@ def main(
         ),
     ] = False,
     version: Annotated[
-        Optional[bool],
+        bool | None,
         typer.Option(
             "--version",
             callback=version_callback,

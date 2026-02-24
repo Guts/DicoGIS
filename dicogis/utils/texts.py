@@ -17,7 +17,6 @@ import gettext
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 from xml.etree import ElementTree as ET
 
 # package
@@ -39,7 +38,7 @@ logger = logging.getLogger(__name__)
 class TextsManager:
     """Load texts from localized files to display in a parent program"""
 
-    def __init__(self, locale_folder: Optional[Path] = None):
+    def __init__(self, locale_folder: Path | None = None):
         """Manage texts from a file into a dictionary used to custom program display."""
         self.dicogis_utils = Utilities()
 

@@ -12,7 +12,6 @@ Look for geographic datasets.
 import logging
 from os import path, walk
 from pathlib import Path
-from typing import Optional
 
 # 3rd party
 import pgserviceparser
@@ -32,7 +31,7 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-def check_usable_pg_services(requested_pg_services: list[str]) -> Optional[list[str]]:
+def check_usable_pg_services(requested_pg_services: list[str]) -> list[str] | None:
     """Check if specified postgres services are actually referenced into the
         pg_service.conf. Filters out services which are not present.
 
