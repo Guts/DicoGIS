@@ -98,7 +98,6 @@ show_missing = true
 
 [tool.coverage.run]
 branch = true
-include = ["dicogis/*"]
 omit = [".venv/*", "*migrations*", "*tests*"]
 
 
