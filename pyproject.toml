@@ -68,7 +68,7 @@ doc = [
 gdal = ["gdal[numpy]>=3.5.0,<4"]
 packaging = [
     "distro==1.9.* ; sys_platform == 'linux'",
-    "pyinstaller>=6.8.0,<6.19",
+    "pyinstaller>=6.8.0,<6.20",
     "pypiwin32==223 ; sys_platform == 'win32'",
 ]
 test = ["packaging>=20,<27", "pytest-cov>=4,<8", "validators>=0.29.0,<0.36"]
