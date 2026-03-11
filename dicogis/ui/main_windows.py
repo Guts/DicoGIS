@@ -566,6 +566,14 @@ class DicoGIS(ThemedTk):
             avert("DicoGIS - User error", self.localized_strings.get("nodata"))
             return
 
+        # set output path
+        if self.serializer.output_path is None:
+            self.serializer.output_path = Path(
+                self.tab_files.target_path.get()
+            ).joinpath(self.ent_outxl_filename.get())
+
+        logger.info(f"Output path: {self.serializer.output_path.resolve()}")
+
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
             serializer=self.serializer,

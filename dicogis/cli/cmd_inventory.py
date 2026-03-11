@@ -51,7 +51,7 @@ def determine_output_path(
         output_path: output path passed to inventory CLI
         output_format: input output format passed to inventory CLI
         input_folder: input folder passed to inventory CLI
-        pg_services: list of ppostgres services names to use
+        pg_services: list of postgres services names to use
 
     Raises:
         ValueError: if output format is not supported
