@@ -3,13 +3,9 @@
 
 """
 Name:         Custom collapsible frame
-Purpose:      Allow toggle a frame in pure Python Tkinter.
+Purpose:      Allow toggle a frame in pure Python Qt.
 
 Author:       Julien Moura (@geojulien)
-Sources:
-    - ttkwidgets (GPL 3)
-    - Onlyjus (https://stackoverflow.com/a/13169685/2556577)
-
 """
 
 # ##############################################################################
@@ -18,8 +14,10 @@ Sources:
 
 # Standard library
 import logging
-from tkinter import BooleanVar
-from tkinter.ttk import Button, Frame, Label, Widget
+
+# 3rd party
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QFrame, QToolButton, QVBoxLayout, QWidget
 
 # ##############################################################################
 # ############ Globals ############
@@ -33,85 +31,81 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class ToggledFrame(Frame):
+class ToggledFrame(QWidget):
     """A frame that can be toggled to open and close."""
 
     def __init__(
         self,
-        parent: Widget = None,
+        parent: QWidget | None = None,
         in_text: str = "",
-        toggle_width: int = 2,
         start_opened: bool = True,
         **kwargs,
     ):
-        """Initializes UI tab for end-user options.
+        """Initializes a collapsible frame.
 
         Args:
-            parent: tkinter parent object
-            in_text: text to display next to the toggle arrow. Defaults to empty string.
-            toggle_width: width of the tgogle button(in characters). Defaults to 2.
-            kwargs: keyword arguments passed on to the :class:`ttk.Frame` initializer
+            parent: Qt parent widget.
+            in_text: text to display next to the toggle arrow. Defaults to empty
+                string.
+            start_opened: whether the frame is expanded on creation. Defaults to
+                True.
+            kwargs: unused, kept for backward-compatibility with the previous
+                signature.
         """
-        super().__init__(parent, **kwargs)
+        super().__init__(parent)
 
-        # variables
-        self.is_open_var = BooleanVar(value=start_opened)
+        self.btn_toggle = QToolButton(self)
+        self.btn_toggle.setText(in_text)
+        self.btn_toggle.setCheckable(True)
+        self.btn_toggle.setChecked(start_opened)
+        self.btn_toggle.setToolButtonStyle(
+            Qt.ToolButtonStyle.ToolButtonTextBesideIcon
+        )
+        self.btn_toggle.setArrowType(
+            Qt.ArrowType.DownArrow if start_opened else Qt.ArrowType.RightArrow
+        )
+        self.btn_toggle.toggled.connect(self._on_toggled)
 
-        # frame containing tool button and label
-        self.title_frame = Frame(self)
-        self.lbl_frame = Label(self.title_frame, text=in_text)
-        self.btn_toggle = Button(
-            self.title_frame,
-            command=self.toggle,
-            style="Toolbutton",
-            text="-" if start_opened is True else "+",
-            width=toggle_width,
+        self.sub_frame = QFrame(self)
+        self.sub_frame.setVisible(start_opened)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.btn_toggle)
+        layout.addWidget(self.sub_frame)
+
+    def _on_toggled(self, checked: bool) -> None:
+        """Show/hide the sub frame and update the toggle arrow.
+
+        Args:
+            checked: whether the frame should be expanded.
+        """
+        self.sub_frame.setVisible(checked)
+        self.btn_toggle.setArrowType(
+            Qt.ArrowType.DownArrow if checked else Qt.ArrowType.RightArrow
         )
 
-        self.sub_frame = Frame(self)
-
-        self._grid_widgets()
-        self.toggle()
-
-    def _grid_widgets(self):
-        """Grid frame widgets."""
-        self.title_frame.grid(sticky="WE")
-        self.title_frame.grid_columnconfigure(0, weight=1)
-        self.lbl_frame.grid(row=0, column=0, sticky="W", padx=15)
-        self.btn_toggle.grid(row=0, column=1, sticky="E")
-
-    def toggle(self):
+    def toggle(self) -> None:
         """Toggle opened or closed."""
-        if self.is_open_var.get():
-            self._open = False
-            self.sub_frame.grid(row=1, sticky="nswe")
-            self.btn_toggle.configure(text="-")
-        else:
-            self._open = True
-            self.sub_frame.grid_forget()
-
-            self.btn_toggle.configure(text="+")
-
-        self.is_open_var.set(not self.is_open_var.get())
+        self.btn_toggle.setChecked(not self.btn_toggle.isChecked())
 
 
 if __name__ == "__main__":
-    from tkinter import Tk
-    from tkinter.ttk import Button
+    import sys
 
-    root = Tk()
+    from PyQt6.QtWidgets import QApplication, QPushButton
 
-    collapsible_frame = ToggledFrame(
-        parent=root,
-        in_text="Rotate",
-        start_opened=True,
-        borderwidth=2,
-        relief="raised",
-    )
-    collapsible_frame.pack()
-    button = Button(
-        collapsible_frame.sub_frame, text="Close window", command=root.destroy
-    )
-    button.grid()
-    collapsible_frame.toggle()
-    root.mainloop()
+    app = QApplication(sys.argv)
+
+    window = QWidget()
+    window_layout = QVBoxLayout(window)
+
+    collapsible_frame = ToggledFrame(parent=window, in_text="Rotate", start_opened=True)
+    inner_layout = QVBoxLayout(collapsible_frame.sub_frame)
+    button = QPushButton("Close window")
+    button.clicked.connect(window.close)
+    inner_layout.addWidget(button)
+
+    window_layout.addWidget(collapsible_frame)
+    window.show()
+    sys.exit(app.exec())

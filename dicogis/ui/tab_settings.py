@@ -14,16 +14,27 @@ Author:       Julien Moura (@geojulien)
 
 # Standard library
 import logging
-from collections.abc import Callable
 from os import environ, getenv
-from tkinter import ACTIVE, DISABLED, RAISED, BooleanVar, IntVar, StringVar
-from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Labelframe, Widget
 from webbrowser import open_new_tab
+
+# 3rd party
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QFormLayout,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
 
 # project
 from dicogis.__about__ import __uri_homepage__
 from dicogis.ui.collapsible_frame import ToggledFrame
 from dicogis.ui.scrollable_table import ScrollableTable
+from dicogis.utils.str2bool import str2bool
 from dicogis.utils.texts import TextsManager
 
 # ##############################################################################
@@ -37,24 +48,23 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class TabSettings(Frame):
+class TabSettings(QWidget):
     """Tab form for end-user settings.
 
     Args:
-        Frame: inherited ttk.Frame
+        QWidget: inherited Qt widget
     """
 
     def __init__(
         self,
-        parent: Widget,
+        parent: QWidget | None = None,
         localized_strings: dict | None = None,
         init_widgets: bool = True,
-        switcher: Callable = None,
     ):
         """Initializes UI tab for end-user options.
 
         Args:
-            parent: tkinter parent object
+            parent: Qt parent widget
             localized_strings: translated strings. Defaults to None.
             init_widgets: option to create widgets during init or not. Defaults to True.
         """
@@ -65,157 +75,127 @@ class TabSettings(Frame):
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts()
 
-        self.switcher = switcher
-
         if init_widgets:
             self.create_widgets()
 
     def create_widgets(self) -> None:
         """Create and layout the widgets for the frame."""
-        # -- Subframes --
-        # Proxy subframe with a check button
-        self.opt_proxy = BooleanVar(self, False)  # proxy optio
-        caz_prox = Checkbutton(
-            self,
-            text="Proxy",
-            variable=self.opt_proxy,
-            command=lambda: self.switcher(self.opt_proxy, self.FrOptProxy),
+        layout = QVBoxLayout(self)
+
+        # -- NETWORK OPTIONS -----------------------------------------------------------
+        self.FrOptProxy = QGroupBox(
+            self.localized_strings.get("Proxy", "Proxy settings"), self
         )
-        self.FrOptProxy = Labelframe(
-            self,
-            name="lfr_settings_network_proxy",
-            text=self.localized_strings.get("Proxy", "Proxy settings"),
-            labelwidget=caz_prox,
+        self.FrOptProxy.setCheckable(True)
+        self.FrOptProxy.setChecked(False)
+        self.FrOptProxy.toggled.connect(self.FrOptProxy.setEnabled)
+        self.FrOptProxy.setEnabled(False)
+
+        proxy_layout = QFormLayout()
+        self.opt_ntlm = QCheckBox("NTLM", self.FrOptProxy)
+        self.prox_ent_host = QLineEdit(self.FrOptProxy)
+        self.prox_ent_host.setText("proxy.server.com")
+        self.prox_ent_port = QSpinBox(self.FrOptProxy)
+        self.prox_ent_port.setRange(1, 65535)
+        self.prox_ent_port.setValue(80)
+        self.prox_ent_user = QLineEdit(self.FrOptProxy)
+        self.prox_ent_user.setText("proxy_user")
+        self.prox_ent_password = QLineEdit(self.FrOptProxy)
+        self.prox_ent_password.setEchoMode(QLineEdit.EchoMode.Password)
+
+        self.prox_lb_host = QLabel(
+            self.localized_strings.get("gui_prox_server", "Host:"), self.FrOptProxy
+        )
+        self.prox_lb_port = QLabel(
+            self.localized_strings.get("gui_port", "Port:"), self.FrOptProxy
+        )
+        self.prox_lb_user = QLabel(
+            self.localized_strings.get("gui_user", "User name:"), self.FrOptProxy
+        )
+        self.prox_lb_password = QLabel(
+            self.localized_strings.get("gui_mdp", "User password:"), self.FrOptProxy
         )
 
+        proxy_layout.addRow(self.prox_lb_host, self.prox_ent_host)
+        proxy_layout.addRow(self.prox_lb_port, self.prox_ent_port)
+        proxy_layout.addRow(self.opt_ntlm)
+        proxy_layout.addRow(self.prox_lb_user, self.prox_ent_user)
+        proxy_layout.addRow(self.prox_lb_password, self.prox_ent_password)
+        self.FrOptProxy.setLayout(proxy_layout)
+
+        # -- EXPORT / GENERAL OPTIONS ---------------------------------------------------
         self.FrOptExport = ToggledFrame(
             self,
-            name="lfr_settings_export",
             in_text=self.localized_strings.get("Export", "Export"),
             start_opened=False,
-            borderwidth=1,
-            relief=RAISED,
         )
+        export_layout = QVBoxLayout()
 
+        self.opt_export_size_prettify = QCheckBox(
+            self.localized_strings.get(
+                "gui_options_export_size_prettify", "Export: prettify files size"
+            ),
+            self.FrOptExport.sub_frame,
+        )
+        self.opt_export_size_prettify.setChecked(
+            str2bool(getenv("DICOGIS_EXPORT_SIZE_PRETTIFY", "True"))
+        )
+        export_layout.addWidget(self.opt_export_size_prettify)
+
+        self.opt_export_raw_path = QCheckBox(
+            self.localized_strings.get(
+                "gui_options_export_raw_path", "Export: raw path"
+            ),
+            self.FrOptExport.sub_frame,
+        )
+        self.opt_export_raw_path.setChecked(
+            str2bool(getenv("DICOGIS_EXPORT_RAW_PATH", "False"))
+        )
+        export_layout.addWidget(self.opt_export_raw_path)
+
+        self.opt_quick_fail = QCheckBox(
+            self.localized_strings.get("gui_options_quick_fail", "Quick fail"),
+            self.FrOptExport.sub_frame,
+        )
+        self.opt_quick_fail.setChecked(str2bool(getenv("DICOGIS_QUICK_FAIL", "False")))
+        export_layout.addWidget(self.opt_quick_fail)
+
+        self.opt_end_process_notification_sound = QCheckBox(
+            self.localized_strings.get(
+                "gui_options_notification_sound",
+                "Play a notification sound when processing has finished.",
+            ),
+            self.FrOptExport.sub_frame,
+        )
+        self.opt_end_process_notification_sound.setChecked(
+            str2bool(getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", "True"))
+        )
+        export_layout.addWidget(self.opt_end_process_notification_sound)
+        self.FrOptExport.sub_frame.setLayout(export_layout)
+
+        # -- Environment variables --
         self.FrOptEnv = ToggledFrame(
             self,
-            name="lfr_settings_env_vars",
             in_text=self.localized_strings.get(
                 "environment_variables", "Environment variables"
             ),
             start_opened=False,
-            borderwidth=1,
-            relief=RAISED,
         )
+        env_layout = QVBoxLayout()
 
-        # -- NETWORK OPTIONS -----------------------------------------------------------
-
-        # proxy specific variables
-        self.opt_ntlm = IntVar(self.FrOptProxy, 0)  # proxy NTLM protocol option
-        self.prox_server = StringVar(self.FrOptProxy, "proxy.server.com")
-        self.prox_port = IntVar(self.FrOptProxy, 80)
-        self.prox_user = StringVar(self.FrOptProxy, "proxy_user")
-        self.prox_pswd = StringVar(self.FrOptProxy, "****")
-
-        # widgets
-        self.prox_ent_host = Entry(self.FrOptProxy, textvariable=self.prox_server)
-        self.prox_ent_port = Entry(self.FrOptProxy, textvariable=self.prox_port)
-        self.prox_ent_user = Entry(self.FrOptProxy, textvariable=self.prox_user)
-        self.prox_ent_password = Entry(
-            self.FrOptProxy, textvariable=self.prox_pswd, show="*"
-        )
-
-        self.prox_lb_host = Label(
-            self.FrOptProxy, text=self.localized_strings.get("gui_prox_server", "Host:")
-        )
-        self.prox_lb_port = Label(
-            self.FrOptProxy, text=self.localized_strings.get("gui_port", "Port:")
-        )
-        caz_ntlm = Checkbutton(self.FrOptProxy, text="NTLM", variable=self.opt_ntlm)
-        self.prox_lb_user = Label(
-            self.FrOptProxy, text=self.localized_strings.get("gui_user", "User name:")
-        )
-
-        self.prox_lb_password = Label(
-            self.FrOptProxy,
-            text=self.localized_strings.get("gui_mdp", "User password:"),
-        )
-
-        # proxy widgets position
-        self.prox_lb_host.grid(row=1, column=0, sticky="NSW", padx=2, pady=2)
-        self.prox_ent_host.grid(row=1, column=1, sticky="NSE", padx=2, pady=2)
-        self.prox_lb_port.grid(row=2, column=0, sticky="NSEW", padx=2, pady=2)
-        self.prox_ent_port.grid(row=2, column=1, sticky="NSEW", padx=2, pady=2)
-        self.prox_lb_user.grid(row=3, column=0, sticky="NSEW", padx=2, pady=2)
-        self.prox_ent_user.grid(row=3, column=1, sticky="NSEW", padx=2, pady=2)
-        self.prox_lb_password.grid(row=4, column=0, sticky="NSEW", padx=2, pady=2)
-        self.prox_ent_password.grid(row=4, column=1, sticky="NSEW", padx=2, pady=2)
-        caz_ntlm.grid(row=3, column=0, sticky="NSEW", padx=2, pady=2)
-
-        # -- GENERAL OPTIONS -----------------------------------------------------------
-        self.opt_export_size_prettify = BooleanVar(
-            master=self, value=getenv("DICOGIS_EXPORT_SIZE_PRETTIFY", True)
-        )
-        caz_opt_export_size_prettify = Checkbutton(
-            self.FrOptExport.sub_frame,
-            text=self.localized_strings.get(
-                "gui_options_export_size_prettify", "Export: prettify files size"
-            ),
-            variable=self.opt_export_size_prettify,
-        )
-        caz_opt_export_size_prettify.grid(
-            row=2, column=0, sticky="NSWE", padx=2, pady=2
-        )
-
-        self.opt_export_raw_path = BooleanVar(
-            master=self, value=getenv("DICOGIS_EXPORT_RAW_PATH", False)
-        )
-        caz_opt_export_raw_path = Checkbutton(
-            self.FrOptExport.sub_frame,
-            text=self.localized_strings.get(
-                "gui_options_export_raw_path", "Export: raw path"
-            ),
-            variable=self.opt_export_raw_path,
-        )
-        caz_opt_export_raw_path.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
-
-        self.opt_quick_fail = BooleanVar(
-            master=self, value=getenv("DICOGIS_QUICK_FAIL", False)
-        )
-        caz_opt_quick_fail = Checkbutton(
-            self.FrOptExport.sub_frame,
-            text=self.localized_strings.get("gui_options_quick_fail", "Quick fail"),
-            variable=self.opt_quick_fail,
-        )
-        caz_opt_quick_fail.grid(row=3, column=0, sticky="NSWE", padx=2, pady=2)
-
-        self.opt_end_process_notification_sound = BooleanVar(
-            master=self, value=getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", True)
-        )
-        caz_opt_end_process_notification_sound = Checkbutton(
-            self.FrOptExport.sub_frame,
-            text=self.localized_strings.get(
-                "gui_options_notification_sound",
-                "Play a notification sound when processing has finished.",
-            ),
-            variable=self.opt_end_process_notification_sound,
-        )
-        caz_opt_end_process_notification_sound.grid(
-            row=4, column=0, sticky="NSWE", padx=2, pady=2
-        )
-
-        # -- Environment variables --
-        btn_doc_env_vars = Button(
-            self.FrOptEnv.sub_frame,
-            text=self.localized_strings.get(
+        btn_doc_env_vars = QPushButton(
+            self.localized_strings.get(
                 "gui_options_supported_env_vars", "See supported variables"
             ),
-            command=lambda: open_new_tab(
+            self.FrOptEnv.sub_frame,
+        )
+        btn_doc_env_vars.clicked.connect(
+            lambda: open_new_tab(
                 f"{__uri_homepage__}usage/settings.html#using-environment-variables"
-            ),
+            )
         )
 
-        tab_env_vars = ScrollableTable(self.FrOptEnv.sub_frame)
+        self.tab_env_vars = ScrollableTable(self.FrOptEnv.sub_frame)
         dicogis_env_vars = {
             env_var: value
             for env_var, value in environ.items()
@@ -227,16 +207,89 @@ class TabSettings(Frame):
             )
             for var_name, var_value in dicogis_env_vars.items():
                 logger.debug(f"{var_name}={var_value}")
-                tab_env_vars.tree.insert("", "end", values=(var_name, var_value))
-        btn_doc_env_vars.grid(padx=2, pady=2, sticky="WE")
-        tab_env_vars.grid(padx=2, pady=2, sticky="NSWE")
+                self.tab_env_vars.add_row(var_name, var_value)
+
+        env_layout.addWidget(btn_doc_env_vars)
+        env_layout.addWidget(self.tab_env_vars)
+        self.FrOptEnv.sub_frame.setLayout(env_layout)
 
         # positionning frames
-        self.FrOptProxy.grid(sticky="NSWE", padx=2, pady=2)
-        self.FrOptExport.grid(sticky="NSWE", padx=2, pady=2)
-        self.FrOptEnv.grid(sticky="NSWE", padx=2, pady=2)
+        layout.addWidget(self.FrOptProxy)
+        layout.addWidget(self.FrOptExport)
+        layout.addWidget(self.FrOptEnv)
+        layout.addStretch(1)
 
-        self.switcher(self.opt_proxy, self.FrOptProxy)
+    # -- Accessors used by OptionsManager -------------------------------------------
+
+    def get_proxy_settings(self) -> dict:
+        """Return proxy settings as a dict."""
+        return {
+            "proxy_needed": self.FrOptProxy.isChecked(),
+            "proxy_type": self.opt_ntlm.isChecked(),
+            "proxy_server": self.prox_ent_host.text(),
+            "proxy_port": self.prox_ent_port.value(),
+            "proxy_user": self.prox_ent_user.text(),
+        }
+
+    def set_proxy_settings(self, values: dict) -> None:
+        """Apply proxy settings from a dict."""
+        self.FrOptProxy.setChecked(bool(str2bool(values.get("proxy_needed", False))))
+        self.opt_ntlm.setChecked(bool(str2bool(values.get("proxy_type", False))))
+        if server := values.get("proxy_server"):
+            self.prox_ent_host.setText(server)
+        if port := values.get("proxy_port"):
+            self.prox_ent_port.setValue(int(port))
+        if user := values.get("proxy_user"):
+            self.prox_ent_user.setText(user)
+
+    def get_export_options(self) -> dict:
+        """Return export/general options as a dict."""
+        return {
+            "export_prettify_size": self.opt_export_size_prettify.isChecked(),
+            "export_raw_path": self.opt_export_raw_path.isChecked(),
+            "quick_fail": self.opt_quick_fail.isChecked(),
+            "notification_sound": self.opt_end_process_notification_sound.isChecked(),
+        }
+
+    def set_export_options(self, values: dict) -> None:
+        """Apply export/general options from a dict."""
+        if "export_prettify_size" in values:
+            self.opt_export_size_prettify.setChecked(
+                bool(str2bool(values["export_prettify_size"]))
+            )
+        if "export_raw_path" in values:
+            self.opt_export_raw_path.setChecked(
+                bool(str2bool(values["export_raw_path"]))
+            )
+        if "quick_fail" in values:
+            self.opt_quick_fail.setChecked(bool(str2bool(values["quick_fail"])))
+        if "notification_sound" in values:
+            self.opt_end_process_notification_sound.setChecked(
+                bool(str2bool(values["notification_sound"]))
+            )
+
+    def retranslate_ui(self, localized_strings: dict) -> None:
+        """Update widgets texts with the given localized strings.
+
+        Args:
+            localized_strings: translated strings.
+        """
+        self.localized_strings = localized_strings
+        self.FrOptProxy.setTitle(localized_strings.get("Proxy", "Proxy settings"))
+        self.prox_lb_host.setText(localized_strings.get("gui_prox_server", "Host:"))
+        self.prox_lb_port.setText(localized_strings.get("gui_port", "Port:"))
+        self.prox_lb_user.setText(localized_strings.get("gui_user", "User name:"))
+        self.prox_lb_password.setText(
+            localized_strings.get("gui_mdp", "User password:")
+        )
+        self.FrOptExport.btn_toggle.setText(
+            localized_strings.get("Export", "Export")
+        )
+        self.FrOptEnv.btn_toggle.setText(
+            localized_strings.get(
+                "environment_variables", "Environment variables"
+            )
+        )
 
 
 # #############################################################################
@@ -245,24 +298,11 @@ class TabSettings(Frame):
 
 if __name__ == "__main__":
     """To test"""
-    from tkinter import Tk
+    import sys
 
-    # faking switch method
-    def ui_switch(cb_value: bool, parent):
-        """Change state of  all children widgets within a parent class.
+    from PyQt6.QtWidgets import QApplication
 
-        cb_value=boolean
-        parent=Tkinter class with children (Frame, Labelframe, Tk, etc.)
-        """
-        if cb_value.get():
-            for child in parent.winfo_children():
-                child.configure(state=ACTIVE)
-        else:
-            for child in parent.winfo_children():
-                child.configure(state=DISABLED)
-
-    # try it
-    root = Tk()
-    frame = TabSettings(root, switcher=ui_switch)
-    frame.pack()
-    root.mainloop()
+    app = QApplication(sys.argv)
+    widget = TabSettings()
+    widget.show()
+    sys.exit(app.exec())

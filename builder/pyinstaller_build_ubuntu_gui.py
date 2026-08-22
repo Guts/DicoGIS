@@ -38,6 +38,7 @@ PyInstaller.__main__.run(
         "--add-data=options_TPL.ini:.",
         "--add-data=LICENSE:.",
         "--add-data=README.md:.",
+        "--collect-data=PyQt6",
         "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
         f"--name={__about__.__title_clean__}-gui.bin",
         "--noconfirm",

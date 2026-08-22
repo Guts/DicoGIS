@@ -13,7 +13,6 @@ import sys
 from importlib import resources
 from pathlib import Path
 from sys import platform as opersys
-from tkinter import ACTIVE, DISABLED
 
 # Imports depending on operating system
 if opersys == "win32":
@@ -63,17 +62,3 @@ class Utilities:
             logger.debug(f"Internal path resolved in packaged mode: {internal_path}")
 
         return internal_path
-
-    @classmethod
-    def ui_switch(cls, cb_value, parent):
-        """Change state of  all children widgets within a parent class.
-
-        cb_value=boolean
-        parent=Tkinter class with children (Frame, Labelframe, Tk, etc.)
-        """
-        if cb_value.get():
-            for child in parent.winfo_children():
-                child.configure(state=ACTIVE)
-        else:
-            for child in parent.winfo_children():
-                child.configure(state=DISABLED)

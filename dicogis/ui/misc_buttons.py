@@ -13,11 +13,12 @@ Author:       Julien Moura (@geojulien)
 
 # Standard library
 import logging
-from tkinter import PhotoImage, Tk, W
-from tkinter.ttk import Button, Frame, Label, Widget
+from pathlib import Path
 from webbrowser import open_new_tab
 
 # 3rd party
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QGridLayout, QLabel, QPushButton, QWidget
 from typer import get_app_dir, launch
 
 # package
@@ -43,27 +44,26 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class MiscButtons(Frame):
+class MiscButtons(QWidget):
     """Miscellaneous buttons.
 
     Args:
-        Frame: inherited ttk.Frame
+        QWidget: inherited Qt widget
     """
 
     def __init__(
         self,
-        parent: Widget,
+        parent: QWidget | None = None,
         localized_strings: dict | None = None,
-        images_folder="bin/img",
+        images_folder: str | Path = "bin/img",
     ):
         """UI frame on the application left side frame with logo and miscellaneous buttons.
 
         Args:
-            parent: tkinter parent object
+            parent: Qt parent widget
             localized_strings: translated strings. Defaults to None.
-            init_widgets: option to create widgets during init or not. Defaults to True.
+            images_folder: folder where images are stored. Defaults to "bin/img".
         """
-        self.parent = parent
         super().__init__(parent)
 
         self.dicogis_utils = Utilities()
@@ -76,69 +76,59 @@ class MiscButtons(Frame):
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts()
 
+        layout = QGridLayout(self)
+
         # logo
-        self.icone = PhotoImage(
-            master=self, file=self.dir_imgs.joinpath("DicoGIS_logo_200px.png")
-        )
-        Label(self, borderwidth=2, image=self.icone).grid(
-            row=1, columnspan=2, column=0, padx=2, pady=2, sticky=W
-        )
+        lbl_logo = QLabel(self)
+        pixmap = QPixmap(str(self.dir_imgs.joinpath("DicoGIS_logo_200px.png")))
+        lbl_logo.setPixmap(pixmap)
+        layout.addWidget(lbl_logo, 0, 0, 1, 2)
 
         # credits
-        btn_credits = Button(
-            self,
-            text=__copyright__,
-            command=lambda: open_new_tab(__uri__),
-        )
-        btn_credits.grid(row=2, columnspan=2, padx=2, pady=2, sticky="WE")
+        self.btn_credits = QPushButton(__copyright__, self)
+        self.btn_credits.clicked.connect(lambda: open_new_tab(__uri__))
+        layout.addWidget(self.btn_credits, 1, 0, 1, 2)
 
         # contact
         mailto = f"mailto:{__email__}?subject=[{__title__}]%20Question"
-        btn_contact = Button(
-            self,
-            text="Contact",
-            command=lambda: open_new_tab(mailto),
-        )
+        self.btn_contact = QPushButton("Contact", self)
+        self.btn_contact.clicked.connect(lambda: open_new_tab(mailto))
 
         # source
         url_src = f"{__uri__}issues"
-        btn_src = Button(
-            self,
-            text="Report",
-            command=lambda: open_new_tab(url_src),
-        )
+        self.btn_src = QPushButton("Report", self)
+        self.btn_src.clicked.connect(lambda: open_new_tab(url_src))
 
         # documentation
-        btn_doc = Button(
+        self.btn_doc = QPushButton(
+            self.localized_strings.get("ui_misc_btn_documentation", "Documentation"),
             self,
-            text=self.localized_strings.get(
-                "ui_misc_btn_documentation", "Documentation"
-            ),
-            command=lambda: open_new_tab(__uri_homepage__),
         )
+        self.btn_doc.clicked.connect(lambda: open_new_tab(__uri_homepage__))
 
         # sponsor
-        btn_support = Button(
-            self,
-            text=self.localized_strings.get("ui_misc_btn_support", "Fund & Support"),
-            command=lambda: open_new_tab(f"{__uri_homepage__}misc/funding.html"),
+        self.btn_support = QPushButton(
+            self.localized_strings.get("ui_misc_btn_support", "Fund & Support"), self
+        )
+        self.btn_support.clicked.connect(
+            lambda: open_new_tab(f"{__uri_homepage__}misc/funding.html")
         )
 
-        # sponsor
-        btn_app_dir = Button(
-            self,
-            text=self.localized_strings.get(
+        # application folder
+        self.btn_app_dir = QPushButton(
+            self.localized_strings.get(
                 "ui_misc_btn_app_dir", "Application folder"
             ),
-            command=lambda: launch(app_dir),
+            self,
         )
+        self.btn_app_dir.clicked.connect(lambda: launch(app_dir))
 
         # griding
-        btn_contact.grid(row=3, column=0, padx=2, pady=2, sticky="WE")
-        btn_src.grid(row=3, column=1, padx=2, pady=2, sticky="EW")
-        btn_doc.grid(row=4, column=0, padx=2, pady=2, sticky="WE")
-        btn_support.grid(row=4, column=1, padx=2, pady=2, sticky="WE")
-        btn_app_dir.grid(row=5, columnspan=2, padx=2, pady=2, sticky="WE")
+        layout.addWidget(self.btn_contact, 2, 0)
+        layout.addWidget(self.btn_src, 2, 1)
+        layout.addWidget(self.btn_doc, 3, 0)
+        layout.addWidget(self.btn_support, 3, 1)
+        layout.addWidget(self.btn_app_dir, 4, 0, 1, 2)
 
 
 # #############################################################################
@@ -147,7 +137,11 @@ class MiscButtons(Frame):
 
 if __name__ == "__main__":
     """To test"""
-    root = Tk()
-    frame = MiscButtons(root)
-    frame.pack()
-    root.mainloop()
+    import sys
+
+    from PyQt6.QtWidgets import QApplication
+
+    app = QApplication(sys.argv)
+    widget = MiscButtons()
+    widget.show()
+    sys.exit(app.exec())

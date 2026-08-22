@@ -24,7 +24,7 @@ Some options and arguments can be set with environment variables.
 
 | Variable name      | Description                                                               | Default value |
 | :----------------- | :------------------------------------------------------------------------ | :-----------: |
-| `DICOGIS_UI_THEME` | UI theme. Can be any of the [ttkthemes](https://ttkthemes.readthedocs.io) | `arc` (overridden per OS: `breeze` on macOS and Windows, `radiance` on Linux, `ubuntu` on Ubuntu) |
+| `DICOGIS_UI_STYLE` | UI style. Can be any Qt style available on the running platform (e.g. `Fusion`, `Windows`) | unset (uses the Qt platform default) |
 
 ### CLI only — `inventory` subcommand
 

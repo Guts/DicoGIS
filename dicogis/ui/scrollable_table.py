@@ -1,28 +1,35 @@
-from tkinter import Event
-from tkinter.ttk import Frame, Scrollbar, Treeview, Widget
+#! python3  # noqa: E265
+
+from PyQt6.QtWidgets import (
+    QAbstractItemView,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from dicogis.utils.texts import TextsManager
 
 
-class ScrollableTable(Frame):
+class ScrollableTable(QWidget):
     """
     A scrollable table with two columns in read-only mode.
 
     Attributes:
-        tree (ttk.Treeview): The Treeview widget for displaying the table.
-        vsb (ttk.Scrollbar): The vertical scrollbar for the Treeview.
+        table (QTableWidget): The table widget displaying key/value rows.
     """
 
     def __init__(
         self,
-        parent: Widget,
+        parent: QWidget | None = None,
         localized_strings: dict | None = None,
         init_widgets: bool = True,
     ):
-        """Initialize the ScrollableTable frame.
+        """Initialize the ScrollableTable widget.
 
         Args:
-            parent (tk.Widget): The parent widget.
+            parent: the parent widget.
+            localized_strings: translated strings. Defaults to None.
             init_widgets: option to create widgets during init or not. Defaults to True.
         """
         super().__init__(parent)
@@ -37,45 +44,30 @@ class ScrollableTable(Frame):
 
     def create_widgets(self) -> None:
         """Create and layout the widgets for the frame."""
-        # Create Treeview with 2 columns
-        self.tree = Treeview(
-            self,
-            columns=("column1", "column2"),
-            show="headings",
-            height=3,
-            selectmode="browse",
+        self.table = QTableWidget(0, 2, self)
+        self.table.setHorizontalHeaderLabels(
+            [
+                self.localized_strings.get("key", "Key"),
+                self.localized_strings.get("value", "Value"),
+            ]
         )
-        self.tree.heading("column1", text=self.localized_strings.get("key", "Key"))
-        self.tree.heading("column2", text=self.localized_strings.get("value", "Value"))
+        self.table.verticalHeader().setVisible(False)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.horizontalHeader().setStretchLastSection(True)
 
-        # Make the columns read-only
-        # self.tree.bind("<1>", self.disable_event)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.table)
 
-        # Add a vertical scrollbar
-        self.vsb = Scrollbar(
-            self,
-            orient="vertical",
-            name="env_var_table_vert_scroll",
-            command=self.tree.yview,
-        )
-        self.tree.configure(yscrollcommand=self.vsb.set)
-
-        # Layout the Treeview and Scrollbar
-        self.tree.grid(row=0, column=0, sticky="NSEW")
-        self.vsb.grid(row=0, column=1, sticky="NS")
-
-        # Make the frame expandable
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-
-    def disable_event(self, event: Event) -> str:
-        """
-        Disable the event to make the Treeview read-only.
+    def add_row(self, key: str, value: str) -> None:
+        """Append a key/value row to the table.
 
         Args:
-            event (Event): The event object.
-
-        Returns:
-            str: "break" to indicate that the event should be ignored.
+            key: value for the first column.
+            value: value for the second column.
         """
-        return "break"
+        row_index = self.table.rowCount()
+        self.table.insertRow(row_index)
+        self.table.setItem(row_index, 0, QTableWidgetItem(str(key)))
+        self.table.setItem(row_index, 1, QTableWidgetItem(str(value)))

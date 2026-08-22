@@ -19,6 +19,8 @@ import platform
 from os import path
 from pathlib import Path
 
+from dicogis.utils.str2bool import str2bool
+
 # #############################################################################
 # ############ Classes #############
 # ##################################
@@ -43,45 +45,44 @@ class OptionsManager:
         self.config = configparser.ConfigParser()
         self.config.read(confile)
 
-    def load_settings(self, parent):
+    def load_settings(self, parent) -> None:
         """load settings from last execution"""
         # basics
-        parent.def_lang = self.config.get("basics", "def_codelang")
+        parent.set_selected_language(self.config.get("basics", "def_codelang"))
         parent.tab_files.listing_initial_folder_path = Path(
             self.config.get("basics", "def_rep")
         )
-        parent.nb.select(self.config.get("basics", "def_tab"))
+        parent.set_active_tab_index(int(self.config.get("basics", "def_tab")))
+        parent.tab_options.set_export_options(
+            {
+                "export_prettify_size": self.config.get(
+                    "basics", "export_prettify_size"
+                ),
+                "export_raw_path": self.config.get("basics", "export_raw_path"),
+                "quick_fail": self.config.get("basics", "quick_fail"),
+                "notification_sound": self.config.get(
+                    "basics", "notification_sound"
+                ),
+            }
+        )
+
         # filters
-        parent.tab_files.opt_shp.set(self.config.get("filters", "opt_shp"))
-        parent.tab_files.opt_tab.set(self.config.get("filters", "opt_tab"))
-        parent.tab_files.opt_kml.set(self.config.get("filters", "opt_kml"))
-        parent.tab_files.opt_gml.set(self.config.get("filters", "opt_gml"))
-        parent.tab_files.opt_geoj.set(self.config.get("filters", "opt_geoj"))
-        parent.tab_files.opt_gxt.set(self.config.get("filters", "opt_gxt"))
-        parent.tab_files.opt_rast.set(self.config.get("filters", "opt_rast"))
-        parent.tab_files.opt_egdb.set(self.config.get("filters", "opt_egdb"))
-        parent.tab_files.opt_spadb.set(self.config.get("filters", "opt_spadb"))
-        parent.tab_files.opt_dxf.set(self.config.get("filters", "opt_dxf"))
+        parent.tab_files.set_filters_state(dict(self.config.items("filters")))
 
         # database settings
         last_used_pg_service = self.config.get("database", "last_used_pg_service")
-        if last_used_pg_service in parent.tab_sgbd.ddl_pg_services["values"]:
-            parent.tab_sgbd.ddl_pg_services.set(
-                self.config.get("database", "last_used_pg_service")
-            )
-        parent.tab_sgbd.opt_pg_views.set(self.config.get("database", "opt_views"))
+        parent.tab_sgbd.set_selected_pg_service(last_used_pg_service)
+        parent.tab_sgbd.set_views_enabled(
+            bool(str2bool(self.config.get("database", "opt_views")))
+        )
 
         # proxy settings
-        parent.tab_options.opt_proxy.set(self.config.get("proxy", "proxy_needed"))
-        parent.tab_options.opt_ntlm.set(self.config.get("proxy", "proxy_type"))
-        parent.tab_options.prox_server.set(self.config.get("proxy", "proxy_server"))
-        parent.tab_options.prox_port.set(self.config.get("proxy", "proxy_port"))
-        parent.tab_options.prox_user.set(self.config.get("proxy", "proxy_user"))
+        parent.tab_options.set_proxy_settings(dict(self.config.items("proxy")))
 
         # log
         logging.info("Last options loaded")
 
-    def save_settings(self, parent):
+    def save_settings(self, parent) -> bool:
         """save last options in order to make the next excution more easy"""
 
         # add sections
@@ -97,65 +98,53 @@ class OptionsManager:
         self.config.set("config", "OS", platform.platform())
 
         # basics
-        self.config.set("basics", "def_codelang", parent.ddl_lang.get())
-        if parent.tab_files.target_path.get():
-            self.config.set("basics", "def_rep", parent.tab_files.target_path.get())
+        self.config.set("basics", "def_codelang", parent.get_selected_language())
+        target_path = parent.tab_files.get_target_path()
+        if target_path:
+            self.config.set("basics", "def_rep", target_path)
         else:
             self.config.set(
                 "basics",
                 "def_rep",
                 str(parent.tab_files.listing_initial_folder_path.resolve()),
             )
-        self.config.set("basics", "def_tab", str(parent.nb.index(parent.nb.select())))
+        self.config.set("basics", "def_tab", str(parent.get_active_tab_index()))
+
+        export_options = parent.tab_options.get_export_options()
         self.config.set(
             "basics",
             "export_prettify_size",
-            str(parent.tab_options.opt_export_size_prettify),
+            str(export_options["export_prettify_size"]),
         )
         self.config.set(
-            "basics",
-            "export_raw_path",
-            str(parent.tab_options.opt_export_raw_path),
+            "basics", "export_raw_path", str(export_options["export_raw_path"])
         )
-        self.config.set(
-            "basics",
-            "quick_fail",
-            str(parent.tab_options.opt_quick_fail),
-        )
+        self.config.set("basics", "quick_fail", str(export_options["quick_fail"]))
         self.config.set(
             "basics",
             "notification_sound",
-            str(parent.tab_options.opt_end_process_notification_sound),
+            str(export_options["notification_sound"]),
         )
 
         # filters
-        self.config.set("filters", "opt_shp", str(parent.tab_files.opt_shp.get()))
-        self.config.set("filters", "opt_tab", str(parent.tab_files.opt_tab.get()))
-        self.config.set("filters", "opt_kml", str(parent.tab_files.opt_kml.get()))
-        self.config.set("filters", "opt_gml", str(parent.tab_files.opt_gml.get()))
-        self.config.set("filters", "opt_geoj", str(parent.tab_files.opt_geoj.get()))
-        self.config.set("filters", "opt_gxt", str(parent.tab_files.opt_gxt.get()))
-        self.config.set("filters", "opt_rast", str(parent.tab_files.opt_rast.get()))
-        self.config.set("filters", "opt_egdb", str(parent.tab_files.opt_egdb.get()))
-        self.config.set("filters", "opt_spadb", str(parent.tab_files.opt_spadb.get()))
-        self.config.set("filters", "opt_dxf", str(parent.tab_files.opt_dxf.get()))
+        for key, value in parent.tab_files.get_filters_state().items():
+            self.config.set("filters", key, str(int(value)))
 
         # database settings
         self.config.set(
-            "database", "last_used_pg_service", parent.tab_sgbd.ddl_pg_services.get()
+            "database", "last_used_pg_service", parent.tab_sgbd.get_selected_pg_service()
         )
         self.config.set(
-            "database", "opt_views", str(parent.tab_sgbd.opt_pg_views.get())
+            "database", "opt_views", str(parent.tab_sgbd.get_views_enabled())
         )
 
         # proxy settings
-        self.config.set(
-            "proxy", "proxy_needed", str(parent.tab_options.opt_proxy.get())
-        )
-        self.config.set("proxy", "proxy_type", str(parent.tab_options.opt_ntlm.get()))
-        self.config.set("proxy", "proxy_server", parent.tab_options.prox_server.get())
-        self.config.set("proxy", "proxy_port", str(parent.tab_options.prox_port.get()))
-        self.config.set("proxy", "proxy_user", parent.tab_options.prox_user.get())
+        proxy_settings = parent.tab_options.get_proxy_settings()
+        self.config.set("proxy", "proxy_needed", str(proxy_settings["proxy_needed"]))
+        self.config.set("proxy", "proxy_type", str(proxy_settings["proxy_type"]))
+        self.config.set("proxy", "proxy_server", proxy_settings["proxy_server"])
+        self.config.set("proxy", "proxy_port", str(proxy_settings["proxy_port"]))
+        self.config.set("proxy", "proxy_user", proxy_settings["proxy_user"])
 
         # Writing the configuration file
         with open(file=self.confile, mode="w", encoding="UTF-8") as configfile:
