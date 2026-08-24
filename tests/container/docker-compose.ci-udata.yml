@@ -1,0 +1,46 @@
+services:
+  mongodb:
+    image: mongo:7.0.28
+    container_name: dicogis-ci-udata-mongo
+    expose:
+      - "27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: dicogis-ci-udata-redis
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  udata:
+    # set to udata/udata:<tag> or a locally-built pinned image
+    # (see tests/container/udata-pinned/) before running `docker compose up`
+    image: ${DICOGIS_TEST_UDATA_IMAGE:?set DICOGIS_TEST_UDATA_IMAGE to the uData image to test}
+    container_name: dicogis-ci-udata-app
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["serve", "--host", "0.0.0.0"]
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:7000/api/1/"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    ports:
+      - "7000:7000"
+
+networks:
+  default:
+    name: dicogis-ci-udata-testing
