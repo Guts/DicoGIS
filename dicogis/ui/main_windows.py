@@ -787,9 +787,11 @@ class DicoGIS(QMainWindow):
                 f"{self.tab_options.prox_ent_port.value()}",
             )
             if self.tab_options.opt_ntlm.isChecked():
-                # if authentication needs username/password or not (NTLM)
+                # NTLM: GDAL negotiates credentials itself, so this is an
+                # intentionally empty "user:password" placeholder, not a
+                # real secret.
                 gdal.SetConfigOption("GDAL_PROXY_AUTH", "NTLM")
-                gdal.SetConfigOption("GDAL_HTTP_PROXYUSERPWD", " : ")
+                gdal.SetConfigOption("GDAL_HTTP_PROXYUSERPWD", " : ")  # NOSONAR
         else:
             logger.info("No proxy configured.")
 
