@@ -81,9 +81,7 @@ class TestCliPublishUdata(unittest.TestCase):
         self.notify_patcher.stop()
         self.tmp_dir.cleanup()
 
-    def assertPublishReport(
-        self, published: int, ignored: int, failed: int
-    ) -> None:
+    def assertPublishReport(self, published: int, ignored: int, failed: int) -> None:
         """Assert the end-of-run notification matches the expected counters."""
         self.mock_notify.assert_called_once_with(
             notification_title="DicoGIS publication ended",
@@ -232,7 +230,11 @@ class TestCliPublishUdata(unittest.TestCase):
         """When an organization id is set, datasets must be attached to it."""
         organization_id = "666f6f2d6261722d71757578"
         make_udata_metadata_file(
-            self.input_folder, "org-dataset.json", "Org dataset", "org-dataset", "sig-org"
+            self.input_folder,
+            "org-dataset.json",
+            "Org dataset",
+            "org-dataset",
+            "sig-org",
         )
 
         responses.get(
