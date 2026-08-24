@@ -189,7 +189,7 @@ def publish(
 
         # check if the metadata has been already published
         if (
-            data.get("slugs") in already_published_slugs
+            data.get("slug") in already_published_slugs
             or data.get("extras", {}).get("dicogis_signature")
             in already_published_signature
         ):
