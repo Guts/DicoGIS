@@ -128,7 +128,9 @@ class TabDatabaseServer(QWidget):
 
     def open_form(self) -> None:
         """Open the modal dialog for database form."""
-        dialog = DatabaseConnectionDialog(self, localized_strings=self.localized_strings)
+        dialog = DatabaseConnectionDialog(
+            self, localized_strings=self.localized_strings
+        )
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
@@ -146,9 +148,7 @@ class TabDatabaseServer(QWidget):
             logger.error(log_msg, stack_info=True)
             QMessageBox.critical(
                 self,
-                self.localized_strings.get(
-                    "gui_database_save_new_service_error", "+"
-                ),
+                self.localized_strings.get("gui_database_save_new_service_error", "+"),
                 log_msg,
             )
 
@@ -181,12 +181,8 @@ class TabDatabaseServer(QWidget):
         self.FrameDatabaseServicePicker.setTitle(
             localized_strings.get("gui_fr2", "PostGIS")
         )
-        self.caz_pg_views.setText(
-            localized_strings.get("gui_views", "Views enabled")
-        )
-        self.open_form_button.setText(
-            localized_strings.get("gui_database_form", "+")
-        )
+        self.caz_pg_views.setText(localized_strings.get("gui_views", "Views enabled"))
+        self.open_form_button.setText(localized_strings.get("gui_database_form", "+"))
         self.lb_pg_services.setText(
             localized_strings.get("gui_pg_service", "PG service:")
         )

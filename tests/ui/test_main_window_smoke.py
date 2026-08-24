@@ -63,7 +63,9 @@ def test_main_window_check_fields_requires_format(qtbot, monkeypatch):
     )
 
     window.tab_files.set_target_path("/tmp")
-    window.tab_files.set_filters_state({key: "0" for key in window.tab_files.get_filters_state()})
+    window.tab_files.set_filters_state(
+        {key: "0" for key in window.tab_files.get_filters_state()}
+    )
     assert window.check_fields(tab_data_type=0) is False
 
 

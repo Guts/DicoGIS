@@ -116,9 +116,7 @@ class MiscButtons(QWidget):
 
         # application folder
         self.btn_app_dir = QPushButton(
-            self.localized_strings.get(
-                "ui_misc_btn_app_dir", "Application folder"
-            ),
+            self.localized_strings.get("ui_misc_btn_app_dir", "Application folder"),
             self,
         )
         self.btn_app_dir.clicked.connect(lambda: launch(app_dir))

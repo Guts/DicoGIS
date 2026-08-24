@@ -58,9 +58,7 @@ class ToggledFrame(QWidget):
         self.btn_toggle.setText(in_text)
         self.btn_toggle.setCheckable(True)
         self.btn_toggle.setChecked(start_opened)
-        self.btn_toggle.setToolButtonStyle(
-            Qt.ToolButtonStyle.ToolButtonTextBesideIcon
-        )
+        self.btn_toggle.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.btn_toggle.setArrowType(
             Qt.ArrowType.DownArrow if start_opened else Qt.ArrowType.RightArrow
         )

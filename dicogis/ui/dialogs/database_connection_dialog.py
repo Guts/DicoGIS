@@ -93,12 +93,8 @@ class DatabaseConnectionDialog(QDialog):
             self.localized_strings.get("gui_database_service_name", "Service name:"),
             self.ent_service_name,
         )
-        layout.addRow(
-            self.localized_strings.get("gui_host", "Host:"), self.ent_host
-        )
-        layout.addRow(
-            self.localized_strings.get("gui_port", "Port:"), self.ent_port
-        )
+        layout.addRow(self.localized_strings.get("gui_host", "Host:"), self.ent_host)
+        layout.addRow(self.localized_strings.get("gui_port", "Port:"), self.ent_port)
         layout.addRow(
             self.localized_strings.get("gui_db", "Database:"), self.ent_db_name
         )

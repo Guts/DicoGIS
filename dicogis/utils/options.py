@@ -60,9 +60,7 @@ class OptionsManager:
                 ),
                 "export_raw_path": self.config.get("basics", "export_raw_path"),
                 "quick_fail": self.config.get("basics", "quick_fail"),
-                "notification_sound": self.config.get(
-                    "basics", "notification_sound"
-                ),
+                "notification_sound": self.config.get("basics", "notification_sound"),
             }
         )
 
@@ -132,7 +130,9 @@ class OptionsManager:
 
         # database settings
         self.config.set(
-            "database", "last_used_pg_service", parent.tab_sgbd.get_selected_pg_service()
+            "database",
+            "last_used_pg_service",
+            parent.tab_sgbd.get_selected_pg_service(),
         )
         self.config.set(
             "database", "opt_views", str(parent.tab_sgbd.get_views_enabled())

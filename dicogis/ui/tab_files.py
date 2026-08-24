@@ -84,9 +84,7 @@ class TabFiles(QWidget):
         layout = QVBoxLayout(self)
 
         # -- Source path -----------------------------------------------------
-        self.FrPath = QGroupBox(
-            self.localized_strings.get("gui_fr1", "Path"), self
-        )
+        self.FrPath = QGroupBox(self.localized_strings.get("gui_fr1", "Path"), self)
         path_layout = QGridLayout()
 
         self.lb_target = QLabel(

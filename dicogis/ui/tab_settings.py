@@ -282,13 +282,9 @@ class TabSettings(QWidget):
         self.prox_lb_password.setText(
             localized_strings.get("gui_mdp", "User password:")
         )
-        self.FrOptExport.btn_toggle.setText(
-            localized_strings.get("Export", "Export")
-        )
+        self.FrOptExport.btn_toggle.setText(localized_strings.get("Export", "Export"))
         self.FrOptEnv.btn_toggle.setText(
-            localized_strings.get(
-                "environment_variables", "Environment variables"
-            )
+            localized_strings.get("environment_variables", "Environment variables")
         )
 
 

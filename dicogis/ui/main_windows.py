@@ -22,6 +22,9 @@ from datetime import date
 from pathlib import Path
 from sys import platform as opersys
 
+# 3rd party
+from osgeo import gdal
+
 # GUI
 from PyQt6.QtCore import QThread
 from PyQt6.QtGui import QIcon
@@ -40,9 +43,6 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-# 3rd party
-from osgeo import gdal
 from typer import launch
 
 # Project
@@ -221,7 +221,9 @@ class DicoGIS(QMainWindow):
         self.FrOutp.setLayout(outp_layout)
 
         # Frame: Progression bar
-        self.FrProg = QGroupBox(self.localized_strings.get("gui_prog", "Progression"), self)
+        self.FrProg = QGroupBox(
+            self.localized_strings.get("gui_prog", "Progression"), self
+        )
         prog_layout = QVBoxLayout()
         self.prog_layers = QProgressBar(self.FrProg)
         self.prog_layers.setValue(0)
@@ -276,8 +278,7 @@ class DicoGIS(QMainWindow):
                 self.settings.load_settings(parent=self)
             except Exception as err:
                 logger.error(
-                    "Load settings failed: option or section is missing. "
-                    f"Trace: {err}"
+                    f"Load settings failed: option or section is missing. Trace: {err}"
                 )
 
         self.retranslate_ui()

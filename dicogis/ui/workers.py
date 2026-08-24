@@ -75,7 +75,9 @@ class FolderScanWorker(QObject):
     finished = pyqtSignal(tuple)
     error = pyqtSignal(str)
 
-    def __init__(self, target_folder: str | Path, parent: QObject | None = None) -> None:
+    def __init__(
+        self, target_folder: str | Path, parent: QObject | None = None
+    ) -> None:
         """Initialize the worker.
 
         Args:
@@ -164,9 +166,7 @@ class PostgisProcessingWorker(QObject):
                 metadataset = self.sgbd_reader.infos_dataset(layer)
                 logger.debug(f"Table examined: {metadataset.name}")
                 self.serializer.serialize_metadaset(metadataset=metadataset)
-                logger.debug(
-                    f"Layer metadata stored into workbook: {metadataset.name}"
-                )
+                logger.debug(f"Layer metadata stored into workbook: {metadataset.name}")
                 if self.progress_reporter is not None:
                     self.progress_reporter.increment()
 
