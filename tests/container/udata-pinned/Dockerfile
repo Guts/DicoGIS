@@ -26,6 +26,11 @@ COPY udata.cfg /udata/udata.cfg
 WORKDIR /udata
 ENV UDATA_SETTINGS=/udata/udata.cfg
 
+# run as a non-root user (port 7000 doesn't need root)
+RUN groupadd --system udata && useradd --system --gid udata --home-dir /udata udata \
+    && chown -R udata:udata /udata
+USER udata
+
 EXPOSE 7000
 
 ENTRYPOINT ["udata"]

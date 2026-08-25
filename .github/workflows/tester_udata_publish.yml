@@ -42,6 +42,8 @@ env:
 jobs:
   test-publish-udata:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -146,11 +148,10 @@ jobs:
 
       - name: Verify datasets were actually published to uData
         run: |
-          published_count=$(
-            curl -sf http://localhost:7000/api/1/me/datasets/ \
-              -H "X-API-KEY: $DICOGIS_CI_APIKEY" \
-            | python3 -c "import json, sys; print(len(json.load(sys.stdin)))"
-          )
+          curl -sf http://localhost:7000/api/1/me/datasets/ \
+            -H "X-API-KEY: $DICOGIS_CI_APIKEY" \
+            -o /tmp/udata_published_datasets.json
+          published_count=$(python3 -c "import json; print(len(json.load(open('/tmp/udata_published_datasets.json'))))")
           echo "Published datasets found in uData: $published_count"
           test "$published_count" -gt 0
 
