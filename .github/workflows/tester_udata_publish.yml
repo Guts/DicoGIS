@@ -1,0 +1,169 @@
+name: "Tester uData publish 📤"
+
+# Exercises `dicogis-cli publish` against 2 real uData major versions
+# (built from udata/system + a pinned `udata` PyPI release, see
+# tests/container/udata-pinned/), to catch regressions caused by drift
+# in uData's REST API across major releases.
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/tester_udata_publish.yml"
+      - "dicogis/cli/cmd_publish.py"
+      - "dicogis/cli/cmd_inventory.py"
+      - "dicogis/export/to_json.py"
+      - "dicogis/export/base_serializer.py"
+      - "tests/container/docker-compose.ci-udata.yml"
+      - "tests/container/udata-pinned/**"
+      - "pyproject.toml"
+
+  pull_request:
+    branches:
+      - master
+      - feature/*
+    paths:
+      - ".github/workflows/tester_udata_publish.yml"
+      - "dicogis/cli/cmd_publish.py"
+      - "dicogis/cli/cmd_inventory.py"
+      - "dicogis/export/to_json.py"
+      - "dicogis/export/base_serializer.py"
+      - "tests/container/docker-compose.ci-udata.yml"
+      - "tests/container/udata-pinned/**"
+      - "pyproject.toml"
+
+env:
+  GDAL_VERSION: 3.*
+  COMPOSE_FILE: tests/container/docker-compose.ci-udata.yml
+  # udata's user registration form does a DNS deliverability check on the
+  # email address; ci@dicogis.test (RFC 2606 reserved, non-resolving TLD)
+  # gets rejected as "Invalid email address" - example.com actually resolves
+  DICOGIS_CI_UDATA_EMAIL: ci@example.com
+  DICOGIS_CI_UDATA_PASSWORD: "Dicogis-CI-Password-1234!"
+
+jobs:
+  test-publish-udata:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - udata_label: "17.x (current major)"
+            udata_version: "17.6.0"
+          - udata_label: "16.x (previous major)"
+            udata_version: "16.6.1"
+
+    env:
+      # every `docker compose` invocation re-interpolates the compose file,
+      # so this must be job-scoped, not just set on the "up" step
+      DICOGIS_TEST_UDATA_IMAGE: "dicogis-udata-pinned:${{ matrix.udata_version }}"
+
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install GDAL binaries
+        run: |
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable && sudo apt update
+          sudo apt install gdal-bin=${{ env.GDAL_VERSION }}
+          sudo apt install libgdal-dev=${{ env.GDAL_VERSION }}
+          export CPLUS_INCLUDE_PATH=/usr/include/gdal
+          export C_INCLUDE_PATH=/usr/include/gdal
+          gdal-config --version
+
+      - name: Install complementary tools
+        run: sudo apt install python3-tk
+
+      - name: Install project requirements
+        run: |
+          python -m pip install "pip==26.2.1" "setuptools==84.0.0" "wheel==0.48.0"
+          python -m pip install GDAL=="`gdal-config --version`.*"
+
+      - name: Install project as a package
+        # installs the local checkout (this PR's own code), not a
+        # third-party dependency, so there's no separate version to pin here
+        run: python -m pip install .
+
+      - name: Install tests fixtures
+        run: python -m pip install "gisdata==0.5.4" -t ./tests/fixtures
+
+      - name: Build pinned uData image (uData ${{ matrix.udata_version }})
+        run: |
+          docker build \
+            --build-arg UDATA_VERSION="${{ matrix.udata_version }}" \
+            -t "dicogis-udata-pinned:${{ matrix.udata_version }}" \
+            tests/container/udata-pinned
+
+      - name: Start uData stack (uData ${{ matrix.udata_version }})
+        run: docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 180
+
+      - name: Initialize uData instance (DB migrations)
+        run: docker compose -f "$COMPOSE_FILE" exec -T udata udata init
+
+      - name: Create uData CI admin user
+        run: |
+          docker compose -f "$COMPOSE_FILE" exec -T udata udata user create \
+            --first-name CI --last-name Bot \
+            --email "$DICOGIS_CI_UDATA_EMAIL" \
+            --password "$DICOGIS_CI_UDATA_PASSWORD" \
+            --admin
+
+      - name: Generate a uData API token for the CI user
+        run: |
+          docker compose -f "$COMPOSE_FILE" exec -T \
+            -e DICOGIS_CI_UDATA_EMAIL="$DICOGIS_CI_UDATA_EMAIL" \
+            udata python3 -c "
+          import os
+
+          from udata.app import create_app
+          from udata.core.api_token.models import ApiToken
+          from udata.models import datastore
+
+          app = create_app()
+          with app.app_context():
+              user = datastore.find_user(email=os.environ['DICOGIS_CI_UDATA_EMAIL'])
+              _, plaintext = ApiToken.generate(user, name='dicogis-ci')
+              print(f'DICOGIS_CI_APIKEY={plaintext}')
+          " | tee /tmp/udata_apikey_output.txt
+          grep '^DICOGIS_CI_APIKEY=' /tmp/udata_apikey_output.txt >> "$GITHUB_ENV"
+
+      - name: Generate sample uData-flavored metadata from test fixtures
+        run: |
+          dicogis-cli inventory --input-folder ./tests --language EN \
+            --output-format udata --output-path ./tests/ci/udata-publish --verbose
+
+      - name: Publish sample metadata to uData
+        run: |
+          dicogis-cli publish \
+            --input-folder ./tests/ci/udata-publish \
+            --udata-api-key "$DICOGIS_CI_APIKEY" \
+            --udata-api-url-base http://localhost:7000/api/ \
+            --udata-api-version 1 \
+            --verbose
+
+      - name: Verify datasets were actually published to uData
+        run: |
+          curl -sf http://localhost:7000/api/1/me/datasets/ \
+            -H "X-API-KEY: $DICOGIS_CI_APIKEY" \
+            -o /tmp/udata_published_datasets.json
+          published_count=$(python3 -c "import json; print(len(json.load(open('/tmp/udata_published_datasets.json'))))")
+          echo "Published datasets found in uData: $published_count"
+          test "$published_count" -gt 0
+
+      - name: Dump uData stack logs
+        if: failure()
+        run: docker compose -f "$COMPOSE_FILE" logs
+
+      - name: Tear down uData stack
+        if: always()
+        run: docker compose -f "$COMPOSE_FILE" down -v

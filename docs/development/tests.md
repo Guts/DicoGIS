@@ -96,3 +96,19 @@ dicogis-cli publish --input-folder ./tests/fixtures/tmp/udata  --udata-organizat
 ```sh
 pytest
 ```
+
+## Publish CI tests
+
+Two separate CI checks cover uData publication:
+
+- `tests/test_cli_publish_udata.py` (run as part of the regular `pytest` suite): exercises
+  `dicogis-cli publish`'s logic against a mocked uData HTTP API (using the `responses`
+  library), so it runs fast without any real infrastructure.
+- [`.github/workflows/tester_udata_publish.yml`](../../.github/workflows/tester_udata_publish.yml):
+  a real end-to-end integration test, matrixed across uData's current and previous major
+  versions. It builds a minimal, version-pinned uData image from `udata/system`
+  (see `tests/container/udata-pinned/`, since the `udata/udata:latest` Docker Hub image
+  doesn't reliably expose which `udata` release it bundles), boots it with MongoDB and
+  Redis (`tests/container/docker-compose.ci-udata.yml`), bootstraps an admin user and API
+  token, then runs a real `dicogis-cli inventory --output-format udata` + `dicogis-cli
+  publish` and checks the dataset actually appears in the instance.
