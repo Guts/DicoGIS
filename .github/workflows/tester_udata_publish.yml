@@ -36,7 +36,10 @@ on:
 env:
   GDAL_VERSION: 3.*
   COMPOSE_FILE: tests/container/docker-compose.ci-udata.yml
-  DICOGIS_CI_UDATA_EMAIL: ci@dicogis.test
+  # udata's user registration form does a DNS deliverability check on the
+  # email address; ci@dicogis.test (RFC 2606 reserved, non-resolving TLD)
+  # gets rejected as "Invalid email address" - example.com actually resolves
+  DICOGIS_CI_UDATA_EMAIL: ci@example.com
   DICOGIS_CI_UDATA_PASSWORD: "Dicogis-CI-Password-1234!"
 
 jobs:
