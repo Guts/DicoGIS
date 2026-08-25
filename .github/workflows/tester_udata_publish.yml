@@ -51,6 +51,11 @@ jobs:
           - udata_label: "16.x (previous major)"
             udata_version: "16.6.1"
 
+    env:
+      # every `docker compose` invocation re-interpolates the compose file,
+      # so this must be job-scoped, not just set on the "up" step
+      DICOGIS_TEST_UDATA_IMAGE: "dicogis-udata-pinned:${{ matrix.udata_version }}"
+
     steps:
       - name: Get source code
         uses: actions/checkout@v7
@@ -93,8 +98,6 @@ jobs:
             tests/container/udata-pinned
 
       - name: Start uData stack (uData ${{ matrix.udata_version }})
-        env:
-          DICOGIS_TEST_UDATA_IMAGE: "dicogis-udata-pinned:${{ matrix.udata_version }}"
         run: docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 180
 
       - name: Initialize uData instance (DB migrations)
