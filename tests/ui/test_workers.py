@@ -12,7 +12,8 @@ Usage from the repo root folder:
 # ##################################
 
 # package
-from dicogis.ui.workers import FolderScanWorker, QtProgressReporter
+from dicogis.cli.cmd_publish import PublishReport
+from dicogis.ui.workers import FolderScanWorker, PublishWorker, QtProgressReporter
 
 # #############################################################################
 # ########## Tests ##################
@@ -60,6 +61,56 @@ def test_folder_scan_worker_run_emits_error_on_failure(qtbot, monkeypatch):
     monkeypatch.setattr("dicogis.ui.workers.find_geodata_files", _boom)
 
     worker = FolderScanWorker(target_folder="/does/not/matter")
+
+    with qtbot.waitSignal(worker.error, timeout=5000) as blocker:
+        worker.run()
+
+    assert "boom" in blocker.args[0]
+
+
+def test_publish_worker_run_emits_finished(qtbot, tmp_path, monkeypatch):
+    expected_report = PublishReport(published=2, ignored=1, failed=0)
+
+    def _fake_publish_metadata_folder(**kwargs):
+        kwargs["progress_callback"](1, 3, tmp_path / "a.json")
+        kwargs["progress_callback"](3, 3, tmp_path / "c.json")
+        return expected_report
+
+    monkeypatch.setattr(
+        "dicogis.ui.workers.publish_metadata_folder", _fake_publish_metadata_folder
+    )
+
+    worker = PublishWorker(
+        input_folder=tmp_path,
+        udata_api_key="fake-api-key",
+        udata_api_url_base="https://udata-test.example/api/",
+        udata_api_version="1",
+    )
+
+    progress_updates = []
+    worker.progress_changed.connect(
+        lambda done, total: progress_updates.append((done, total))
+    )
+
+    with qtbot.waitSignal(worker.finished, timeout=5000) as blocker:
+        worker.run()
+
+    assert blocker.args[0] is expected_report
+    assert progress_updates == [(1, 3), (3, 3)]
+
+
+def test_publish_worker_run_emits_error_on_failure(qtbot, tmp_path, monkeypatch):
+    def _boom(**kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("dicogis.ui.workers.publish_metadata_folder", _boom)
+
+    worker = PublishWorker(
+        input_folder=tmp_path,
+        udata_api_key="fake-api-key",
+        udata_api_url_base="https://udata-test.example/api/",
+        udata_api_version="1",
+    )
 
     with qtbot.waitSignal(worker.error, timeout=5000) as blocker:
         worker.run()

@@ -21,6 +21,7 @@ from pathlib import Path
 from PyQt6.QtCore import QObject, pyqtSignal
 
 # project
+from dicogis.cli.cmd_publish import PublishReport, publish_metadata_folder
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.georeaders.process_files import ProcessingFiles, ProgressReporter
 from dicogis.georeaders.read_postgis import ReadPostGIS
@@ -174,4 +175,60 @@ class PostgisProcessingWorker(QObject):
             self.finished.emit(total_layers)
         except Exception as err:
             logger.error(f"PostGIS processing failed. Trace: {err}")
+            self.error.emit(str(err))
+
+
+class PublishWorker(QObject):
+    """Worker publishing DicoGIS metadata JSON files to a uData catalog, off the
+    GUI thread.
+    """
+
+    progress_changed = pyqtSignal(int, int)
+    finished = pyqtSignal(object)  # PublishReport
+    error = pyqtSignal(str)
+
+    def __init__(
+        self,
+        input_folder: Path,
+        udata_api_key: str,
+        udata_api_url_base: str,
+        udata_api_version: str,
+        udata_organization_id: str | None = None,
+        parent: QObject | None = None,
+    ) -> None:
+        """Initialize the worker.
+
+        Args:
+            input_folder: folder where metadata JSON files (udata flavor) are stored.
+            udata_api_key: API key of the account on the uData instance.
+            udata_api_url_base: API URL of the uData instance.
+            udata_api_version: API version of the uData instance.
+            udata_organization_id: organization ID in the uData instance. Defaults
+                to None.
+            parent: Qt parent object.
+        """
+        super().__init__(parent)
+        self.input_folder = input_folder
+        self.udata_api_key = udata_api_key
+        self.udata_api_url_base = udata_api_url_base
+        self.udata_api_version = udata_api_version
+        self.udata_organization_id = udata_organization_id
+
+    def run(self) -> None:
+        """Run the publication and emit the resulting report."""
+        try:
+            report: PublishReport = publish_metadata_folder(
+                input_folder=self.input_folder,
+                udata_api_key=self.udata_api_key,
+                udata_api_url_base=self.udata_api_url_base,
+                udata_api_version=self.udata_api_version,
+                udata_organization_id=self.udata_organization_id,
+                progress_callback=lambda done, total, _current_file: (
+                    self.progress_changed.emit(done, total)
+                ),
+                verbose=True,
+            )
+            self.finished.emit(report)
+        except Exception as err:
+            logger.error(f"uData publication failed. Trace: {err}")
             self.error.emit(str(err))

@@ -4,4 +4,5 @@ from .misc_buttons import MiscButtons  # noqa: E402 F401
 from .tab_credits import TabCredits  # noqa: E402 F401
 from .tab_database import TabDatabaseServer  # noqa: E402 F401
 from .tab_files import TabFiles  # noqa: E402 F401
+from .tab_publish import TabPublish  # noqa: E402 F401
 from .tab_settings import TabSettings  # noqa: E402 F401

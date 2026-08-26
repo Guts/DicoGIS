@@ -48,16 +48,25 @@ from typer import launch
 # Project
 from dicogis import __about__
 from dicogis.cli.cmd_inventory import determine_output_path
+from dicogis.cli.cmd_publish import PublishReport
 from dicogis.constants import AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
-from dicogis.ui import MiscButtons, TabCredits, TabDatabaseServer, TabFiles, TabSettings
+from dicogis.ui import (
+    MiscButtons,
+    TabCredits,
+    TabDatabaseServer,
+    TabFiles,
+    TabPublish,
+    TabSettings,
+)
 from dicogis.ui.workers import (
     FolderScanWorker,
     PostgisProcessingWorker,
     ProcessingWorker,
+    PublishWorker,
     QtProgressReporter,
 )
 from dicogis.utils.checknorris import CheckNorris
@@ -193,11 +202,17 @@ class DicoGIS(QMainWindow):
             localized_strings=self.localized_strings,
             init_widgets=True,
         )  # tab_id = 2
-        self.tab_credits = TabCredits(parent=self.nb)  # tab_id = 3
+        self.tab_publish = TabPublish(
+            parent=self.nb,
+            localized_strings=self.localized_strings,
+            init_widgets=True,
+        )  # tab_id = 3
+        self.tab_credits = TabCredits(parent=self.nb)  # tab_id = 4
 
         self.nb.addTab(self.tab_files, " Files ")
         self.nb.addTab(self.tab_sgbd, " PostGIS ")
         self.nb.addTab(self.tab_options, "Options")
+        self.nb.addTab(self.tab_publish, "Publish")
         self.nb.addTab(self.tab_credits, "Credits")
 
         self.tab_files.folder_selected.connect(self.on_folder_selected)
@@ -287,6 +302,7 @@ class DicoGIS(QMainWindow):
         if not checker.check_internet_connection():
             self.nb.setTabEnabled(1, False)
             self.nb.setTabEnabled(2, False)
+            self.nb.setTabEnabled(3, False)
 
     # =================================================================================
 
@@ -305,11 +321,13 @@ class DicoGIS(QMainWindow):
         self.nb.setTabText(0, self.localized_strings.get("gui_tab1", " Files "))
         self.nb.setTabText(1, self.localized_strings.get("gui_tab2", " PostGIS "))
         self.nb.setTabText(2, self.localized_strings.get("gui_tab5", "Options"))
-        self.nb.setTabText(3, self.localized_strings.get("gui_tab6", "Credits"))
+        self.nb.setTabText(3, self.localized_strings.get("gui_tab_publish", "Publish"))
+        self.nb.setTabText(4, self.localized_strings.get("gui_tab6", "Credits"))
 
         self.tab_files.retranslate_ui(self.localized_strings)
         self.tab_sgbd.retranslate_ui(self.localized_strings)
         self.tab_options.retranslate_ui(self.localized_strings)
+        self.tab_publish.retranslate_ui(self.localized_strings)
 
         self._apply_locale(new_lang)
 
@@ -481,7 +499,7 @@ class DicoGIS(QMainWindow):
         self.typo: int = self.nb.currentIndex()
         logger.info(f"Selected tab: {self.typo}")
 
-        if self.typo not in (0, 1):
+        if self.typo not in (0, 1, 3):
             logger.debug("Active tab does not allow execution.")
             return
 
@@ -493,10 +511,18 @@ class DicoGIS(QMainWindow):
         self.nb.setTabEnabled(0, False)
         self.nb.setTabEnabled(1, False)
         self.nb.setTabEnabled(2, False)
+        self.nb.setTabEnabled(3, False)
 
         # check form fields
         if not self.check_fields(tab_data_type=self.typo):
             self._on_check_failed()
+            return
+
+        # uData publication has its own dedicated pipeline: no output serializer,
+        # no geodata listing, no PostGIS connection needed.
+        if self.typo == 3:
+            logger.info("PROCESS LAUNCHED: uData publication")
+            self.process_publish()
             return
 
         # if SGBD, check connection
@@ -540,6 +566,7 @@ class DicoGIS(QMainWindow):
         self.nb.setTabEnabled(0, True)
         self.nb.setTabEnabled(1, True)
         self.nb.setTabEnabled(2, True)
+        self.nb.setTabEnabled(3, True)
 
     def _on_check_failed(self) -> None:
         """React to a check_fields()/test_connection() failure."""
@@ -723,6 +750,68 @@ class DicoGIS(QMainWindow):
         )
         self._enable_processing_controls()
 
+    def process_publish(self) -> None:
+        """Launch uData publication of metadata JSON files in a background worker."""
+        self._progress_reporter = None
+        self.prog_layers.setRange(0, 0)  # indeterminate mode while fetching the catalog
+        self.set_status_message("Publishing to uData...")
+        self.tab_publish.clear_report()
+
+        self._proc_thread = QThread(self)
+        self._proc_worker = PublishWorker(
+            input_folder=Path(self.tab_publish.get_input_folder()),
+            udata_api_key=self.tab_publish.get_udata_api_key(),
+            udata_api_url_base=self.tab_publish.get_udata_api_url_base(),
+            udata_api_version=self.tab_publish.get_udata_api_version(),
+            udata_organization_id=self.tab_publish.get_udata_organization_id(),
+        )
+        self._proc_worker.moveToThread(self._proc_thread)
+        self._proc_thread.started.connect(self._proc_worker.run)
+        self._proc_worker.progress_changed.connect(self._on_publish_progress)
+        self._proc_worker.finished.connect(self._on_publish_finished)
+        self._proc_worker.error.connect(self._on_processing_error)
+        self._proc_worker.finished.connect(self._proc_thread.quit)
+        self._proc_worker.error.connect(self._proc_thread.quit)
+        self._proc_worker.finished.connect(self._proc_worker.deleteLater)
+        self._proc_worker.error.connect(self._proc_worker.deleteLater)
+        self._proc_thread.finished.connect(self._proc_thread.deleteLater)
+        self._proc_thread.finished.connect(self._clear_proc_thread_ref)
+        self._proc_thread.start()
+
+    def _on_publish_progress(self, files_done: int, files_total: int) -> None:
+        """React to a uData publication progress update.
+
+        Args:
+            files_done: number of JSON files already examined.
+            files_total: total number of JSON files to examine.
+        """
+        if self.prog_layers.maximum() != files_total:
+            self.prog_layers.setRange(0, files_total)
+        self.prog_layers.setValue(files_done)
+        self.set_status_message(f"Publishing to uData: {files_done}/{files_total}")
+
+    def _on_publish_finished(self, report: PublishReport) -> None:
+        """React to a successful uData publication run.
+
+        Args:
+            report: outcome of the publication run.
+        """
+        self.prog_layers.setRange(0, max(report.total, 1))
+        self.prog_layers.setValue(report.total)
+        self.set_status_message(
+            f"{report.published} published, {report.ignored} ignored, "
+            f"{report.failed} failed."
+        )
+        self.tab_publish.show_report(report)
+        send_system_notify(
+            notification_title="DicoGIS publication ended",
+            notification_message=f"{report.published} published, "
+            f"{report.ignored} ignored,"
+            f"{report.failed} failed.",
+            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
+        )
+        self._enable_processing_controls()
+
     def check_fields(self, tab_data_type: int) -> bool:
         """Check if required form fields are not empty.
 
@@ -762,6 +851,23 @@ class DicoGIS(QMainWindow):
                 self.set_status_message(
                     "PG service name is a "
                     f"{self.localized_strings.get('err_pg_empty_field')}"
+                )
+                return False
+
+        elif tab_data_type == 3:
+            if not self.tab_publish.get_input_folder():
+                QMessageBox.critical(
+                    self, "DicoGIS - User error", self.localized_strings.get("nofolder")
+                )
+                return False
+            if not self.tab_publish.get_udata_api_key():
+                QMessageBox.critical(
+                    self,
+                    "DicoGIS - User error",
+                    self.localized_strings.get(
+                        "gui_publish_missing_api_key",
+                        "A uData API key is required to publish.",
+                    ),
                 )
                 return False
 

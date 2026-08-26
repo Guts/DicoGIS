@@ -70,6 +70,26 @@ class OptionsManager:
             {"style": self.config.get("ui", "style", fallback="")}
         )
 
+        # uData publication settings (backward compatibility: older options.ini files
+        # predate the "udata" section)
+        if self.config.has_section("udata"):
+            parent.tab_publish.set_publish_options(
+                {
+                    "input_folder": self.config.get(
+                        "udata", "input_folder", fallback=""
+                    ),
+                    "udata_api_url_base": self.config.get(
+                        "udata", "api_url_base", fallback=""
+                    ),
+                    "udata_api_version": self.config.get(
+                        "udata", "api_version", fallback=""
+                    ),
+                    "udata_organization_id": self.config.get(
+                        "udata", "organization_id", fallback=""
+                    ),
+                }
+            )
+
         # filters
         parent.tab_files.set_filters_state(dict(self.config.items("filters")))
 
@@ -100,6 +120,10 @@ class OptionsManager:
         # backward compatibility: older options.ini files predate the "ui" section
         if not self.config.has_section("ui"):
             self.config.add_section("ui")
+
+        # backward compatibility: older options.ini files predate the "udata" section
+        if not self.config.has_section("udata"):
+            self.config.add_section("udata")
 
         # config
         self.config.set("config", "DicoGIS_version", parent.package_about.__version__)
@@ -138,6 +162,15 @@ class OptionsManager:
         # interface settings
         ui_options = parent.tab_options.get_ui_options()
         self.config.set("ui", "style", ui_options["style"])
+
+        # uData publication settings (the API key is never persisted, for security)
+        publish_options = parent.tab_publish.get_publish_options()
+        self.config.set("udata", "input_folder", publish_options["input_folder"])
+        self.config.set("udata", "api_url_base", publish_options["udata_api_url_base"])
+        self.config.set("udata", "api_version", publish_options["udata_api_version"])
+        self.config.set(
+            "udata", "organization_id", publish_options["udata_organization_id"]
+        )
 
         # filters
         for key, value in parent.tab_files.get_filters_state().items():
