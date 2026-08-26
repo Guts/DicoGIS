@@ -18,26 +18,31 @@ Julien Moura (@geojulien)
 import getpass
 import locale
 import logging
-import platform
+from datetime import date
 from pathlib import Path
 from sys import platform as opersys
 
-# GUI
-from tkinter import ACTIVE, DISABLED, END, NORMAL, Image, IntVar, StringVar
-from tkinter.messagebox import showerror as avert
-from tkinter.ttk import (
-    Button,
-    Combobox,
-    Entry,
-    Label,
-    Labelframe,
-    Notebook,
-    Progressbar,
-)
-
 # 3rd party
 from osgeo import gdal
-from ttkthemes import ThemedTk
+
+# GUI
+from PyQt6.QtCore import QThread
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import (
+    QComboBox,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 from typer import launch
 
 # Project
@@ -48,8 +53,13 @@ from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
-from dicogis.listing.geodata_listing import find_geodata_files
 from dicogis.ui import MiscButtons, TabCredits, TabDatabaseServer, TabFiles, TabSettings
+from dicogis.ui.workers import (
+    FolderScanWorker,
+    PostgisProcessingWorker,
+    ProcessingWorker,
+    QtProgressReporter,
+)
 from dicogis.utils.checknorris import CheckNorris
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.options import OptionsManager
@@ -72,22 +82,20 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class DicoGIS(ThemedTk):
+class DicoGIS(QMainWindow):
     """Main DicoGIS GUI object.
 
     Args:
-        ThemedTk: themed tk object.
+        QMainWindow: inherited Qt main window.
     """
 
     # attributes
     package_about = __about__
 
-    def __init__(self, theme: str = "radiance"):
-        """Main window constructor.
+    def __init__(self, parent: QWidget | None = None):
+        """Main window constructor."""
+        super().__init__(parent)
 
-        Args:
-            theme: Tkinter theme to use. Defaults to "radiance".
-        """
         # store vars as attr
         self.txt_manager = TextsManager()
         self.dir_imgs = utils_global.resolve_internal_path(internal_path="bin/img")
@@ -98,22 +106,11 @@ class DicoGIS(ThemedTk):
         checker = CheckNorris()
 
         # basics settings
-        ThemedTk.__init__(self, fonts=True, themebg=True)
-        self.set_theme(theme)
-        self.title(f"DicoGIS {self.package_about.__version__}")
+        self.setWindowTitle(f"DicoGIS {self.package_about.__version__}")
         self.uzer = getpass.getuser()
-        if opersys == "win32":
-            self.iconbitmap(self.dir_imgs / "DicoGIS.ico")  # windows icon
-        elif opersys.startswith("linux"):
-            icon = Image("photo", file=self.dir_imgs / "DicoGIS_logo.gif")
-            self.call("wm", "iconphoto", self._w, icon)
-        else:
-            logger.warning(f"Unknown operating system: {platform.platform()}")
-        self.resizable(width=False, height=False)
-        self.focus_force()
+        self.setWindowIcon(QIcon(str(self.dir_imgs / "DicoGIS.ico")))
 
         # -- Variables --
-        # settings
         self.num_folders = 0
         self.def_lang = "EN"  # default language to start
         self.localized_strings = {}  # texts dictionary
@@ -170,13 +167,20 @@ class DicoGIS(ThemedTk):
         self.global_ignored = 0  # files ignored by an user filter
         self.global_dico_fields = {}
 
+        # threads/workers references (kept to avoid premature garbage collection)
+        self._scan_thread: QThread | None = None
+        self._scan_worker: FolderScanWorker | None = None
+        self._proc_thread: QThread | None = None
+        self._proc_worker: object | None = None
+        self._progress_reporter: QtProgressReporter | None = None
+
         # fillfulling text
         self.localized_strings = self.txt_manager.load_texts(
             language_code=self.def_lang
         )
 
         # Notebook
-        self.nb = Notebook(self)
+        self.nb = QTabWidget(self)
         # tabs
         self.tab_files = TabFiles(
             parent=self.nb, localized_strings=self.localized_strings
@@ -188,98 +192,85 @@ class DicoGIS(ThemedTk):
             parent=self.nb,
             localized_strings=self.localized_strings,
             init_widgets=True,
-            switcher=utils_global.ui_switch,
         )  # tab_id = 2
         self.tab_credits = TabCredits(parent=self.nb)  # tab_id = 3
 
-        # =================================================================================
-        # ## TAB 1: FILES ##
-        self.nb.add(self.tab_files, text=" Files ", padding=3)
+        self.nb.addTab(self.tab_files, " Files ")
+        self.nb.addTab(self.tab_sgbd, " PostGIS ")
+        self.nb.addTab(self.tab_options, "Options")
+        self.nb.addTab(self.tab_credits, "Credits")
 
-        # ================================================================================
+        self.tab_files.folder_selected.connect(self.on_folder_selected)
 
-        # ## TAB 2: Database ##
-        self.nb.add(self.tab_sgbd, text=" PostGIS ", padding=3)
-
-        # =================================================================================
-
-        # ## TAB 3: Options ##
-        self.nb.add(self.tab_options, text="Options", padding=3)
-
-        # =================================================================================
-
-        # ## TAB 4: Options ##
-        self.nb.add(self.tab_credits, text="Credits", padding=3)
-
-        # =================================================================================
         # ## MAIN FRAME ##
         # welcome message
-        self.welcome = Label(
-            self, text=self.localized_strings.get("hi") + self.uzer, foreground="blue"
+        self.welcome = QLabel(
+            self.localized_strings.get("hi", "Hello ") + self.uzer, self
         )
+        self.welcome.setStyleSheet("color: blue;")
 
         # Frame: Output
-        self.FrOutp = Labelframe(
-            self, name="output", text=self.localized_strings.get("gui_fr4")
+        self.FrOutp = QGroupBox(self.localized_strings.get("gui_fr4", "Output"), self)
+        outp_layout = QGridLayout()
+        self.lbl_outxl_filename = QLabel(
+            self.localized_strings.get("gui_fic", "Name of output file: "), self.FrOutp
         )
-        # widgets
-        self.lbl_outxl_filename = Label(
-            self.FrOutp, text=self.localized_strings.get("gui_fic")
-        )
-        self.ent_outxl_filename = Entry(self.FrOutp, width=35)
-        # widgets placement
-        self.lbl_outxl_filename.grid(row=0, column=1, sticky="NSWE", padx=2, pady=2)
-        self.ent_outxl_filename.grid(
-            row=0, column=2, columnspan=1, sticky="NSWE", padx=2, pady=2
-        )
+        self.ent_outxl_filename = QLineEdit(self.FrOutp)
+        outp_layout.addWidget(self.lbl_outxl_filename, 0, 0)
+        outp_layout.addWidget(self.ent_outxl_filename, 0, 1)
+        self.FrOutp.setLayout(outp_layout)
+
         # Frame: Progression bar
-        self.FrProg = Labelframe(
-            self, name="progression", text=self.localized_strings.get("gui_prog")
+        self.FrProg = QGroupBox(
+            self.localized_strings.get("gui_prog", "Progression"), self
         )
-        # variables
-        self.status = StringVar(self.FrProg, "")
-        self.progress = IntVar(self.FrProg, 0)
-        # widgets
-        self.prog_layers = Progressbar(
-            self.FrProg, orient="horizontal", variable=self.progress
-        )
-        self.lbl_status = Label(
-            master=self.FrProg, textvariable=self.status, foreground="DodgerBlue"
-        )
-        self.lbl_status.pack()
-        # widgets placement
-        self.prog_layers.pack(expand=1, fill="both")
+        prog_layout = QVBoxLayout()
+        self.prog_layers = QProgressBar(self.FrProg)
+        self.prog_layers.setValue(0)
+        self.lbl_status = QLabel("", self.FrProg)
+        self.lbl_status.setStyleSheet("color: DodgerBlue;")
+        prog_layout.addWidget(self.prog_layers)
+        prog_layout.addWidget(self.lbl_status)
+        self.FrProg.setLayout(prog_layout)
 
         # miscellaneous
-        misc_frame = MiscButtons(self, images_folder=self.dir_imgs)
-        misc_frame.grid(row=2, rowspan=3, padx=2, pady=2, sticky="NSWE")
+        self.misc_frame = MiscButtons(self, images_folder=self.dir_imgs)
+
         # language switcher
         li_lang = [v.value for v in AvailableLocales]
-        self.ddl_lang = Combobox(self, values=li_lang, width=5, state="readonly")
-        self.ddl_lang.current(li_lang.index(self.def_lang))
-        self.ddl_lang.bind("<<ComboboxSelected>>", self.change_lang)
+        self.ddl_lang = QComboBox(self)
+        self.ddl_lang.addItems(li_lang)
+        self.ddl_lang.setCurrentText(self.def_lang)
+        self.ddl_lang.activated.connect(lambda _index: self.retranslate_ui())
 
         # Basic buttons
-        self.val = Button(
-            self,
-            text=self.localized_strings.get("gui_go"),
-            state=ACTIVE,
-            command=lambda: self.process(),
-        )
-        self.can = Button(
-            self,
-            text=self.localized_strings.get("gui_quit"),
-            command=lambda: self.destroy(),
-        )
+        self.val = QPushButton(self.localized_strings.get("gui_go", "Launch"), self)
+        self.val.setEnabled(True)
+        self.val.clicked.connect(self.process)
+        self.can = QPushButton(self.localized_strings.get("gui_quit", "Quit"), self)
+        self.can.clicked.connect(self.close)
 
-        # widgets placement
-        self.welcome.grid(row=1, column=1, columnspan=1, sticky="NS", padx=2, pady=2)
-        self.ddl_lang.grid(row=1, column=1, sticky="NSE", padx=2, pady=2)
-        self.nb.grid(row=2, column=1)  # notebook
-        self.FrProg.grid(row=3, column=1, sticky="NSWE", padx=2, pady=2)
-        self.FrOutp.grid(row=4, column=1, sticky="NSWE", padx=2, pady=2)
-        self.val.grid(row=5, column=1, columnspan=2, sticky="NSWE", padx=2, pady=2)
-        self.can.grid(row=5, column=0, sticky="NSWE", padx=2, pady=2)
+        # -- layout --
+        central_widget = QWidget(self)
+        main_layout = QGridLayout(central_widget)
+
+        top_bar = QHBoxLayout()
+        top_bar.addWidget(self.welcome)
+        top_bar.addStretch(1)
+        top_bar.addWidget(self.ddl_lang)
+
+        buttons_bar = QHBoxLayout()
+        buttons_bar.addWidget(self.can)
+        buttons_bar.addWidget(self.val)
+
+        main_layout.addWidget(self.misc_frame, 0, 0, 5, 1)
+        main_layout.addLayout(top_bar, 0, 1)
+        main_layout.addWidget(self.nb, 1, 1)
+        main_layout.addWidget(self.FrProg, 2, 1)
+        main_layout.addWidget(self.FrOutp, 3, 1)
+        main_layout.addLayout(buttons_bar, 4, 1)
+
+        self.setCentralWidget(central_widget)
 
         # loading previous options
         if not self.settings.first_use:
@@ -287,79 +278,47 @@ class DicoGIS(ThemedTk):
                 self.settings.load_settings(parent=self)
             except Exception as err:
                 logger.error(
-                    "Load settings failed: option or section is missing. Trace: {}".format(
-                        err
-                    )
+                    f"Load settings failed: option or section is missing. Trace: {err}"
                 )
 
-        self.ddl_lang.set(self.def_lang)
-        self.change_lang(1)
-
-        # set UI options tab
-        utils_global.ui_switch(self.tab_options.opt_proxy, self.tab_options.FrOptProxy)
+        self.retranslate_ui()
 
         # checking connection
         if not checker.check_internet_connection():
-            self.nb.tab(2, state=DISABLED)
-            self.nb.tab(3, state=DISABLED)
+            self.nb.setTabEnabled(1, False)
+            self.nb.setTabEnabled(2, False)
 
     # =================================================================================
 
-    def change_lang(self, event):
-        """Update the texts dictionary with the language selected."""
-        new_lang = self.ddl_lang.get()
-        # change to the new language selected
+    def retranslate_ui(self) -> None:
+        """Update widgets text with the language currently selected."""
+        new_lang = self.ddl_lang.currentText()
         self.localized_strings = self.txt_manager.load_texts(language_code=new_lang)
-        # update widgets text
-        self.welcome.config(text=self.localized_strings.get("hi") + self.uzer)
-        self.can.config(text=self.localized_strings.get("gui_quit"))
-        self.FrOutp.config(text=self.localized_strings.get("gui_fr4", "Output"))
-        self.FrProg.config(text=self.localized_strings.get("gui_prog", "Progression"))
-        self.val.config(text=self.localized_strings.get("gui_go", "Launch"))
-        self.lbl_outxl_filename.config(text=self.localized_strings.get("gui_fic"))
-        # tab files
-        self.nb.tab(0, text=self.localized_strings.get("gui_tab1"))
-        self.tab_files.FrPath.config(text=self.localized_strings.get("gui_fr1"))
-        self.tab_files.FrFilters.config(text=self.localized_strings.get("gui_fr3"))
-        self.tab_files.lb_target.config(text=self.localized_strings.get("gui_path"))
-        self.tab_files.btn_browse.config(text=self.localized_strings.get("gui_choix"))
-        # sgbd tab
-        self.nb.tab(1, text=self.localized_strings.get("gui_tab2"))
-        self.tab_sgbd.FrameDatabaseServicePicker.config(
-            text=self.localized_strings.get("gui_fr2")
-        )
-        self.tab_sgbd.caz_pg_views.config(
-            text=self.localized_strings.get("gui_views", "Views enabled")
-        )
-        self.tab_sgbd.lb_pg_services.config(
-            text=self.localized_strings.get("gui_pg_service", "PG service:")
-        )
-        self.tab_sgbd.open_form_button.config(
-            text=self.localized_strings.get("gui_database_form", "+")
-        )
 
-        # options
-        self.nb.tab(2, text=self.localized_strings.get("gui_tab5"))
-        self.tab_options.prox_lb_host.config(
-            text=self.localized_strings.get("gui_host")
-        )
-        self.tab_options.prox_lb_port.config(
-            text=self.localized_strings.get("gui_port")
-        )
-        self.tab_options.prox_lb_user.config(
-            text=self.localized_strings.get("gui_user")
-        )
-        self.tab_options.prox_lb_password.config(
-            text=self.localized_strings.get("gui_mdp")
-        )
-        self.tab_options.prox_lb_host.config(
-            text=self.localized_strings.get("gui_host")
-        )
+        self.welcome.setText(self.localized_strings.get("hi", "Hello ") + self.uzer)
+        self.can.setText(self.localized_strings.get("gui_quit", "Quit"))
+        self.FrOutp.setTitle(self.localized_strings.get("gui_fr4", "Output"))
+        self.FrProg.setTitle(self.localized_strings.get("gui_prog", "Progression"))
+        self.val.setText(self.localized_strings.get("gui_go", "Launch"))
+        self.lbl_outxl_filename.setText(self.localized_strings.get("gui_fic"))
 
-        # credits
-        self.nb.tab(3, text=self.localized_strings.get("gui_tab6"))
+        self.nb.setTabText(0, self.localized_strings.get("gui_tab1", " Files "))
+        self.nb.setTabText(1, self.localized_strings.get("gui_tab2", " PostGIS "))
+        self.nb.setTabText(2, self.localized_strings.get("gui_tab5", "Options"))
+        self.nb.setTabText(3, self.localized_strings.get("gui_tab6", "Credits"))
 
-        # setting locale according to the language passed
+        self.tab_files.retranslate_ui(self.localized_strings)
+        self.tab_sgbd.retranslate_ui(self.localized_strings)
+        self.tab_options.retranslate_ui(self.localized_strings)
+
+        self._apply_locale(new_lang)
+
+    def _apply_locale(self, new_lang: str) -> None:
+        """Set the OS locale according to the language passed.
+
+        Args:
+            new_lang: 2 letters language code (EN, FR, ES)
+        """
         try:
             if opersys == "win32":
                 if new_lang.lower() == "fr":
@@ -376,30 +335,81 @@ class DicoGIS(ThemedTk):
                 else:
                     locale.setlocale(locale.LC_ALL, "en_GB.utf8")
 
-            logger.info(f"Language switched to: {self.ddl_lang.get()}")
+            logger.info(f"Language switched to: {new_lang}")
         except locale.Error:
             logger.error("Selected locale is not installed")
 
-        # End of function
-        return self.localized_strings
-
-    def ligeofiles(self, target_folder: str) -> tuple[list[str]]:
-        """List compatible geo-files stored into a folder structure.
+    def set_status_message(self, message: str) -> None:
+        """Update the status label text.
 
         Args:
-            target_folder (str): folder into walk to look for geographic datasets.
-
-        Returns:
-            tuple[list[str]]: tuple of list of paths by formats
+            message: message to display.
         """
-        # disable related UI items in the meanwhile
-        self.tab_files.btn_browse.config(state=DISABLED)
+        self.lbl_status.setText(message)
 
-        # Looping in folders structure
-        self.status.set(self.localized_strings.get("gui_prog1"))
-        self.prog_layers.start()
+    # =================================================================================
+    # -- Folder listing (Files tab) ---------------------------------------------------
+
+    def on_folder_selected(self, foldername: str) -> None:
+        """React to a folder being picked in the Files tab: set the default output
+        filename and start the background folder scan.
+
+        Args:
+            foldername: selected folder path.
+        """
+        self.ent_outxl_filename.setText(
+            f"DicoGIS_{Path(foldername).name}_{date.today()}.xlsx"
+        )
+        self._start_folder_scan(foldername)
+
+    def _start_folder_scan(self, target_folder: str) -> None:
+        """Start a background worker listing geodata files under target_folder.
+
+        Args:
+            target_folder: folder to walk into.
+        """
+        self.tab_files.btn_browse.setEnabled(False)
+        self.set_status_message(self.localized_strings.get("gui_prog1", ""))
+        self.prog_layers.setRange(0, 0)  # indeterminate mode while scanning
         logger.info(f"Begin of folders parsing: {target_folder}")
 
+        self._scan_thread = QThread(self)
+        self._scan_worker = FolderScanWorker(target_folder)
+        self._scan_worker.moveToThread(self._scan_thread)
+        self._scan_thread.started.connect(self._scan_worker.run)
+        self._scan_worker.status_message.connect(self.set_status_message)
+        self._scan_worker.finished.connect(self._on_folder_scan_finished)
+        self._scan_worker.error.connect(self._on_folder_scan_error)
+        self._scan_worker.finished.connect(self._scan_thread.quit)
+        self._scan_worker.error.connect(self._scan_thread.quit)
+        self._scan_worker.finished.connect(self._scan_worker.deleteLater)
+        self._scan_worker.error.connect(self._scan_worker.deleteLater)
+        self._scan_thread.finished.connect(self._scan_thread.deleteLater)
+        self._scan_thread.finished.connect(self._clear_scan_thread_ref)
+        self._scan_thread.start()
+
+    def _clear_scan_thread_ref(self) -> None:
+        """Drop the reference to the finished folder-scan thread."""
+        self._scan_thread = None
+
+    def _on_folder_scan_error(self, message: str) -> None:
+        """React to a folder scan failure.
+
+        Args:
+            message: error message.
+        """
+        logger.error(f"Folder scan failed: {message}")
+        self.prog_layers.setRange(0, 1)
+        self.prog_layers.setValue(0)
+        self.tab_files.btn_browse.setEnabled(True)
+        QMessageBox.critical(self, "DicoGIS", message)
+
+    def _on_folder_scan_finished(self, result: tuple) -> None:
+        """React to a successful folder scan: store the resulting file lists.
+
+        Args:
+            result: tuple returned by find_geodata_files().
+        """
         (
             self.num_folders,
             self.li_shapefiles,
@@ -418,14 +428,14 @@ class DicoGIS(ThemedTk):
             self.li_file_databases,
             self.li_file_database_spatialite,
             self.li_file_database_geopackage,
-        ) = find_geodata_files(start_folder=target_folder)
+        ) = result
 
         # end of listing
-        self.prog_layers.stop()
-        self.progress.set(0)
+        self.prog_layers.setRange(0, 1)
+        self.prog_layers.setValue(0)
 
         # status message
-        self.status.set(
+        self.set_status_message(
             "{} shapefiles - "
             "{} tables (MapInfo) - "
             "{} KML - "
@@ -446,11 +456,12 @@ class DicoGIS(ThemedTk):
                 len(self.li_file_databases),
                 len(self.li_cdao),
                 self.num_folders,
-                self.localized_strings.get("log_numfold"),
+                self.localized_strings.get("log_numfold", ""),
             )
         )
 
         # grouping vectors lists
+        self.li_vectors = []
         self.li_vectors.extend(self.li_shapefiles)
         self.li_vectors.extend(self.li_mapinfo_tab)
         self.li_vectors.extend(self.li_kml)
@@ -459,30 +470,15 @@ class DicoGIS(ThemedTk):
         self.li_vectors.extend(self.li_gxt)
 
         # reactivating the buttons
-        self.tab_files.btn_browse.config(state=ACTIVE)
-        self.val.config(state=ACTIVE)
-        # End of function
-        return (
-            self.li_shapefiles,
-            self.li_mapinfo_tab,
-            self.li_kml,
-            self.li_gml,
-            self.li_geojson,
-            self.li_gxt,
-            self.li_raster,
-            self.li_file_database_esri,
-            self.li_dxf,
-            self.li_dwg,
-            self.li_dgn,
-            self.li_cdao,
-            self.li_file_databases,
-            self.li_file_database_spatialite,
-        )
+        self.tab_files.btn_browse.setEnabled(True)
+        self.val.setEnabled(True)
 
-    def process(self):
+    # =================================================================================
+    # -- Processing dispatch ------------------------------------------------------------
+
+    def process(self) -> None:
         """Check needed info and launch different processes."""
-        # get the active tab ID
-        self.typo: int = self.nb.index("current")
+        self.typo: int = self.nb.currentIndex()
         logger.info(f"Selected tab: {self.typo}")
 
         if self.typo not in (0, 1):
@@ -493,31 +489,22 @@ class DicoGIS(ThemedTk):
         self.settings.save_settings(self)
 
         # disabling UI to avoid unattended actions
-        self.val.config(state=DISABLED)
-        self.nb.tab(0, state=DISABLED)
-        self.nb.tab(1, state=DISABLED)
-        self.nb.tab(2, state=DISABLED)
+        self.val.setEnabled(False)
+        self.nb.setTabEnabled(0, False)
+        self.nb.setTabEnabled(1, False)
+        self.nb.setTabEnabled(2, False)
 
         # check form fields
         if not self.check_fields(tab_data_type=self.typo):
-            self.lbl_status.configure(foreground="red")
-            self.val.config(state=ACTIVE)
-            self.nb.tab(0, state=NORMAL)
-            self.nb.tab(1, state=NORMAL)
-            self.nb.tab(2, state=NORMAL)
-            self.nb.select(self.typo)
+            self._on_check_failed()
             return
 
         # if SGBD, check connection
+        pg_reader = None
         if self.typo == 1:
             pg_reader = self.test_connection()
             if pg_reader is None:
-                self.lbl_status.configure(foreground="red")
-                self.val.config(state=ACTIVE)
-                self.nb.tab(0, state=NORMAL)
-                self.nb.tab(1, state=NORMAL)
-                self.nb.tab(2, state=NORMAL)
-                self.nb.select(self.typo)
+                self._on_check_failed()
                 return
 
         # creating the output serializer
@@ -526,53 +513,78 @@ class DicoGIS(ThemedTk):
                 format_or_serializer=OutputFormats.excel,
                 localized_strings=self.localized_strings,
                 output_path=None,
-                opt_prettify_size=self.tab_options.opt_export_size_prettify.get(),
-                opt_raw_path=self.tab_options.opt_export_raw_path.get(),
+                opt_prettify_size=self.tab_options.opt_export_size_prettify.isChecked(),
+                opt_raw_path=self.tab_options.opt_export_raw_path.isChecked(),
             )
         )
 
-        self.lbl_status.configure(foreground="DodgerBlue")
-        self.status.set("Excel worbook object instanciated")
+        self.lbl_status.setStyleSheet("color: DodgerBlue;")
+        self.set_status_message("Excel worbook object instanciated")
 
         # process files or PostGIS database
         if self.typo == 0:
-            self.nb.select(0)
+            self.nb.setCurrentIndex(0)
             logger.info("PROCESS LAUNCHED: files")
             self.process_files()
         elif self.typo == 1:
-            self.nb.select(1)
+            self.nb.setCurrentIndex(1)
             self.serializer.pre_serializing(has_sgbd=1)
             logger.info("PROCESS LAUNCHED: SGBD")
-            # launching the process
             self.process_db(sgbd_reader=pg_reader)
         else:
             logger.critical("Unrecognized data type to process. Report it!")
-        self.val.config(state=ACTIVE)
-        # end of function
-        return self.typo
 
-    def process_files(self):
-        """Launch the different processes."""
+    def _enable_processing_controls(self) -> None:
+        """Re-enable the controls disabled while a process was running."""
+        self.val.setEnabled(True)
+        self.nb.setTabEnabled(0, True)
+        self.nb.setTabEnabled(1, True)
+        self.nb.setTabEnabled(2, True)
 
+    def _on_check_failed(self) -> None:
+        """React to a check_fields()/test_connection() failure."""
+        self.lbl_status.setStyleSheet("color: red;")
+        self._enable_processing_controls()
+        self.nb.setCurrentIndex(self.typo)
+
+    def _on_processing_error(self, message: str) -> None:
+        """React to a processing worker failure.
+
+        Args:
+            message: error message.
+        """
+        logger.error(f"Processing failed: {message}")
+        self.lbl_status.setStyleSheet("color: red;")
+        self._enable_processing_controls()
+        QMessageBox.critical(self, "DicoGIS", message)
+
+    def process_files(self) -> None:
+        """Launch files processing in a background worker."""
         # check if there are some layers into the folder structure
-        if (
+        if not (
             len(self.li_vectors)
             + len(self.li_raster)
             + len(self.li_file_databases)
             + len(self.li_cdao)
         ):
-            pass
-        else:
-            avert("DicoGIS - User error", self.localized_strings.get("nodata"))
+            QMessageBox.critical(
+                self, "DicoGIS - User error", self.localized_strings.get("nodata")
+            )
+            self._enable_processing_controls()
             return
 
         # set output path
         if self.serializer.output_path is None:
             self.serializer.output_path = Path(
-                self.tab_files.target_path.get()
-            ).joinpath(self.ent_outxl_filename.get())
+                self.tab_files.get_target_path()
+            ).joinpath(self.ent_outxl_filename.text())
 
         logger.info(f"Output path: {self.serializer.output_path.resolve()}")
+
+        self._progress_reporter = QtProgressReporter(self)
+        self._progress_reporter.message_changed.connect(self.set_status_message)
+        self._progress_reporter.progress_incremented.connect(self.prog_layers.setValue)
+        self._progress_reporter.total_changed.connect(self.prog_layers.setMaximum)
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
@@ -596,88 +608,120 @@ class DicoGIS(ThemedTk):
             li_geojson=self.li_geojson,
             li_geotiff=self.li_geotiff,
             # options
-            opt_analyze_cdao=self.tab_files.opt_gxt.get(),
-            opt_analyze_esri_filegdb=self.tab_files.opt_egdb.get(),
-            opt_analyze_geojson=self.tab_files.opt_geoj.get(),
-            opt_analyze_gml=self.tab_files.opt_gml.get(),
-            opt_analyze_gxt=self.tab_files.opt_gxt.get(),
-            opt_analyze_kml=self.tab_files.opt_kml.get(),
-            opt_analyze_mapinfo_tab=self.tab_files.opt_tab.get(),
-            opt_analyze_raster=self.tab_files.opt_rast.get(),
-            opt_analyze_shapefiles=self.tab_files.opt_shp.get(),
-            opt_analyze_spatialite=self.tab_files.opt_spadb.get(),
+            opt_analyze_cdao=self.tab_files.opt_gxt.isChecked(),
+            opt_analyze_esri_filegdb=self.tab_files.opt_egdb.isChecked(),
+            opt_analyze_geojson=self.tab_files.opt_geoj.isChecked(),
+            opt_analyze_gml=self.tab_files.opt_gml.isChecked(),
+            opt_analyze_gxt=self.tab_files.opt_gxt.isChecked(),
+            opt_analyze_kml=self.tab_files.opt_kml.isChecked(),
+            opt_analyze_mapinfo_tab=self.tab_files.opt_tab.isChecked(),
+            opt_analyze_raster=self.tab_files.opt_rast.isChecked(),
+            opt_analyze_shapefiles=self.tab_files.opt_shp.isChecked(),
+            opt_analyze_spatialite=self.tab_files.opt_spadb.isChecked(),
             # progress
-            progress_counter=self.progress,
-            progress_message_displayer=self.status,
-            progress_callback_cmd=self.update,
+            progress_reporter=self._progress_reporter,
             # misc
-            opt_quick_fail=self.tab_options.opt_quick_fail.get(),
+            opt_quick_fail=self.tab_options.opt_quick_fail.isChecked(),
         )
 
         # sheets and progress bar
         total_files = geofiles_processor.count_files_to_process()
-        self.prog_layers["maximum"] = total_files
+        self.prog_layers.setMaximum(total_files)
 
-        # launch processing
-        geofiles_processor.process_datasets_in_queue()
+        # launch processing in a background thread
+        self._proc_thread = QThread(self)
+        self._proc_worker = ProcessingWorker(geofiles_processor)
+        self._proc_worker.moveToThread(self._proc_thread)
+        self._proc_thread.started.connect(self._proc_worker.run)
+        self._proc_worker.finished.connect(self._on_files_processing_finished)
+        self._proc_worker.error.connect(self._on_processing_error)
+        self._proc_worker.finished.connect(self._proc_thread.quit)
+        self._proc_worker.error.connect(self._proc_thread.quit)
+        self._proc_worker.finished.connect(self._proc_worker.deleteLater)
+        self._proc_worker.error.connect(self._proc_worker.deleteLater)
+        self._proc_thread.finished.connect(self._proc_thread.deleteLater)
+        self._proc_thread.finished.connect(self._clear_proc_thread_ref)
+        self._proc_thread.start()
 
-        # opening and notifying
+    def _on_files_processing_finished(self, total_files: int) -> None:
+        """React to a successful files processing run.
+
+        Args:
+            total_files: number of files processed.
+        """
         launch(url=f"{self.serializer.output_path.resolve()}")
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files. "
             "\nOpen the application to save the workbook.",
-            notification_sound=self.tab_options.opt_end_process_notification_sound.get(),
+            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
         )
-        self.val.config(state=ACTIVE)
+        self._enable_processing_controls()
 
-    def process_db(self, sgbd_reader: ReadPostGIS):
-        """Process PostGIS DB analisis.
+    def process_db(self, sgbd_reader: ReadPostGIS) -> None:
+        """Launch PostGIS DB analysis in a background worker.
 
         Args:
-            sgbd_reader (ReadPostGIS): PostGIS georeader
+            sgbd_reader: PostGIS georeader
         """
-        # getting the info from shapefiles and compile it in the excel
         logger.info("Start processing PostGIS tables...")
 
-        pg_service_name = self.tab_sgbd.ddl_pg_services.get()
+        pg_service_name = self.tab_sgbd.get_selected_pg_service()
 
         # set the default output file in UI and as serializer attribute
-        self.ent_outxl_filename.delete(0, END)
-        self.ent_outxl_filename.insert(
-            0,
-            determine_output_path(
-                output_path=None, output_format="excel", pg_services=[pg_service_name]
-            ),
+        self.ent_outxl_filename.setText(
+            str(
+                determine_output_path(
+                    output_path=None,
+                    output_format="excel",
+                    pg_services=[pg_service_name],
+                )
+            )
         )
-        self.serializer.output_path = Path(self.ent_outxl_filename.get())
+        self.serializer.output_path = Path(self.ent_outxl_filename.text())
 
-        # setting progress bar
-        self.prog_layers["maximum"] = sgbd_reader.conn.GetLayerCount()
-        # parsing the layers
-        for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
-            layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
-            self.status.set(f"Reading: {layer.GetName()}")
-            metadataset = sgbd_reader.infos_dataset(layer)
-            logger.debug(f"Table examined: {metadataset.name}")
-            self.serializer.serialize_metadaset(metadataset=metadataset)
-            logger.debug(f"Layer metadata stored into workbook: {metadataset.name}")
-            # increment the progress bar
-            self.prog_layers["value"] = self.prog_layers["value"] + 1
-            self.update()
+        self._progress_reporter = QtProgressReporter(self)
+        self._progress_reporter.message_changed.connect(self.set_status_message)
+        self._progress_reporter.progress_incremented.connect(self.prog_layers.setValue)
+        self._progress_reporter.total_changed.connect(self.prog_layers.setMaximum)
 
-        # saving dictionary
-        self.serializer.post_serializing()
+        self._proc_thread = QThread(self)
+        self._proc_worker = PostgisProcessingWorker(
+            sgbd_reader=sgbd_reader,
+            serializer=self.serializer,
+            progress_reporter=self._progress_reporter,
+        )
+        self._proc_worker.moveToThread(self._proc_thread)
+        self._proc_thread.started.connect(self._proc_worker.run)
+        self._proc_worker.finished.connect(self._on_db_processing_finished)
+        self._proc_worker.error.connect(self._on_processing_error)
+        self._proc_worker.finished.connect(self._proc_thread.quit)
+        self._proc_worker.error.connect(self._proc_thread.quit)
+        self._proc_worker.finished.connect(self._proc_worker.deleteLater)
+        self._proc_worker.error.connect(self._proc_worker.deleteLater)
+        self._proc_thread.finished.connect(self._proc_thread.deleteLater)
+        self._proc_thread.finished.connect(self._clear_proc_thread_ref)
+        self._proc_thread.start()
 
+    def _clear_proc_thread_ref(self) -> None:
+        """Drop the reference to the finished processing thread."""
+        self._proc_thread = None
+
+    def _on_db_processing_finished(self, total_layers: int) -> None:
+        """React to a successful PostGIS processing run.
+
+        Args:
+            total_layers: number of PostGIS tables processed.
+        """
         launch(url=f"{self.serializer.output_path.resolve()}")
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "
-            f"{sgbd_reader.conn.GetLayerCount()} PostGIS tables. "
+            f"{total_layers} PostGIS tables. "
             "\nOpen the application to save the workbook.",
-            notification_sound=self.tab_options.opt_end_process_notification_sound.get(),
+            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
         )
-        self.val.config(state=ACTIVE)
+        self._enable_processing_controls()
 
     def check_fields(self, tab_data_type: int) -> bool:
         """Check if required form fields are not empty.
@@ -688,42 +732,42 @@ class DicoGIS(ThemedTk):
         Returns:
             True if everything is OK
         """
-        # error counter
-        # checking empty fields
         if tab_data_type == 0:
-            if not len(self.tab_files.ent_target.get()):
-                avert("DicoGIS - User error", self.localized_strings.get("nofolder"))
+            if not len(self.tab_files.get_target_path()):
+                QMessageBox.critical(
+                    self, "DicoGIS - User error", self.localized_strings.get("nofolder")
+                )
                 return False
 
             # check if at least a format has been choosen
+            filters = self.tab_files.get_filters_state()
             if not (
-                self.tab_files.opt_shp.get()
-                + self.tab_files.opt_tab.get()
-                + self.tab_files.opt_kml.get()
-                + self.tab_files.opt_gml.get()
-                + self.tab_files.opt_geoj.get()
-                + self.tab_files.opt_rast.get()
-                + self.tab_files.opt_egdb.get()
-                + self.tab_files.opt_dxf.get()
+                filters["opt_shp"]
+                or filters["opt_tab"]
+                or filters["opt_kml"]
+                or filters["opt_gml"]
+                or filters["opt_geoj"]
+                or filters["opt_rast"]
+                or filters["opt_egdb"]
+                or filters["opt_dxf"]
             ):
-                avert("DicoGIS - User error", self.localized_strings.get("noformat"))
+                QMessageBox.critical(
+                    self, "DicoGIS - User error", self.localized_strings.get("noformat")
+                )
                 return False
 
         elif tab_data_type == 1:
-            if (
-                self.tab_sgbd.ddl_pg_services.get() == ""
-                or not self.tab_sgbd.ddl_pg_services.get()
-            ):
-                self.tab_sgbd.ddl_pg_services.configure(foreground="red")
-                self.status.set(
-                    f"PG service name is a {self.localized_strings.get('err_pg_empty_field')}"
+            if not self.tab_sgbd.get_selected_pg_service():
+                self.tab_sgbd.ddl_pg_services.setStyleSheet("color: red;")
+                self.set_status_message(
+                    "PG service name is a "
+                    f"{self.localized_strings.get('err_pg_empty_field')}"
                 )
                 return False
 
         # no error detected: let's test connection
         logger.info("Required fields are OK.")
 
-        # End of function
         return True
 
     def test_connection(self) -> ReadPostGIS | None:
@@ -732,103 +776,84 @@ class DicoGIS(ThemedTk):
         Returns:
             Optional[ReadPostGIS]: PostGIS reader or None
         """
-        self.dico_dataset: dict = {}
-
         # check if a proxy is needed
         # more information about the GDAL HTTP proxy options here:
         # http://trac.osgeo.org/gdal/wiki/ConfigOptions#GDALOGRHTTPoptions
-        if self.tab_options.opt_proxy.get():
+        if self.tab_options.FrOptProxy.isChecked():
             logger.info("Proxy configured.")
             gdal.SetConfigOption(
                 "GDAL_HTTP_PROXY",
-                f"{self.prox_server.get()}:{self.prox_port.get()}",
+                f"{self.tab_options.prox_ent_host.text()}:"
+                f"{self.tab_options.prox_ent_port.value()}",
             )
-            if self.tab_options.opt_ntlm.get():
-                # if authentication needs ...\
-                # username/password or not (NTLM)
+            if self.tab_options.opt_ntlm.isChecked():
+                # NTLM: GDAL negotiates credentials itself, so this is an
+                # intentionally empty "user:password" placeholder, not a
+                # real secret.
                 gdal.SetConfigOption("GDAL_PROXY_AUTH", "NTLM")
-                gdal.SetConfigOption("GDAL_HTTP_PROXYUSERPWD", " : ")
-
+                gdal.SetConfigOption("GDAL_HTTP_PROXYUSERPWD", " : ")  # NOSONAR
         else:
             logger.info("No proxy configured.")
 
         # testing connection settings
         sgbd_reader = ReadPostGIS(
-            service=self.tab_sgbd.ddl_pg_services.get(),
-            views_included=self.tab_sgbd.opt_pg_views.get(),
+            service=self.tab_sgbd.get_selected_pg_service(),
+            views_included=self.tab_sgbd.get_views_enabled(),
         )
         sgbd_reader.get_connection()
 
         # check connection state
         if sgbd_reader.conn is None:
             fail_reason = sgbd_reader.db_connection.state_msg
-            self.status.set(f"Connection failed: {fail_reason}.")
+            self.set_status_message(f"Connection failed: {fail_reason}.")
             logger.error(f"PostGIS connection failed: {fail_reason}.")
-            avert(
-                title=self.localized_strings.get("err_pg_conn_fail"),
-                message=fail_reason,
+            QMessageBox.critical(
+                self,
+                self.localized_strings.get("err_pg_conn_fail"),
+                fail_reason,
             )
             return None
 
-        self.status.set(
+        self.set_status_message(
             f"{sgbd_reader.conn.GetLayerCount()} tables found in PostGIS database."
         )
 
-        # end of function
         return sgbd_reader
 
+    # =================================================================================
+    # -- Accessors used by OptionsManager -----------------------------------------------
 
-# ############################################################################
-# #### Stand alone program ########
-# #################################
+    def get_selected_language(self) -> str:
+        """Return the currently selected language code."""
+        return self.ddl_lang.currentText()
 
-if __name__ == "__main__":
-    """standalone execution"""
-    # standard
-    import sys
-    from os import getenv
-    from tkinter import TkVersion
+    def set_selected_language(self, language_code: str) -> None:
+        """Select a language and retranslate the UI.
 
-    # 3rd party
-    # condition import
-    if opersys == "linux":
-        import distro
+        Args:
+            language_code: 2 letters language code (EN, FR, ES)
+        """
+        if AvailableLocales.has_value(language_code):
+            self.ddl_lang.setCurrentText(language_code)
 
-    # check Tk version
-    logger.info(f"{TkVersion=}")
-    if TkVersion < 8.6:
-        logger.critical("DicoGIS requires Tkversion >= 8.6.")
-        sys.exit(1)
+    def get_active_tab_index(self) -> int:
+        """Return the currently active tab index."""
+        return self.nb.currentIndex()
 
-    # determine theme depending on operating system and distro
-    theme = "arc"
-    if theme_from_env := getenv("DICOGIS_UI_THEME"):
-        theme = theme_from_env
-    elif opersys == "darwin":
-        theme = "breeze"
-    elif opersys == "linux":
-        theme = "radiance"
-        if distro.name().lower() == "ubuntu":
-            theme = "yaru"
-    elif opersys == "win32":
-        theme = "breeze"
-    else:
-        logger.warning(
-            f"Your platform/operating system is not recognized: {opersys}. "
-            "It may lead to some strange behavior or buggy events."
-        )
+    def set_active_tab_index(self, index: int) -> None:
+        """Select the active tab by index.
 
-    logger.info(f"Used theme: {theme}")
+        Args:
+            index: tab index to select.
+        """
+        self.nb.setCurrentIndex(int(index))
 
-    # launch the main UI
-    try:
-        app = DicoGIS(theme=theme)
-        app.set_theme(theme_name=theme)
-    except Exception as err:
-        logger.critical(
-            "Launching DicoGIS UI failed. Did you install the system "
-            f"requirements? Trace: {err}"
-        )
-        raise (err)
+    # =================================================================================
 
-    app.mainloop()
+    def closeEvent(self, event) -> None:
+        """Ensure background threads are stopped before the window closes."""
+        for thread in (self._scan_thread, self._proc_thread):
+            if thread is not None and thread.isRunning():
+                thread.quit()
+                thread.wait(3000)
+        super().closeEvent(event)
