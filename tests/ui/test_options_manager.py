@@ -42,9 +42,16 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
             "proxy_user": "someone",
         }
     )
+    window.tab_publish.set_input_folder(str(tmp_path))
+    window.tab_publish.ent_udata_api_url_base.setText("https://udata-test.example/api/")
+    window.tab_publish.ent_udata_api_version.setText("2")
+    window.tab_publish.ent_udata_organization_id.setText("some-org-id")
+    window.tab_publish.ent_udata_api_key.setText("super-secret-key")
 
     assert window.settings.save_settings(window) is True
     assert ini_path.is_file()
+    # the API key must never be persisted to options.ini
+    assert "super-secret-key" not in ini_path.read_text(encoding="UTF-8")
 
     # build a fresh window and load the saved settings into it
     other_window = DicoGIS()
@@ -59,6 +66,52 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
     assert proxy_settings["proxy_needed"] is True
     assert proxy_settings["proxy_server"] == "proxy.example.com"
     assert proxy_settings["proxy_port"] == 8080
+    assert other_window.tab_publish.get_input_folder() == str(tmp_path)
+    assert (
+        other_window.tab_publish.get_udata_api_url_base()
+        == "https://udata-test.example/api/"
+    )
+    assert other_window.tab_publish.get_udata_api_version() == "2"
+    assert other_window.tab_publish.get_udata_organization_id() == "some-org-id"
+    # the API key is never persisted, so it stays empty after a load
+    assert other_window.tab_publish.get_udata_api_key() == ""
+
+
+def test_options_manager_load_settings_without_udata_section(qtbot, tmp_path):
+    """Older options.ini files predating the "udata" section must still load fine."""
+    ini_path = tmp_path / "options.ini"
+    ini_path.write_text(
+        "[basics]\n"
+        "def_codelang = EN\n"
+        "def_rep = \n"
+        "def_tab = 0\n"
+        "export_prettify_size = 1\n"
+        "export_raw_path = 0\n"
+        "quick_fail = 0\n"
+        "notification_sound = 1\n"
+        "\n"
+        "[filters]\n"
+        "\n"
+        "[database]\n"
+        "last_used_pg_service = \n"
+        "opt_views = 0\n"
+        "\n"
+        "[proxy]\n"
+        "proxy_needed = 0\n"
+        "proxy_type = 0\n"
+        "proxy_server = proxy.server.com\n"
+        "proxy_port = 80\n"
+        "proxy_user = proxy_user\n",
+        encoding="UTF-8",
+    )
+
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.settings = OptionsManager(str(ini_path))
+
+    window.settings.load_settings(window)
+
+    assert window.tab_publish.get_input_folder() == ""
 
 
 def test_options_manager_first_use(tmp_path):

@@ -23,7 +23,7 @@ def test_main_window_constructs(qtbot):
     window = DicoGIS()
     qtbot.addWidget(window)
 
-    assert window.nb.count() == 4
+    assert window.nb.count() == 5
 
 
 def test_main_window_retranslate_ui_all_languages(qtbot):
@@ -67,6 +67,37 @@ def test_main_window_check_fields_requires_format(qtbot, monkeypatch):
         {key: "0" for key in window.tab_files.get_filters_state()}
     )
     assert window.check_fields(tab_data_type=0) is False
+
+
+def test_main_window_check_fields_requires_publish_input_folder(qtbot, monkeypatch):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+
+    shown_messages = []
+    monkeypatch.setattr(
+        "dicogis.ui.main_windows.QMessageBox.critical",
+        staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
+    )
+
+    window.tab_publish.set_input_folder("")
+    assert window.check_fields(tab_data_type=3) is False
+    assert shown_messages
+
+
+def test_main_window_check_fields_requires_publish_api_key(
+    qtbot, monkeypatch, tmp_path
+):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+
+    monkeypatch.setattr(
+        "dicogis.ui.main_windows.QMessageBox.critical",
+        staticmethod(lambda *args, **kwargs: None),
+    )
+
+    window.tab_publish.set_input_folder(str(tmp_path))
+    window.tab_publish.ent_udata_api_key.setText("")
+    assert window.check_fields(tab_data_type=3) is False
 
 
 def test_main_window_folder_selected_sets_default_output_name(qtbot):
