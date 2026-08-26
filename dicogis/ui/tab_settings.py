@@ -19,13 +19,16 @@ from webbrowser import open_new_tab
 
 # 3rd party
 from PyQt6.QtWidgets import (
+    QApplication,
     QCheckBox,
+    QComboBox,
     QFormLayout,
     QGroupBox,
     QLabel,
     QLineEdit,
     QPushButton,
     QSpinBox,
+    QStyleFactory,
     QVBoxLayout,
     QWidget,
 )
@@ -81,6 +84,36 @@ class TabSettings(QWidget):
     def create_widgets(self) -> None:
         """Create and layout the widgets for the frame."""
         layout = QVBoxLayout(self)
+
+        # -- INTERFACE OPTIONS ----------------------------------------------------------
+        self.FrOptInterface = QGroupBox(
+            self.localized_strings.get("gui_options_interface", "Interface"), self
+        )
+        interface_layout = QFormLayout()
+
+        self.opt_ui_style = QComboBox(self.FrOptInterface)
+        self.opt_ui_style.addItems(QStyleFactory.keys())
+        current_style = getenv("DICOGIS_UI_STYLE") or self.style().objectName()
+        style_idx = self.opt_ui_style.findText(current_style)
+        if style_idx < 0:
+            style_idx = next(
+                (
+                    i
+                    for i in range(self.opt_ui_style.count())
+                    if self.opt_ui_style.itemText(i).lower() == current_style.lower()
+                ),
+                -1,
+            )
+        if style_idx >= 0:
+            self.opt_ui_style.setCurrentIndex(style_idx)
+        self.opt_ui_style.currentTextChanged.connect(self.apply_ui_style)
+
+        self.lbl_ui_style = QLabel(
+            self.localized_strings.get("gui_options_ui_style", "Interface style:"),
+            self.FrOptInterface,
+        )
+        interface_layout.addRow(self.lbl_ui_style, self.opt_ui_style)
+        self.FrOptInterface.setLayout(interface_layout)
 
         # -- NETWORK OPTIONS -----------------------------------------------------------
         self.FrOptProxy = QGroupBox(
@@ -171,6 +204,16 @@ class TabSettings(QWidget):
             str2bool(getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", "True"))
         )
         export_layout.addWidget(self.opt_end_process_notification_sound)
+
+        self.opt_debug = QCheckBox(
+            self.localized_strings.get(
+                "gui_options_debug_logging", "Enable verbose (debug) logging"
+            ),
+            self.FrOptExport.sub_frame,
+        )
+        self.opt_debug.setChecked(str2bool(getenv("DICOGIS_DEBUG", "False")))
+        self.opt_debug.toggled.connect(self.apply_debug_logging)
+        export_layout.addWidget(self.opt_debug)
         self.FrOptExport.sub_frame.setLayout(export_layout)
 
         # -- Environment variables --
@@ -214,10 +257,34 @@ class TabSettings(QWidget):
         self.FrOptEnv.sub_frame.setLayout(env_layout)
 
         # positionning frames
+        layout.addWidget(self.FrOptInterface)
         layout.addWidget(self.FrOptProxy)
         layout.addWidget(self.FrOptExport)
         layout.addWidget(self.FrOptEnv)
         layout.addStretch(1)
+
+    # -- Live-apply handlers ---------------------------------------------------------
+
+    def apply_ui_style(self, style_name: str) -> None:
+        """Apply the selected Qt style immediately to the running application.
+
+        Args:
+            style_name: name of a Qt style, as listed by QStyleFactory.keys().
+        """
+        if app := QApplication.instance():
+            app.setStyle(style_name)
+
+    def apply_debug_logging(self, enabled: bool) -> None:
+        """Toggle root logger verbosity immediately.
+
+        Args:
+            enabled: whether debug (verbose) logging should be enabled.
+        """
+        level = logging.DEBUG if enabled else logging.INFO
+        root_logger = logging.getLogger()
+        root_logger.setLevel(level)
+        for handler in root_logger.handlers:
+            handler.setLevel(level)
 
     # -- Accessors used by OptionsManager -------------------------------------------
 
@@ -249,6 +316,7 @@ class TabSettings(QWidget):
             "export_raw_path": self.opt_export_raw_path.isChecked(),
             "quick_fail": self.opt_quick_fail.isChecked(),
             "notification_sound": self.opt_end_process_notification_sound.isChecked(),
+            "debug": self.opt_debug.isChecked(),
         }
 
     def set_export_options(self, values: dict) -> None:
@@ -267,6 +335,19 @@ class TabSettings(QWidget):
             self.opt_end_process_notification_sound.setChecked(
                 bool(str2bool(values["notification_sound"]))
             )
+        if "debug" in values:
+            self.opt_debug.setChecked(bool(str2bool(values["debug"])))
+
+    def get_ui_options(self) -> dict:
+        """Return interface options as a dict."""
+        return {"style": self.opt_ui_style.currentText()}
+
+    def set_ui_options(self, values: dict) -> None:
+        """Apply interface options from a dict."""
+        if style := values.get("style"):
+            idx = self.opt_ui_style.findText(style)
+            if idx >= 0:
+                self.opt_ui_style.setCurrentIndex(idx)
 
     def retranslate_ui(self, localized_strings: dict) -> None:
         """Update widgets texts with the given localized strings.
@@ -275,6 +356,17 @@ class TabSettings(QWidget):
             localized_strings: translated strings.
         """
         self.localized_strings = localized_strings
+        self.FrOptInterface.setTitle(
+            localized_strings.get("gui_options_interface", "Interface")
+        )
+        self.lbl_ui_style.setText(
+            localized_strings.get("gui_options_ui_style", "Interface style:")
+        )
+        self.opt_debug.setText(
+            localized_strings.get(
+                "gui_options_debug_logging", "Enable verbose (debug) logging"
+            )
+        )
         self.FrOptProxy.setTitle(localized_strings.get("Proxy", "Proxy settings"))
         self.prox_lb_host.setText(localized_strings.get("gui_prox_server", "Host:"))
         self.prox_lb_port.setText(localized_strings.get("gui_port", "Port:"))

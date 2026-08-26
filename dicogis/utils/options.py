@@ -61,7 +61,13 @@ class OptionsManager:
                 "export_raw_path": self.config.get("basics", "export_raw_path"),
                 "quick_fail": self.config.get("basics", "quick_fail"),
                 "notification_sound": self.config.get("basics", "notification_sound"),
+                "debug": self.config.get("basics", "debug", fallback="False"),
             }
+        )
+
+        # interface settings
+        parent.tab_options.set_ui_options(
+            {"style": self.config.get("ui", "style", fallback="")}
         )
 
         # filters
@@ -90,6 +96,10 @@ class OptionsManager:
             self.config.add_section("filters")
             self.config.add_section("database")
             self.config.add_section("proxy")
+
+        # backward compatibility: older options.ini files predate the "ui" section
+        if not self.config.has_section("ui"):
+            self.config.add_section("ui")
 
         # config
         self.config.set("config", "DicoGIS_version", parent.package_about.__version__)
@@ -123,6 +133,11 @@ class OptionsManager:
             "notification_sound",
             str(export_options["notification_sound"]),
         )
+        self.config.set("basics", "debug", str(export_options["debug"]))
+
+        # interface settings
+        ui_options = parent.tab_options.get_ui_options()
+        self.config.set("ui", "style", ui_options["style"])
 
         # filters
         for key, value in parent.tab_files.get_filters_state().items():

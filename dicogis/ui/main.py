@@ -17,6 +17,7 @@ Julien Moura (@geojulien)
 # standard library
 import logging
 import sys
+from configparser import ConfigParser
 from os import getenv
 from pathlib import Path
 
@@ -44,18 +45,35 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
+def _get_persisted_option(section: str, option: str) -> str | None:
+    """Best-effort read of a value saved by the GUI on a previous run.
+
+    Environment variables take precedence over this at call sites, so this is
+    only consulted as a fallback, before the OptionsManager/main window (which
+    need a QApplication to already exist) are available.
+
+    Args:
+        section: options.ini section name.
+        option: options.ini option name.
+
+    Returns:
+        the stored value, or None if unset/unreadable.
+    """
+    config = ConfigParser()
+    if not config.read("options.ini"):
+        return None
+    return config.get(section, option, fallback=None) or None
+
+
 def dicogis_gui():
     """Launch DicoGIS GUI."""
+    debug_enabled = str2bool(
+        getenv("DICOGIS_DEBUG") or _get_persisted_option("basics", "debug") or False
+    )
     # LOG
     logmngr = LogManager(
-        console_level=(
-            logging.DEBUG
-            if str2bool(getenv("DICOGIS_DEBUG", False))
-            else logging.WARNING
-        ),
-        file_level=(
-            logging.DEBUG if str2bool(getenv("DICOGIS_DEBUG", False)) else logging.INFO
-        ),
+        console_level=(logging.DEBUG if debug_enabled else logging.WARNING),
+        file_level=(logging.DEBUG if debug_enabled else logging.INFO),
         label=f"{__package_name__}-gui",
         folder=Path(app_dir).joinpath("logs"),
     )
@@ -65,8 +83,9 @@ def dicogis_gui():
     # launch the main UI
     try:
         app = QApplication(sys.argv)
-        if style_from_env := getenv("DICOGIS_UI_STYLE"):
-            app.setStyle(style_from_env)
+        ui_style = getenv("DICOGIS_UI_STYLE") or _get_persisted_option("ui", "style")
+        if ui_style:
+            app.setStyle(ui_style)
         window = DicoGIS()
     except Exception as err:
         logger.critical(
