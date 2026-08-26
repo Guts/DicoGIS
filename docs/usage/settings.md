@@ -8,7 +8,10 @@ Options are accessible through the `Settings` tab:
 
 ## Using environment variables
 
-Some options and arguments can be set with environment variables.
+Some options and arguments can be set with environment variables. When a
+GUI widget exists for one of them (see the `Settings` tab above), the
+environment variable only sets its initial value: the widget can override it,
+and the choice persists across runs in `options.ini`.
 
 ### Shared (CLI and GUI)
 
