@@ -22,7 +22,7 @@ Les formats pris en compte sont potentiellement tous ceux de [GDAL](https://gdal
 
 - vecteurs : shapefile, tables MapInfo, GeoJSON, GML, KML
 - rasters : ECW, GeoTIFF, JPEG
-- bases de données "plates" (fichiers) : Esri File GDB
+- bases de données "plates" (fichiers) : Esri File GDB, GeoPackage, Spatialite
 - CAO : DXF (+ listing des DWG)
 - Documents cartos : Geospatial PDF
 

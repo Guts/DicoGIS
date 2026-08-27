@@ -22,7 +22,7 @@ En teoría, los formatos compatibles son todos que cuenta [GDAL](https://gdal.or
 
 - vectores: shapefile, tables MapInfo, GeoJSON, GML, KML
 - rasters: ECW, GeoTIFF, JPEG
-- bases de datos archivos ("flat"): Esri File GDB
+- bases de datos archivos ("flat"): Esri File GDB, GeoPackage, Spatialite
 - CAO: DXF (+ lista de los DWG)
 - Documentos cartográficos: Geospatial PDF
 
