@@ -24,6 +24,19 @@ Make sure your code *roughly* follows [PEP-8](https://www.python.org/dev/peps/pe
 - sorted imports: [isort](https://pycqa.github.io/isort/) is used to sort imports
 - static analisis: [flake8](https://flake8.pycqa.org/en/latest/) is used to catch some dizziness and keep the source code healthy.
 
+## Pull requests
+
+Please fill out the [pull request template](/.github/PULL_REQUEST_TEMPLATE.md) - it's pre-filled when you open a PR on GitHub.
+
+Labels are applied automatically based on your branch name and changed files (see `.github/labeler.yml`), which also drives the release notes categorization (`.github/release.yml`). Prefixing your branch name accordingly helps:
+
+- `fix/…` or `hotfix/…`: bug fix
+- `feature/…` or `improve/…`: new feature or enhancement
+- `docs/…`: documentation
+- `packaging/…`: build/packaging
+- `tooling/…`: tooling
+- `cli/…`: CLI-specific change
+
 ## Security
 
 As the aim of this project is to be carried out on large-scale IT infrastructures, security is one of the development challenges. It's enforced through automated checks, which are mainly executed in CI. But there are a few best practices to bear in mind:
