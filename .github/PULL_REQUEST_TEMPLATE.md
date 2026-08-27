@@ -29,3 +29,9 @@ Please fill out this template to help us review your pull request.
 - [ ] I have added or updated tests covering my changes
 - [ ] I have updated the documentation where relevant
 - [ ] `pytest` passes locally
+
+## AI/LLM disclosure
+
+<!-- If you used an AI/LLM to help produce this contribution, disclose it here: level (see https://www.visidata.org/blog/2026/ai/), model, and session link. Otherwise, leave as "Not used". -->
+
+Not used
