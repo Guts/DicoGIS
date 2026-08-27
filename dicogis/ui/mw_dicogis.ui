@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DicoGIS</class>
+ <widget class="QMainWindow" name="DicoGIS">
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="main_layout">
+    <item row="0" column="1">
+     <layout class="QHBoxLayout" name="top_bar">
+      <item>
+       <widget class="QLabel" name="welcome">
+        <property name="styleSheet">
+         <string notr="true">color: blue;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="top_bar_spacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QComboBox" name="ddl_lang"/>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
+     <widget class="QTabWidget" name="nb"/>
+    </item>
+    <item row="2" column="1">
+     <widget class="QGroupBox" name="FrProg">
+      <property name="title">
+       <string>Progression</string>
+      </property>
+      <layout class="QVBoxLayout" name="prog_layout">
+       <item>
+        <widget class="QProgressBar" name="prog_layers">
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lbl_status">
+         <property name="styleSheet">
+          <string notr="true">color: DodgerBlue;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QGroupBox" name="FrOutp">
+      <property name="title">
+       <string>Output</string>
+      </property>
+      <layout class="QGridLayout" name="outp_layout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="lbl_outxl_filename">
+         <property name="text">
+          <string>Name of output file: </string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="ent_outxl_filename"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <layout class="QHBoxLayout" name="buttons_bar">
+      <item>
+       <widget class="QPushButton" name="can">
+        <property name="text">
+         <string>Quit</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="val">
+        <property name="text">
+         <string>Launch</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

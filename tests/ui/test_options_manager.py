@@ -15,7 +15,7 @@ Usage from the repo root folder:
 from pathlib import Path
 
 # package
-from dicogis.ui.main_windows import DicoGIS
+from dicogis.ui.mw_dicogis import DicoGIS
 from dicogis.utils.options import OptionsManager
 
 # #############################################################################

@@ -26,23 +26,10 @@ from sys import platform as opersys
 from osgeo import gdal
 
 # GUI
+from PyQt6 import uic
 from PyQt6.QtCore import QThread
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (
-    QComboBox,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QMessageBox,
-    QProgressBar,
-    QPushButton,
-    QTabWidget,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QWidget
 from typer import launch
 
 # Project
@@ -104,6 +91,10 @@ class DicoGIS(QMainWindow):
     def __init__(self, parent: QWidget | None = None):
         """Main window constructor."""
         super().__init__(parent)
+        uic.loadUi(
+            utils_global.resolve_internal_path(internal_path=Path("ui/mw_dicogis.ui")),
+            self,
+        )
 
         # store vars as attr
         self.txt_manager = TextsManager()
@@ -188,24 +179,20 @@ class DicoGIS(QMainWindow):
             language_code=self.def_lang
         )
 
-        # Notebook
-        self.nb = QTabWidget(self)
         # tabs
         self.tab_files = TabFiles(
             parent=self.nb, localized_strings=self.localized_strings
         )  # tab_id = 0
         self.tab_sgbd = TabDatabaseServer(
-            parent=self.nb, localized_strings=self.localized_strings, init_widgets=True
+            parent=self.nb, localized_strings=self.localized_strings
         )  # tab_id = 1
         self.tab_options = TabSettings(
             parent=self.nb,
             localized_strings=self.localized_strings,
-            init_widgets=True,
         )  # tab_id = 2
         self.tab_publish = TabPublish(
             parent=self.nb,
             localized_strings=self.localized_strings,
-            init_widgets=True,
         )  # tab_id = 3
         self.tab_credits = TabCredits(parent=self.nb)  # tab_id = 4
 
@@ -217,75 +204,20 @@ class DicoGIS(QMainWindow):
 
         self.tab_files.folder_selected.connect(self.on_folder_selected)
 
-        # ## MAIN FRAME ##
-        # welcome message
-        self.welcome = QLabel(
-            self.localized_strings.get("hi", "Hello ") + self.uzer, self
-        )
-        self.welcome.setStyleSheet("color: blue;")
-
-        # Frame: Output
-        self.FrOutp = QGroupBox(self.localized_strings.get("gui_fr4", "Output"), self)
-        outp_layout = QGridLayout()
-        self.lbl_outxl_filename = QLabel(
-            self.localized_strings.get("gui_fic", "Name of output file: "), self.FrOutp
-        )
-        self.ent_outxl_filename = QLineEdit(self.FrOutp)
-        outp_layout.addWidget(self.lbl_outxl_filename, 0, 0)
-        outp_layout.addWidget(self.ent_outxl_filename, 0, 1)
-        self.FrOutp.setLayout(outp_layout)
-
-        # Frame: Progression bar
-        self.FrProg = QGroupBox(
-            self.localized_strings.get("gui_prog", "Progression"), self
-        )
-        prog_layout = QVBoxLayout()
-        self.prog_layers = QProgressBar(self.FrProg)
-        self.prog_layers.setValue(0)
-        self.lbl_status = QLabel("", self.FrProg)
-        self.lbl_status.setStyleSheet("color: DodgerBlue;")
-        prog_layout.addWidget(self.prog_layers)
-        prog_layout.addWidget(self.lbl_status)
-        self.FrProg.setLayout(prog_layout)
-
-        # miscellaneous
+        # miscellaneous (left side panel)
         self.misc_frame = MiscButtons(self, images_folder=self.dir_imgs)
+        self.main_layout.addWidget(self.misc_frame, 0, 0, 5, 1)
 
         # language switcher
         li_lang = [v.value for v in AvailableLocales]
-        self.ddl_lang = QComboBox(self)
         self.ddl_lang.addItems(li_lang)
         self.ddl_lang.setCurrentText(self.def_lang)
         self.ddl_lang.activated.connect(lambda _index: self.retranslate_ui())
 
         # Basic buttons
-        self.val = QPushButton(self.localized_strings.get("gui_go", "Launch"), self)
         self.val.setEnabled(True)
         self.val.clicked.connect(self.process)
-        self.can = QPushButton(self.localized_strings.get("gui_quit", "Quit"), self)
         self.can.clicked.connect(self.close)
-
-        # -- layout --
-        central_widget = QWidget(self)
-        main_layout = QGridLayout(central_widget)
-
-        top_bar = QHBoxLayout()
-        top_bar.addWidget(self.welcome)
-        top_bar.addStretch(1)
-        top_bar.addWidget(self.ddl_lang)
-
-        buttons_bar = QHBoxLayout()
-        buttons_bar.addWidget(self.can)
-        buttons_bar.addWidget(self.val)
-
-        main_layout.addWidget(self.misc_frame, 0, 0, 5, 1)
-        main_layout.addLayout(top_bar, 0, 1)
-        main_layout.addWidget(self.nb, 1, 1)
-        main_layout.addWidget(self.FrProg, 2, 1)
-        main_layout.addWidget(self.FrOutp, 3, 1)
-        main_layout.addLayout(buttons_bar, 4, 1)
-
-        self.setCentralWidget(central_widget)
 
         # loading previous options
         if not self.settings.first_use:

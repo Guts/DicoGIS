@@ -19,23 +19,15 @@ from os import getenv
 from pathlib import Path
 
 # GUI
-from PyQt6.QtWidgets import (
-    QFileDialog,
-    QFormLayout,
-    QGridLayout,
-    QGroupBox,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt6 import uic
+from PyQt6.QtWidgets import QFileDialog, QLineEdit, QWidget
 
 # project
 from dicogis.cli.cmd_publish import PublishReport
-from dicogis.ui.scrollable_table import ScrollableTable
+from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.check_path import check_path
 from dicogis.utils.texts import TextsManager
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
@@ -59,108 +51,39 @@ class TabPublish(QWidget):
         self,
         parent: QWidget | None = None,
         localized_strings: dict | None = None,
-        init_widgets: bool = True,
     ):
         """Initializes UI tab for uData publication.
 
         Args:
             parent: Qt parent widget
             localized_strings: translated strings. Defaults to None.
-            init_widgets: option to create widgets during init or not. Defaults to True.
         """
         super().__init__(parent)
+        uic.loadUi(
+            Utilities().resolve_internal_path(
+                internal_path=Path("ui/wdg_tab_publish.ui")
+            ),
+            self,
+        )
 
         # handle empty localized strings
         self.localized_strings = localized_strings
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts()
 
-        if init_widgets:
-            self.create_widgets()
-
-    def create_widgets(self) -> None:
-        """Create and layout the widgets for the frame."""
-        layout = QVBoxLayout(self)
-
-        # -- SOURCE -----------------------------------------------------------------
-        self.FrSource = QGroupBox(
-            self.localized_strings.get("gui_publish_source", "Metadata source"), self
-        )
-        source_layout = QGridLayout()
-
-        self.lb_input_folder = QLabel(
-            self.localized_strings.get(
-                "gui_publish_input_folder", "JSON metadata folder: "
-            ),
-            self.FrSource,
-        )
-        self.ent_input_folder = QLineEdit(self.FrSource)
         self.ent_input_folder.setText(getenv("DICOGIS_PUBLISH_INPUT_FOLDER", ""))
-        self.btn_browse_input_folder = QPushButton(
-            self.localized_strings.get("gui_choix", "Browse"), self.FrSource
-        )
         self.btn_browse_input_folder.clicked.connect(self.on_browse_input_folder)
 
-        source_layout.addWidget(self.lb_input_folder, 0, 0)
-        source_layout.addWidget(self.ent_input_folder, 0, 1)
-        source_layout.addWidget(self.btn_browse_input_folder, 0, 2)
-        self.FrSource.setLayout(source_layout)
-
-        # -- UDATA CATALOG ------------------------------------------------------------
-        self.FrCatalog = QGroupBox(
-            self.localized_strings.get("gui_publish_catalog", "uData catalog"), self
-        )
-        catalog_layout = QFormLayout()
-
-        self.ent_udata_api_url_base = QLineEdit(self.FrCatalog)
         self.ent_udata_api_url_base.setText(
             getenv("DICOGIS_UDATA_API_URL_BASE", "https://demo.data.gouv.fr/api/")
         )
-        self.ent_udata_api_version = QLineEdit(self.FrCatalog)
         self.ent_udata_api_version.setText(getenv("DICOGIS_UDATA_API_VERSION", "1"))
-        self.ent_udata_api_key = QLineEdit(self.FrCatalog)
         self.ent_udata_api_key.setEchoMode(QLineEdit.EchoMode.Password)
         self.ent_udata_api_key.setText(getenv("DICOGIS_UDATA_API_KEY", ""))
-        self.ent_udata_organization_id = QLineEdit(self.FrCatalog)
         self.ent_udata_organization_id.setText(
             getenv("DICOGIS_UDATA_ORGANIZATION_ID", "")
         )
 
-        self.lb_udata_api_url_base = QLabel(
-            self.localized_strings.get("gui_publish_api_url", "API URL:"),
-            self.FrCatalog,
-        )
-        self.lb_udata_api_version = QLabel(
-            self.localized_strings.get("gui_publish_api_version", "API version:"),
-            self.FrCatalog,
-        )
-        self.lb_udata_api_key = QLabel(
-            self.localized_strings.get("gui_publish_api_key", "API key:"),
-            self.FrCatalog,
-        )
-        self.lb_udata_organization_id = QLabel(
-            self.localized_strings.get(
-                "gui_publish_organization_id", "Organization ID (optional):"
-            ),
-            self.FrCatalog,
-        )
-
-        catalog_layout.addRow(self.lb_udata_api_url_base, self.ent_udata_api_url_base)
-        catalog_layout.addRow(self.lb_udata_api_version, self.ent_udata_api_version)
-        catalog_layout.addRow(self.lb_udata_api_key, self.ent_udata_api_key)
-        catalog_layout.addRow(
-            self.lb_udata_organization_id, self.ent_udata_organization_id
-        )
-        self.FrCatalog.setLayout(catalog_layout)
-
-        # -- REPORT ---------------------------------------------------------------
-        self.FrReport = QGroupBox(
-            self.localized_strings.get("gui_publish_report", "Publication report"),
-            self,
-        )
-        report_layout = QVBoxLayout()
-
-        self.lbl_publish_summary = QLabel("", self.FrReport)
         self.tab_publish_errors = ScrollableTable(
             self.FrReport, localized_strings=self.localized_strings
         )
@@ -170,14 +93,9 @@ class TabPublish(QWidget):
                 self.localized_strings.get("gui_publish_report_error", "Error"),
             ]
         )
+        self.FrReport.layout().addWidget(self.tab_publish_errors)
 
-        report_layout.addWidget(self.lbl_publish_summary)
-        report_layout.addWidget(self.tab_publish_errors)
-        self.FrReport.setLayout(report_layout)
-
-        layout.addWidget(self.FrSource)
-        layout.addWidget(self.FrCatalog)
-        layout.addWidget(self.FrReport)
+        self.retranslate_ui(self.localized_strings)
 
     def on_browse_input_folder(self) -> Path | None:
         """Browse and insert the path of the folder containing JSON metadata files.

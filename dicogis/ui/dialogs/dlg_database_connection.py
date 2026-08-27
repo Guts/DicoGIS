@@ -14,20 +14,16 @@ Author:       Julien Moura (@geojulien)
 
 # Standard library
 import logging
+from pathlib import Path
 
 # 3rd party
-from PyQt6.QtWidgets import (
-    QDialog,
-    QDialogButtonBox,
-    QFormLayout,
-    QLineEdit,
-    QSpinBox,
-    QWidget,
-)
+from PyQt6 import uic
+from PyQt6.QtWidgets import QDialog, QWidget
 
 # project
 from dicogis.models.database_connection import DatabaseConnection
 from dicogis.utils.texts import TextsManager
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
@@ -49,16 +45,20 @@ class DatabaseConnectionDialog(QDialog):
         self,
         parent: QWidget | None = None,
         localized_strings: dict | None = None,
-        init_widgets: bool = True,
     ) -> None:
         """Initialize the database connection dialog.
 
         Args:
             parent: the parent widget.
             localized_strings: translated strings. Defaults to None.
-            init_widgets: option to create widgets during init or not. Defaults to True.
         """
         super().__init__(parent)
+        uic.loadUi(
+            Utilities().resolve_internal_path(
+                internal_path=Path("ui/dialogs/dlg_database_connection.ui")
+            ),
+            self,
+        )
         self.setModal(True)
 
         # handle empty localized strings
@@ -66,52 +66,10 @@ class DatabaseConnectionDialog(QDialog):
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts()
 
-        self.setWindowTitle(
-            self.localized_strings.get(
-                "gui_database_connection_form_title", "Add a new database connection"
-            )
-        )
+        self.retranslate_ui(self.localized_strings)
 
-        if init_widgets:
-            self.create_widgets()
-
-    def create_widgets(self) -> None:
-        """Create and layout the widgets."""
-        layout = QFormLayout(self)
-
-        self.ent_service_name = QLineEdit(self)
-        self.ent_host = QLineEdit(self)
-        self.ent_port = QSpinBox(self)
-        self.ent_port.setRange(1, 65535)
-        self.ent_port.setValue(5432)
-        self.ent_db_name = QLineEdit(self)
-        self.ent_user = QLineEdit(self)
-        self.ent_password = QLineEdit(self)
-        self.ent_password.setEchoMode(QLineEdit.EchoMode.Password)
-
-        layout.addRow(
-            self.localized_strings.get("gui_database_service_name", "Service name:"),
-            self.ent_service_name,
-        )
-        layout.addRow(self.localized_strings.get("gui_host", "Host:"), self.ent_host)
-        layout.addRow(self.localized_strings.get("gui_port", "Port:"), self.ent_port)
-        layout.addRow(
-            self.localized_strings.get("gui_db", "Database:"), self.ent_db_name
-        )
-        layout.addRow(
-            self.localized_strings.get("gui_user", "Username:"), self.ent_user
-        )
-        layout.addRow(
-            self.localized_strings.get("gui_mdp", "Password:"), self.ent_password
-        )
-
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
-            self,
-        )
-        buttons.accepted.connect(self._on_submit)
-        buttons.rejected.connect(self.reject)
-        layout.addRow(buttons)
+        self.buttons.accepted.connect(self._on_submit)
+        self.buttons.rejected.connect(self.reject)
 
     def _on_submit(self) -> None:
         """Collect the data from the entries and accept the dialog."""
@@ -126,7 +84,7 @@ class DatabaseConnectionDialog(QDialog):
         self.accept()
 
     def retranslate_ui(self, localized_strings: dict) -> None:
-        """Update the dialog's title with the given localized strings.
+        """Update the dialog's texts with the given localized strings.
 
         Args:
             localized_strings: translated strings.
@@ -137,6 +95,14 @@ class DatabaseConnectionDialog(QDialog):
                 "gui_database_connection_form_title", "Add a new database connection"
             )
         )
+        self.lbl_service_name.setText(
+            localized_strings.get("gui_database_service_name", "Service name:")
+        )
+        self.lbl_host.setText(localized_strings.get("gui_host", "Host:"))
+        self.lbl_port.setText(localized_strings.get("gui_port", "Port:"))
+        self.lbl_db_name.setText(localized_strings.get("gui_db", "Database:"))
+        self.lbl_user.setText(localized_strings.get("gui_user", "Username:"))
+        self.lbl_password.setText(localized_strings.get("gui_mdp", "Password:"))
 
 
 # #############################################################################

@@ -8,7 +8,7 @@ DicoGIS scans a folder tree (and/or PostGIS databases via `pg_service.conf`) for
 geospatial datasets, extracts their metadata (CRS, geometry type, fields, extent,
 size, etc.) using GDAL/OGR, and exports the result as an Excel workbook (`.xlsx`)
 or JSON (optionally in "udata" flavor for publishing to a uData catalog). It ships
-both a Tkinter desktop GUI (`dicogis-gui`) and a Typer-based CLI (`dicogis-cli`),
+both a PyQt6 desktop GUI (`dicogis-gui`) and a Typer-based CLI (`dicogis-cli`),
 distributed as PyInstaller executables for Windows/Linux.
 
 ## Common commands
@@ -84,11 +84,34 @@ Line length: 88 (black/ruff-format/isort), docstrings are Google-style.
 ### Two entry points, one pipeline
 
 `dicogis-cli` (`dicogis/cli/main.py`, a Typer app with `inventory` and `publish`
-subcommands) and `dicogis-gui` (`dicogis/ui/main.py`, Tkinter/ttkthemes) are thin
-wrappers around the same core pipeline in `dicogis/georeaders`, `dicogis/listing`,
-and `dicogis/export`. When changing core processing logic, check both entry points
+subcommands) and `dicogis-gui` (`dicogis/ui/main.py`, PyQt6) are thin wrappers
+around the same core pipeline in `dicogis/georeaders`, `dicogis/listing`, and
+`dicogis/export`. When changing core processing logic, check both entry points
 for how they call into it — the GUI additionally wires up progress bars/counters
-(`tkinter.IntVar`/`StringVar`) that the CLI passes as `None`.
+and runs long-running work in `QThread` workers (`dicogis/ui/workers.py`) that
+the CLI passes as `None`.
+
+### GUI widgets: `.ui` files + naming convention
+
+GUI widgets are defined as Qt Designer `.ui` files, loaded dynamically at
+runtime with `PyQt6.uic.loadUi()` — not built up imperatively in Python. Each
+widget/dialog module has a matching `.ui` file of the same stem
+(`dicogis/ui/wdg_tab_files.py` + `dicogis/ui/wdg_tab_files.ui`), loaded via
+`Utilities().resolve_internal_path()` (so it resolves both from source and
+from a frozen PyInstaller build) rather than `Path(__file__).parent`. Widgets
+named in the `.ui` file (`objectName`) become attributes on `self` after
+`loadUi()` — dynamic content (translated strings, values only known at
+runtime, nested custom widgets) is still applied/composed in Python after the
+load call.
+
+File naming follows a prefix convention:
+- `dlg_` — `QDialog` subclasses (`dicogis/ui/dialogs/dlg_database_connection.py`)
+- `wdg_` — `QWidget` subclasses, including notebook tab pages
+  (`wdg_tab_files.py`, `wdg_collapsible_frame.py`, `wdg_scrollable_table.py`, …)
+- `mw_` — the `QMainWindow` (`dicogis/ui/mw_dicogis.py`)
+
+Plain, unprefixed modules (`workers.py`, `main.py`) hold non-widget code
+(QThread workers, the app entry point) and have no `.ui` counterpart.
 
 ### Processing pipeline
 
@@ -180,3 +203,5 @@ it via `[tool.setuptools.dynamic]`).
 - Prefer the standard library over new third-party dependencies where practical
   (see `CONTRIBUTING.md` "Security" section) given the project targets
   large-scale IT infrastructures.
+- GUI widgets: `.ui` files loaded with `uic.loadUi()`, not built up in Python —
+  see "GUI widgets: `.ui` files + naming convention" above.

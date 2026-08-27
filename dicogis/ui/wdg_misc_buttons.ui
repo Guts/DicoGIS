@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MiscButtons</class>
+ <widget class="QWidget" name="MiscButtons">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" rowspan="1" colspan="2">
+    <widget class="QLabel" name="lbl_logo">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" rowspan="1" colspan="2">
+    <widget class="QPushButton" name="btn_credits"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="btn_contact">
+     <property name="text">
+      <string>Contact</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="btn_src">
+     <property name="text">
+      <string>Report</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="btn_doc">
+     <property name="text">
+      <string>Documentation</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="btn_support">
+     <property name="text">
+      <string>Fund &amp; Support</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" rowspan="1" colspan="2">
+    <widget class="QPushButton" name="btn_app_dir">
+     <property name="text">
+      <string>Application folder</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
