@@ -15,3 +15,15 @@
 Automatize the creation of a dictionnary of geographic data in a folders structure. The output dictionary is an Excel file (.xlsx).
 
 For further information, see [the documentation](https://guts.github.io/DicoGIS/).
+
+## Installation
+
+DicoGIS relies on GDAL, declared as an optional dependency so that
+`pipx install dicogis` (or `pip install dicogis`) always succeeds, even
+without GDAL. Getting GDAL into a pipx-managed virtual environment needs a
+couple of extra steps depending on your OS — see the
+[pipx installation guide](https://guts.github.io/DicoGIS/usage/installation.html).
+
+If you'd rather avoid Python/GDAL packaging altogether, standalone CLI/GUI
+executables (Windows and Ubuntu) that embed GDAL are published on the
+[latest release](https://github.com/Guts/DicoGIS/releases/latest).

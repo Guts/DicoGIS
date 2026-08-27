@@ -29,9 +29,13 @@ from typer import get_app_dir
 
 # Project
 from dicogis.__about__ import __package_name__, __title__
-from dicogis.ui.main_windows import DicoGIS
+from dicogis.utils.environment import GDAL_IS_AVAILABLE
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.str2bool import str2bool
+
+# GDAL is an optional dependency (see pyproject.toml `gdal` extra): dicogis.ui.main_windows
+# imports it at module level, so importing it here eagerly would break `dicogis-gui`
+# entirely when GDAL isn't installed, e.g. under pipx. Deferred into dicogis_gui().
 
 # ##############################################################################
 # ############ Globals ############
@@ -79,6 +83,19 @@ def dicogis_gui():
     )
     # add headers
     logmngr.headers()
+
+    if not GDAL_IS_AVAILABLE:
+        logger.critical(
+            "GDAL (and its Python bindings) is required to run DicoGIS but is not "
+            "installed. See https://guts.github.io/DicoGIS/usage/installation.html "
+            "for how to install it, including with pipx."
+        )
+        sys.exit(1)
+
+    # imported here rather than at module level: GDAL is an optional dependency
+    # (see pyproject.toml `gdal` extra), so importing it eagerly would break every
+    # dicogis-gui invocation when GDAL isn't installed
+    from dicogis.ui.main_windows import DicoGIS
 
     # launch the main UI
     try:

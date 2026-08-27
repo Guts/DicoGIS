@@ -83,6 +83,7 @@ introduction/es
 maxdepth: 1
 caption: Usage
 ---
+usage/installation
 usage/cli
 usage/settings
 ```
