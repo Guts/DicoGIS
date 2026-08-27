@@ -115,6 +115,7 @@ class TabFiles(QWidget):
         self.opt_geoj = QCheckBox(".geojson", self.FrFilters)
         self.opt_gxt = QCheckBox(".gxt", self.FrFilters)
         self.opt_egdb = QCheckBox("Esri FileGDB", self.FrFilters)
+        self.opt_gpkg = QCheckBox("GeoPackage", self.FrFilters)
         self.opt_spadb = QCheckBox("Spatialite", self.FrFilters)
         self.opt_rast = QCheckBox(
             "rasters ({})".format(
@@ -131,9 +132,11 @@ class TabFiles(QWidget):
         filters_layout.addWidget(self.opt_geoj, 0, 4)
         filters_layout.addWidget(self.opt_gxt, 0, 5)
         filters_layout.addWidget(self.opt_rast, 1, 0, 1, 2)
-        filters_layout.addWidget(self.opt_egdb, 1, 2, 1, 2)
-        filters_layout.addWidget(self.opt_dxf, 1, 4, 1, 1)
-        filters_layout.addWidget(self.opt_spadb, 1, 5, 1, 2)
+        filters_layout.addWidget(self.opt_dxf, 1, 2, 1, 1)
+        # file databases grouped together, on their own row for clarity
+        filters_layout.addWidget(self.opt_egdb, 2, 0, 1, 2)
+        filters_layout.addWidget(self.opt_gpkg, 2, 2, 1, 2)
+        filters_layout.addWidget(self.opt_spadb, 2, 4, 1, 2)
         self.FrFilters.setLayout(filters_layout)
 
         layout.addWidget(self.FrPath)
@@ -204,6 +207,7 @@ class TabFiles(QWidget):
             "opt_gxt": self.opt_gxt.isChecked(),
             "opt_rast": self.opt_rast.isChecked(),
             "opt_egdb": self.opt_egdb.isChecked(),
+            "opt_gpkg": self.opt_gpkg.isChecked(),
             "opt_spadb": self.opt_spadb.isChecked(),
             "opt_dxf": self.opt_dxf.isChecked(),
         }
@@ -219,6 +223,7 @@ class TabFiles(QWidget):
             "opt_gxt": self.opt_gxt,
             "opt_rast": self.opt_rast,
             "opt_egdb": self.opt_egdb,
+            "opt_gpkg": self.opt_gpkg,
             "opt_spadb": self.opt_spadb,
             "opt_dxf": self.opt_dxf,
         }

@@ -637,6 +637,7 @@ class DicoGIS(QMainWindow):
             # options
             opt_analyze_cdao=self.tab_files.opt_gxt.isChecked(),
             opt_analyze_esri_filegdb=self.tab_files.opt_egdb.isChecked(),
+            opt_analyze_geopackage=self.tab_files.opt_gpkg.isChecked(),
             opt_analyze_geojson=self.tab_files.opt_geoj.isChecked(),
             opt_analyze_gml=self.tab_files.opt_gml.isChecked(),
             opt_analyze_gxt=self.tab_files.opt_gxt.isChecked(),
@@ -838,6 +839,8 @@ class DicoGIS(QMainWindow):
                 or filters["opt_geoj"]
                 or filters["opt_rast"]
                 or filters["opt_egdb"]
+                or filters["opt_gpkg"]
+                or filters["opt_spadb"]
                 or filters["opt_dxf"]
             ):
                 QMessageBox.critical(
