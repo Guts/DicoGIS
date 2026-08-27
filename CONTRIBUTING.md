@@ -24,6 +24,21 @@ Make sure your code *roughly* follows [PEP-8](https://www.python.org/dev/peps/pe
 - sorted imports: [isort](https://pycqa.github.io/isort/) is used to sort imports
 - static analisis: [flake8](https://flake8.pycqa.org/en/latest/) is used to catch some dizziness and keep the source code healthy.
 
+## Commit messages
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`, e.g. `feat(gui): add Publish tab for uData catalog publication`. The scope is optional.
+
+Common types used in this project:
+
+- `feat`: new feature or enhancement
+- `fix`: bug fix
+- `docs`: documentation only
+- `test`: adding or fixing tests
+- `refactor`: code change that neither fixes a bug nor adds a feature
+- `chore`: maintenance (dependency bumps, housekeeping, etc.)
+- `ci`: CI/CD configuration
+- `build`: build system or packaging
+
 ## Pull requests
 
 Please fill out the [pull request template](/.github/PULL_REQUEST_TEMPLATE.md) - it's pre-filled when you open a PR on GitHub.
