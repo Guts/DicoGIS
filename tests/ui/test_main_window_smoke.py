@@ -69,6 +69,26 @@ def test_main_window_check_fields_requires_format(qtbot, monkeypatch):
     assert window.check_fields(tab_data_type=0) is False
 
 
+def test_main_window_check_fields_accepts_geopackage_only(qtbot, monkeypatch, tmp_path):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+
+    shown_messages = []
+    monkeypatch.setattr(
+        "dicogis.ui.main_windows.QMessageBox.critical",
+        staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
+    )
+
+    window.tab_files.set_target_path(str(tmp_path))
+    window.tab_files.set_filters_state(
+        {key: "0" for key in window.tab_files.get_filters_state()}
+    )
+    window.tab_files.set_filters_state({"opt_gpkg": "1"})
+
+    assert window.check_fields(tab_data_type=0) is True
+    assert not shown_messages
+
+
 def test_main_window_check_fields_requires_publish_input_folder(qtbot, monkeypatch):
     window = DicoGIS()
     qtbot.addWidget(window)
