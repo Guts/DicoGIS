@@ -22,7 +22,7 @@ Formats handled are potentially the entire list of [GDAL](https://gdal.org/drive
 
 - vectors: shapefile, MapInfo tables, GeoJSON, GML, KML
 - rasters: ECW, GeoTIFF, JPEG
-- "flat" databases: Esri File GDB, Spatialite
+- "flat" databases: Esri File GDB, GeoPackage, Spatialite
 - CAD: DWG (only listing), DXF
 - Map documents: Geospatial PDF
 

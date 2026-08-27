@@ -24,6 +24,44 @@ Make sure your code *roughly* follows [PEP-8](https://www.python.org/dev/peps/pe
 - sorted imports: [isort](https://pycqa.github.io/isort/) is used to sort imports
 - static analisis: [flake8](https://flake8.pycqa.org/en/latest/) is used to catch some dizziness and keep the source code healthy.
 
+## Commit messages
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`, e.g. `feat(gui): add Publish tab for uData catalog publication`. The scope is optional.
+
+Common types used in this project:
+
+- `feat`: new feature or enhancement
+- `fix`: bug fix
+- `docs`: documentation only
+- `test`: adding or fixing tests
+- `refactor`: code change that neither fixes a bug nor adds a feature
+- `chore`: maintenance (dependency bumps, housekeeping, etc.)
+- `ci`: CI/CD configuration
+- `build`: build system or packaging
+
+## AI/LLM-assisted contributions
+
+If you used an AI/LLM (Claude, ChatGPT, Copilot, etc.) to help produce a contribution, please disclose it, following the transparency levels described in [VisiData's "Using AI to Contribute to Open Source"](https://www.visidata.org/blog/2026/ai/). In your PR description (or as commit message trailers), indicate:
+
+- the disclosure **level**, per the scale from the article above;
+- the **model** used (name/version);
+- a **link to the session** (chat/agent conversation) that produced the change, when available.
+
+Whatever the level, a human must still vouch for the PR: you should have reviewed and tested the change yourself.
+
+## Pull requests
+
+Please fill out the [pull request template](/.github/PULL_REQUEST_TEMPLATE.md) - it's pre-filled when you open a PR on GitHub.
+
+Labels are applied automatically based on your branch name and changed files (see `.github/labeler.yml`), which also drives the release notes categorization (`.github/release.yml`). Prefixing your branch name accordingly helps:
+
+- `fix/…` or `hotfix/…`: bug fix
+- `feature/…` or `improve/…`: new feature or enhancement
+- `docs/…`: documentation
+- `packaging/…`: build/packaging
+- `tooling/…`: tooling
+- `cli/…`: CLI-specific change
+
 ## Security
 
 As the aim of this project is to be carried out on large-scale IT infrastructures, security is one of the development challenges. It's enforced through automated checks, which are mainly executed in CI. But there are a few best practices to bear in mind:
