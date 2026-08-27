@@ -14,10 +14,15 @@ Author:       Julien Moura (@geojulien)
 
 # Standard library
 import logging
+from pathlib import Path
 
 # 3rd party
+from PyQt6 import uic
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QFrame, QToolButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QWidget
+
+# project
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
@@ -53,24 +58,20 @@ class ToggledFrame(QWidget):
                 signature.
         """
         super().__init__(parent)
+        uic.loadUi(
+            Utilities().resolve_internal_path(
+                internal_path=Path("ui/wdg_collapsible_frame.ui")
+            ),
+            self,
+        )
 
-        self.btn_toggle = QToolButton(self)
         self.btn_toggle.setText(in_text)
-        self.btn_toggle.setCheckable(True)
         self.btn_toggle.setChecked(start_opened)
-        self.btn_toggle.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.btn_toggle.setArrowType(
             Qt.ArrowType.DownArrow if start_opened else Qt.ArrowType.RightArrow
         )
-        self.btn_toggle.toggled.connect(self._on_toggled)
-
-        self.sub_frame = QFrame(self)
         self.sub_frame.setVisible(start_opened)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.btn_toggle)
-        layout.addWidget(self.sub_frame)
+        self.btn_toggle.toggled.connect(self._on_toggled)
 
     def _on_toggled(self, checked: bool) -> None:
         """Show/hide the sub frame and update the toggle arrow.
@@ -91,7 +92,7 @@ class ToggledFrame(QWidget):
 if __name__ == "__main__":
     import sys
 
-    from PyQt6.QtWidgets import QApplication, QPushButton
+    from PyQt6.QtWidgets import QApplication, QPushButton, QVBoxLayout
 
     app = QApplication(sys.argv)
 

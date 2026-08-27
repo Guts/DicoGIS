@@ -14,26 +14,18 @@ Author:       Julien Moura (@geojulien)
 
 # Standard library
 import logging
+from pathlib import Path
 
 # 3rd party
 import pgserviceparser
-from PyQt6.QtWidgets import (
-    QCheckBox,
-    QComboBox,
-    QDialog,
-    QFormLayout,
-    QGroupBox,
-    QLabel,
-    QMessageBox,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt6 import uic
+from PyQt6.QtWidgets import QDialog, QMessageBox, QWidget
 
 # project
 from dicogis.models.database_connection import DatabaseConnection
-from dicogis.ui.dialogs.database_connection_dialog import DatabaseConnectionDialog
+from dicogis.ui.dialogs.dlg_database_connection import DatabaseConnectionDialog
 from dicogis.utils.texts import TextsManager
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
@@ -58,16 +50,20 @@ class TabDatabaseServer(QWidget):
         self,
         parent: QWidget | None = None,
         localized_strings: dict | None = None,
-        init_widgets: bool = True,
     ):
         """UI tab for databases initialization.
 
         Args:
             parent: Qt parent widget
             localized_strings: translated strings. Defaults to None.
-            init_widgets: option to create widgets during init or not. Defaults to True.
         """
         super().__init__(parent)
+        uic.loadUi(
+            Utilities().resolve_internal_path(
+                internal_path=Path("ui/wdg_tab_database.ui")
+            ),
+            self,
+        )
 
         # attributes
         try:
@@ -84,47 +80,10 @@ class TabDatabaseServer(QWidget):
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts()
 
-        if init_widgets:
-            self.create_widgets()
-
-    def create_widgets(self) -> None:
-        """Create and layout the widgets for the frame."""
-        layout = QVBoxLayout(self)
-
-        # subframe
-        self.FrameDatabaseServicePicker = QGroupBox(
-            self.localized_strings.get("gui_fr2", "PostGIS"), self
-        )
-        form_layout = QFormLayout()
-
-        # Form widgets
-        self.ddl_pg_services = QComboBox(self.FrameDatabaseServicePicker)
         self.ddl_pg_services.addItems(self.pg_services_names)
-
-        self.caz_pg_views = QCheckBox(
-            self.localized_strings.get("gui_views", "Views enabled"),
-            self.FrameDatabaseServicePicker,
-        )
-
-        # Button to open modal dialog
-        self.open_form_button = QPushButton(
-            self.localized_strings.get("gui_database_form", "+"),
-            self.FrameDatabaseServicePicker,
-        )
         self.open_form_button.clicked.connect(self.open_form)
 
-        self.lb_pg_services = QLabel(
-            self.localized_strings.get("gui_pg_service", "PG service:"),
-            self.FrameDatabaseServicePicker,
-        )
-
-        form_layout.addRow(self.lb_pg_services, self.ddl_pg_services)
-        form_layout.addRow(self.open_form_button)
-        form_layout.addRow(self.caz_pg_views)
-
-        self.FrameDatabaseServicePicker.setLayout(form_layout)
-        layout.addWidget(self.FrameDatabaseServicePicker)
-        layout.addStretch(1)
+        self.retranslate_ui(self.localized_strings)
 
     def open_form(self) -> None:
         """Open the modal dialog for database form."""

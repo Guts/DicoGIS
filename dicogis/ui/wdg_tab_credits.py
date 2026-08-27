@@ -15,16 +15,19 @@ Author:       Julien Moura (@geojulien)
 # Standard library
 import logging
 import platform
+from pathlib import Path
 
 # 3rd party
 from lxml import __version__ as lxml_version
 from numpy import __version__ as numpy_version
 from openpyxl import __version__ as openpyxl_version
+from PyQt6 import uic
 from PyQt6.QtCore import PYQT_VERSION_STR, qVersion
-from PyQt6.QtWidgets import QGridLayout, QLabel, QWidget
+from PyQt6.QtWidgets import QLabel, QWidget
 
 # project
 from dicogis.utils.environment import get_gdal_version, get_proj_version
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
@@ -52,8 +55,12 @@ class TabCredits(QWidget):
             parent: Qt parent widget
         """
         super().__init__(parent)
-
-        layout = QGridLayout(self)
+        uic.loadUi(
+            Utilities().resolve_internal_path(
+                internal_path=Path("ui/wdg_tab_credits.ui")
+            ),
+            self,
+        )
 
         rows = [
             ("GDAL", get_gdal_version()),
@@ -66,8 +73,8 @@ class TabCredits(QWidget):
         ]
 
         for row_index, (name, value) in enumerate(rows):
-            layout.addWidget(QLabel(name, self), row_index, 0)
-            layout.addWidget(QLabel(str(value), self), row_index, 1)
+            self.gridLayout.addWidget(QLabel(name, self), row_index, 0)
+            self.gridLayout.addWidget(QLabel(str(value), self), row_index, 1)
 
 
 # #############################################################################

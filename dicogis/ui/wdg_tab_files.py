@@ -17,23 +17,14 @@ import logging
 from pathlib import Path
 
 # GUI
+from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import (
-    QCheckBox,
-    QFileDialog,
-    QGridLayout,
-    QGroupBox,
-    QLabel,
-    QLineEdit,
-    QMessageBox,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt6.QtWidgets import QFileDialog, QMessageBox, QWidget
 
 # project
 from dicogis.constants import FormatsRaster
 from dicogis.utils.check_path import check_path
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
@@ -70,6 +61,12 @@ class TabFiles(QWidget):
             localized_strings: translated strings. Defaults to None.
         """
         super().__init__(parent)
+        uic.loadUi(
+            Utilities().resolve_internal_path(
+                internal_path=Path("ui/wdg_tab_files.ui")
+            ),
+            self,
+        )
 
         # localized strings
         self.localized_strings = localized_strings
@@ -81,67 +78,15 @@ class TabFiles(QWidget):
         if not self.listing_initial_folder_path:
             self.listing_initial_folder_path = Path().home()
 
-        layout = QVBoxLayout(self)
-
-        # -- Source path -----------------------------------------------------
-        self.FrPath = QGroupBox(self.localized_strings.get("gui_fr1", "Path"), self)
-        path_layout = QGridLayout()
-
-        self.lb_target = QLabel(
-            self.localized_strings.get("gui_path", "Folder path: "), self.FrPath
-        )
-        self.ent_target = QLineEdit(self.FrPath)
-        self.btn_browse = QPushButton(
-            self.localized_strings.get("gui_choix", "Browse"), self.FrPath
-        )
-        self.btn_browse.clicked.connect(self.on_browse_get_initial_listing_folder_path)
-
-        path_layout.addWidget(self.lb_target, 0, 0)
-        path_layout.addWidget(self.ent_target, 0, 1)
-        path_layout.addWidget(self.btn_browse, 0, 2)
-        self.FrPath.setLayout(path_layout)
-
-        # -- Format filters --------------------------------------------------
-        self.FrFilters = QGroupBox(
-            self.localized_strings.get("gui_fr3", "Filters"), self
-        )
-        filters_layout = QGridLayout()
-
-        # formats options
-        self.opt_shp = QCheckBox(".shp", self.FrFilters)
-        self.opt_tab = QCheckBox(".tab", self.FrFilters)
-        self.opt_kml = QCheckBox(".kml", self.FrFilters)
-        self.opt_gml = QCheckBox(".gml", self.FrFilters)
-        self.opt_geoj = QCheckBox(".geojson", self.FrFilters)
-        self.opt_gxt = QCheckBox(".gxt", self.FrFilters)
-        self.opt_egdb = QCheckBox("Esri FileGDB", self.FrFilters)
-        self.opt_gpkg = QCheckBox("GeoPackage", self.FrFilters)
-        self.opt_spadb = QCheckBox("Spatialite", self.FrFilters)
-        self.opt_rast = QCheckBox(
+        self.opt_rast.setText(
             "rasters ({})".format(
                 ", ".join([raster_format.value for raster_format in FormatsRaster])
-            ),
-            self.FrFilters,
+            )
         )
-        self.opt_dxf = QCheckBox("DXF", self.FrFilters)
 
-        filters_layout.addWidget(self.opt_shp, 0, 0)
-        filters_layout.addWidget(self.opt_tab, 0, 1)
-        filters_layout.addWidget(self.opt_kml, 0, 2)
-        filters_layout.addWidget(self.opt_gml, 0, 3)
-        filters_layout.addWidget(self.opt_geoj, 0, 4)
-        filters_layout.addWidget(self.opt_gxt, 0, 5)
-        filters_layout.addWidget(self.opt_rast, 1, 0, 1, 2)
-        filters_layout.addWidget(self.opt_dxf, 1, 2, 1, 1)
-        # file databases grouped together, on their own row for clarity
-        filters_layout.addWidget(self.opt_egdb, 2, 0, 1, 2)
-        filters_layout.addWidget(self.opt_gpkg, 2, 2, 1, 2)
-        filters_layout.addWidget(self.opt_spadb, 2, 4, 1, 2)
-        self.FrFilters.setLayout(filters_layout)
+        self.btn_browse.clicked.connect(self.on_browse_get_initial_listing_folder_path)
 
-        layout.addWidget(self.FrPath)
-        layout.addWidget(self.FrFilters)
-        layout.addStretch(1)
+        self.retranslate_ui(self.localized_strings)
 
     def on_browse_get_initial_listing_folder_path(self) -> Path | None:
         """Browse and insert the path of target folder.

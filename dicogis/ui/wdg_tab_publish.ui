@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TabPublish</class>
+ <widget class="QWidget" name="TabPublish">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="FrSource">
+     <property name="title">
+      <string>Metadata source</string>
+     </property>
+     <layout class="QGridLayout" name="source_layout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lb_input_folder">
+        <property name="text">
+         <string>JSON metadata folder: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="ent_input_folder"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="btn_browse_input_folder">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="FrCatalog">
+     <property name="title">
+      <string>uData catalog</string>
+     </property>
+     <layout class="QFormLayout" name="catalog_layout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lb_udata_api_url_base">
+        <property name="text">
+         <string>API URL:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="ent_udata_api_url_base"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lb_udata_api_version">
+        <property name="text">
+         <string>API version:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="ent_udata_api_version"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lb_udata_api_key">
+        <property name="text">
+         <string>API key:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="ent_udata_api_key">
+        <property name="echoMode">
+         <enum>QLineEdit::EchoMode::Password</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lb_udata_organization_id">
+        <property name="text">
+         <string>Organization ID (optional):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="ent_udata_organization_id"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="FrReport">
+     <property name="title">
+      <string>Publication report</string>
+     </property>
+     <layout class="QVBoxLayout" name="report_layout">
+      <item>
+       <widget class="QLabel" name="lbl_publish_summary">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

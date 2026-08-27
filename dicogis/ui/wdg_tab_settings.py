@@ -15,19 +15,15 @@ Author:       Julien Moura (@geojulien)
 # Standard library
 import logging
 from os import environ, getenv
+from pathlib import Path
 from webbrowser import open_new_tab
 
 # 3rd party
+from PyQt6 import uic
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
-    QComboBox,
-    QFormLayout,
-    QGroupBox,
-    QLabel,
-    QLineEdit,
     QPushButton,
-    QSpinBox,
     QStyleFactory,
     QVBoxLayout,
     QWidget,
@@ -35,10 +31,11 @@ from PyQt6.QtWidgets import (
 
 # project
 from dicogis.__about__ import __uri_homepage__
-from dicogis.ui.collapsible_frame import ToggledFrame
-from dicogis.ui.scrollable_table import ScrollableTable
+from dicogis.ui.wdg_collapsible_frame import ToggledFrame
+from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.str2bool import str2bool
 from dicogis.utils.texts import TextsManager
+from dicogis.utils.utils import Utilities
 
 # ##############################################################################
 # ############ Globals ############
@@ -62,36 +59,35 @@ class TabSettings(QWidget):
         self,
         parent: QWidget | None = None,
         localized_strings: dict | None = None,
-        init_widgets: bool = True,
     ):
         """Initializes UI tab for end-user options.
 
         Args:
             parent: Qt parent widget
             localized_strings: translated strings. Defaults to None.
-            init_widgets: option to create widgets during init or not. Defaults to True.
         """
         super().__init__(parent)
+        uic.loadUi(
+            Utilities().resolve_internal_path(
+                internal_path=Path("ui/wdg_tab_settings.ui")
+            ),
+            self,
+        )
 
         # handle empty localized strings
         self.localized_strings = localized_strings
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts()
 
-        if init_widgets:
-            self.create_widgets()
+        self._init_interface_options()
+        self._init_proxy_options()
+        self._init_export_options()
+        self._init_env_vars()
 
-    def create_widgets(self) -> None:
-        """Create and layout the widgets for the frame."""
-        layout = QVBoxLayout(self)
+        self.retranslate_ui(self.localized_strings)
 
-        # -- INTERFACE OPTIONS ----------------------------------------------------------
-        self.FrOptInterface = QGroupBox(
-            self.localized_strings.get("gui_options_interface", "Interface"), self
-        )
-        interface_layout = QFormLayout()
-
-        self.opt_ui_style = QComboBox(self.FrOptInterface)
+    def _init_interface_options(self) -> None:
+        """Populate and wire the interface style combobox."""
         self.opt_ui_style.addItems(QStyleFactory.keys())
         current_style = getenv("DICOGIS_UI_STYLE") or self.style().objectName()
         style_idx = self.opt_ui_style.findText(current_style)
@@ -108,55 +104,12 @@ class TabSettings(QWidget):
             self.opt_ui_style.setCurrentIndex(style_idx)
         self.opt_ui_style.currentTextChanged.connect(self.apply_ui_style)
 
-        self.lbl_ui_style = QLabel(
-            self.localized_strings.get("gui_options_ui_style", "Interface style:"),
-            self.FrOptInterface,
-        )
-        interface_layout.addRow(self.lbl_ui_style, self.opt_ui_style)
-        self.FrOptInterface.setLayout(interface_layout)
-
-        # -- NETWORK OPTIONS -----------------------------------------------------------
-        self.FrOptProxy = QGroupBox(
-            self.localized_strings.get("Proxy", "Proxy settings"), self
-        )
-        self.FrOptProxy.setCheckable(True)
-        self.FrOptProxy.setChecked(False)
+    def _init_proxy_options(self) -> None:
+        """Wire the proxy settings group box toggle."""
         self.FrOptProxy.toggled.connect(self.FrOptProxy.setEnabled)
-        self.FrOptProxy.setEnabled(False)
 
-        proxy_layout = QFormLayout()
-        self.opt_ntlm = QCheckBox("NTLM", self.FrOptProxy)
-        self.prox_ent_host = QLineEdit(self.FrOptProxy)
-        self.prox_ent_host.setText("proxy.server.com")
-        self.prox_ent_port = QSpinBox(self.FrOptProxy)
-        self.prox_ent_port.setRange(1, 65535)
-        self.prox_ent_port.setValue(80)
-        self.prox_ent_user = QLineEdit(self.FrOptProxy)
-        self.prox_ent_user.setText("proxy_user")
-        self.prox_ent_password = QLineEdit(self.FrOptProxy)
-        self.prox_ent_password.setEchoMode(QLineEdit.EchoMode.Password)
-
-        self.prox_lb_host = QLabel(
-            self.localized_strings.get("gui_prox_server", "Host:"), self.FrOptProxy
-        )
-        self.prox_lb_port = QLabel(
-            self.localized_strings.get("gui_port", "Port:"), self.FrOptProxy
-        )
-        self.prox_lb_user = QLabel(
-            self.localized_strings.get("gui_user", "User name:"), self.FrOptProxy
-        )
-        self.prox_lb_password = QLabel(
-            self.localized_strings.get("gui_mdp", "User password:"), self.FrOptProxy
-        )
-
-        proxy_layout.addRow(self.prox_lb_host, self.prox_ent_host)
-        proxy_layout.addRow(self.prox_lb_port, self.prox_ent_port)
-        proxy_layout.addRow(self.opt_ntlm)
-        proxy_layout.addRow(self.prox_lb_user, self.prox_ent_user)
-        proxy_layout.addRow(self.prox_lb_password, self.prox_ent_password)
-        self.FrOptProxy.setLayout(proxy_layout)
-
-        # -- EXPORT / GENERAL OPTIONS ---------------------------------------------------
+    def _init_export_options(self) -> None:
+        """Create the export/general options collapsible frame."""
         self.FrOptExport = ToggledFrame(
             self,
             in_text=self.localized_strings.get("Export", "Export"),
@@ -216,7 +169,10 @@ class TabSettings(QWidget):
         export_layout.addWidget(self.opt_debug)
         self.FrOptExport.sub_frame.setLayout(export_layout)
 
-        # -- Environment variables --
+        self.verticalLayout.insertWidget(2, self.FrOptExport)
+
+    def _init_env_vars(self) -> None:
+        """Create the environment variables collapsible frame."""
         self.FrOptEnv = ToggledFrame(
             self,
             in_text=self.localized_strings.get(
@@ -226,13 +182,13 @@ class TabSettings(QWidget):
         )
         env_layout = QVBoxLayout()
 
-        btn_doc_env_vars = QPushButton(
+        self.btn_doc_env_vars = QPushButton(
             self.localized_strings.get(
                 "gui_options_supported_env_vars", "See supported variables"
             ),
             self.FrOptEnv.sub_frame,
         )
-        btn_doc_env_vars.clicked.connect(
+        self.btn_doc_env_vars.clicked.connect(
             lambda: open_new_tab(
                 f"{__uri_homepage__}usage/settings.html#using-environment-variables"
             )
@@ -252,16 +208,11 @@ class TabSettings(QWidget):
                 logger.debug(f"{var_name}={var_value}")
                 self.tab_env_vars.add_row(var_name, var_value)
 
-        env_layout.addWidget(btn_doc_env_vars)
+        env_layout.addWidget(self.btn_doc_env_vars)
         env_layout.addWidget(self.tab_env_vars)
         self.FrOptEnv.sub_frame.setLayout(env_layout)
 
-        # positionning frames
-        layout.addWidget(self.FrOptInterface)
-        layout.addWidget(self.FrOptProxy)
-        layout.addWidget(self.FrOptExport)
-        layout.addWidget(self.FrOptEnv)
-        layout.addStretch(1)
+        self.verticalLayout.insertWidget(3, self.FrOptEnv)
 
     # -- Live-apply handlers ---------------------------------------------------------
 

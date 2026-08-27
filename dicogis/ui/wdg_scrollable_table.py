@@ -1,14 +1,12 @@
 #! python3  # noqa: E265
 
-from PyQt6.QtWidgets import (
-    QAbstractItemView,
-    QTableWidget,
-    QTableWidgetItem,
-    QVBoxLayout,
-    QWidget,
-)
+from pathlib import Path
+
+from PyQt6 import uic
+from PyQt6.QtWidgets import QTableWidgetItem, QWidget
 
 from dicogis.utils.texts import TextsManager
+from dicogis.utils.utils import Utilities
 
 
 class ScrollableTable(QWidget):
@@ -23,28 +21,26 @@ class ScrollableTable(QWidget):
         self,
         parent: QWidget | None = None,
         localized_strings: dict | None = None,
-        init_widgets: bool = True,
     ):
         """Initialize the ScrollableTable widget.
 
         Args:
             parent: the parent widget.
             localized_strings: translated strings. Defaults to None.
-            init_widgets: option to create widgets during init or not. Defaults to True.
         """
         super().__init__(parent)
+        uic.loadUi(
+            Utilities().resolve_internal_path(
+                internal_path=Path("ui/wdg_scrollable_table.ui")
+            ),
+            self,
+        )
 
         # handle empty localized strings
         self.localized_strings = localized_strings
         if self.localized_strings is None:
             self.localized_strings = TextsManager().load_texts()
 
-        if init_widgets:
-            self.create_widgets()
-
-    def create_widgets(self) -> None:
-        """Create and layout the widgets for the frame."""
-        self.table = QTableWidget(0, 2, self)
         self.table.setHorizontalHeaderLabels(
             [
                 self.localized_strings.get("key", "Key"),
@@ -52,13 +48,7 @@ class ScrollableTable(QWidget):
             ]
         )
         self.table.verticalHeader().setVisible(False)
-        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.horizontalHeader().setStretchLastSection(True)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.table)
 
     def add_row(self, key: str, value: str) -> None:
         """Append a key/value row to the table.

@@ -12,7 +12,7 @@ Usage from the repo root folder:
 # ##################################
 
 # package
-from dicogis.ui.main_windows import DicoGIS
+from dicogis.ui.mw_dicogis import DicoGIS
 
 # #############################################################################
 # ########## Tests ##################
@@ -44,7 +44,7 @@ def test_main_window_check_fields_requires_folder(qtbot, monkeypatch):
 
     shown_messages = []
     monkeypatch.setattr(
-        "dicogis.ui.main_windows.QMessageBox.critical",
+        "dicogis.ui.mw_dicogis.QMessageBox.critical",
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
 
@@ -58,7 +58,7 @@ def test_main_window_check_fields_requires_format(qtbot, monkeypatch):
     qtbot.addWidget(window)
 
     monkeypatch.setattr(
-        "dicogis.ui.main_windows.QMessageBox.critical",
+        "dicogis.ui.mw_dicogis.QMessageBox.critical",
         staticmethod(lambda *args, **kwargs: None),
     )
 
@@ -75,7 +75,7 @@ def test_main_window_check_fields_accepts_geopackage_only(qtbot, monkeypatch, tm
 
     shown_messages = []
     monkeypatch.setattr(
-        "dicogis.ui.main_windows.QMessageBox.critical",
+        "dicogis.ui.mw_dicogis.QMessageBox.critical",
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
 
@@ -95,7 +95,7 @@ def test_main_window_check_fields_requires_publish_input_folder(qtbot, monkeypat
 
     shown_messages = []
     monkeypatch.setattr(
-        "dicogis.ui.main_windows.QMessageBox.critical",
+        "dicogis.ui.mw_dicogis.QMessageBox.critical",
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
 
@@ -111,7 +111,7 @@ def test_main_window_check_fields_requires_publish_api_key(
     qtbot.addWidget(window)
 
     monkeypatch.setattr(
-        "dicogis.ui.main_windows.QMessageBox.critical",
+        "dicogis.ui.mw_dicogis.QMessageBox.critical",
         staticmethod(lambda *args, **kwargs: None),
     )
 

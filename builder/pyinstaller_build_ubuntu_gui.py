@@ -35,6 +35,10 @@ PyInstaller.__main__.run(
             package_folder.joinpath("bin/img/").resolve()
         ),
         "--add-data={}:locale/".format((package_folder / "locale/").resolve()),
+        "--add-data={}:ui/".format((package_folder / "ui/*.ui").resolve()),
+        "--add-data={}:ui/dialogs/".format(
+            (package_folder / "ui/dialogs/*.ui").resolve()
+        ),
         "--add-data=options_TPL.ini:.",
         "--add-data=LICENSE:.",
         "--add-data=README.md:.",
