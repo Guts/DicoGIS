@@ -6,9 +6,17 @@ Options are accessible through the `Settings` tab:
 
 ![DicoGIS GUI settings tags](../static/img/dicogis_gui_settings.webp)
 
+Publishing previously exported metadata (JSON files) to a uData catalog is done
+through the `Publish` tab: pick the folder containing the JSON files, fill in the
+uData catalog connection (API URL, version, key, and optionally an organization ID),
+then use the `Launch` button.
+
 ## Using environment variables
 
-Some options and arguments can be set with environment variables.
+Some options and arguments can be set with environment variables. When a
+GUI widget exists for one of them (see the `Settings` tab above), the
+environment variable only sets its initial value: the widget can override it,
+and the choice persists across runs in `options.ini`.
 
 ### Shared (CLI and GUI)
 
@@ -24,7 +32,7 @@ Some options and arguments can be set with environment variables.
 
 | Variable name      | Description                                                               | Default value |
 | :----------------- | :------------------------------------------------------------------------ | :-----------: |
-| `DICOGIS_UI_THEME` | UI theme. Can be any of the [ttkthemes](https://ttkthemes.readthedocs.io) | `arc` (overridden per OS: `breeze` on macOS and Windows, `radiance` on Linux, `ubuntu` on Ubuntu) |
+| `DICOGIS_UI_STYLE` | UI style. Can be any Qt style available on the running platform (e.g. `Fusion`, `Windows`) | unset (uses the Qt platform default) |
 
 ### CLI only — `inventory` subcommand
 
@@ -38,7 +46,12 @@ Some options and arguments can be set with environment variables.
 | `DICOGIS_POSTGRES_SERVICES`         | `--pg-services`                                  | `None`             |
 | `DICOGIS_START_FOLDER`              | `--input-folder`                                 | `None`             |
 
-### CLI only — `publish` subcommand
+### Shared (CLI `publish` subcommand and GUI `Publish` tab)
+
+These set the initial value of their `Publish` tab widget, same as the "Shared"
+table above, except `DICOGIS_UDATA_API_KEY`: for security, the API key typed into
+the GUI is never written to `options.ini`, so it must be re-entered (or re-exposed
+through the environment variable) on every run.
 
 | Variable name                    | Corresponding CLI argument    | Default value                    |
 | :------------------------------- | :---------------------------: | :------------------------------: |

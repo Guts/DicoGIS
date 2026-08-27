@@ -8,12 +8,12 @@
 
 # standard library
 import logging
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 from dataclasses import dataclass
 from locale import getlocale
 from os import path
 from pathlib import Path
-from tkinter import IntVar, StringVar
+from typing import Protocol
 
 # package
 from dicogis.export.base_serializer import MetadatasetSerializerBase
@@ -38,6 +38,22 @@ logger = logging.getLogger(__name__)
 # ##############################################################################
 # ############ Classes ############
 # #################################
+
+
+class ProgressReporter(Protocol):
+    """Toolkit-agnostic contract for reporting processing progress."""
+
+    def set_message(self, message: str) -> None:
+        """Update the currently displayed status message."""
+        ...
+
+    def increment(self, amount: int = 1) -> None:
+        """Increment the progress counter."""
+        ...
+
+    def set_total(self, total: int) -> None:
+        """Set the total/maximum value of the progress counter."""
+        ...
 
 
 @dataclass
@@ -105,9 +121,7 @@ class ProcessingFiles:
         opt_analyze_shapefiles: bool = True,
         opt_analyze_spatialite: bool = True,
         # progress
-        progress_message_displayer: StringVar | None = None,
-        progress_counter: IntVar | None = None,
-        progress_callback_cmd: Callable | None = None,
+        progress_reporter: ProgressReporter | None = None,
         # misc
         opt_quick_fail: bool = False,
     ) -> None:
@@ -164,9 +178,7 @@ class ProcessingFiles:
             self.localized_strings = txt_manager.load_texts(language_code=getlocale())
 
         # progress
-        self.progress_message_displayer = progress_message_displayer
-        self.progress_counter = progress_counter
-        self.progress_callback_cmd = progress_callback_cmd
+        self.progress_reporter = progress_reporter
 
     def process_datasets_in_queue(self):
         """Process datasets in queue."""
@@ -434,14 +446,9 @@ class ProcessingFiles:
             message_to_display: message to display. Defaults to None.
             increment_counter: option to increment progress counter. Defaults to False.
         """
-        if hasattr(self.progress_message_displayer, "set"):
-            self.progress_message_displayer.set(message_to_display)
-        if increment_counter and self.progress_counter is not None:
-            if hasattr(self.progress_counter, "set") and hasattr(
-                self.progress_counter, "get"
-            ):
-                self.progress_counter.set(self.progress_counter.get() + 1)
-            else:
-                self.progress_counter += 1
-        if self.progress_callback_cmd is not None:
-            self.progress_callback_cmd()
+        if self.progress_reporter is None:
+            return
+        if message_to_display is not None:
+            self.progress_reporter.set_message(message_to_display)
+        if increment_counter:
+            self.progress_reporter.increment()

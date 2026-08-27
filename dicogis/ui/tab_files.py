@@ -14,16 +14,22 @@ Author:       Julien Moura (@geojulien)
 
 # Standard library
 import logging
-import threading
-from datetime import date
-from os import path
 from pathlib import Path
 
 # GUI
-from tkinter import END, IntVar, StringVar, Tk
-from tkinter.filedialog import askdirectory
-from tkinter.messagebox import showinfo
-from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label, Labelframe
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import (
+    QCheckBox,
+    QFileDialog,
+    QGridLayout,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 # project
 from dicogis.constants import FormatsRaster
@@ -40,29 +46,30 @@ logger = logging.getLogger(__name__)
 # ##################################
 
 
-class TabFiles(Frame):
+class TabFiles(QWidget):
     """Tab for listing and picking geodata files formats.
 
     Args:
-        Frame: inherited ttk.Frame
+        QWidget: inherited Qt widget
     """
+
+    folder_selected = pyqtSignal(str)
 
     def __init__(
         self,
-        parent,
+        parent: QWidget | None = None,
         listing_initial_folder: Path | None = None,
         localized_strings: dict | None = None,
     ):
         """Initializes UI tab for files browsing and filtering.
 
         Args:
-            parent: tkinter parent object
-            listing_initial_folder: initial folder fro ask directory dialog. Defaults
+            parent: Qt parent widget
+            listing_initial_folder: initial folder for the browse dialog. Defaults
                 to Path().home().
             localized_strings: translated strings. Defaults to None.
         """
-        self.parent = parent
-        Frame.__init__(self)
+        super().__init__(parent)
 
         # localized strings
         self.localized_strings = localized_strings
@@ -74,90 +81,67 @@ class TabFiles(Frame):
         if not self.listing_initial_folder_path:
             self.listing_initial_folder_path = Path().home()
 
-        # -- VARIABLES -------------------------------------------------------
-        self.target_path = StringVar()
+        layout = QVBoxLayout(self)
 
         # -- Source path -----------------------------------------------------
-        self.FrPath = Labelframe(
-            self, name="files", text=self.localized_strings.get("gui_fr1", "Path")
-        )
+        self.FrPath = QGroupBox(self.localized_strings.get("gui_fr1", "Path"), self)
+        path_layout = QGridLayout()
 
-        # target folder
-        self.lb_target = Label(
-            self.FrPath, text=self.localized_strings.get("gui_path", "Folder path: ")
+        self.lb_target = QLabel(
+            self.localized_strings.get("gui_path", "Folder path: "), self.FrPath
         )
-        self.ent_target = Entry(
-            master=self.FrPath, width=35, textvariable=self.target_path
+        self.ent_target = QLineEdit(self.FrPath)
+        self.btn_browse = QPushButton(
+            self.localized_strings.get("gui_choix", "Browse"), self.FrPath
         )
-        self.btn_browse = Button(
-            self.FrPath,
-            text=self.localized_strings.get("gui_choix", "Browse"),
-            command=lambda: self.on_browse_get_initial_listing_folder_path(),
-            takefocus=True,
-        )
-        self.btn_browse.focus_force()
+        self.btn_browse.clicked.connect(self.on_browse_get_initial_listing_folder_path)
 
-        # widgets placement
-        self.lb_target.grid(
-            row=1, column=1, columnspan=1, sticky="NSWE", padx=2, pady=2
-        )
-        self.ent_target.grid(
-            row=1, column=2, columnspan=1, sticky="NSWE", padx=2, pady=2
-        )
-        self.btn_browse.grid(row=1, column=3, sticky="NSE", padx=2, pady=2)
+        path_layout.addWidget(self.lb_target, 0, 0)
+        path_layout.addWidget(self.ent_target, 0, 1)
+        path_layout.addWidget(self.btn_browse, 0, 2)
+        self.FrPath.setLayout(path_layout)
 
         # -- Format filters --------------------------------------------------
-        self.FrFilters = Labelframe(
-            self, name="filters", text=self.localized_strings.get("gui_fr3", "Filters")
+        self.FrFilters = QGroupBox(
+            self.localized_strings.get("gui_fr3", "Filters"), self
         )
-        # formats options
-        self.opt_shp = IntVar(self.FrFilters)  # able/disable shapefiles
-        self.opt_tab = IntVar(self.FrFilters)  # able/disable MapInfo tables
-        self.opt_kml = IntVar(self.FrFilters)  # able/disable KML
-        self.opt_gml = IntVar(self.FrFilters)  # able/disable GML
-        self.opt_geoj = IntVar(self.FrFilters)  # able/disable GeoJSON
-        self.opt_gxt = IntVar(self.FrFilters)  # able/disable GXT
-        self.opt_egdb = IntVar(self.FrFilters)  # able/disable Esri FileGDB
-        self.opt_spadb = IntVar(self.FrFilters)  # able/disable Spatalite DB
-        self.opt_rast = IntVar(self.FrFilters)  # able/disable rasters
-        self.opt_dxf = IntVar(self.FrFilters)  # able/disable DXF files
+        filters_layout = QGridLayout()
 
-        # format choosen: check buttons
-        caz_shp = Checkbutton(self.FrFilters, text=".shp", variable=self.opt_shp)
-        caz_tab = Checkbutton(self.FrFilters, text=".tab", variable=self.opt_tab)
-        caz_kml = Checkbutton(self.FrFilters, text=".kml", variable=self.opt_kml)
-        caz_gml = Checkbutton(self.FrFilters, text=".gml", variable=self.opt_gml)
-        caz_geoj = Checkbutton(self.FrFilters, text=".geojson", variable=self.opt_geoj)
-        caz_gxt = Checkbutton(self.FrFilters, text=".gxt", variable=self.opt_gxt)
-        caz_egdb = Checkbutton(
-            self.FrFilters, text="Esri FileGDB", variable=self.opt_egdb
-        )
-        caz_spadb = Checkbutton(
-            self.FrFilters, text="Spatialite", variable=self.opt_spadb
-        )
-        caz_rast = Checkbutton(
-            self.FrFilters,
-            text="rasters ({})".format(
+        # formats options
+        self.opt_shp = QCheckBox(".shp", self.FrFilters)
+        self.opt_tab = QCheckBox(".tab", self.FrFilters)
+        self.opt_kml = QCheckBox(".kml", self.FrFilters)
+        self.opt_gml = QCheckBox(".gml", self.FrFilters)
+        self.opt_geoj = QCheckBox(".geojson", self.FrFilters)
+        self.opt_gxt = QCheckBox(".gxt", self.FrFilters)
+        self.opt_egdb = QCheckBox("Esri FileGDB", self.FrFilters)
+        self.opt_gpkg = QCheckBox("GeoPackage", self.FrFilters)
+        self.opt_spadb = QCheckBox("Spatialite", self.FrFilters)
+        self.opt_rast = QCheckBox(
+            "rasters ({})".format(
                 ", ".join([raster_format.value for raster_format in FormatsRaster])
             ),
-            variable=self.opt_rast,
+            self.FrFilters,
         )
-        caz_dxf = Checkbutton(self.FrFilters, text="DXF", variable=self.opt_dxf)
-        # widgets placement
-        caz_shp.grid(row=1, column=0, sticky="NSWE", padx=2, pady=2)
-        caz_tab.grid(row=1, column=1, sticky="NSWE", padx=2, pady=2)
-        caz_kml.grid(row=1, column=2, sticky="NSWE", padx=2, pady=2)
-        caz_gml.grid(row=1, column=3, sticky="NSWE", padx=2, pady=2)
-        caz_geoj.grid(row=1, column=4, sticky="NSWE", padx=2, pady=2)
-        caz_gxt.grid(row=1, column=5, sticky="NSWE", padx=2, pady=2)
-        caz_rast.grid(row=2, column=0, columnspan=2, sticky="NSWE", padx=2, pady=2)
-        caz_egdb.grid(row=2, column=2, columnspan=2, sticky="NSWE", padx=2, pady=2)
-        caz_dxf.grid(row=2, column=4, columnspan=1, sticky="NSWE", padx=2, pady=2)
-        caz_spadb.grid(row=2, column=5, columnspan=2, sticky="NSWE", padx=2, pady=2)
+        self.opt_dxf = QCheckBox("DXF", self.FrFilters)
 
-        # frames placement
-        self.FrPath.grid(row=3, column=1, padx=2, pady=2, sticky="NSWE")
-        self.FrFilters.grid(row=4, column=1, padx=2, pady=2, sticky="NSWE")
+        filters_layout.addWidget(self.opt_shp, 0, 0)
+        filters_layout.addWidget(self.opt_tab, 0, 1)
+        filters_layout.addWidget(self.opt_kml, 0, 2)
+        filters_layout.addWidget(self.opt_gml, 0, 3)
+        filters_layout.addWidget(self.opt_geoj, 0, 4)
+        filters_layout.addWidget(self.opt_gxt, 0, 5)
+        filters_layout.addWidget(self.opt_rast, 1, 0, 1, 2)
+        filters_layout.addWidget(self.opt_dxf, 1, 2, 1, 1)
+        # file databases grouped together, on their own row for clarity
+        filters_layout.addWidget(self.opt_egdb, 2, 0, 1, 2)
+        filters_layout.addWidget(self.opt_gpkg, 2, 2, 1, 2)
+        filters_layout.addWidget(self.opt_spadb, 2, 4, 1, 2)
+        self.FrFilters.setLayout(filters_layout)
+
+        layout.addWidget(self.FrPath)
+        layout.addWidget(self.FrFilters)
+        layout.addStretch(1)
 
     def on_browse_get_initial_listing_folder_path(self) -> Path | None:
         """Browse and insert the path of target folder.
@@ -179,50 +163,85 @@ class TabFiles(Frame):
             )
             self.listing_initial_folder_path = Path().home()
 
-        foldername = askdirectory(
-            parent=self.parent,
-            initialdir=self.listing_initial_folder_path,
-            mustexist=True,
-            title=self.localized_strings.get("nofolder", "Pick DicoGIS start folder"),
+        foldername = QFileDialog.getExistingDirectory(
+            self,
+            self.localized_strings.get("nofolder", "Pick DicoGIS start folder"),
+            str(self.listing_initial_folder_path),
         )
 
         # check if a folder has been choosen
-        if isinstance(foldername, (str, Path)) and len(str(foldername)):
-            try:
-                self.ent_target.delete(0, END)
-                self.ent_target.insert(0, foldername)
-            except Exception as err:
-                logger.warning(err)
-                showinfo(
-                    title=self.localized_strings.get("nofolder", "No folder selected"),
-                    message=self.localized_strings.get(
-                        "nofolder", "A folder is required."
-                    ),
-                )
-                return None
-        else:
-            showinfo(
-                title=self.localized_strings.get("nofolder", "No folder selected"),
-                message=self.localized_strings.get("nofolder", "A folder is required."),
+        if not foldername:
+            QMessageBox.information(
+                self,
+                self.localized_strings.get("nofolder", "No folder selected"),
+                self.localized_strings.get("nofolder", "A folder is required."),
             )
             return None
 
-        # set the default output file
-        self.parent.master.ent_outxl_filename.delete(0, END)
-        self.parent.master.ent_outxl_filename.insert(
-            0,
-            f"DicoGIS_{path.split(self.target_path.get())[1]}_{date.today()}.xlsx",
-        )
+        self.ent_target.setText(foldername)
 
-        # count geofiles in a separated thread
-        proc = threading.Thread(
-            target=self.parent.master.ligeofiles, args=(foldername,)
-        )
-        proc.daemon = True
-        proc.start()
+        # let the owning window react (default output filename, launch scan worker)
+        self.folder_selected.emit(foldername)
 
         # end of function
         return Path(foldername)
+
+    # -- Accessors used by OptionsManager -------------------------------------------
+
+    def get_target_path(self) -> str:
+        """Return the currently entered target folder path."""
+        return self.ent_target.text()
+
+    def set_target_path(self, path: str) -> None:
+        """Set the target folder path."""
+        self.ent_target.setText(path)
+
+    def get_filters_state(self) -> dict[str, bool]:
+        """Return the state of every format filter checkbox."""
+        return {
+            "opt_shp": self.opt_shp.isChecked(),
+            "opt_tab": self.opt_tab.isChecked(),
+            "opt_kml": self.opt_kml.isChecked(),
+            "opt_gml": self.opt_gml.isChecked(),
+            "opt_geoj": self.opt_geoj.isChecked(),
+            "opt_gxt": self.opt_gxt.isChecked(),
+            "opt_rast": self.opt_rast.isChecked(),
+            "opt_egdb": self.opt_egdb.isChecked(),
+            "opt_gpkg": self.opt_gpkg.isChecked(),
+            "opt_spadb": self.opt_spadb.isChecked(),
+            "opt_dxf": self.opt_dxf.isChecked(),
+        }
+
+    def set_filters_state(self, values: dict) -> None:
+        """Apply the state of every format filter checkbox from a dict."""
+        mapping = {
+            "opt_shp": self.opt_shp,
+            "opt_tab": self.opt_tab,
+            "opt_kml": self.opt_kml,
+            "opt_gml": self.opt_gml,
+            "opt_geoj": self.opt_geoj,
+            "opt_gxt": self.opt_gxt,
+            "opt_rast": self.opt_rast,
+            "opt_egdb": self.opt_egdb,
+            "opt_gpkg": self.opt_gpkg,
+            "opt_spadb": self.opt_spadb,
+            "opt_dxf": self.opt_dxf,
+        }
+        for key, checkbox in mapping.items():
+            if key in values:
+                checkbox.setChecked(bool(int(values[key])))
+
+    def retranslate_ui(self, localized_strings: dict) -> None:
+        """Update widgets texts with the given localized strings.
+
+        Args:
+            localized_strings: translated strings.
+        """
+        self.localized_strings = localized_strings
+        self.FrPath.setTitle(localized_strings.get("gui_fr1", "Path"))
+        self.FrFilters.setTitle(localized_strings.get("gui_fr3", "Filters"))
+        self.lb_target.setText(localized_strings.get("gui_path", "Folder path: "))
+        self.btn_browse.setText(localized_strings.get("gui_choix", "Browse"))
 
 
 # #############################################################################
@@ -231,8 +250,11 @@ class TabFiles(Frame):
 
 if __name__ == "__main__":
     """To test"""
-    root = Tk()
-    target_path = StringVar(root)
-    frame = TabFiles(root)
-    frame.pack()
-    root.mainloop()
+    import sys
+
+    from PyQt6.QtWidgets import QApplication
+
+    app = QApplication(sys.argv)
+    widget = TabFiles()
+    widget.show()
+    sys.exit(app.exec())
