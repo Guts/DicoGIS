@@ -339,6 +339,7 @@ def inventory(
             # options
             opt_analyze_cdao="dxf" in formats,
             opt_analyze_esri_filegdb="file_geodatabase_esri" in formats,
+            opt_analyze_geopackage="file_geodatabase_geopackage" in formats,
             opt_analyze_geojson="geojson" in formats,
             opt_analyze_gml="gml" in formats,
             opt_analyze_gxt="gxt" in formats,
