@@ -19,13 +19,17 @@ from rich import print
 from dicogis.__about__ import __package_name__, __title__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
-from dicogis.georeaders.process_files import ProcessingFiles
-from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
+from dicogis.utils.environment import GDAL_IS_AVAILABLE
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.slugger import sluggy
 from dicogis.utils.texts import TextsManager
+
+# GDAL is an optional dependency (see pyproject.toml `gdal` extra): importing the
+# georeaders modules here at module level would break `dicogis-cli` entirely
+# (even --help/--version) when GDAL isn't installed, e.g. under pipx. So the
+# imports below are deferred into `inventory()`, guarded by GDAL_IS_AVAILABLE.
 
 # ############################################################################
 # ########## Globals ###############
@@ -239,6 +243,21 @@ def inventory(
             "input_folder or pg_services[/bold red]"
         )
         raise typer.Exit(code=1)
+
+    if not GDAL_IS_AVAILABLE:
+        print(
+            "[bold red]Error: GDAL (and its Python bindings) is required to run an "
+            "inventory but is not installed.[/bold red]\n"
+            "See https://guts.github.io/DicoGIS/usage/installation.html for how to "
+            "install it, including with pipx."
+        )
+        raise typer.Exit(code=1)
+
+    # imported here rather than at module level: GDAL is an optional dependency
+    # (see pyproject.toml `gdal` extra), so importing it eagerly would break every
+    # dicogis-cli invocation, even --help/--version, when GDAL isn't installed
+    from dicogis.georeaders.process_files import ProcessingFiles
+    from dicogis.georeaders.read_postgis import ReadPostGIS
 
     # TODO: check if specified formats are supported
 
