@@ -177,12 +177,40 @@ connection state/errors.
 
 ### i18n
 
-`dicogis/utils/texts.py::TextsManager` loads UI/log strings from
-`dicogis/locale/lang_{EN,ES,FR}.xml` keyed by `AvailableLocales`
-(`dicogis/constants.py`). Both CLI and GUI resolve a language (explicit option or
-system locale) and pass the resulting `localized_strings` dict down through the
-processing pipeline — user-facing strings should go through this mechanism rather
-than being hardcoded, to stay translated.
+Two separate mechanisms cover two separate concerns, split by whether GUI (PyQt6)
+is involved:
+
+- **CLI + shared processing pipeline** (`dicogis/export`, `dicogis/georeaders`,
+  and anything reachable from `dicogis-cli`): `dicogis/utils/texts.py::TextsManager`
+  loads strings from `dicogis/locale/lang_{EN,ES,FR}.xml` keyed by
+  `AvailableLocales` (`dicogis/constants.py`) into a `localized_strings` dict,
+  passed down explicitly through the processing pipeline (e.g. to
+  `ProcessingFiles`, `MetadatasetSerializerBase`). This has no PyQt6 dependency,
+  matching the CLI's own requirement to run without the `gui` extra installed.
+  New pipeline-output strings (Excel/JSON field labels, error messages) should go
+  through this mechanism rather than being hardcoded.
+- **GUI widget text** (`dicogis/ui/*`, including dialogs): plain Qt native
+  i18n — `self.tr("English source text")` calls, extracted into
+  `dicogis/ui/i18n/dicogis_{en,fr,es}.ts` with `pylupdate6`, translated in Qt
+  Linguist (or by hand), compiled to `.qm` with `lrelease`, and loaded via a
+  `QTranslator` installed on the `QApplication` (`DicoGIS._install_qt_translator()`
+  in `mw_dicogis.py`, called from `retranslate_ui()` before any `self.tr()` call,
+  including the one done at startup and on every language-dropdown change). New
+  widget-visible text should use `self.tr(...)` — never `TextsManager` — and the
+  `.ts` files regenerated with:
+
+  ```sh
+  pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_en.ts
+  # repeat for _fr.ts / _es.ts, fill in <translation> entries, then compile:
+  lrelease dicogis/ui/i18n/dicogis_fr.ts -qm dicogis/ui/i18n/dicogis_fr.qm
+  lrelease dicogis/ui/i18n/dicogis_es.ts -qm dicogis/ui/i18n/dicogis_es.qm
+  ```
+
+  `dicogis_en.ts` is kept as the source-of-truth reference (never compiled/loaded
+  at runtime: English is the source language, so untranslated `self.tr()` calls
+  already return it with no `.qm` installed). Only `.qm` files ship with the
+  package/frozen executables (`pyproject.toml` package-data, PyInstaller GUI
+  builder scripts' `--add-data`), not the `.ts` sources.
 
 ### Cross-cutting utilities (`dicogis/utils/`)
 

@@ -1,29 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <lang iso="ES">
-<!-- GUI -->
-    <hi>Hola </hi>
-    <gui_choix>Explorar</gui_choix>
-    <gui_go>Iniciar</gui_go>
-    <gui_quit>Salir</gui_quit>
-    <gui_tab1> Archivos </gui_tab1>
-    <gui_tab2> Base de datos </gui_tab2>
-    <gui_tab5> Opciones </gui_tab5>
-    <gui_tab6> Créditos </gui_tab6>
-    <gui_fr1> Carpeta </gui_fr1>
-    <gui_fr2> Base de datos </gui_fr2>
-    <gui_fr3> Formatos </gui_fr3>
-    <gui_fr4> Archivo final </gui_fr4>
-    <gui_path>Ruta de la carpeta: </gui_path>
-    <gui_fic>Nombre del diccionario: </gui_fic>
-    <gui_views>Vistas lógicas? </gui_views>
-    <gui_host>Servidor: </gui_host>
-    <gui_port>Puerto: </gui_port>
-    <gui_db>Base de datos: </gui_db>
-    <gui_user>Usuario: </gui_user>
-    <gui_mdp>Contraseña: </gui_mdp>
-    <gui_prog>Progresión</gui_prog>
-    <gui_prox_server>Servidor: </gui_prox_server>
-    <gui_prog1>Progresión: análisis de los archivos compatibles</gui_prog1>
 <!-- Log -->
     <log_numfold> carpetas.</log_numfold>
 <!-- Output file: commons -->
@@ -91,11 +67,7 @@
     <srs_vert>Vertical</srs_vert>
     <srs_nr>Sin información</srs_nr>
 <!-- Gestion erreurs -->
-    <nofolder>Ninguna carpeta seleccionada</nofolder>
     <nodata>Ningún dato compatible encontrado.</nodata>
-    <noformat>Ningún formato seleccionado</noformat>
     <err_nobjet> Este dato no tiene ningún objeto. Nopuede ser procesado!</err_nobjet>
     <err_corrupt> Archivo corupto </err_corrupt>
-    <err_pg_empty_field>campo requerido</err_pg_empty_field>
-    <err_pg_conn_fail>Conexión fracasó</err_pg_conn_fail>
 </lang>

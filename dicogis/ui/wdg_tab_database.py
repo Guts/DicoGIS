@@ -24,7 +24,6 @@ from PyQt6.QtWidgets import QDialog, QMessageBox, QWidget
 # project
 from dicogis.models.database_connection import DatabaseConnection
 from dicogis.ui.dialogs.dlg_database_connection import DatabaseConnectionDialog
-from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
 # ##############################################################################
@@ -49,13 +48,11 @@ class TabDatabaseServer(QWidget):
     def __init__(
         self,
         parent: QWidget | None = None,
-        localized_strings: dict | None = None,
     ):
         """UI tab for databases initialization.
 
         Args:
             parent: Qt parent widget
-            localized_strings: translated strings. Defaults to None.
         """
         super().__init__(parent)
         uic.loadUi(
@@ -75,21 +72,14 @@ class TabDatabaseServer(QWidget):
             )
             self.pg_services_names = []
 
-        # handle empty localized strings
-        self.localized_strings = localized_strings
-        if self.localized_strings is None:
-            self.localized_strings = TextsManager().load_texts()
-
         self.ddl_pg_services.addItems(self.pg_services_names)
         self.open_form_button.clicked.connect(self.open_form)
 
-        self.retranslate_ui(self.localized_strings)
+        self.retranslate_ui()
 
     def open_form(self) -> None:
         """Open the modal dialog for database form."""
-        dialog = DatabaseConnectionDialog(
-            self, localized_strings=self.localized_strings
-        )
+        dialog = DatabaseConnectionDialog(self)
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
@@ -107,7 +97,7 @@ class TabDatabaseServer(QWidget):
             logger.error(log_msg, stack_info=True)
             QMessageBox.critical(
                 self,
-                self.localized_strings.get("gui_database_save_new_service_error", "+"),
+                self.tr("+"),
                 log_msg,
             )
 
@@ -130,21 +120,14 @@ class TabDatabaseServer(QWidget):
         """Set whether PostGIS views are enabled."""
         self.caz_pg_views.setChecked(bool(value))
 
-    def retranslate_ui(self, localized_strings: dict) -> None:
-        """Update widgets texts with the given localized strings.
-
-        Args:
-            localized_strings: translated strings.
-        """
-        self.localized_strings = localized_strings
+    def retranslate_ui(self) -> None:
+        """Update widgets texts for the currently active language."""
         self.FrameDatabaseServicePicker.setTitle(
-            localized_strings.get("gui_fr2", "PostGIS")
+            self.tr(" Database connection settings ")
         )
-        self.caz_pg_views.setText(localized_strings.get("gui_views", "Views enabled"))
-        self.open_form_button.setText(localized_strings.get("gui_database_form", "+"))
-        self.lb_pg_services.setText(
-            localized_strings.get("gui_pg_service", "PG service:")
-        )
+        self.caz_pg_views.setText(self.tr("See views? "))
+        self.open_form_button.setText(self.tr("+"))
+        self.lb_pg_services.setText(self.tr("PG service:"))
 
 
 # #############################################################################

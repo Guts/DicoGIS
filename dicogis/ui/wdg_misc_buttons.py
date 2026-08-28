@@ -30,7 +30,6 @@ from dicogis.__about__ import (
     __uri__,
     __uri_homepage__,
 )
-from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
 # ##############################################################################
@@ -55,14 +54,12 @@ class MiscButtons(QWidget):
     def __init__(
         self,
         parent: QWidget | None = None,
-        localized_strings: dict | None = None,
         images_folder: str | Path = "bin/img",
     ):
         """UI frame on the application left side frame with logo and miscellaneous buttons.
 
         Args:
             parent: Qt parent widget
-            localized_strings: translated strings. Defaults to None.
             images_folder: folder where images are stored. Defaults to "bin/img".
         """
         super().__init__(parent)
@@ -77,11 +74,6 @@ class MiscButtons(QWidget):
         self.dir_imgs = self.dicogis_utils.resolve_internal_path(
             internal_path=images_folder
         )
-
-        # handle empty localized strings
-        self.localized_strings = localized_strings
-        if self.localized_strings is None:
-            self.localized_strings = TextsManager().load_texts()
 
         # logo
         pixmap = QPixmap(str(self.dir_imgs.joinpath("DicoGIS_logo_200px.png")))
@@ -100,23 +92,17 @@ class MiscButtons(QWidget):
         self.btn_src.clicked.connect(lambda: open_new_tab(url_src))
 
         # documentation
-        self.btn_doc.setText(
-            self.localized_strings.get("ui_misc_btn_documentation", "Documentation")
-        )
+        self.btn_doc.setText(self.tr("Documentation"))
         self.btn_doc.clicked.connect(lambda: open_new_tab(__uri_homepage__))
 
         # sponsor
-        self.btn_support.setText(
-            self.localized_strings.get("ui_misc_btn_support", "Fund & Support")
-        )
+        self.btn_support.setText(self.tr("Fund & Support"))
         self.btn_support.clicked.connect(
             lambda: open_new_tab(f"{__uri_homepage__}misc/funding.html")
         )
 
         # application folder
-        self.btn_app_dir.setText(
-            self.localized_strings.get("ui_misc_btn_app_dir", "Application folder")
-        )
+        self.btn_app_dir.setText(self.tr("Application folder"))
         self.btn_app_dir.clicked.connect(lambda: launch(app_dir))
 
 

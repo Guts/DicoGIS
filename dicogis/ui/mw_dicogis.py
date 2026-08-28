@@ -27,9 +27,9 @@ from osgeo import gdal
 
 # GUI
 from PyQt6 import uic
-from PyQt6.QtCore import QThread
+from PyQt6.QtCore import QThread, QTranslator
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QMainWindow, QMessageBox, QWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
 from typer import launch
 
 # Project
@@ -172,26 +172,20 @@ class DicoGIS(QMainWindow):
         self._proc_worker: object | None = None
         self._progress_reporter: QtProgressReporter | None = None
 
+        # Qt translator for widget texts (self.tr()). Kept as an attribute so it can
+        # be swapped out on language change without being garbage-collected.
+        self._qt_translator: QTranslator | None = None
+
         # fillfulling text
         self.localized_strings = self.txt_manager.load_texts(
             language_code=self.def_lang
         )
 
         # tabs
-        self.tab_files = TabFiles(
-            parent=self.nb, localized_strings=self.localized_strings
-        )  # tab_id = 0
-        self.tab_sgbd = TabDatabaseServer(
-            parent=self.nb, localized_strings=self.localized_strings
-        )  # tab_id = 1
-        self.tab_options = TabSettings(
-            parent=self.nb,
-            localized_strings=self.localized_strings,
-        )  # tab_id = 2
-        self.tab_publish = TabPublish(
-            parent=self.nb,
-            localized_strings=self.localized_strings,
-        )  # tab_id = 3
+        self.tab_files = TabFiles(parent=self.nb)  # tab_id = 0
+        self.tab_sgbd = TabDatabaseServer(parent=self.nb)  # tab_id = 1
+        self.tab_options = TabSettings(parent=self.nb)  # tab_id = 2
+        self.tab_publish = TabPublish(parent=self.nb)  # tab_id = 3
         self.tab_credits = TabCredits(parent=self.nb)  # tab_id = 4
 
         self.nb.addTab(self.tab_files, " Files ")
@@ -239,27 +233,61 @@ class DicoGIS(QMainWindow):
     def retranslate_ui(self) -> None:
         """Update widgets text with the language currently selected."""
         new_lang = self.ddl_lang.currentText()
+        self._install_qt_translator(new_lang)
+        # still needed for the shared processing pipeline (export/georeaders), which
+        # has no PyQt6/Qt translator dependency of its own
         self.localized_strings = self.txt_manager.load_texts(language_code=new_lang)
 
-        self.welcome.setText(self.localized_strings.get("hi", "Hello ") + self.uzer)
-        self.can.setText(self.localized_strings.get("gui_quit", "Quit"))
-        self.FrOutp.setTitle(self.localized_strings.get("gui_fr4", "Output"))
-        self.FrProg.setTitle(self.localized_strings.get("gui_prog", "Progression"))
-        self.val.setText(self.localized_strings.get("gui_go", "Launch"))
-        self.lbl_outxl_filename.setText(self.localized_strings.get("gui_fic"))
+        self.welcome.setText(self.tr("Hello ") + self.uzer)
+        self.can.setText(self.tr("Quit"))
+        self.FrOutp.setTitle(self.tr(" Output file "))
+        self.FrProg.setTitle(self.tr("Progression"))
+        self.val.setText(self.tr("Go!"))
+        self.lbl_outxl_filename.setText(self.tr("Name of output file: "))
 
-        self.nb.setTabText(0, self.localized_strings.get("gui_tab1", " Files "))
-        self.nb.setTabText(1, self.localized_strings.get("gui_tab2", " PostGIS "))
-        self.nb.setTabText(2, self.localized_strings.get("gui_tab5", "Options"))
-        self.nb.setTabText(3, self.localized_strings.get("gui_tab_publish", "Publish"))
-        self.nb.setTabText(4, self.localized_strings.get("gui_tab6", "Credits"))
+        self.nb.setTabText(0, self.tr(" Files "))
+        self.nb.setTabText(1, self.tr(" Database "))
+        self.nb.setTabText(2, self.tr(" Settings "))
+        self.nb.setTabText(3, self.tr("Publish"))
+        self.nb.setTabText(4, self.tr(" Credits "))
 
-        self.tab_files.retranslate_ui(self.localized_strings)
-        self.tab_sgbd.retranslate_ui(self.localized_strings)
-        self.tab_options.retranslate_ui(self.localized_strings)
-        self.tab_publish.retranslate_ui(self.localized_strings)
+        self.tab_files.retranslate_ui()
+        self.tab_sgbd.retranslate_ui()
+        self.tab_options.retranslate_ui()
+        self.tab_publish.retranslate_ui()
 
         self._apply_locale(new_lang)
+
+    def _install_qt_translator(self, language_code: str) -> None:
+        """Install the Qt translator (.qm) matching the given language on the
+        running QApplication, so every `self.tr()` call across the GUI resolves
+        to that language.
+
+        Args:
+            language_code: 2 letters language code (EN, FR, ES)
+        """
+        app = QApplication.instance()
+        if app is None:
+            return
+
+        if self._qt_translator is not None:
+            app.removeTranslator(self._qt_translator)
+            self._qt_translator = None
+
+        # source strings are already English: no .qm is shipped/needed for EN,
+        # removing any previously installed translator is enough
+        if language_code.upper() == "EN":
+            return
+
+        translator = QTranslator(self)
+        qm_path = utils_global.resolve_internal_path(
+            internal_path=Path(f"ui/i18n/dicogis_{language_code.lower()}.qm")
+        )
+        if translator.load(str(qm_path)):
+            app.installTranslator(translator)
+            self._qt_translator = translator
+        else:
+            logger.warning(f"Qt translation file not found or invalid: {qm_path}")
 
     def _apply_locale(self, new_lang: str) -> None:
         """Set the OS locale according to the language passed.
@@ -317,7 +345,9 @@ class DicoGIS(QMainWindow):
             target_folder: folder to walk into.
         """
         self.tab_files.btn_browse.setEnabled(False)
-        self.set_status_message(self.localized_strings.get("gui_prog1", ""))
+        self.set_status_message(
+            self.tr("Progress: parsing and retrieving compatible files")
+        )
         self.prog_layers.setRange(0, 0)  # indeterminate mode while scanning
         logger.info(f"Begin of folders parsing: {target_folder}")
 
@@ -404,7 +434,7 @@ class DicoGIS(QMainWindow):
                 len(self.li_file_databases),
                 len(self.li_cdao),
                 self.num_folders,
-                self.localized_strings.get("log_numfold", ""),
+                self.tr(" folders."),
             )
         )
 
@@ -525,7 +555,9 @@ class DicoGIS(QMainWindow):
             + len(self.li_cdao)
         ):
             QMessageBox.critical(
-                self, "DicoGIS - User error", self.localized_strings.get("nodata")
+                self,
+                "DicoGIS - User error",
+                self.tr("Any compatible geographic data (.shp / .tab) has been found."),
             )
             self._enable_processing_controls()
             return
@@ -755,7 +787,7 @@ class DicoGIS(QMainWindow):
         if tab_data_type == 0:
             if not len(self.tab_files.get_target_path()):
                 QMessageBox.critical(
-                    self, "DicoGIS - User error", self.localized_strings.get("nofolder")
+                    self, "DicoGIS - User error", self.tr("Any folder selected")
                 )
                 return False
 
@@ -774,7 +806,7 @@ class DicoGIS(QMainWindow):
                 or filters["opt_dxf"]
             ):
                 QMessageBox.critical(
-                    self, "DicoGIS - User error", self.localized_strings.get("noformat")
+                    self, "DicoGIS - User error", self.tr("Any format selected")
                 )
                 return False
 
@@ -782,25 +814,21 @@ class DicoGIS(QMainWindow):
             if not self.tab_sgbd.get_selected_pg_service():
                 self.tab_sgbd.ddl_pg_services.setStyleSheet("color: red;")
                 self.set_status_message(
-                    "PG service name is a "
-                    f"{self.localized_strings.get('err_pg_empty_field')}"
+                    f"PG service name is a {self.tr('required field')}"
                 )
                 return False
 
         elif tab_data_type == 3:
             if not self.tab_publish.get_input_folder():
                 QMessageBox.critical(
-                    self, "DicoGIS - User error", self.localized_strings.get("nofolder")
+                    self, "DicoGIS - User error", self.tr("Any folder selected")
                 )
                 return False
             if not self.tab_publish.get_udata_api_key():
                 QMessageBox.critical(
                     self,
                     "DicoGIS - User error",
-                    self.localized_strings.get(
-                        "gui_publish_missing_api_key",
-                        "A uData API key is required to publish.",
-                    ),
+                    self.tr("A uData API key is required to publish."),
                 )
                 return False
 
@@ -848,7 +876,7 @@ class DicoGIS(QMainWindow):
             logger.error(f"PostGIS connection failed: {fail_reason}.")
             QMessageBox.critical(
                 self,
-                self.localized_strings.get("err_pg_conn_fail"),
+                self.tr("Connection failed"),
                 fail_reason,
             )
             return None
