@@ -49,6 +49,27 @@ If you used an AI/LLM (Claude, ChatGPT, Copilot, etc.) to help produce a contrib
 
 Whatever the level, a human must still vouch for the PR: you should have reviewed and tested the change yourself.
 
+The scale, summarized:
+
+| Level | Name |
+| --- | --- |
+| 0 | Human did not use AI at all |
+| 1 | Human asked chatbot for ideas |
+| 2 | Human coded with minor assists |
+| 3 | Human coded, bots assisted non-trivially |
+| 4 | Human coded, bots helped significantly |
+| 5 | Bots coded, human understands completely |
+| 6 | Bots coded, human understands mostly |
+| 7 | Human specced, bots coded |
+| 8 | Bots planned, human approved |
+| 9 | Human fired-and-forgot |
+| 10 | Rogue bots, zero human attention |
+
+Levels 0-8 are welcome here with proper disclosure. Levels 9-10 (autonomous
+bots acting without a human reviewing this specific change) are out of scope
+for this project unless explicitly authorized by a maintainer — see the
+article for the full description of each level.
+
 ## Pull requests
 
 Please fill out the [pull request template](/.github/PULL_REQUEST_TEMPLATE.md) - it's pre-filled when you open a PR on GitHub.
