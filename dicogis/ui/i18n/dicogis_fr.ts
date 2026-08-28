@@ -103,7 +103,7 @@
     <message>
         <location filename="../mw_dicogis.py" line="432" />
         <source> folders.</source>
-        <translation type="unfinished" />
+        <translation> dossiers.</translation>
     </message>
     <message>
         <location filename="../mw_dicogis.py" line="555" />
@@ -129,7 +129,7 @@
     <message>
         <location filename="../mw_dicogis.py" line="828" />
         <source>A uData API key is required to publish.</source>
-        <translation type="unfinished" />
+        <translation>Une clé API uData est requise pour publier.</translation>
     </message>
     <message>
         <location filename="../mw_dicogis.py" line="876" />
@@ -141,29 +141,29 @@
     <message>
         <location filename="../wdg_misc_buttons.py" line="95" />
         <source>Documentation</source>
-        <translation type="unfinished" />
+        <translation>Documentation</translation>
     </message>
     <message>
         <location filename="../wdg_misc_buttons.py" line="99" />
         <source>Fund &amp; Support</source>
-        <translation type="unfinished" />
+        <translation>Financer &amp; soutenir</translation>
     </message>
     <message>
         <location filename="../wdg_misc_buttons.py" line="105" />
         <source>Application folder</source>
-        <translation type="unfinished" />
+        <translation>Dossier de l'application</translation>
     </message>
 </context><context>
     <name>ScrollableTable</name>
     <message>
         <location filename="../wdg_scrollable_table.py" line="38" />
         <source>Key</source>
-        <translation type="unfinished" />
+        <translation>Clé</translation>
     </message>
     <message>
         <location filename="../wdg_scrollable_table.py" line="39" />
         <source>Value</source>
-        <translation type="unfinished" />
+        <translation>Valeur</translation>
     </message>
 </context><context>
     <name>TabDatabaseServer</name>
@@ -223,33 +223,33 @@
         <location filename="../wdg_tab_publish.py" line="203" />
         <location filename="../wdg_tab_publish.py" line="82" />
         <source>File</source>
-        <translation type="unfinished" />
+        <translation>Fichier</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="204" />
         <location filename="../wdg_tab_publish.py" line="83" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Erreur</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="113" />
         <source>Pick the folder containing JSON metadata</source>
-        <translation type="unfinished" />
+        <translation>Choisir le dossier contenant les métadonnées JSON</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="135" />
         <source>{published} published - {ignored} ignored - {failed} failed</source>
-        <translation type="unfinished" />
+        <translation>{published} publiés - {ignored} ignorés - {failed} échoués</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="192" />
         <source>Metadata source</source>
-        <translation type="unfinished" />
+        <translation>Source des métadonnées</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="193" />
         <source>JSON metadata folder: </source>
-        <translation type="unfinished" />
+        <translation>Dossier des métadonnées JSON : </translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="194" />
@@ -259,32 +259,32 @@
     <message>
         <location filename="../wdg_tab_publish.py" line="195" />
         <source>uData catalog</source>
-        <translation type="unfinished" />
+        <translation>Catalogue uData</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="196" />
         <source>API URL:</source>
-        <translation type="unfinished" />
+        <translation>URL de l'API :</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="197" />
         <source>API version:</source>
-        <translation type="unfinished" />
+        <translation>Version de l'API :</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="198" />
         <source>API key:</source>
-        <translation type="unfinished" />
+        <translation>Clé API :</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="199" />
         <source>Organization ID (optional):</source>
-        <translation type="unfinished" />
+        <translation>ID de l'organisation (facultatif) :</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.py" line="200" />
         <source>Publication report</source>
-        <translation type="unfinished" />
+        <translation>Rapport de publication</translation>
     </message>
 </context><context>
     <name>TabSettings</name>
@@ -292,59 +292,59 @@
         <location filename="../wdg_tab_settings.py" line="292" />
         <location filename="../wdg_tab_settings.py" line="107" />
         <source>Export</source>
-        <translation type="unfinished" />
+        <translation>Export</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="113" />
         <source>Export: prettify files size</source>
-        <translation type="unfinished" />
+        <translation>Export : taille des fichiers formatée</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="122" />
         <source>Export: raw path</source>
-        <translation type="unfinished" />
+        <translation>Export : chemin brut</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="131" />
         <source>Quick fail</source>
-        <translation type="unfinished" />
+        <translation>Arrêt immédiat en cas d'erreur</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="138" />
         <source>Play a notification sound when processing has finished.</source>
-        <translation type="unfinished" />
+        <translation>Jouer un son de notification une fois le traitement terminé.</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="286" />
         <location filename="../wdg_tab_settings.py" line="147" />
         <source>Enable verbose (debug) logging</source>
-        <translation type="unfinished" />
+        <translation>Activer la journalisation détaillée (debug)</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="293" />
         <location filename="../wdg_tab_settings.py" line="161" />
         <source>Environment variables</source>
-        <translation type="unfinished" />
+        <translation>Variables d'environnement</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="167" />
         <source>See supported variables</source>
-        <translation type="unfinished" />
+        <translation>Voir les variables prises en charge</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="284" />
         <source>Interface</source>
-        <translation type="unfinished" />
+        <translation>Interface</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="285" />
         <source>Interface style:</source>
-        <translation type="unfinished" />
+        <translation>Style de l'interface :</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="287" />
         <source>Proxy settings</source>
-        <translation type="unfinished" />
+        <translation>Paramètres du proxy</translation>
     </message>
     <message>
         <location filename="../wdg_tab_settings.py" line="288" />
