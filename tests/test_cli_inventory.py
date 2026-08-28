@@ -1,0 +1,389 @@
+#! python3  # noqa E265
+
+"""
+Usage from the repo root folder:
+
+.. code-block:: bash
+    # for whole tests
+    python -m unittest tests.test_cli_inventory
+    # for specific test
+    python -m unittest tests.test_cli_inventory.TestDetermineOutputPath.test_explicit_output_path_wins
+"""
+
+# standard library
+import sys
+import types
+import unittest
+from datetime import date
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import MagicMock, patch
+
+# 3rd party
+import typer
+
+# project
+from dicogis.cli.cmd_inventory import determine_output_path, inventory
+from dicogis.models.metadataset import MetaDatabaseTable
+
+# ############################################################################
+# ########## Globals #############
+# ################################
+
+
+def _stub_georeader_modules(processing_files_mock=None, read_postgis_mock=None):
+    """Install fake dicogis.georeaders.process_files/read_postgis modules in
+    sys.modules so inventory()'s deferred, GDAL-gated imports succeed
+    without a real GDAL install, and so ProcessingFiles/ReadPostGIS can be
+    inspected/controlled from the test.
+    """
+    process_files_module = types.ModuleType("dicogis.georeaders.process_files")
+    process_files_module.ProcessingFiles = (
+        processing_files_mock if processing_files_mock is not None else MagicMock()
+    )
+    read_postgis_module = types.ModuleType("dicogis.georeaders.read_postgis")
+    read_postgis_module.ReadPostGIS = (
+        read_postgis_mock if read_postgis_mock is not None else MagicMock()
+    )
+    return patch.dict(
+        sys.modules,
+        {
+            "dicogis.georeaders.process_files": process_files_module,
+            "dicogis.georeaders.read_postgis": read_postgis_module,
+        },
+    )
+
+
+# ############################################################################
+# ########## Classes #############
+# ################################
+
+
+class TestDetermineOutputPath(unittest.TestCase):
+    """Test determine_output_path()."""
+
+    def test_explicit_output_path_wins_over_everything_else(self):
+        result = determine_output_path(
+            output_path=Path("explicit.xlsx"),
+            output_format="excel",
+            input_folder=Path("some/folder"),
+        )
+
+        self.assertEqual(result, Path("explicit.xlsx"))
+
+    def test_excel_default_name_from_input_folder(self):
+        result = determine_output_path(
+            output_path=None,
+            output_format="excel",
+            input_folder=Path("some/folder"),
+        )
+
+        self.assertEqual(result, Path(f"DicoGIS_folder_{date.today()}.xlsx"))
+
+    def test_excel_default_name_from_pg_services(self):
+        result = determine_output_path(
+            output_path=None,
+            output_format="excel",
+            pg_services=["srv_a", "srv_b"],
+        )
+
+        self.assertEqual(
+            result, Path(f"DicoGIS_PostGIS_srv_a__srv_b_{date.today()}.xlsx")
+        )
+
+    def test_json_default_name_is_a_folder_without_extension(self):
+        result = determine_output_path(
+            output_path=None,
+            output_format="json",
+            input_folder=Path("some/folder"),
+        )
+
+        self.assertEqual(result, Path(f"DicoGIS_folder_{date.today()}"))
+
+    def test_udata_default_name_is_a_folder_without_extension(self):
+        result = determine_output_path(
+            output_path=None,
+            output_format="udata",
+            input_folder=Path("some/folder"),
+        )
+
+        self.assertEqual(result, Path(f"DicoGIS_folder_{date.today()}"))
+
+    def test_json_default_name_from_pg_services(self):
+        result = determine_output_path(
+            output_path=None,
+            output_format="json",
+            pg_services=["srv_a"],
+        )
+
+        self.assertEqual(result, Path(f"DicoGIS_srv_a_{date.today()}"))
+
+    def test_unsupported_format_without_explicit_path_raises_valueerror(self):
+        with self.assertRaises(ValueError):
+            determine_output_path(
+                output_path=None,
+                output_format="bogus",
+                input_folder=Path("some/folder"),
+            )
+
+    def test_known_gap_no_folder_and_no_pg_services_returns_none(self):
+        """Document a gap: with no output_path, no input_folder and no
+        pg_services, the function falls through every branch and returns
+        None instead of a Path or raising. inventory() never hits this in
+        practice because it validates that at least one of input_folder/
+        pg_services is set before calling determine_output_path()."""
+        result = determine_output_path(
+            output_path=None,
+            output_format="excel",
+            input_folder=None,
+            pg_services=None,
+        )
+
+        self.assertIsNone(result)
+
+
+class TestInventoryEarlyValidation(unittest.TestCase):
+    """Test inventory()'s guard clauses that run before any GDAL-gated import."""
+
+    def test_missing_input_folder_and_pg_services_exits(self):
+        with self.assertRaises(typer.Exit) as raised:
+            inventory(input_folder=None, pg_services=None)
+
+        self.assertEqual(raised.exception.exit_code, 1)
+
+    @patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", False)
+    def test_gdal_unavailable_exits(self):
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            with self.assertRaises(typer.Exit) as raised:
+                inventory(input_folder=Path(tmpdirname))
+
+        self.assertEqual(raised.exception.exit_code, 1)
+
+
+class TestInventoryFormatFlagDerivation(unittest.TestCase):
+    """Test how inventory() derives ProcessingFiles' opt_analyze_* flags
+    from the --formats option (a comma-joined string checked with `in`)."""
+
+    def _run_with_formats(self, formats: str, processing_files_mock: MagicMock):
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            input_folder = Path(tmpdirname)
+            output_path = input_folder / "out.xlsx"
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch("dicogis.cli.cmd_inventory.send_system_notify"),
+                _stub_georeader_modules(processing_files_mock=processing_files_mock),
+            ):
+                inventory(
+                    input_folder=input_folder,
+                    formats=formats,
+                    output_path=output_path,
+                    output_format="excel",
+                    language="EN",
+                    opt_open_output=False,
+                )
+
+    def test_known_bug_mapinfo_tab_flag_actually_checks_geojson(self):
+        """Document a pre-existing bug: opt_analyze_mapinfo_tab is derived
+        from `"geojson" in formats` instead of `"mapinfo_tab" in formats`
+        (a copy-paste artifact). Both format names are in the default
+        --formats value, masking the bug there; it surfaces as soon as a
+        caller customizes --formats to include one but not the other.
+        """
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 0
+
+        # mapinfo_tab requested, geojson excluded: should enable MapInfo TAB
+        # analysis, but instead disables it because the check looks for
+        # "geojson".
+        self._run_with_formats("mapinfo_tab,esri_shapefile", processing_files_mock)
+
+        _, kwargs = processing_files_mock.call_args
+        self.assertFalse(kwargs["opt_analyze_mapinfo_tab"])
+
+    def test_known_bug_cdao_flag_never_matches_default_formats(self):
+        """Document a pre-existing bug: opt_analyze_cdao is derived from
+        `"dxf" in formats`, but "dxf" is never a SUPPORTED_FORMATS member
+        name (only "dgn" represents CAD/DAO in the enum) -- so with the
+        default --formats value (every supported format), CAD/DAO analysis
+        is never actually enabled.
+        """
+        from dicogis.constants import SUPPORTED_FORMATS
+
+        default_formats = ",".join(f.name for f in SUPPORTED_FORMATS)
+        self.assertNotIn("dxf", default_formats)
+
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 0
+
+        self._run_with_formats(default_formats, processing_files_mock)
+
+        _, kwargs = processing_files_mock.call_args
+        self.assertFalse(kwargs["opt_analyze_cdao"])
+
+
+class TestInventoryNoDataFound(unittest.TestCase):
+    """Test inventory()'s behavior when the input folder has no geodata."""
+
+    def test_known_bug_nodata_branch_does_not_actually_exit(self):
+        """Document a pre-existing bug: when no geodata is found, inventory()
+        does `typer.Exit(1)` without `raise`ing it -- the exception instance
+        is constructed and immediately discarded, so execution continues
+        into ProcessingFiles instantiation instead of stopping.
+        """
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 0
+
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            input_folder = Path(tmpdirname)  # empty: no geodata files at all
+            output_path = input_folder / "out.xlsx"
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch("dicogis.cli.cmd_inventory.send_system_notify"),
+                _stub_georeader_modules(processing_files_mock=processing_files_mock),
+            ):
+                # does not raise typer.Exit despite finding zero datasets
+                inventory(
+                    input_folder=input_folder,
+                    output_path=output_path,
+                    output_format="excel",
+                    language="EN",
+                    opt_open_output=False,
+                )
+
+        processing_files_mock.assert_called_once()
+
+
+class TestInventoryHappyPath(unittest.TestCase):
+    """Test inventory()'s orchestration when geodata files are found."""
+
+    def _make_shapefile_trio(self, folder: Path) -> None:
+        for suffix in (".shp", ".dbf", ".shx"):
+            (folder / f"parcels{suffix}").touch()
+
+    def test_processing_files_is_driven_and_notified(self):
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 1
+
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            input_folder = Path(tmpdirname)
+            self._make_shapefile_trio(input_folder)
+            output_path = input_folder / "out.xlsx"
+
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch("dicogis.cli.cmd_inventory.send_system_notify") as mock_notify,
+                patch("typer.launch") as mock_launch,
+                _stub_georeader_modules(processing_files_mock=processing_files_mock),
+            ):
+                inventory(
+                    input_folder=input_folder,
+                    output_path=output_path,
+                    output_format="excel",
+                    language="EN",
+                    opt_open_output=True,
+                    opt_notify_sound=False,
+                )
+
+        processing_files_mock.assert_called_once()
+        _, kwargs = processing_files_mock.call_args
+        self.assertEqual(kwargs["li_shapefiles"], (str(input_folder / "parcels.shp"),))
+        self.assertTrue(kwargs["opt_analyze_shapefiles"])
+
+        processing_files_mock.return_value.count_files_to_process.assert_called_once()
+        processing_files_mock.return_value.process_datasets_in_queue.assert_called_once()
+
+        mock_notify.assert_called_once()
+        self.assertEqual(mock_notify.call_args.kwargs["notification_sound"], False)
+        mock_launch.assert_called_once_with(url=f"{output_path.resolve()}")
+
+    def test_opt_open_output_false_does_not_launch(self):
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 1
+
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            input_folder = Path(tmpdirname)
+            self._make_shapefile_trio(input_folder)
+            output_path = input_folder / "out.xlsx"
+
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch("dicogis.cli.cmd_inventory.send_system_notify"),
+                patch("typer.launch") as mock_launch,
+                _stub_georeader_modules(processing_files_mock=processing_files_mock),
+            ):
+                inventory(
+                    input_folder=input_folder,
+                    output_path=output_path,
+                    output_format="excel",
+                    language="EN",
+                    opt_open_output=False,
+                )
+
+        mock_launch.assert_not_called()
+
+
+class TestInventoryPgServices(unittest.TestCase):
+    """Test inventory()'s PostgreSQL-services branch."""
+
+    @patch("dicogis.cli.cmd_inventory.check_usable_pg_services", return_value=[])
+    def test_no_usable_pg_service_exits(self, mock_check):
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                _stub_georeader_modules(),
+                self.assertRaises(typer.Exit) as raised,
+            ):
+                inventory(
+                    input_folder=None,
+                    pg_services=["not_a_real_service"],
+                    output_path=Path(tmpdirname) / "out.xlsx",
+                    language="EN",
+                )
+
+        self.assertEqual(raised.exception.exit_code, 1)
+
+    def test_usable_pg_service_is_processed_and_notified(self):
+        fake_layer = MagicMock()
+        fake_conn = MagicMock()
+        fake_conn.GetLayerCount.return_value = 1
+        fake_conn.GetLayerByIndex.return_value = fake_layer
+
+        read_postgis_mock = MagicMock()
+        fake_reader = read_postgis_mock.return_value
+        fake_reader.conn = fake_conn
+        fake_metadataset = MetaDatabaseTable(
+            name="public.roads", dataset_type="sgbd_postgis"
+        )
+        fake_reader.infos_dataset.return_value = fake_metadataset
+
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            output_path = Path(tmpdirname) / "out.xlsx"
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch(
+                    "dicogis.cli.cmd_inventory.check_usable_pg_services",
+                    return_value=["srv_a"],
+                ),
+                patch("dicogis.cli.cmd_inventory.send_system_notify") as mock_notify,
+                patch("typer.launch"),
+                _stub_georeader_modules(read_postgis_mock=read_postgis_mock),
+            ):
+                inventory(
+                    input_folder=None,
+                    pg_services=["srv_a"],
+                    output_path=output_path,
+                    output_format="excel",
+                    language="EN",
+                    opt_open_output=False,
+                )
+
+        read_postgis_mock.assert_called_once_with(service="srv_a")
+        fake_reader.infos_dataset.assert_called_once_with(layer=fake_layer)
+        mock_notify.assert_called_once()
+
+
+# ############################################################################
+# ####### Stand-alone run ########
+# ################################
+if __name__ == "__main__":
+    unittest.main()
