@@ -215,9 +215,10 @@ Full guidelines: `CONTRIBUTING.md`. What matters most for changes made here:
   confirming `pre-commit run --all-files` / `pytest` were run where relevant.
 - **AI/LLM disclosure is required**: any PR/commit produced with AI assistance
   must disclose the transparency level (per
-  [VisiData's scale](https://www.visidata.org/blog/2026/ai/)), the model used,
-  and a link to the session — in the PR description's "AI/LLM disclosure"
-  section and/or as commit trailers (`AI-Level:`, `AI-Model:`,
+  [VisiData's scale](https://www.visidata.org/blog/2026/ai/), summarized as a
+  table in `CONTRIBUTING.md`'s "AI/LLM-assisted contributions" section), the
+  model used, and a link to the session — in the PR description's "AI/LLM
+  disclosure" section and/or as commit trailers (`AI-Level:`, `AI-Model:`,
   `Co-Authored-By:`, `Claude-Session:` — see recent commit history for the
   exact trailer format). A human must still have reviewed and tested the
   change themselves, whatever the level.
