@@ -207,23 +207,27 @@ class MetaDataset:
 
         # parse attributes
         for obj_attribute in hashable_attributes:
-            # because hash.update requires a
-            if attr_value := getattr(self, obj_attribute, None):
+            attr_value = getattr(self, obj_attribute, None)
+            if attr_value is not None:
                 try:
                     if isinstance(attr_value, str):
                         hasher.update(attr_value.encode("UTF-8"))
                     elif isinstance(attr_value, (float, int)):
                         hasher.update(str(attr_value).encode("UTF-8"))
                     elif isinstance(attr_value, dict):
-                        hasher.update(hash(frozenset(attr_value.items())))
+                        for key, value in sorted(attr_value.items(), key=str):
+                            hasher.update(f"{key}={value}".encode())
                     elif (
-                        isinstance(attr_value, tuple)
+                        isinstance(attr_value, (list, tuple))
                         and obj_attribute == "feature_attributes"
                     ):
                         for feature_attribute in attr_value:
                             hasher.update(feature_attribute.signature.encode("UTF-8"))
+                    elif isinstance(attr_value, (list, tuple)):
+                        for item in attr_value:
+                            hasher.update(str(item).encode("UTF-8"))
                     else:
-                        hasher.update(hash(str(attr_value).encode("UTF-8")))
+                        hasher.update(str(attr_value).encode("UTF-8"))
                 except TypeError as err:
                     logger.info(
                         f"Impossible to hash {obj_attribute} value "
