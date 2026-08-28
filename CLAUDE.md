@@ -22,7 +22,7 @@ must match `gdal-config --version`). See `docs/development/ubuntu.md` /
 ```sh
 python -m pip install -U pip setuptools wheel
 python -m pip install -U gdal=="$(gdal-config --version).*"
-python -m pip install -U -e .[gdal,dev,test]
+python -m pip install -U -e .[gdal,dev,gui,test]
 pre-commit install
 ```
 
@@ -99,6 +99,13 @@ behind `GDAL_IS_AVAILABLE` (`dicogis/utils/environment.py`) and defer them into
 the function/entry point body rather than importing eagerly at module scope —
 keep new GDAL-dependent imports deferred the same way. See
 `docs/usage/installation.md` for the pipx/GDAL install story.
+
+PyQt6 is likewise an optional dependency (the `gui` extra) — `dicogis-cli`
+does not import anything from `dicogis/ui`, so it works fully without it.
+`dicogis-gui` (`dicogis/ui/main.py::dicogis_gui()`) imports `PyQt6.QtWidgets`
+lazily and exits with a clear message if it's missing; `dicogis/ui/__init__.py`
+is kept empty so importing `dicogis.ui`/`dicogis.ui.main` doesn't pull in PyQt6
+before that guard runs (see `tests/test_ui_optional_pyqt6.py`).
 
 ### GUI widgets: `.ui` files + naming convention
 

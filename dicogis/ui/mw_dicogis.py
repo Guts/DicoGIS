@@ -41,14 +41,12 @@ from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
-from dicogis.ui import (
-    MiscButtons,
-    TabCredits,
-    TabDatabaseServer,
-    TabFiles,
-    TabPublish,
-    TabSettings,
-)
+from dicogis.ui.wdg_misc_buttons import MiscButtons
+from dicogis.ui.wdg_tab_credits import TabCredits
+from dicogis.ui.wdg_tab_database import TabDatabaseServer
+from dicogis.ui.wdg_tab_files import TabFiles
+from dicogis.ui.wdg_tab_publish import TabPublish
+from dicogis.ui.wdg_tab_settings import TabSettings
 from dicogis.ui.workers import (
     FolderScanWorker,
     PostgisProcessingWorker,

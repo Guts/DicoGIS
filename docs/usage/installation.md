@@ -89,6 +89,17 @@ conda activate dicogis
 pip install dicogis
 ```
 
+## The GUI extra
+
+`dicogis-gui` additionally needs PyQt6, declared as an **optional** dependency
+too (the `gui` extra), so `pipx install dicogis` / `dicogis-cli` never require
+it:
+
+```sh
+pipx inject dicogis PyQt6
+# or: pip install dicogis[gui]
+```
+
 ## Prebuilt executables
 
 If you'd rather not deal with GDAL at all, the

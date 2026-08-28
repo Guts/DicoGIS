@@ -119,7 +119,7 @@ python -m pip install -U gdal=="$(gdal-config --version).*"
 ## Install project
 
 ```sh
-python -m pip install -U -e .[gdal,dev]
+python -m pip install -U -e .[gdal,dev,gui]
 ```
 
 ### Try it
