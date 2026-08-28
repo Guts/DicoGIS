@@ -46,6 +46,7 @@ def send_system_notify(
         notification_message (str): notification message
         notification_title (str): notification title
     """
+    notification.title = notification_title
     notification.message = notification_message
     if notification_sound:
         notification.audio = str(
