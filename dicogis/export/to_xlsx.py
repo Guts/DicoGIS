@@ -88,6 +88,26 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         "gdal_warn",
     ]
 
+    li_cols_cad = [
+        "nomfic",
+        "path",
+        "theme",
+        "num_attrib",
+        "num_objets",
+        "geometrie",
+        "srs",
+        "srs_type",
+        "codepsg",
+        "emprise",
+        "date_crea",
+        "date_actu",
+        "format",
+        "li_depends",
+        "tot_size",
+        "li_chps",
+        "gdal_warn",
+    ]
+
     li_cols_filedb = [
         "nomfic",
         "path",
@@ -277,7 +297,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             )
             # headers
             self.sheet_cad_files.append(
-                [self.localized_strings.get(i) for i in self.li_cols_caodao]
+                [self.localized_strings.get(i) for i in self.li_cols_cad]
             )
 
             # initialize line counter
@@ -349,7 +369,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         Returns:
             True if a style with the same name already exist in the worksheet
         """
-        return any(style.name == style_name for style in self.workbook.named_styles)
+        return style_name in self.workbook.named_styles
 
     @lru_cache(maxsize=128, typed=True)
     def format_as_hyperlink(self, target: str | Path, label: str) -> str:
@@ -431,7 +451,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         return out_attributes_str
 
     @lru_cache
-    def format_size(self, in_size_in_octets: int = 0) -> str:
+    def format_size(self, in_size_in_octets: int | None = 0) -> str:
         """Format size in octets accordingly to the option.
 
         Args:
@@ -440,6 +460,8 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         Returns:
             str: formatted size in octets
         """
+        if in_size_in_octets is None:
+            return ""
         if self.opt_size_prettify:
             return convert_octets(in_size_in_octets)
         else:
@@ -470,11 +492,12 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"B{row_index}"].style = "Warning Text"
         worksheet[f"C{row_index}"] = err_mess
         worksheet[f"C{row_index}"].style = "Warning Text"
-        # gdal info
-        worksheet[f"Q{row_index}"] = (
+        # gdal info: always stored in the sheet's last column (gdal_warn/gdal_err)
+        gdal_warn_column = get_column_letter(worksheet.max_column)
+        worksheet[f"{gdal_warn_column}{row_index}"] = (
             f"{metadataset.processing_error_type}: {metadataset.processing_error_msg}"
         )
-        worksheet[f"Q{row_index}"].style = "Warning Text"
+        worksheet[f"{gdal_warn_column}{row_index}"].style = "Warning Text"
         logger.debug(
             f"Processing error detected on {metadataset.name} (in "
             f"{metadataset.path_as_str}) ({err_mess}) has been stored."
@@ -499,6 +522,12 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         ):
             self.row_index_vector_files += 1
             return self.sheet_vector_files, self.row_index_vector_files
+        elif (
+            isinstance(metadataset, MetaVectorDataset)
+            and metadataset.dataset_type == "flat_cad"
+        ):
+            self.row_index_cad_files += 1
+            return self.sheet_cad_files, self.row_index_cad_files
         elif isinstance(metadataset, MetaRasterDataset):
             self.row_index_raster_files += 1
             return self.sheet_raster_files, self.row_index_raster_files
@@ -508,6 +537,12 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         elif isinstance(metadataset, MetaDatabaseFlat):
             self.row_index_flat_geodatabases += 1
             return self.sheet_flat_geodatabases, self.row_index_flat_geodatabases
+
+        raise ValueError(
+            f"No worksheet/row mapping for metadataset {metadataset.name!r} "
+            f"(type: {type(metadataset).__name__}, "
+            f"dataset_type: {metadataset.dataset_type!r})."
+        )
 
     def serialize_metadaset(self, metadataset: MetaDataset) -> bool:
         """Router method to serialize metadataset depending on its type.
@@ -522,22 +557,15 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             metadataset=metadataset
         )
 
-        # -- Common --
-        # in case of a source error
-        if metadataset.processing_succeeded is False:
-            self.store_error(
-                metadataset=metadataset, worksheet=worksheet, row_index=row_index
-            )
-
         # Dataset name
         worksheet[f"A{row_index}"] = metadataset.name
 
         # routing to custom serializing methods
-        if (
-            isinstance(metadataset, MetaVectorDataset)
-            and metadataset.dataset_type == "flat_vector"
+        if isinstance(metadataset, MetaVectorDataset) and metadataset.dataset_type in (
+            "flat_vector",
+            "flat_cad",
         ):
-            return self.store_md_vector_files(
+            result = self.store_md_vector_files(
                 metadataset=metadataset,
                 worksheet=worksheet,
                 row_index=row_index,
@@ -546,7 +574,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             isinstance(metadataset, MetaRasterDataset)
             and metadataset.dataset_type == "flat_raster"
         ):
-            return self.store_md_raster_files(
+            result = self.store_md_raster_files(
                 metadataset=metadataset,
                 worksheet=worksheet,
                 row_index=row_index,
@@ -555,7 +583,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             isinstance(metadataset, MetaDatabaseTable)
             and metadataset.dataset_type == "sgbd_postgis"
         ):
-            return self.store_md_geodatabases_server(
+            result = self.store_md_geodatabases_server(
                 metadataset=metadataset,
                 worksheet=worksheet,
                 row_index=row_index,
@@ -564,7 +592,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             "flat_database",
             "flat_database_esri",
         ):
-            return self.store_md_flat_geodatabases(
+            result = self.store_md_flat_geodatabases(
                 metadataset=metadataset,
                 worksheet=worksheet,
                 row_index=row_index,
@@ -574,6 +602,17 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
                 f"No matching serializer for {metadataset.name} "
                 f"(in {metadataset.path_as_str}): {metadataset.dataset_type}"
             )
+            result = None
+
+        # -- Common --
+        # in case of a source error, flag the row *after* the normal write so the
+        # warning highlighting and error message aren't clobbered by it
+        if metadataset.processing_succeeded is False:
+            self.store_error(
+                metadataset=metadataset, worksheet=worksheet, row_index=row_index
+            )
+
+        return result
 
     # ------------ Writing metadata ---------------------
     def store_md_vector_files(
@@ -727,12 +766,12 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
         # Dependencies
         worksheet[f"T{row_index}"].style = "wrap"
-        worksheet[f"U{row_index}"] = " |\n ".join(
-            f.resolve() for f in metadataset.files_dependencies
+        worksheet[f"T{row_index}"] = " |\n ".join(
+            str(f.resolve()) for f in metadataset.files_dependencies
         )
 
         # total size of file and its dependencies
-        worksheet[f"V{row_index}"] = self.format_size(
+        worksheet[f"U{row_index}"] = self.format_size(
             in_size_in_octets=metadataset.storage_size
         )
 

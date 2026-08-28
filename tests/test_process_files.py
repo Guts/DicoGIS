@@ -196,23 +196,10 @@ class TestExportMetadataset(unittest.TestCase):
                 metadataset_to_serialize=MetaDataset(name="parcels"),
             )
 
-    def test_known_bug_failure_overwrites_exported_instead_of_export_error(self):
-        """Document current (likely unintended) behavior on export failure.
-
-        The except branch in ``export_metadataset`` does::
-
-            dataset_to_process.exported = False
-            dataset_to_process.exported = err
-
-        instead of setting ``dataset_to_process.export_error = err`` on the
-        second line. As a result, after a failed export ``exported`` ends up
-        holding the *exception instance* (truthy, so it reads as "exported
-        successfully" in a boolean context) rather than staying False, and
-        ``export_error`` -- the field meant to carry this information -- is
-        never populated. This test pins that behavior; if the typo is fixed,
-        update this test to assert ``exported is False`` and
-        ``export_error is err`` instead.
-        """
+    def test_failure_sets_exported_false_and_records_export_error(self):
+        """On export failure, exported stays False and export_error holds
+        the exception (previously exported was overwritten with the
+        exception instance instead, and export_error was never set)."""
         serializer = FakeSerializer(fail_on_serialize=True)
         processor = _make_processor(serializer=serializer, opt_quick_fail=False)
         dataset = DatasetToProcess(
@@ -224,8 +211,8 @@ class TestExportMetadataset(unittest.TestCase):
             metadataset_to_serialize=MetaDataset(name="parcels"),
         )
 
-        self.assertIsInstance(result_dataset.exported, RuntimeError)
-        self.assertIsNone(result_dataset.export_error)
+        self.assertFalse(result_dataset.exported)
+        self.assertIsInstance(result_dataset.export_error, RuntimeError)
 
 
 class TestProcessDatasetsInQueue(unittest.TestCase):
@@ -365,41 +352,33 @@ class TestCountFilesToProcess(unittest.TestCase):
             any(call.get("has_vector") for call in serializer.pre_serializing_calls)
         )
 
-    def test_raster_option_raises_attributeerror_due_to_li_tif_bug(self):
-        """Document a pre-existing bug: rasters reference an undefined attribute.
-
-        ``count_files_to_process`` queues rasters with
-        ``list_of_datasets=self.li_tif``, but ``self.li_tif`` is never set
-        anywhere in ``ProcessingFiles.__init__`` (the file-list attribute is
-        named ``self.li_rasters``). As soon as ``opt_analyze_raster`` is True
-        and ``li_rasters`` is non-empty, this raises ``AttributeError``
-        instead of queueing the raster files. This test pins that behavior;
-        if ``self.li_tif`` is corrected to ``self.li_rasters``, replace this
-        test with one asserting the rasters are queued normally.
-        """
+    def test_raster_files_are_queued_with_resolved_georeader(self):
+        """Rasters are queued from li_rasters with a real georeader resolved
+        (previously referenced an undefined self.li_tif attribute)."""
         processor = _make_processor(li_rasters=["ortho.tif"])
 
-        with self.assertRaises(AttributeError):
-            processor.count_files_to_process()
+        total = processor.count_files_to_process()
 
-    def test_cdao_files_get_unresolved_georeader_due_to_file_cad_key_mismatch(self):
-        """Document a pre-existing bug: CAD/DAO files get no georeader.
+        self.assertEqual(total, 1)
+        self.assertEqual(len(processor.li_files_to_process), 1)
+        self.assertIs(
+            processor.li_files_to_process[0].georeader,
+            ProcessingFiles.MATRIX_FORMAT_GEOREADER["raster"],
+        )
 
-        ``count_files_to_process`` queues CAD/DAO files with
-        ``dataset_format="file_cad"``, but ``MATRIX_FORMAT_GEOREADER`` has no
-        ``"file_cad"`` key (only ``"dxf"``). So every queued CAD/DAO dataset
-        ends up with ``georeader=None``, and calling ``dataset.georeader()``
-        later (as ``read_dataset`` does) would raise ``TypeError: 'NoneType'
-        object is not callable``. This test pins that behavior; if the format
-        key is corrected, update this test to assert a real georeader class
-        is resolved instead.
-        """
+    def test_cdao_files_are_queued_with_dxf_georeader(self):
+        """CAD/DAO files are queued with the "dxf" format, which resolves to
+        a real georeader class (previously used the unregistered
+        "file_cad" format, leaving georeader=None)."""
         processor = _make_processor(li_cdao=["plan.dxf"])
 
         processor.count_files_to_process()
 
         self.assertEqual(len(processor.li_files_to_process), 1)
-        self.assertIsNone(processor.li_files_to_process[0].georeader)
+        self.assertIs(
+            processor.li_files_to_process[0].georeader,
+            ProcessingFiles.MATRIX_FORMAT_GEOREADER["dxf"],
+        )
 
 
 # ############################################################################

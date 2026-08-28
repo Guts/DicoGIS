@@ -145,22 +145,16 @@ class TestFormatFeatureAttributes(unittest.TestCase):
 class TestIsStyleRegistered(unittest.TestCase):
     """Test the (dead) MetadatasetSerializerXlsx.is_style_registered()."""
 
-    def test_known_bug_raises_attributeerror(self):
-        """Document current behavior: calling this method always crashes.
-
-        ``is_style_registered`` iterates ``self.workbook.named_styles``
-        expecting ``NamedStyle`` objects (``style.name == style_name``), but
-        openpyxl's ``Workbook.named_styles`` actually returns a list of plain
-        style-name strings. Any call raises ``AttributeError: 'str' object
-        has no attribute 'name'``. The method is never called anywhere in the
-        codebase, so this has gone unnoticed. This test pins that behavior;
-        if the method is fixed (e.g. comparing directly against the string),
-        replace this test with one asserting a real bool is returned.
-        """
+    def test_registered_style_is_found(self):
         serializer = _make_serializer()
 
-        with self.assertRaises(AttributeError):
-            serializer.is_style_registered(style_name="date")
+        self.assertTrue(serializer.is_style_registered(style_name="date"))
+        self.assertTrue(serializer.is_style_registered(style_name="wrap"))
+
+    def test_unregistered_style_is_not_found(self):
+        serializer = _make_serializer()
+
+        self.assertFalse(serializer.is_style_registered(style_name="not-a-style"))
 
 
 class TestPreSerializing(unittest.TestCase):
@@ -182,15 +176,13 @@ class TestPreSerializing(unittest.TestCase):
         self.assertIn("Rasters", serializer.workbook.sheetnames)
         self.assertIn("File databases", serializer.workbook.sheetnames)
 
-    def test_creates_sgbd_sheet_with_untranslated_header_key(self):
-        """The 'gdal_err' column key has no entry in the locale files, so its
-        header cell ends up as None rather than a translated label."""
+    def test_creates_sgbd_sheet_with_translated_headers(self):
         serializer = _make_serializer()
         serializer.pre_serializing(has_sgbd=True)
 
         self.assertIn("PostGIS", serializer.workbook.sheetnames)
         header_row = [cell.value for cell in serializer.sheet_server_geodatabases[1]]
-        self.assertIsNone(header_row[-1])
+        self.assertEqual(header_row[-1], "GDAL errors")
 
     def test_calling_twice_does_not_duplicate_sheet(self):
         serializer = _make_serializer()
@@ -199,23 +191,14 @@ class TestPreSerializing(unittest.TestCase):
 
         self.assertEqual(serializer.workbook.sheetnames.count("Vectors"), 1)
 
-    def test_known_bug_cad_sheet_raises_attributeerror(self):
-        """Document current behavior: has_cad=True always crashes.
-
-        ``pre_serializing`` builds the CAD/DAO sheet's header row from
-        ``self.li_cols_caodao``, but no such class attribute exists on
-        ``MetadatasetSerializerXlsx`` (only ``li_cols_vector``,
-        ``li_cols_raster``, ``li_cols_filedb``, ``li_cols_mapdocs`` and
-        ``li_cols_sgbd`` are defined) -- a typo/leftover from a rename. This
-        means CAD/DAO analysis, once enabled, cannot ever produce output.
-        This test pins that behavior; if the attribute is added or renamed
-        correctly, replace this test with one asserting the CAD sheet is
-        created normally.
-        """
+    def test_creates_cad_sheet_with_translated_headers(self):
         serializer = _make_serializer()
+        serializer.pre_serializing(has_cad=True)
 
-        with self.assertRaises(AttributeError):
-            serializer.pre_serializing(has_cad=True)
+        self.assertIn("CAD", serializer.workbook.sheetnames)
+        header_row = [cell.value for cell in serializer.sheet_cad_files[1]]
+        self.assertEqual(header_row[0], "Filename")
+        self.assertEqual(serializer.row_index_cad_files, 1)
 
 
 class TestGetSheetAndIncrementedRowIndexFromType(unittest.TestCase):
@@ -267,23 +250,27 @@ class TestGetSheetAndIncrementedRowIndexFromType(unittest.TestCase):
         )
         self.assertEqual(row_index, 3)
 
-    def test_known_gap_unmatched_type_returns_none(self):
-        """Document current behavior: an unrouteable metadataset returns None.
+    def test_routes_cad_dataset_and_increments_row(self):
+        metadataset = MetaVectorDataset(dataset_type="flat_cad")
+        self.serializer.pre_serializing(has_cad=True)
 
-        Plain ``MetaDataset`` (or a ``MetaVectorDataset`` whose
-        ``dataset_type`` isn't ``"flat_vector"``) matches none of the
-        isinstance/dataset_type branches, so the method falls off the end
-        and implicitly returns ``None`` instead of a ``(worksheet,
-        row_index)`` tuple. Callers that do
-        ``worksheet, row_index = get_sheet_and_incremented_row_index_from_type(...)``
-        (as ``serialize_metadaset`` does) would raise ``TypeError: cannot
-        unpack non-iterable NoneType object``.
-        """
-        metadataset = MetaDataset()
-        result = self.serializer.get_sheet_and_incremented_row_index_from_type(
-            metadataset
+        sheet, row_index = (
+            self.serializer.get_sheet_and_incremented_row_index_from_type(metadataset)
         )
-        self.assertIsNone(result)
+
+        self.assertIs(sheet, self.serializer.sheet_cad_files)
+        self.assertEqual(row_index, 2)
+
+    def test_unmatched_type_raises_clear_valueerror(self):
+        """A plain ``MetaDataset`` (or a ``MetaVectorDataset`` whose
+        ``dataset_type`` isn't a routed one) matches none of the
+        isinstance/dataset_type branches, so a clear ``ValueError`` is
+        raised instead of an implicit ``None`` that would fail confusingly
+        on unpacking in the caller."""
+        metadataset = MetaDataset()
+
+        with self.assertRaises(ValueError):
+            self.serializer.get_sheet_and_incremented_row_index_from_type(metadataset)
 
 
 class TestStoreError(unittest.TestCase):
@@ -291,7 +278,8 @@ class TestStoreError(unittest.TestCase):
 
     def test_stores_name_hyperlink_and_message_with_warning_style(self):
         serializer = _make_serializer()
-        worksheet = serializer.workbook.create_sheet("scratch")
+        serializer.pre_serializing(has_vector=True)
+        worksheet = serializer.sheet_vector_files
         metadataset = MetaDataset(
             name="broken.shp",
             path=Path("broken.shp"),
@@ -307,24 +295,23 @@ class TestStoreError(unittest.TestCase):
         self.assertEqual(worksheet["A2"].style, "Warning Text")
         self.assertIn("HYPERLINK", worksheet["B2"].value)
         self.assertEqual(worksheet["C2"].value, "unrecognized driver")
+        # gdal info goes into the sheet's last column (Q, "gdal_warn" here)
         self.assertIn("unrecognized driver", worksheet["Q2"].value)
 
-    def test_known_bug_hardcoded_columns_mismatch_non_vector_sheets(self):
-        """Document current behavior: store_error's columns assume the
-        vector sheet's layout, which is wrong for every other sheet type.
-
-        ``store_error`` unconditionally writes the error message to column C
-        (the vector sheet's "theme"/folder-name column, coincidentally
-        acceptable there since it means the folder name is lost) and the
-        full error string to column Q (the vector sheet's "gdal_warn"
-        column). For the raster sheet, column Q's header is actually
-        "format" (see ``li_cols_raster``) rather than "gdal_warn" -- so a
-        raster processing error lands in the wrong column entirely instead
-        of the raster sheet's real gdal_warn column, V.
-        """
+    def test_error_lands_in_the_sheets_own_last_column(self):
+        """store_error() finds the gdal-warning column dynamically (the
+        sheet's own last column), rather than assuming a hardcoded "Q" --
+        which only happened to be correct for the vector sheet. On the
+        raster sheet, that's V (li_cols_raster's real "gdal_warn" column),
+        not Q ("format")."""
         serializer = _make_serializer()
         serializer.pre_serializing(has_raster=True)
-        metadataset = MetaRasterDataset(name="broken.tif", path=Path("broken.tif"))
+        metadataset = MetaRasterDataset(
+            name="broken.tif",
+            path=Path("broken.tif"),
+            processing_error_type="err_unknown_format",
+            processing_error_msg="unrecognized driver",
+        )
 
         serializer.store_error(
             metadataset=metadataset,
@@ -332,12 +319,11 @@ class TestStoreError(unittest.TestCase):
             row_index=2,
         )
 
-        # header of column Q on the raster sheet is "format", not "gdal_warn"
         raster_headers = [cell.value for cell in serializer.sheet_raster_files[1]]
         self.assertEqual(raster_headers[16], "Format")  # column Q, 0-indexed 16
-        self.assertIsNotNone(serializer.sheet_raster_files["Q2"].value)
-        # the raster sheet's real gdal_warn column (V) never receives it
-        self.assertIsNone(serializer.sheet_raster_files["V2"].value)
+        self.assertEqual(raster_headers[21], "GDAL warnings")  # column V
+        self.assertIsNone(serializer.sheet_raster_files["Q2"].value)
+        self.assertIn("unrecognized driver", serializer.sheet_raster_files["V2"].value)
 
 
 class TestSerializeMetadatasetVector(unittest.TestCase):
@@ -406,20 +392,12 @@ class TestSerializeMetadatasetVector(unittest.TestCase):
         self.assertIn("parcels.dbf", dependencies_cell)
         self.assertIn("parcels.shx", dependencies_cell)
 
-    def test_known_bug_processing_error_message_is_overwritten_by_folder_name(self):
-        """Document current behavior: the error message store_error() writes
-        into column C is immediately clobbered by the normal vector-row
-        write that follows it in serialize_metadaset().
-
-        ``serialize_metadaset`` calls ``store_error`` (writing the error
-        message into C with "Warning Text" style) whenever
-        ``processing_succeeded`` is False, but then unconditionally routes
-        to ``store_md_vector_files`` anyway, which overwrites C's *value*
-        with ``parent_folder_name`` (without resetting its style). The net
-        effect: C ends up showing the folder name, not the error, still
-        highlighted as a warning -- a misleading combination. Only column Q
-        (gdal_warn) still carries the real error text.
-        """
+    def test_processing_error_stores_message_and_warning_style_after_normal_write(self):
+        """A processing failure is flagged *after* the normal vector-row
+        write, so the warning highlighting and error message survive
+        instead of being immediately clobbered by it (previously, C ended
+        up showing the folder name -- not the error -- while still
+        highlighted as a warning)."""
         metadataset = self._vector_metadataset(
             processing_succeeded=False,
             processing_error_type="err_unknown",
@@ -430,27 +408,46 @@ class TestSerializeMetadatasetVector(unittest.TestCase):
 
         sheet = self.serializer.sheet_vector_files
         self.assertEqual(sheet["A2"].style, "Warning Text")
-        self.assertEqual(sheet["C2"].value, "data")
+        self.assertEqual(sheet["B2"].style, "Warning Text")
+        self.assertEqual(sheet["C2"].value, "could not open dataset")
         self.assertEqual(sheet["C2"].style, "Warning Text")
         self.assertIn("could not open dataset", sheet["Q2"].value)
-        # normal vector fields are still written afterwards
+        # normal vector fields were still written
         self.assertEqual(sheet["F2"].value, "Polygon")
 
-    def test_known_bug_missing_storage_size_crashes(self):
-        """Document current behavior: storage_size=None (the dataclass
-        default) crashes serialization instead of degrading gracefully.
-
-        ``store_md_vector_files`` unconditionally calls
-        ``self.format_size(in_size_in_octets=metadataset.storage_size)``,
-        which calls ``convert_octets(None)`` when prettifying is on --
-        raising ``TypeError`` from ``math.log(None, 1024)``. Any dataset
-        whose size ended up unset (it's the field's own default) cannot be
-        serialized at all.
-        """
+    def test_missing_storage_size_is_left_blank_instead_of_crashing(self):
+        """storage_size=None (the dataclass default) degrades gracefully to
+        an empty size cell instead of crashing serialization."""
         metadataset = self._vector_metadataset(storage_size=None)
 
-        with self.assertRaises(TypeError):
-            self.serializer.serialize_metadaset(metadataset=metadataset)
+        self.serializer.serialize_metadaset(metadataset=metadataset)
+
+        self.assertEqual(self.serializer.sheet_vector_files["O2"].value, "")
+
+
+class TestSerializeMetadatasetCad(unittest.TestCase):
+    """Test MetadatasetSerializerXlsx.serialize_metadaset() for CAD/DAO datasets."""
+
+    def test_cad_dataset_is_routed_to_the_cad_sheet(self):
+        serializer = _make_serializer()
+        serializer.pre_serializing(has_cad=True)
+        metadataset = MetaVectorDataset(
+            name="plan.dxf",
+            path=Path("data/plan.dxf"),
+            parent_folder_name="data",
+            dataset_type="flat_cad",
+            feature_attributes=[AttributeField(name="id", data_type="Integer")],
+            geometry_type="LineString",
+            files_dependencies=[],
+            storage_size=512,
+        )
+
+        serializer.serialize_metadaset(metadataset=metadataset)
+
+        sheet = serializer.sheet_cad_files
+        self.assertEqual(sheet["A2"].value, "plan.dxf")
+        self.assertEqual(sheet["F2"].value, "LineString")
+        self.assertEqual(sheet["O2"].value, "512.0 octets")
 
 
 class TestSerializeMetadatasetRaster(unittest.TestCase):
@@ -489,43 +486,30 @@ class TestSerializeMetadatasetRaster(unittest.TestCase):
         self.assertEqual(sheet["J2"].value, "RGF93")  # crs_name
         self.assertEqual(sheet["Q2"].value, "GeoTIFF")  # format
 
-    def test_known_bug_dependencies_and_size_are_shifted_one_column(self):
-        """Document current behavior: raster rows misplace two columns.
-
-        ``store_md_raster_files`` styles column T (the "li_depends" header)
-        but never writes a value into it; it writes the joined dependencies
-        string into U ("tot_size"'s column) and the formatted size into V
-        ("gdal_warn"'s column). So with an empty dependency list: T stays
-        blank, U ends up holding an empty string (the join of nothing)
-        instead of the size, and V ends up holding the *size* under what is
-        labeled as the GDAL-warnings column. This test pins that behavior;
-        if the off-by-one is fixed, update it to assert T holds the
-        (empty) dependency text and U holds the formatted size.
-        """
+    def test_dependencies_and_size_land_in_correct_columns(self):
+        """T (li_depends) holds the dependency text and U (tot_size) holds
+        the formatted size -- previously shifted one column each, with the
+        size ending up mislabeled under the gdal_warn column (V)."""
         metadataset = self._raster_metadataset(files_dependencies=[], storage_size=1024)
 
         self.serializer.serialize_metadaset(metadataset=metadataset)
 
         sheet = self.serializer.sheet_raster_files
-        self.assertIsNone(sheet["T2"].value)
-        self.assertEqual(sheet["U2"].value, "")
-        self.assertEqual(sheet["V2"].value, "1.0 Ko")
+        self.assertEqual(sheet["T2"].value, "")
+        self.assertEqual(sheet["U2"].value, "1.0 Ko")
+        self.assertIsNone(sheet["V2"].value)
 
-    def test_known_bug_non_empty_dependencies_raise_typeerror(self):
-        """Document current behavior: non-empty raster dependencies crash.
-
-        Unlike ``store_md_vector_files`` (which wraps each dependency in
-        ``str(f.resolve())``), ``store_md_raster_files`` joins
-        ``f.resolve()`` directly -- a ``Path`` object, not a string --
-        raising ``TypeError`` from ``str.join`` as soon as there is at least
-        one dependency file.
-        """
+    def test_dependencies_are_joined_as_strings(self):
+        """Dependencies are stringified (str(f.resolve())) like the vector
+        writer does, instead of joining raw Path objects (which used to
+        raise TypeError as soon as there was at least one dependency)."""
         metadataset = self._raster_metadataset(
             files_dependencies=[Path("data/ortho.tfw")]
         )
 
-        with self.assertRaises(TypeError):
-            self.serializer.serialize_metadaset(metadataset=metadataset)
+        self.serializer.serialize_metadaset(metadataset=metadataset)
+
+        self.assertIn("ortho.tfw", self.serializer.sheet_raster_files["T2"].value)
 
 
 class TestStoreMdFlatGeodatabases(unittest.TestCase):

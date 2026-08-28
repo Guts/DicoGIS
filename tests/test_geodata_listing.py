@@ -303,28 +303,28 @@ class TestFindGeodataFiles(unittest.TestCase):
         self.assertEqual(result["geotiff"], [str(geotiff)])
         self.assertIn(str(geotiff), result["raster"])
 
-    def test_common_raster_extensions_are_currently_not_detected(self):
-        """Document current (likely unintended) behavior: standard raster
-        extensions are silently dropped instead of being bucketed as raster.
-
-        ``find_geodata_files`` compares extensions against
-        ``(".geotiff", "tiff")`` -- the bare "tiff" never matches
-        ``os.path.splitext``'s dotted output -- and then falls back to
-        ``FormatsRaster.has_key(extension)``, which checks the *enum member
-        names* ("ecw", "geotiff", "jpeg") rather than their dotted values, so
-        it can never match either. As a result, ``.tif``/``.tiff`` GeoTIFFs and
-        ``.ecw``/``.jpeg`` files are neither detected nor reported: they just
-        vanish. This test pins today's behavior; if that extension matching
-        is fixed, update this test (and the one above) accordingly.
-        """
-        self._touch("ortho.tif")
-        self._touch("ortho.tiff")
-        self._touch("ortho.ecw")
-        self._touch("ortho.jpeg")
+    def test_common_geotiff_extensions_are_detected(self):
+        """.tif and .tiff (the real-world GeoTIFF extensions) are bucketed
+        as geotiff/raster, alongside the literal '.geotiff' extension."""
+        tif = self._touch("ortho.tif")
+        tiff = self._touch("ortho2.tiff")
 
         result = _find_geodata_files(self.start_folder)
 
-        self._assert_all_buckets_empty(result)
+        self.assertEqual(set(result["geotiff"]), {str(tif), str(tiff)})
+        self.assertIn(str(tif), result["raster"])
+        self.assertIn(str(tiff), result["raster"])
+
+    def test_other_formatsraster_extensions_are_detected(self):
+        """.ecw and .jpeg, declared in the FormatsRaster enum, are bucketed
+        as raster through the generic FormatsRaster.has_value() fallback."""
+        ecw = self._touch("ortho.ecw")
+        jpeg = self._touch("ortho.jpeg")
+
+        result = _find_geodata_files(self.start_folder)
+
+        self.assertEqual(set(result["raster"]), {str(ecw), str(jpeg)})
+        self.assertEqual(result["geotiff"], [])
 
 
 # ############################################################################

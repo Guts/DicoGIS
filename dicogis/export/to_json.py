@@ -10,6 +10,7 @@
 import json
 import logging
 from dataclasses import asdict
+from datetime import datetime
 from os import getenv
 from pathlib import Path
 from typing import Literal
@@ -47,6 +48,10 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         opt_size_prettify: bool = True,
     ) -> None:
         """Store metadata into JSON files."""
+        if output_path is None:
+            raise ValueError(
+                "output_path is required to serialize metadatasets as JSON files."
+            )
         output_path.mkdir(parents=True, exist_ok=True)
         self.flavor = flavor
 
@@ -68,6 +73,13 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         """
         if isinstance(obj_to_encode, Path):
             return str(obj_to_encode)
+        if isinstance(obj_to_encode, datetime):
+            return obj_to_encode.isoformat()
+        if isinstance(obj_to_encode, (set, frozenset)):
+            return sorted(obj_to_encode)
+        raise TypeError(
+            f"Object of type {type(obj_to_encode).__name__} is not JSON serializable"
+        )
 
     def as_udata(self, metadataset: MetaDataset) -> dict:
         """Serialize metadaset in a data structure matching udata dataset schema.
@@ -109,6 +121,14 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         Returns:
             path to the generated JSON file
         """
+        if not metadataset.name:
+            raise ValueError(
+                "metadataset.name must be set to serialize it as JSON "
+                f"(got: {metadataset.name!r})."
+            )
+        if self.flavor not in ("dicogis", "udata"):
+            raise ValueError(f"Unsupported JSON flavor: {self.flavor!r}")
+
         output_json_filepath = self.output_path.joinpath(
             f"{sluggy(metadataset.name)}.json"
         )
@@ -121,7 +141,7 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
                     default=self.json_encoder_for_unsupported_types,
                     sort_keys=True,
                 )
-            elif self.flavor == "udata":
+            else:  # "udata"
                 json.dump(
                     self.as_udata(metadataset),
                     out_json,
