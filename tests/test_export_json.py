@@ -52,26 +52,28 @@ class TestJsonEncoderForUnsupportedTypes(unittest.TestCase):
 
             self.assertEqual(result, str(Path("a/b.shp")))
 
-    def test_known_bug_datetime_silently_becomes_none(self):
-        """Document current behavior: dates vanish instead of being encoded.
-
-        ``json_encoder_for_unsupported_types`` only special-cases
-        ``pathlib.Path``; any other type (e.g. ``datetime``, used for
-        ``storage_date_created``/``storage_date_updated``) falls through
-        with no ``return`` statement, implicitly returning ``None``. Since
-        ``json.dump``'s ``default`` callback is expected to return a
-        JSON-serializable substitute (or raise), this silently serializes
-        every date field as ``null`` instead of e.g. an ISO string. This
-        test pins that behavior; if the encoder is extended to handle
-        datetimes, update this test to assert an ISO-formatted string
-        instead.
-        """
+    def test_datetime_is_isoformatted(self):
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             serializer = _make_serializer(output_path=Path(tmpdirname))
 
             result = serializer.json_encoder_for_unsupported_types(datetime(2024, 1, 1))
 
-            self.assertIsNone(result)
+            self.assertEqual(result, datetime(2024, 1, 1).isoformat())
+
+    def test_set_is_sorted_into_a_list(self):
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            serializer = _make_serializer(output_path=Path(tmpdirname))
+
+            result = serializer.json_encoder_for_unsupported_types({"b", "a", "c"})
+
+            self.assertEqual(result, ["a", "b", "c"])
+
+    def test_truly_unsupported_type_raises_typeerror(self):
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            serializer = _make_serializer(output_path=Path(tmpdirname))
+
+            with self.assertRaises(TypeError):
+                serializer.json_encoder_for_unsupported_types(object())
 
 
 class TestMetadatasetSerializerJsonInit(unittest.TestCase):
@@ -91,18 +93,11 @@ class TestMetadatasetSerializerJsonInit(unittest.TestCase):
 
             self.assertEqual(serializer.flavor, "dicogis")
 
-    def test_known_bug_output_path_none_raises_attributeerror(self):
-        """Document current behavior: output_path is not actually optional.
-
-        The signature advertises ``output_path: Path | None = None``, but
-        ``__init__`` immediately calls ``output_path.mkdir(...)`` before
-        ever delegating to the base class -- so constructing without an
-        explicit ``output_path`` raises ``AttributeError: 'NoneType' object
-        has no attribute 'mkdir'`` instead of behaving like
-        ``MetadatasetSerializerXlsx``, where ``output_path`` is genuinely
-        optional until ``post_serializing()`` is called.
-        """
-        with self.assertRaises(AttributeError):
+    def test_output_path_none_raises_clear_valueerror(self):
+        """output_path is required (unlike MetadatasetSerializerXlsx, where
+        it's genuinely optional until post_serializing()); missing it raises
+        a clear ValueError instead of an obscure AttributeError."""
+        with self.assertRaises(ValueError):
             MetadatasetSerializerJson(localized_strings={})
 
 
@@ -194,15 +189,7 @@ class TestSerializeMetadataset(unittest.TestCase):
 
             self.assertEqual(output_file.name, "parcelles-communales.json")
 
-    def test_known_bug_dates_are_serialized_as_null(self):
-        """Document current behavior: created/updated dates vanish in JSON.
-
-        Because ``json_encoder_for_unsupported_types`` doesn't handle
-        ``datetime`` (see ``TestJsonEncoderForUnsupportedTypes``), a
-        metadataset with real creation/update dates loses that information
-        entirely when serialized with the "dicogis" flavor: both fields
-        come back as JSON ``null``.
-        """
+    def test_dates_are_isoformatted(self):
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             serializer = _make_serializer(output_path=Path(tmpdirname))
             metadataset = MetaDataset(
@@ -215,43 +202,30 @@ class TestSerializeMetadataset(unittest.TestCase):
 
             with output_file.open(encoding="UTF-8") as f:
                 content = json.load(f)
-            self.assertIsNone(content["storage_date_created"])
-            self.assertIsNone(content["storage_date_updated"])
+            self.assertEqual(
+                content["storage_date_created"], datetime(2024, 1, 1).isoformat()
+            )
+            self.assertEqual(
+                content["storage_date_updated"], datetime(2024, 6, 1).isoformat()
+            )
 
-    def test_known_bug_unsupported_flavor_silently_writes_empty_file(self):
-        """Document current behavior: an unrecognized flavor writes nothing.
-
-        ``serialize_metadaset`` only handles ``self.flavor in ("dicogis",
-        "udata")``; any other value (bypassing the type hint, e.g. set
-        directly on the instance) falls through both branches with no
-        ``else``, leaving the opened output file empty -- no error is
-        raised, so the caller has no way to know serialization silently
-        did nothing.
-        """
+    def test_unsupported_flavor_raises_valueerror_without_writing_a_file(self):
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             serializer = _make_serializer(output_path=Path(tmpdirname))
             serializer.flavor = "not-a-real-flavor"
             metadataset = MetaDataset(name="parcels")
 
-            output_file = serializer.serialize_metadaset(metadataset=metadataset)
+            with self.assertRaises(ValueError):
+                serializer.serialize_metadaset(metadataset=metadataset)
 
-            self.assertTrue(output_file.is_file())
-            self.assertEqual(output_file.read_text(encoding="UTF-8"), "")
+            self.assertEqual(list(Path(tmpdirname).iterdir()), [])
 
-    def test_known_bug_unnamed_metadataset_crashes(self):
-        """Document current behavior: name=None (the dataclass default)
-        crashes serialize_metadaset instead of e.g. falling back to a
-        generated filename.
-
-        ``serialize_metadaset`` slugifies ``metadataset.name`` directly via
-        ``sluggy()``, which requires a string; passing ``None`` raises
-        ``TypeError`` from within ``unicodedata``/regex processing.
-        """
+    def test_unnamed_metadataset_raises_clear_valueerror(self):
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             serializer = _make_serializer(output_path=Path(tmpdirname))
             metadataset = MetaDataset(name=None)
 
-            with self.assertRaises(TypeError):
+            with self.assertRaises(ValueError):
                 serializer.serialize_metadaset(metadataset=metadataset)
 
 

@@ -47,6 +47,7 @@
 <!-- Output file: PostGIS -->
     <schema>Esquema</schema>
     <conn_chain>Cadena de conexión</conn_chain>
+    <gdal_err>Errores GDAL</gdal_err>
 <!-- Output file: FileGDB -->
     <feats_class>Clases de objetos</feats_class>
 <!-- Output file: Maps & Docs -->

@@ -302,7 +302,7 @@ class ProcessingFiles:
             dataset_to_process.exported = True
         except Exception as err:
             dataset_to_process.exported = False
-            dataset_to_process.exported = err
+            dataset_to_process.export_error = err
             logger.error(
                 f"Exporting metadata of {dataset_to_process.file_path} failed. "
                 f"Trace: {err}"
@@ -400,7 +400,7 @@ class ProcessingFiles:
             total_files += len(self.li_rasters)
             self.serializer.pre_serializing(has_raster=1)
             self.add_files_to_process_queue(
-                list_of_datasets=self.li_tif, dataset_format="raster"
+                list_of_datasets=self.li_rasters, dataset_format="raster"
             )
 
         if self.opt_analyze_esri_filegdb and len(self.li_flat_geodatabase_esri_filegdb):
@@ -431,7 +431,7 @@ class ProcessingFiles:
             total_files += len(self.li_cdao)
             self.serializer.pre_serializing(has_cad=1)
             self.add_files_to_process_queue(
-                list_of_datasets=self.li_cdao, dataset_format="file_cad"
+                list_of_datasets=self.li_cdao, dataset_format="dxf"
             )
 
         self.total_files = total_files

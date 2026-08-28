@@ -179,13 +179,13 @@ def find_geodata_files(
                 """listing GeoJSON"""
 
                 li_geoj.append(full_path)
-            elif path.splitext(full_path.lower())[1] in (".geotiff", "tiff"):
+            elif path.splitext(full_path.lower())[1] in (".geotiff", ".tif", ".tiff"):
                 li_geotiff.append(full_path)
             elif path.splitext(full_path.lower())[1] == ".gxt":
                 """listing Geoconcept eXport Text (GXT)"""
 
                 li_gxt.append(full_path)
-            elif FormatsRaster.has_key(path.splitext(full_path.lower())[1]):
+            elif FormatsRaster.has_value(path.splitext(full_path.lower())[1]):
                 """listing compatible rasters"""
 
                 li_raster.append(full_path)
