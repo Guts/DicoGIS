@@ -50,7 +50,6 @@ class TabFiles(QWidget):
         self,
         parent: QWidget | None = None,
         listing_initial_folder: Path | None = None,
-        localized_strings: dict | None = None,
     ):
         """Initializes UI tab for files browsing and filtering.
 
@@ -58,7 +57,6 @@ class TabFiles(QWidget):
             parent: Qt parent widget
             listing_initial_folder: initial folder for the browse dialog. Defaults
                 to Path().home().
-            localized_strings: translated strings. Defaults to None.
         """
         super().__init__(parent)
         uic.loadUi(
@@ -67,11 +65,6 @@ class TabFiles(QWidget):
             ),
             self,
         )
-
-        # localized strings
-        self.localized_strings = localized_strings
-        if not self.localized_strings:
-            self.localized_strings = {}
 
         # browse default path
         self.listing_initial_folder_path = listing_initial_folder
@@ -86,7 +79,7 @@ class TabFiles(QWidget):
 
         self.btn_browse.clicked.connect(self.on_browse_get_initial_listing_folder_path)
 
-        self.retranslate_ui(self.localized_strings)
+        self.retranslate_ui()
 
     def on_browse_get_initial_listing_folder_path(self) -> Path | None:
         """Browse and insert the path of target folder.
@@ -110,7 +103,7 @@ class TabFiles(QWidget):
 
         foldername = QFileDialog.getExistingDirectory(
             self,
-            self.localized_strings.get("nofolder", "Pick DicoGIS start folder"),
+            self.tr("Any folder selected"),
             str(self.listing_initial_folder_path),
         )
 
@@ -118,8 +111,8 @@ class TabFiles(QWidget):
         if not foldername:
             QMessageBox.information(
                 self,
-                self.localized_strings.get("nofolder", "No folder selected"),
-                self.localized_strings.get("nofolder", "A folder is required."),
+                self.tr("Any folder selected"),
+                self.tr("Any folder selected"),
             )
             return None
 
@@ -176,17 +169,12 @@ class TabFiles(QWidget):
             if key in values:
                 checkbox.setChecked(bool(int(values[key])))
 
-    def retranslate_ui(self, localized_strings: dict) -> None:
-        """Update widgets texts with the given localized strings.
-
-        Args:
-            localized_strings: translated strings.
-        """
-        self.localized_strings = localized_strings
-        self.FrPath.setTitle(localized_strings.get("gui_fr1", "Path"))
-        self.FrFilters.setTitle(localized_strings.get("gui_fr3", "Filters"))
-        self.lb_target.setText(localized_strings.get("gui_path", "Folder path: "))
-        self.btn_browse.setText(localized_strings.get("gui_choix", "Browse"))
+    def retranslate_ui(self) -> None:
+        """Update widgets texts for the currently active language."""
+        self.FrPath.setTitle(self.tr(" Folders structure target "))
+        self.FrFilters.setTitle(self.tr(" Formats "))
+        self.lb_target.setText(self.tr("Folder path: "))
+        self.btn_browse.setText(self.tr("Browse"))
 
 
 # #############################################################################

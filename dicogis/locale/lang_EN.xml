@@ -1,29 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <lang iso="EN">
-<!-- GUI -->
-    <hi>Hello </hi>
-    <gui_choix>Browse</gui_choix>
-    <gui_go>Go!</gui_go>
-    <gui_quit>Quit</gui_quit>
-    <gui_tab1> Files </gui_tab1>
-    <gui_tab2> Database </gui_tab2>
-    <gui_tab5> Settings </gui_tab5>
-    <gui_tab6> Credits </gui_tab6>
-    <gui_fr1> Folders structure target </gui_fr1>
-    <gui_fr2> Database connection settings </gui_fr2>
-    <gui_fr3> Formats </gui_fr3>
-    <gui_fr4> Output file </gui_fr4>
-    <gui_path>Folder path: </gui_path>
-    <gui_fic>Name of output file: </gui_fic>
-    <gui_views>See views? </gui_views>
-    <gui_host>Host: </gui_host>
-    <gui_port>Port: </gui_port>
-    <gui_db>Database: </gui_db>
-    <gui_user>User: </gui_user>
-    <gui_mdp>Password: </gui_mdp>
-    <gui_prox_server>Server: </gui_prox_server>
-    <gui_prog>Progression</gui_prog>
-    <gui_prog1>Progress: parsing and retrieving compatible files</gui_prog1>
 <!-- Log -->
     <log_numfold> folders.</log_numfold>
 <!-- Output file: commons -->
@@ -91,11 +67,7 @@
     <srs_vert>Vertical</srs_vert>
     <srs_nr>Not specified</srs_nr>
 <!-- Gestion erreurs -->
-    <nofolder>Any folder selected</nofolder>
     <nodata>Any compatible geographic data (.shp / .tab) has been found.</nodata>
-    <noformat>Any format selected</noformat>
     <err_nobjet> This data doesn't have any object, so can't be processed!</err_nobjet>
     <err_corrupt> Corrupt file</err_corrupt>
-    <err_pg_empty_field>required field</err_pg_empty_field>
-    <err_pg_conn_fail>Connection failed</err_pg_conn_fail>
 </lang>

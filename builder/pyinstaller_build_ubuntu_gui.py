@@ -1,4 +1,4 @@
-#! python3  # noqa: E265
+#! python3
 
 """
 Launch PyInstaller using a Python script.
@@ -19,7 +19,7 @@ import PyInstaller.__main__
 
 # package
 sys.path.insert(0, str(Path(".").resolve()))
-from dicogis import __about__  # noqa: E402
+from dicogis import __about__
 
 # #############################################################################
 # ########### MAIN #################
@@ -39,6 +39,7 @@ PyInstaller.__main__.run(
         "--add-data={}:ui/dialogs/".format(
             (package_folder / "ui/dialogs/*.ui").resolve()
         ),
+        "--add-data={}:ui/i18n/".format((package_folder / "ui/i18n/*.qm").resolve()),
         "--add-data=options_TPL.ini:.",
         "--add-data=LICENSE:.",
         "--add-data=README.md:.",

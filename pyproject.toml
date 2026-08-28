@@ -158,7 +158,14 @@ testpaths = ["tests"]
 version = { attr = "dicogis.__about__.__version__" }
 
 [tool.setuptools.package-data]
-dicogis = ["locale/*", "bin/img/*", "bin/audio/*", "ui/*.ui", "ui/dialogs/*.ui"]
+dicogis = [
+    "locale/*",
+    "bin/img/*",
+    "bin/audio/*",
+    "ui/*.ui",
+    "ui/dialogs/*.ui",
+    "ui/i18n/*.qm",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]

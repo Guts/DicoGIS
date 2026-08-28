@@ -34,7 +34,6 @@ from dicogis.__about__ import __uri_homepage__
 from dicogis.ui.wdg_collapsible_frame import ToggledFrame
 from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.str2bool import str2bool
-from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
 # ##############################################################################
@@ -58,13 +57,11 @@ class TabSettings(QWidget):
     def __init__(
         self,
         parent: QWidget | None = None,
-        localized_strings: dict | None = None,
     ):
         """Initializes UI tab for end-user options.
 
         Args:
             parent: Qt parent widget
-            localized_strings: translated strings. Defaults to None.
         """
         super().__init__(parent)
         uic.loadUi(
@@ -74,17 +71,12 @@ class TabSettings(QWidget):
             self,
         )
 
-        # handle empty localized strings
-        self.localized_strings = localized_strings
-        if self.localized_strings is None:
-            self.localized_strings = TextsManager().load_texts()
-
         self._init_interface_options()
         self._init_proxy_options()
         self._init_export_options()
         self._init_env_vars()
 
-        self.retranslate_ui(self.localized_strings)
+        self.retranslate_ui()
 
     def _init_interface_options(self) -> None:
         """Populate and wire the interface style combobox."""
@@ -112,15 +104,13 @@ class TabSettings(QWidget):
         """Create the export/general options collapsible frame."""
         self.FrOptExport = ToggledFrame(
             self,
-            in_text=self.localized_strings.get("Export", "Export"),
+            in_text=self.tr("Export"),
             start_opened=False,
         )
         export_layout = QVBoxLayout()
 
         self.opt_export_size_prettify = QCheckBox(
-            self.localized_strings.get(
-                "gui_options_export_size_prettify", "Export: prettify files size"
-            ),
+            self.tr("Export: prettify files size"),
             self.FrOptExport.sub_frame,
         )
         self.opt_export_size_prettify.setChecked(
@@ -129,9 +119,7 @@ class TabSettings(QWidget):
         export_layout.addWidget(self.opt_export_size_prettify)
 
         self.opt_export_raw_path = QCheckBox(
-            self.localized_strings.get(
-                "gui_options_export_raw_path", "Export: raw path"
-            ),
+            self.tr("Export: raw path"),
             self.FrOptExport.sub_frame,
         )
         self.opt_export_raw_path.setChecked(
@@ -140,17 +128,14 @@ class TabSettings(QWidget):
         export_layout.addWidget(self.opt_export_raw_path)
 
         self.opt_quick_fail = QCheckBox(
-            self.localized_strings.get("gui_options_quick_fail", "Quick fail"),
+            self.tr("Quick fail"),
             self.FrOptExport.sub_frame,
         )
         self.opt_quick_fail.setChecked(str2bool(getenv("DICOGIS_QUICK_FAIL", "False")))
         export_layout.addWidget(self.opt_quick_fail)
 
         self.opt_end_process_notification_sound = QCheckBox(
-            self.localized_strings.get(
-                "gui_options_notification_sound",
-                "Play a notification sound when processing has finished.",
-            ),
+            self.tr("Play a notification sound when processing has finished."),
             self.FrOptExport.sub_frame,
         )
         self.opt_end_process_notification_sound.setChecked(
@@ -159,9 +144,7 @@ class TabSettings(QWidget):
         export_layout.addWidget(self.opt_end_process_notification_sound)
 
         self.opt_debug = QCheckBox(
-            self.localized_strings.get(
-                "gui_options_debug_logging", "Enable verbose (debug) logging"
-            ),
+            self.tr("Enable verbose (debug) logging"),
             self.FrOptExport.sub_frame,
         )
         self.opt_debug.setChecked(str2bool(getenv("DICOGIS_DEBUG", "False")))
@@ -175,17 +158,13 @@ class TabSettings(QWidget):
         """Create the environment variables collapsible frame."""
         self.FrOptEnv = ToggledFrame(
             self,
-            in_text=self.localized_strings.get(
-                "environment_variables", "Environment variables"
-            ),
+            in_text=self.tr("Environment variables"),
             start_opened=False,
         )
         env_layout = QVBoxLayout()
 
         self.btn_doc_env_vars = QPushButton(
-            self.localized_strings.get(
-                "gui_options_supported_env_vars", "See supported variables"
-            ),
+            self.tr("See supported variables"),
             self.FrOptEnv.sub_frame,
         )
         self.btn_doc_env_vars.clicked.connect(
@@ -300,35 +279,18 @@ class TabSettings(QWidget):
             if idx >= 0:
                 self.opt_ui_style.setCurrentIndex(idx)
 
-    def retranslate_ui(self, localized_strings: dict) -> None:
-        """Update widgets texts with the given localized strings.
-
-        Args:
-            localized_strings: translated strings.
-        """
-        self.localized_strings = localized_strings
-        self.FrOptInterface.setTitle(
-            localized_strings.get("gui_options_interface", "Interface")
-        )
-        self.lbl_ui_style.setText(
-            localized_strings.get("gui_options_ui_style", "Interface style:")
-        )
-        self.opt_debug.setText(
-            localized_strings.get(
-                "gui_options_debug_logging", "Enable verbose (debug) logging"
-            )
-        )
-        self.FrOptProxy.setTitle(localized_strings.get("Proxy", "Proxy settings"))
-        self.prox_lb_host.setText(localized_strings.get("gui_prox_server", "Host:"))
-        self.prox_lb_port.setText(localized_strings.get("gui_port", "Port:"))
-        self.prox_lb_user.setText(localized_strings.get("gui_user", "User name:"))
-        self.prox_lb_password.setText(
-            localized_strings.get("gui_mdp", "User password:")
-        )
-        self.FrOptExport.btn_toggle.setText(localized_strings.get("Export", "Export"))
-        self.FrOptEnv.btn_toggle.setText(
-            localized_strings.get("environment_variables", "Environment variables")
-        )
+    def retranslate_ui(self) -> None:
+        """Update widgets texts for the currently active language."""
+        self.FrOptInterface.setTitle(self.tr("Interface"))
+        self.lbl_ui_style.setText(self.tr("Interface style:"))
+        self.opt_debug.setText(self.tr("Enable verbose (debug) logging"))
+        self.FrOptProxy.setTitle(self.tr("Proxy settings"))
+        self.prox_lb_host.setText(self.tr("Server: "))
+        self.prox_lb_port.setText(self.tr("Port: "))
+        self.prox_lb_user.setText(self.tr("User: "))
+        self.prox_lb_password.setText(self.tr("Password: "))
+        self.FrOptExport.btn_toggle.setText(self.tr("Export"))
+        self.FrOptEnv.btn_toggle.setText(self.tr("Environment variables"))
 
 
 # #############################################################################

@@ -26,7 +26,6 @@ from PyQt6.QtWidgets import QFileDialog, QLineEdit, QWidget
 from dicogis.cli.cmd_publish import PublishReport
 from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.check_path import check_path
-from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
 # ##############################################################################
@@ -50,13 +49,11 @@ class TabPublish(QWidget):
     def __init__(
         self,
         parent: QWidget | None = None,
-        localized_strings: dict | None = None,
     ):
         """Initializes UI tab for uData publication.
 
         Args:
             parent: Qt parent widget
-            localized_strings: translated strings. Defaults to None.
         """
         super().__init__(parent)
         uic.loadUi(
@@ -65,11 +62,6 @@ class TabPublish(QWidget):
             ),
             self,
         )
-
-        # handle empty localized strings
-        self.localized_strings = localized_strings
-        if self.localized_strings is None:
-            self.localized_strings = TextsManager().load_texts()
 
         self.ent_input_folder.setText(getenv("DICOGIS_PUBLISH_INPUT_FOLDER", ""))
         self.btn_browse_input_folder.clicked.connect(self.on_browse_input_folder)
@@ -84,18 +76,16 @@ class TabPublish(QWidget):
             getenv("DICOGIS_UDATA_ORGANIZATION_ID", "")
         )
 
-        self.tab_publish_errors = ScrollableTable(
-            self.FrReport, localized_strings=self.localized_strings
-        )
+        self.tab_publish_errors = ScrollableTable(self.FrReport)
         self.tab_publish_errors.table.setHorizontalHeaderLabels(
             [
-                self.localized_strings.get("gui_publish_report_file", "File"),
-                self.localized_strings.get("gui_publish_report_error", "Error"),
+                self.tr("File"),
+                self.tr("Error"),
             ]
         )
         self.FrReport.layout().addWidget(self.tab_publish_errors)
 
-        self.retranslate_ui(self.localized_strings)
+        self.retranslate_ui()
 
     def on_browse_input_folder(self) -> Path | None:
         """Browse and insert the path of the folder containing JSON metadata files.
@@ -120,9 +110,7 @@ class TabPublish(QWidget):
 
         foldername = QFileDialog.getExistingDirectory(
             self,
-            self.localized_strings.get(
-                "gui_publish_pick_folder", "Pick the folder containing JSON metadata"
-            ),
+            self.tr("Pick the folder containing JSON metadata"),
             str(initial_folder),
         )
 
@@ -144,9 +132,8 @@ class TabPublish(QWidget):
             report: outcome of the publication run.
         """
         self.lbl_publish_summary.setText(
-            self.localized_strings.get(
-                "gui_publish_summary",
-                "{published} published - {ignored} ignored - {failed} failed",
+            self.tr(
+                "{published} published - {ignored} ignored - {failed} failed"
             ).format(
                 published=report.published, ignored=report.ignored, failed=report.failed
             )
@@ -202,46 +189,21 @@ class TabPublish(QWidget):
         if organization_id := values.get("udata_organization_id"):
             self.ent_udata_organization_id.setText(organization_id)
 
-    def retranslate_ui(self, localized_strings: dict) -> None:
-        """Update widgets texts with the given localized strings.
-
-        Args:
-            localized_strings: translated strings.
-        """
-        self.localized_strings = localized_strings
-        self.FrSource.setTitle(
-            localized_strings.get("gui_publish_source", "Metadata source")
-        )
-        self.lb_input_folder.setText(
-            localized_strings.get("gui_publish_input_folder", "JSON metadata folder: ")
-        )
-        self.btn_browse_input_folder.setText(
-            localized_strings.get("gui_choix", "Browse")
-        )
-        self.FrCatalog.setTitle(
-            localized_strings.get("gui_publish_catalog", "uData catalog")
-        )
-        self.lb_udata_api_url_base.setText(
-            localized_strings.get("gui_publish_api_url", "API URL:")
-        )
-        self.lb_udata_api_version.setText(
-            localized_strings.get("gui_publish_api_version", "API version:")
-        )
-        self.lb_udata_api_key.setText(
-            localized_strings.get("gui_publish_api_key", "API key:")
-        )
-        self.lb_udata_organization_id.setText(
-            localized_strings.get(
-                "gui_publish_organization_id", "Organization ID (optional):"
-            )
-        )
-        self.FrReport.setTitle(
-            localized_strings.get("gui_publish_report", "Publication report")
-        )
+    def retranslate_ui(self) -> None:
+        """Update widgets texts for the currently active language."""
+        self.FrSource.setTitle(self.tr("Metadata source"))
+        self.lb_input_folder.setText(self.tr("JSON metadata folder: "))
+        self.btn_browse_input_folder.setText(self.tr("Browse"))
+        self.FrCatalog.setTitle(self.tr("uData catalog"))
+        self.lb_udata_api_url_base.setText(self.tr("API URL:"))
+        self.lb_udata_api_version.setText(self.tr("API version:"))
+        self.lb_udata_api_key.setText(self.tr("API key:"))
+        self.lb_udata_organization_id.setText(self.tr("Organization ID (optional):"))
+        self.FrReport.setTitle(self.tr("Publication report"))
         self.tab_publish_errors.table.setHorizontalHeaderLabels(
             [
-                localized_strings.get("gui_publish_report_file", "File"),
-                localized_strings.get("gui_publish_report_error", "Error"),
+                self.tr("File"),
+                self.tr("Error"),
             ]
         )
 

@@ -1,29 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <lang iso="FR">
-<!-- GUI -->
-    <hi>Bonjour </hi>
-    <gui_choix>Parcourir</gui_choix>
-    <gui_go>Lancer</gui_go>
-    <gui_quit>Quitter</gui_quit>
-    <gui_tab1> Fichiers </gui_tab1>
-    <gui_tab2> Base de données </gui_tab2>
-    <gui_tab5> Options </gui_tab5>
-    <gui_tab6> Crédits </gui_tab6>
-    <gui_fr1> Arborescence cible </gui_fr1>
-    <gui_fr2> Base de données cible </gui_fr2>
-    <gui_fr3> Formats </gui_fr3>
-    <gui_fr4> Fichier en sortie </gui_fr4>
-    <gui_path>Chemin du dossier : </gui_path>
-    <gui_fic>Nom du fichier en sortie : </gui_fic>
-    <gui_views>Vues logiques ? </gui_views>
-    <gui_host>Hôte : </gui_host>
-    <gui_port>Port : </gui_port>
-    <gui_db>Base de données : </gui_db>
-    <gui_user>Utilisateur : </gui_user>
-    <gui_mdp>Mot de passe : </gui_mdp>
-    <gui_prox_server>Serveur : </gui_prox_server>
-    <gui_prog>Progression</gui_prog>
-    <gui_prog1>Progression : recherche des fichiers compatibles</gui_prog1>
 <!-- Log -->
     <log_numfold> dossiers.</log_numfold>
 <!-- Output file: commons -->
@@ -91,11 +67,7 @@
     <srs_vert>Verticale</srs_vert>
     <srs_nr>Non renseignée</srs_nr>
 <!-- Gestion erreurs -->
-    <nofolder>Aucun dossier sélectionné</nofolder>
     <nodata>Aucune donnée géographique compatible trouvée.</nodata>
-    <noformat>Aucun format sélectionné</noformat>
     <err_nobjet> Cette donnée n'a aucun objet. Traitement impossible !</err_nobjet>
     <err_corrupt> Fichier corrompu </err_corrupt>
-    <err_pg_empty_field>Champ requis</err_pg_empty_field>
-    <err_pg_conn_fail>La connexion a échoué</err_pg_conn_fail>
 </lang>
