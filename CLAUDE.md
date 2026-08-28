@@ -91,6 +91,15 @@ for how they call into it — the GUI additionally wires up progress bars/counte
 and runs long-running work in `QThread` workers (`dicogis/ui/workers.py`) that
 the CLI passes as `None`.
 
+GDAL is an optional extra (`pip install dicogis[gdal]`), so `dicogis-cli`/
+`dicogis-gui` must stay importable without it (e.g. installed via `pipx` on a
+system without GDAL): `dicogis/cli/cmd_inventory.py` and `dicogis/ui/main.py`
+guard the GDAL-dependent imports (`ProcessingFiles`, `ReadPostGIS`, `DicoGIS`)
+behind `GDAL_IS_AVAILABLE` (`dicogis/utils/environment.py`) and defer them into
+the function/entry point body rather than importing eagerly at module scope —
+keep new GDAL-dependent imports deferred the same way. See
+`docs/usage/installation.md` for the pipx/GDAL install story.
+
 ### GUI widgets: `.ui` files + naming convention
 
 GUI widgets are defined as Qt Designer `.ui` files, loaded dynamically at
@@ -188,6 +197,30 @@ both the CLI and GUI executables, plus a Windows version-info templater. CI's
 `builder_releaser.yml` workflow builds and publishes these. Version is
 single-sourced from `dicogis/__about__.py::__version__` (`pyproject.toml` reads
 it via `[tool.setuptools.dynamic]`).
+
+## Contributing
+
+Full guidelines: `CONTRIBUTING.md`. What matters most for changes made here:
+
+- **Commit messages** follow [Conventional Commits](https://www.conventionalcommits.org/):
+  `<type>(<scope>): <description>` (scope optional), e.g.
+  `fix(cli,gui): defer GDAL imports so dicogis-cli/gui work without it`. Common
+  types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `ci`, `build`.
+- **Branch names** are prefixed to drive auto-labeling and release-notes
+  categorization (`.github/labeler.yml` / `.github/release.yml`): `fix/…` or
+  `hotfix/…` (bug fix), `feature/…` or `improve/…` (enhancement), `docs/…`,
+  `packaging/…`, `tooling/…`, `cli/…`.
+- **Pull requests** should fill out `.github/PULL_REQUEST_TEMPLATE.md`
+  (auto-filled on GitHub) — including the "Type of change" checklist and
+  confirming `pre-commit run --all-files` / `pytest` were run where relevant.
+- **AI/LLM disclosure is required**: any PR/commit produced with AI assistance
+  must disclose the transparency level (per
+  [VisiData's scale](https://www.visidata.org/blog/2026/ai/)), the model used,
+  and a link to the session — in the PR description's "AI/LLM disclosure"
+  section and/or as commit trailers (`AI-Level:`, `AI-Model:`,
+  `Co-Authored-By:`, `Claude-Session:` — see recent commit history for the
+  exact trailer format). A human must still have reviewed and tested the
+  change themselves, whatever the level.
 
 ## Conventions
 
