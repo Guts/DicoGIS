@@ -21,9 +21,6 @@ from configparser import ConfigParser
 from os import getenv
 from pathlib import Path
 
-# GUI
-from PyQt6.QtWidgets import QApplication
-
 # 3rd party
 from typer import get_app_dir
 
@@ -36,6 +33,8 @@ from dicogis.utils.str2bool import str2bool
 # GDAL is an optional dependency (see pyproject.toml `gdal` extra): dicogis.ui.mw_dicogis
 # imports it at module level, so importing it here eagerly would break `dicogis-gui`
 # entirely when GDAL isn't installed, e.g. under pipx. Deferred into dicogis_gui().
+# PyQt6 is likewise an optional dependency (see pyproject.toml `gui` extra), so it's
+# deferred too, with a clear error message instead of a raw ImportError traceback.
 
 # ##############################################################################
 # ############ Globals ############
@@ -92,9 +91,19 @@ def dicogis_gui():
         )
         sys.exit(1)
 
-    # imported here rather than at module level: GDAL is an optional dependency
-    # (see pyproject.toml `gdal` extra), so importing it eagerly would break every
-    # dicogis-gui invocation when GDAL isn't installed
+    # imported here rather than at module level: PyQt6 and GDAL are optional
+    # dependencies (see pyproject.toml `gui` and `gdal` extras), so importing them
+    # eagerly would break every dicogis-gui invocation when they aren't installed
+    try:
+        from PyQt6.QtWidgets import QApplication
+    except ImportError:
+        logger.critical(
+            "PyQt6 is required to run DicoGIS GUI but is not installed. Install "
+            "DicoGIS with the `gui` extra, e.g. `pip install dicogis[gui]`. See "
+            "https://guts.github.io/DicoGIS/usage/installation.html for details."
+        )
+        sys.exit(1)
+
     from dicogis.ui.mw_dicogis import DicoGIS
 
     # launch the main UI

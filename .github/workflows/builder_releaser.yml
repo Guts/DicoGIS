@@ -64,7 +64,7 @@ jobs:
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install gdal=="`gdal-config --version`.*"
-          python -m pip install .[gdal,packaging]
+          python -m pip install .[gdal,gui,packaging]
 
       - name: Generates executable for command-line version
         run: |
@@ -144,7 +144,7 @@ jobs:
           python -m pip install -U https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.7.4/gdal-3.11.1-cp311-cp311-win_amd64.whl
 
       - name: Install project as a package
-        run: python -m pip install .[gdal,packaging]
+        run: python -m pip install .[gdal,gui,packaging]
 
       - name: Generates MS Version Info
         run: python .\builder\version_info_templater.py

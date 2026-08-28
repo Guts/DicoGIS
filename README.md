@@ -24,6 +24,10 @@ without GDAL. Getting GDAL into a pipx-managed virtual environment needs a
 couple of extra steps depending on your OS — see the
 [pipx installation guide](https://guts.github.io/DicoGIS/usage/installation.html).
 
+PyQt6, needed only for the `dicogis-gui` desktop app, is likewise an optional
+dependency (the `gui` extra): `pip install dicogis[gui]` /
+`pipx inject dicogis PyQt6`. `dicogis-cli` never needs it.
+
 If you'd rather avoid Python/GDAL packaging altogether, standalone CLI/GUI
 executables (Windows and Ubuntu) that embed GDAL are published on the
 [latest release](https://github.com/Guts/DicoGIS/releases/latest).

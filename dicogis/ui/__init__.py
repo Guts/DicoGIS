@@ -1,8 +1,7 @@
 #! python3  # noqa: E265
 
-from .wdg_misc_buttons import MiscButtons  # noqa: E402 F401
-from .wdg_tab_credits import TabCredits  # noqa: E402 F401
-from .wdg_tab_database import TabDatabaseServer  # noqa: E402 F401
-from .wdg_tab_files import TabFiles  # noqa: E402 F401
-from .wdg_tab_publish import TabPublish  # noqa: E402 F401
-from .wdg_tab_settings import TabSettings  # noqa: E402 F401
+# PyQt6 is an optional dependency (see pyproject.toml `gui` extra): submodules of
+# this package import it at module level, so this __init__.py must not re-export
+# them eagerly, or importing dicogis.ui.main (the dicogis-gui entry point) would
+# break entirely when PyQt6 isn't installed, before the deferred/guarded imports
+# in dicogis_gui() ever get a chance to run.
