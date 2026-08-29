@@ -1,4 +1,5 @@
 import random
+import shutil
 from datetime import datetime
 from pathlib import Path
 from string import ascii_letters
@@ -152,6 +153,72 @@ def generate_random_dataset_vector(
     # save and free file lock
     data_source.FlushCache()
     data_source = None
+
+
+def generate_simple_vector_dataset(
+    gdal_driver_name: str,
+    output_path: Path,
+    layer_name: str = "test_layer",
+    features_number: int = 5,
+    with_attributes: bool = True,
+    datasource_creation_options: list[str] | None = None,
+) -> Path:
+    """Generate a minimal point dataset with a given GDAL/OGR vector driver.
+
+    Kept intentionally simple (2D points, at most 2 basic fields) so it works
+    identically across drivers with limited schema/geometry support (DXF,
+    Geoconcept...). Notably uses `AddPoint_2D` rather than `AddPoint`: the
+    latter's 2-args overload still produces a 3D point in the Python
+    bindings, which some drivers (Spatialite, GeoPackage) reject when the
+    layer was declared as strictly 2D.
+
+    Args:
+        gdal_driver_name: name of the OGR driver to use (e.g. "GeoJSON").
+        output_path: path (file or directory, depending on the driver) of the
+            dataset to create.
+        layer_name: name of the single layer created in the dataset.
+        features_number: number of point features to create.
+        with_attributes: whether to add an integer and a string field.
+        datasource_creation_options: options passed to
+            `Driver.CreateDataSource()` (e.g. ["SPATIALITE=YES"]).
+
+    Returns:
+        the output_path, for convenience.
+    """
+    driver: ogr.Driver = ogr.GetDriverByName(gdal_driver_name)
+
+    output_path.parent.mkdir(exist_ok=True, parents=True)
+    if output_path.is_dir():
+        shutil.rmtree(output_path)
+    elif output_path.exists():
+        output_path.unlink()
+
+    data_source: ogr.DataSource = driver.CreateDataSource(
+        f"{output_path.resolve()}", options=datasource_creation_options or []
+    )
+    layer: ogr.Layer = data_source.CreateLayer(
+        layer_name, spatial_ref, geom_type=ogr.wkbPoint
+    )
+
+    if with_attributes:
+        layer.CreateField(ogr.FieldDefn("id", ogr.OFTInteger))
+        layer.CreateField(ogr.FieldDefn("name", ogr.OFTString))
+
+    for i in range(features_number):
+        feature = ogr.Feature(layer.GetLayerDefn())
+        if with_attributes:
+            feature.SetField("id", i)
+            feature.SetField("name", f"feature_{i}")
+        point = ogr.Geometry(ogr.wkbPoint)
+        point.AddPoint_2D(float(i), float(i))
+        feature.SetGeometry(point)
+        layer.CreateFeature(feature)
+        feature.Destroy()
+
+    data_source.FlushCache()
+    data_source = None
+
+    return output_path
 
 
 # #############################################################################
