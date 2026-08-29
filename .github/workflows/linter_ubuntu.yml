@@ -17,6 +17,9 @@ env:
   PROJECT_FOLDER: "dicogis"
   PYTHON_VERSION: "3.10"
 
+permissions:
+  contents: read
+
 jobs:
   lint-ubuntu:
     runs-on: ubuntu-24.04
