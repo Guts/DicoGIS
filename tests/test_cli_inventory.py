@@ -167,6 +167,10 @@ class TestInventoryFormatFlagDerivation(unittest.TestCase):
     def _run_with_formats(self, formats: str, processing_files_mock: MagicMock):
         with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             input_folder = Path(tmpdirname)
+            # at least one real dataset, or inventory() exits before ever
+            # instantiating ProcessingFiles
+            for suffix in (".shp", ".dbf", ".shx"):
+                (input_folder / f"parcels{suffix}").touch()
             output_path = input_folder / "out.xlsx"
             with (
                 patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
@@ -182,35 +186,27 @@ class TestInventoryFormatFlagDerivation(unittest.TestCase):
                     opt_open_output=False,
                 )
 
-    def test_known_bug_mapinfo_tab_flag_actually_checks_geojson(self):
-        """Document a pre-existing bug: opt_analyze_mapinfo_tab is derived
-        from `"geojson" in formats` instead of `"mapinfo_tab" in formats`
-        (a copy-paste artifact). Both format names are in the default
-        --formats value, masking the bug there; it surfaces as soon as a
-        caller customizes --formats to include one but not the other.
-        """
+    def test_mapinfo_tab_flag_matches_mapinfo_tab_format(self):
+        """opt_analyze_mapinfo_tab is derived from "mapinfo_tab" in formats
+        (previously checked "geojson" instead, a copy-paste artifact)."""
         processing_files_mock = MagicMock()
         processing_files_mock.return_value.count_files_to_process.return_value = 0
 
-        # mapinfo_tab requested, geojson excluded: should enable MapInfo TAB
-        # analysis, but instead disables it because the check looks for
-        # "geojson".
+        # mapinfo_tab requested, geojson excluded: MapInfo TAB analysis
+        # must be enabled regardless of geojson's presence.
         self._run_with_formats("mapinfo_tab,esri_shapefile", processing_files_mock)
 
         _, kwargs = processing_files_mock.call_args
-        self.assertFalse(kwargs["opt_analyze_mapinfo_tab"])
+        self.assertTrue(kwargs["opt_analyze_mapinfo_tab"])
 
-    def test_known_bug_cdao_flag_never_matches_default_formats(self):
-        """Document a pre-existing bug: opt_analyze_cdao is derived from
-        `"dxf" in formats`, but "dxf" is never a SUPPORTED_FORMATS member
-        name (only "dgn" represents CAD/DAO in the enum) -- so with the
-        default --formats value (every supported format), CAD/DAO analysis
-        is never actually enabled.
-        """
+    def test_cdao_flag_matches_default_formats(self):
+        """opt_analyze_cdao is derived from "dgn" in formats (the actual
+        SUPPORTED_FORMATS member representing CAD/DAO; previously checked
+        "dxf", which is never a member name, so it never matched)."""
         from dicogis.constants import SUPPORTED_FORMATS
 
         default_formats = ",".join(f.name for f in SUPPORTED_FORMATS)
-        self.assertNotIn("dxf", default_formats)
+        self.assertIn("dgn", default_formats)
 
         processing_files_mock = MagicMock()
         processing_files_mock.return_value.count_files_to_process.return_value = 0
@@ -218,18 +214,16 @@ class TestInventoryFormatFlagDerivation(unittest.TestCase):
         self._run_with_formats(default_formats, processing_files_mock)
 
         _, kwargs = processing_files_mock.call_args
-        self.assertFalse(kwargs["opt_analyze_cdao"])
+        self.assertTrue(kwargs["opt_analyze_cdao"])
 
 
 class TestInventoryNoDataFound(unittest.TestCase):
     """Test inventory()'s behavior when the input folder has no geodata."""
 
-    def test_known_bug_nodata_branch_does_not_actually_exit(self):
-        """Document a pre-existing bug: when no geodata is found, inventory()
-        does `typer.Exit(1)` without `raise`ing it -- the exception instance
-        is constructed and immediately discarded, so execution continues
-        into ProcessingFiles instantiation instead of stopping.
-        """
+    def test_nodata_branch_exits_without_calling_processing_files(self):
+        """When no geodata is found, inventory() now actually raises
+        typer.Exit(1) instead of constructing and discarding it, so
+        ProcessingFiles is never instantiated."""
         processing_files_mock = MagicMock()
         processing_files_mock.return_value.count_files_to_process.return_value = 0
 
@@ -240,8 +234,8 @@ class TestInventoryNoDataFound(unittest.TestCase):
                 patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
                 patch("dicogis.cli.cmd_inventory.send_system_notify"),
                 _stub_georeader_modules(processing_files_mock=processing_files_mock),
+                self.assertRaises(typer.Exit) as raised,
             ):
-                # does not raise typer.Exit despite finding zero datasets
                 inventory(
                     input_folder=input_folder,
                     output_path=output_path,
@@ -250,7 +244,8 @@ class TestInventoryNoDataFound(unittest.TestCase):
                     opt_open_output=False,
                 )
 
-        processing_files_mock.assert_called_once()
+        self.assertEqual(raised.exception.exit_code, 1)
+        processing_files_mock.assert_not_called()
 
 
 class TestInventoryHappyPath(unittest.TestCase):

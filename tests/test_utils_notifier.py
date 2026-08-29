@@ -41,25 +41,15 @@ class TestSendSystemNotify(unittest.TestCase):
 
         self.assertEqual(notifier.notification.message, "Hello there")
 
-    def test_known_bug_title_is_never_applied_to_the_notification(self):
-        """Document a pre-existing bug: notification_title is accepted as a
-        parameter but notification.title is never assigned from it anywhere
-        in send_system_notify -- every notification is shown under
-        whatever title the Notify() singleton started with (its notifypy
-        default, since dicogis.utils.notifier doesn't pass
-        default_notification_title either), regardless of the title
-        callers pass in.
-        """
+    def test_title_is_applied_to_the_notification(self):
         with patch.object(notifier.notification, "send"):
             notifier.send_system_notify(
                 notification_message="Hello there",
-                notification_title="This should be the title but never is",
+                notification_title="This is the title",
                 notification_sound=False,
             )
 
-        self.assertNotEqual(
-            notifier.notification.title, "This should be the title but never is"
-        )
+        self.assertEqual(notifier.notification.title, "This is the title")
 
     def test_sound_enabled_sets_audio_path(self):
         with patch.object(notifier.notification, "send"):

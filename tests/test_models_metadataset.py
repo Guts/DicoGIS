@@ -123,31 +123,26 @@ class TestSignature(unittest.TestCase):
 
         self.assertNotEqual(metadataset_a.signature(), metadataset_b.signature())
 
-    def test_known_bug_envelope_never_affects_signature(self):
-        """Document a pre-existing bug: `envelope` is listed in
-        hashable_attributes but is never actually hashed.
-
-        The special-case branch for a tuple value only applies "when
-        obj_attribute == 'feature_attributes'", so a tuple envelope value
-        falls to the generic `else: hasher.update(hash(str(attr_value)...))`
-        branch -- which always raises TypeError (hash() returns an int, not
-        a bytes-like object) and is silently swallowed by the surrounding
-        try/except. So two metadatasets with different envelopes but
-        otherwise identical hashable attributes get the same signature.
+    def test_envelope_affects_signature(self):
+        """`envelope` is now actually hashed: previously the tuple
+        special-case only applied when obj_attribute == 'feature_attributes',
+        so any other tuple value (like envelope) fell into a generic
+        `else` branch that always raised TypeError (hash() returns an int,
+        not a bytes-like object) and was silently swallowed -- two
+        metadatasets with different envelopes produced the same signature.
         """
         metadataset_a = MetaDataset(name="parcels", envelope=(0.0, 0.0, 1.0, 1.0))
         metadataset_b = MetaDataset(name="parcels", envelope=(10.0, 10.0, 20.0, 20.0))
 
-        self.assertEqual(metadataset_a.signature(), metadataset_b.signature())
+        self.assertNotEqual(metadataset_a.signature(), metadataset_b.signature())
 
-    def test_known_bug_feature_attributes_list_never_affects_signature(self):
-        """Document a pre-existing bug: feature_attributes (declared as
-        list[AttributeField]) is listed in hashable_attributes, but the
-        special per-item hashing branch only triggers for an actual tuple
-        (`isinstance(attr_value, tuple)`) -- a real-world list value falls
-        to the same broken `else` branch as above and is silently dropped.
-        So two vector datasets with completely different field lists (but
-        otherwise identical hashable attributes) get the same signature.
+    def test_feature_attributes_list_affects_signature(self):
+        """feature_attributes (declared as list[AttributeField]) now
+        affects the signature: previously the special per-item hashing
+        branch only triggered for an actual tuple, so a real-world list
+        value fell to the same broken `else` branch as envelope and was
+        silently dropped -- two vector datasets with completely different
+        field lists produced the same signature.
         """
         metadataset_a = MetaVectorDataset(
             name="parcels",
@@ -161,10 +156,10 @@ class TestSignature(unittest.TestCase):
             ],
         )
 
-        self.assertEqual(metadataset_a.signature(), metadataset_b.signature())
+        self.assertNotEqual(metadataset_a.signature(), metadataset_b.signature())
 
     def test_feature_attributes_as_an_actual_tuple_does_affect_signature(self):
-        """The special per-item branch does work when feature_attributes is
+        """The special per-item branch also works when feature_attributes is
         passed as a real tuple (not the declared list type)."""
         metadataset_a = MetaVectorDataset(
             name="parcels",
@@ -176,6 +171,24 @@ class TestSignature(unittest.TestCase):
         )
 
         self.assertNotEqual(metadataset_a.signature(), metadataset_b.signature())
+
+    def test_dict_valued_attribute_affects_signature(self):
+        """A dict-valued attribute is hashed via a sorted key=value
+        encoding instead of the previous `hash(frozenset(...))`, which also
+        always raised TypeError (hash() returns an int, not a bytes-like
+        object) and was silently swallowed. No dataclass field is
+        dict-typed today, so this exercises the branch directly via a
+        dynamically-added attribute and a custom hashable_attributes.
+        """
+        metadataset_a = MetaDataset(name="parcels")
+        metadataset_a.extra = {"a": 1, "b": 2}
+        metadataset_b = MetaDataset(name="parcels")
+        metadataset_b.extra = {"a": 1, "b": 3}
+
+        self.assertNotEqual(
+            metadataset_a.signature(hashable_attributes=("name", "extra")),
+            metadataset_b.signature(hashable_attributes=("name", "extra")),
+        )
 
 
 class TestAsMarkdownDescription(unittest.TestCase):

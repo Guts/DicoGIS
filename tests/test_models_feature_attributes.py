@@ -67,17 +67,15 @@ class TestAttributeFieldSignature(unittest.TestCase):
 
         self.assertEqual(field_a.signature, field_b.signature)
 
-    def test_known_gap_falsy_length_is_indistinguishable_from_unset(self):
-        """Document a gap: the walrus check `if attr_value := getattr(...)`
-        treats a falsy value (like length=0) the same as an unset one
-        (length=None) -- both are skipped from the hash, so a field with an
-        explicit zero length has the same signature as one where length was
-        never set.
-        """
+    def test_explicit_zero_length_differs_from_unset(self):
+        """A field with an explicit zero length is now distinguishable from
+        one where length was never set (previously both were skipped from
+        the hash, since the field is checked for truthiness rather than
+        for being not-None)."""
         field_zero = AttributeField(name="flag", length=0)
         field_unset = AttributeField(name="flag", length=None)
 
-        self.assertEqual(field_zero.signature, field_unset.signature)
+        self.assertNotEqual(field_zero.signature, field_unset.signature)
 
 
 # ############################################################################

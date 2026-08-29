@@ -53,15 +53,15 @@ class AttributeField:
         hashable_attributes: tuple = ("name", "data_type", "length", "precision")
         # parse attributes
         for obj_attribute in hashable_attributes:
-            # because hash.update requires a
-            if attr_value := getattr(self, obj_attribute, None):
+            attr_value = getattr(self, obj_attribute, None)
+            if attr_value is not None:
                 try:
                     if isinstance(attr_value, str):
                         hasher.update(attr_value.encode())
                     elif isinstance(attr_value, (float, int)):
                         hasher.update(str(attr_value).encode())
                     else:
-                        hasher.update(hash(str(attr_value).encode()))
+                        hasher.update(str(attr_value).encode())
                 except TypeError as err:
                     logger.info(
                         f"Impossible to hash {obj_attribute} value "

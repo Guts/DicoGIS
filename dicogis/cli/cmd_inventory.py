@@ -332,7 +332,7 @@ def inventory(
             len(li_vectors) + len(li_raster) + len(li_file_databases) + len(li_cdao)
         ):
             logger.error(localized_strings.get("nodata"))
-            typer.Exit(1)
+            raise typer.Exit(1)
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
@@ -356,14 +356,14 @@ def inventory(
             li_mapinfo_tab=li_mapinfo_tab,
             li_shapefiles=li_shapefiles,
             # options
-            opt_analyze_cdao="dxf" in formats,
+            opt_analyze_cdao="dgn" in formats,
             opt_analyze_esri_filegdb="file_geodatabase_esri" in formats,
             opt_analyze_geopackage="file_geodatabase_geopackage" in formats,
             opt_analyze_geojson="geojson" in formats,
             opt_analyze_gml="gml" in formats,
             opt_analyze_gxt="gxt" in formats,
             opt_analyze_kml="kml" in formats,
-            opt_analyze_mapinfo_tab="geojson" in formats,
+            opt_analyze_mapinfo_tab="mapinfo_tab" in formats,
             opt_analyze_raster=any(
                 [fmt in formats for fmt in ("ecw", "geotiff", "jpeg")]
             ),
