@@ -14,9 +14,20 @@ import tempfile
 import unittest
 from pathlib import Path
 
+# 3rd party
+from osgeo import ogr
+
 # package
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from tests.fixtures.fixture_data_generator import generate_simple_vector_dataset
+
+# #############################################################################
+# ########## Globals ###############
+# ##################################
+
+# the Geoconcept driver is an optional/plugin OGR driver: some GDAL packaging
+# (e.g. the ubuntugis-unstable PPA build used in CI) does not include it.
+GEOCONCEPT_AVAILABLE = ogr.GetDriverByName("Geoconcept") is not None
 
 # #############################################################################
 # ########## Classes ###############
@@ -125,6 +136,10 @@ class TestReadVectorFlatDatasetFormats(unittest.TestCase):
         self._assert_common_metadata(metadataset, fixture_path)
         self.assertEqual(metadataset.format_gdal_short_name, "GeoJSON")
 
+    @unittest.skipUnless(
+        GEOCONCEPT_AVAILABLE,
+        "GDAL was built without the optional Geoconcept driver.",
+    )
     def test_read_gxt_geoconcept(self):
         """Geoconcept eXport Text (.gxt) files are read through
         ReadVectorFlatDataset."""
