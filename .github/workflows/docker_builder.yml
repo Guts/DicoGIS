@@ -72,6 +72,12 @@ jobs:
           context: .
           push: false
           load: true
+          # Provenance/SBOM attestations produce a manifest list even for a
+          # single-platform `load`, which can make `docker run` resolve the
+          # wrong entry (see docker/build-push-action#851/#900) — disable
+          # both for this local-only smoke-test build.
+          provenance: false
+          sbom: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
