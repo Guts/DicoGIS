@@ -149,11 +149,7 @@ def find_geodata_files(
         gdb_dirs: list[str] = []
         for d in dirs:
             """looking for File Geodatabase among directories"""
-            try:
-                path.join(root, d)
-                full_path = path.join(root, d)
-            except UnicodeDecodeError:
-                full_path = path.join(root, d.decode("latin1"))
+            full_path = path.join(root, d)
             if full_path[-4:].lower() == ".gdb":
                 # add complete path of Esri FileGeoDatabase
                 li_flat_geodatabases_esri_filegdb.append(path.abspath(full_path))
@@ -175,11 +171,7 @@ def find_geodata_files(
         files_lower: set[str] = {name.lower() for name in files}
         for f in files:
             """looking for files with geographic data"""
-            try:
-                path.join(root, f)
-                full_path = path.join(root, f)
-            except UnicodeDecodeError:
-                full_path = path.join(root, f.decode("latin1"))
+            full_path = path.join(root, f)
             f_stem_lower, f_ext_lower = path.splitext(f.lower())
             # Looping on files contained
             if (
