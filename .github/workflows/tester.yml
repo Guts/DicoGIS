@@ -148,6 +148,9 @@ jobs:
       export_output_folder: tests/ci/windows
       GDAL_VERSION: "3.11.1"
 
+    permissions:
+      contents: read
+
     steps:
       - name: Get source code
         uses: actions/checkout@v7
