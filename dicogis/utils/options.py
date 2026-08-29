@@ -16,10 +16,23 @@ Author:       Julien Moura (@geojulien)
 import configparser
 import logging
 import platform
-from os import path
 from pathlib import Path
 
+from typer import get_app_dir
+
+from dicogis.__about__ import __title__
+from dicogis.utils.check_path import check_path
 from dicogis.utils.str2bool import str2bool
+
+# #############################################################################
+# ########## Globals ###############
+# ##################################
+
+# default location: a per-platform user config folder, e.g. ~/.config/DicoGIS
+# on Linux, instead of a hardcoded, Windows-style relative path
+DEFAULT_OPTIONS_FILEPATH = (
+    Path(get_app_dir(app_name=__title__, force_posix=True)) / "options.ini"
+)
 
 # #############################################################################
 # ############ Classes #############
@@ -27,14 +40,26 @@ from dicogis.utils.str2bool import str2bool
 
 
 class OptionsManager:
-    def __init__(self, confile: str = r"..\..\options.ini"):
+    def __init__(self, confile: str | Path | None = None):
         """
         Main window constructor
         Creates 1 frame and 2 labelled subframes
+
+        Args:
+            confile: path to the options.ini file to load/save. Defaults to
+                DEFAULT_OPTIONS_FILEPATH (a per-platform user config folder).
         """
-        self.confile = path.realpath(confile)
+        self.confile = str(
+            Path(confile).resolve() if confile else DEFAULT_OPTIONS_FILEPATH.resolve()
+        )
         # first use or not
-        if not path.isfile(self.confile):
+        if not check_path(
+            input_path=self.confile,
+            must_exists=True,
+            must_be_a_file=True,
+            must_be_readable=True,
+            raise_error=False,
+        ):
             logging.info("No options.ini file found. First use: welcome!")
             self.first_use = 1
         else:
@@ -43,7 +68,7 @@ class OptionsManager:
 
         # using safe parser
         self.config = configparser.ConfigParser()
-        self.config.read(confile)
+        self.config.read(self.confile)
 
     def load_settings(self, parent) -> None:
         """load settings from last execution"""
@@ -195,6 +220,7 @@ class OptionsManager:
         self.config.set("proxy", "proxy_user", proxy_settings["proxy_user"])
 
         # Writing the configuration file
+        Path(self.confile).parent.mkdir(parents=True, exist_ok=True)
         with open(file=self.confile, mode="w", encoding="UTF-8") as configfile:
             try:
                 self.config.write(configfile)

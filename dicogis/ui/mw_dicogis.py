@@ -99,7 +99,7 @@ class DicoGIS(QMainWindow):
         self.dir_imgs = utils_global.resolve_internal_path(internal_path="bin/img")
 
         # manage settings outside the main class
-        self.settings = OptionsManager("options.ini")
+        self.settings = OptionsManager()
         # Invoke Check Norris
         checker = CheckNorris()
 
