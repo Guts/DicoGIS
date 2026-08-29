@@ -59,14 +59,21 @@ LABEL org.opencontainers.image.title="DicoGIS" \
       org.opencontainers.image.source="https://github.com/Guts/DicoGIS" \
       org.opencontainers.image.licenses="Apache-2.0"
 
-COPY --from=builder /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:${PATH}"
-
 RUN useradd --create-home --shell /usr/sbin/nologin dicogis \
     && mkdir -p /data \
     && chown dicogis:dicogis /data
 
+# --chown so the venv is readable/executable by the non-root `dicogis` user
+# this image runs as (COPY --from otherwise preserves the builder's root
+# ownership, which the base image's umask can leave too restrictive for
+# a different user to traverse).
+COPY --chown=dicogis:dicogis --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:${PATH}"
+
+# Build-time sanity check, as the user the image actually runs as.
 USER dicogis
+RUN python3 -c "import dicogis.cli.main"
+
 WORKDIR /data
 
 ENTRYPOINT ["dicogis-cli"]
