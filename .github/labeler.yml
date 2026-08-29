@@ -40,6 +40,7 @@ packaging:
           - any-glob-to-any-file:
                 - builder/**/*
                 - Dockerfile
+                - requirements-docker.txt
                 - setup.py
                 - .dockerignore
     - head-branch:

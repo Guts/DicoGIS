@@ -26,7 +26,8 @@ RUN python3 -m pip install --no-cache-dir \
         pip==26.2.1 \
         setuptools==84.0.0 \
         wheel==0.48.0 \
-    && python3 -m pip install --no-cache-dir .
+    && python3 -m pip install --no-cache-dir -r requirements-docker.txt \
+    && python3 -m pip install --no-cache-dir --no-deps .
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-${GDAL_VERSION} AS runtime
 
