@@ -18,6 +18,8 @@ on:
       - "**/*.py"
       - pyproject.toml
 
+permissions:
+  contents: read
 
 env:
   GDAL_VERSION: 3.*
