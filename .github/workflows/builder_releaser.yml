@@ -26,15 +26,14 @@ env:
   PYINSTALLER_LOG_LEVEL: "DEBUG"
   USE_PATH_FOR_GDAL_PYTHON: yes
 
-# Default to least privilege; the release job overrides with what it needs.
-permissions:
-  contents: read
-
 # Jobs definition
 jobs:
   build-ubuntu:
     name: "🐧 Ubuntu LTS"
     runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
 
     env:
       export_output_folder: tests/ci/ubuntu
@@ -128,6 +127,9 @@ jobs:
   build-windows:
     name: "🏠 Windows"
     runs-on: windows-latest
+
+    permissions:
+      contents: read
 
     env:
       export_output_folder: tests/ci/windows
