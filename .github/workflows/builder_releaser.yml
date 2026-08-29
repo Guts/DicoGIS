@@ -26,6 +26,10 @@ env:
   PYINSTALLER_LOG_LEVEL: "DEBUG"
   USE_PATH_FOR_GDAL_PYTHON: yes
 
+# Default to least privilege; the release job overrides with what it needs.
+permissions:
+  contents: read
+
 # Jobs definition
 jobs:
   build-ubuntu:
@@ -39,6 +43,8 @@ jobs:
     steps:
       - name: Get source code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -98,6 +104,7 @@ jobs:
         with:
           repository: qgis/QGIS-Training-Data
           path: tests/fixtures/qgisdata
+          persist-credentials: false
 
       - name: Minimal integration test - help
         run: ./dist/DicoGIS-cli.bin --help
@@ -130,6 +137,8 @@ jobs:
     steps:
       - name: Get source code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -179,6 +188,7 @@ jobs:
         with:
           repository: qgis/QGIS-Training-Data
           path: tests/fixtures/qgisdata
+          persist-credentials: false
 
       - name: Minimal integration test
         run: |

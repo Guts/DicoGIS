@@ -39,7 +39,7 @@ jobs:
       export_output_folder: tests/ci/ubuntu
 
     permissions:
-      packages: read
+      contents: read
 
     services:
       postgis:
@@ -60,6 +60,8 @@ jobs:
     steps:
       - name: Get source code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v7
