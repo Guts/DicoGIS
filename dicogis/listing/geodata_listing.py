@@ -25,6 +25,27 @@ from dicogis.constants import FormatsRaster
 
 logger = logging.getLogger(__name__)
 
+# extension -> bucket key, for formats identified by extension alone (no
+# companion-file validation needed, unlike shapefiles/MapInfo TAB). Adding a
+# new such format only means adding an entry here and to the `buckets` dict
+# built in find_geodata_files(). FormatsRaster.has_value() is checked as a
+# fallback for any extension not listed here (currently .ecw, .jpeg).
+EXTENSION_TO_BUCKET: dict[str, str] = {
+    ".kml": "kml",
+    ".kmz": "kml",
+    ".gml": "gml",
+    ".geojson": "geoj",
+    ".geotiff": "geotiff",
+    ".tif": "geotiff",
+    ".tiff": "geotiff",
+    ".gxt": "gxt",
+    ".dxf": "dxf",
+    ".dwg": "dwg",
+    ".dgn": "dgn",
+    ".gpkg": "geopackage",
+    ".sqlite": "spatialite",
+}
+
 
 # ##############################################################################
 # ########## Functions #############
@@ -107,6 +128,19 @@ def find_geodata_files(
     li_fdb: list[str] = []
     li_flat_geodatabases_esri_filegdb: list[str] = []
     li_flat_geodatabases_spatialite: list[str] = []
+    # bucket key (see EXTENSION_TO_BUCKET) -> list to append matches into
+    buckets: dict[str, list[str]] = {
+        "kml": li_kml,
+        "gml": li_gml,
+        "geoj": li_geoj,
+        "geotiff": li_geotiff,
+        "gxt": li_gxt,
+        "dxf": li_dxf,
+        "dwg": li_dwg,
+        "dgn": li_dgn,
+        "geopackage": li_flat_geodatabases_geopackage,
+        "spatialite": li_flat_geodatabases_spatialite,
+    }
 
     # Looping in folders structure
     logger.info(f"Begin of folders parsing: {start_folder}")
@@ -165,48 +199,12 @@ def find_geodata_files(
                 """listing MapInfo tables"""
 
                 li_tab.append(full_path)
-            elif (
-                path.splitext(full_path.lower())[1] == ".kml"
-                or path.splitext(full_path.lower())[1] == ".kmz"
-            ):
-                """listing KML and KMZ"""
-
-                li_kml.append(full_path)
-            elif path.splitext(full_path.lower())[1] == ".gml":
-                """listing GML"""
-
-                li_gml.append(full_path)
-            elif path.splitext(full_path.lower())[1] == ".geojson":
-                """listing GeoJSON"""
-
-                li_geoj.append(full_path)
-            elif path.splitext(full_path.lower())[1] in (".geotiff", ".tif", ".tiff"):
-                li_geotiff.append(full_path)
-            elif path.splitext(full_path.lower())[1] == ".gxt":
-                """listing Geoconcept eXport Text (GXT)"""
-
-                li_gxt.append(full_path)
-            elif FormatsRaster.has_value(path.splitext(full_path.lower())[1]):
+            elif bucket_key := EXTENSION_TO_BUCKET.get(f_ext_lower):
+                buckets[bucket_key].append(full_path)
+            elif FormatsRaster.has_value(f_ext_lower):
                 """listing compatible rasters"""
 
                 li_raster.append(full_path)
-            elif path.splitext(full_path.lower())[1] == ".dxf":
-                """listing DXF"""
-
-                li_dxf.append(full_path)
-            elif path.splitext(full_path.lower())[1] == ".dwg":
-                """listing DWG"""
-
-                li_dwg.append(full_path)
-            elif path.splitext(full_path.lower())[1] == ".dgn":
-                """listing MicroStation DGN"""
-                li_dgn.append(full_path)
-            elif path.splitext(full_path.lower())[1] == ".gpkg":
-                """listing GeoPackage"""
-                li_flat_geodatabases_geopackage.append(full_path)
-            elif path.splitext(full_path.lower())[1] == ".sqlite":
-                """listing Spatialite DB"""
-                li_flat_geodatabases_spatialite.append(full_path)
             else:
                 continue
     # grouping raster
