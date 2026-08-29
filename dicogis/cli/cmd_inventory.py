@@ -20,7 +20,11 @@ from dicogis.__about__ import __package_name__, __title__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
-from dicogis.utils.environment import GDAL_IS_AVAILABLE
+from dicogis.utils.environment import (
+    GDAL_IS_AVAILABLE,
+    get_available_gdal_drivers,
+    is_format_supported_by_gdal,
+)
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.slugger import sluggy
@@ -259,7 +263,25 @@ def inventory(
     from dicogis.georeaders.process_files import ProcessingFiles
     from dicogis.georeaders.read_postgis import ReadPostGIS
 
-    # TODO: check if specified formats are supported
+    # drop requested formats the installed GDAL build can't actually read
+    # (some drivers, e.g. Geoconcept or ECW, are optional/plugin drivers not
+    # included in every GDAL packaging)
+    requested_formats = [fmt.strip() for fmt in formats.split(",") if fmt.strip()]
+    available_gdal_drivers = get_available_gdal_drivers()
+    unsupported_formats = [
+        fmt
+        for fmt in requested_formats
+        if not is_format_supported_by_gdal(fmt, available_gdal_drivers)
+    ]
+    if unsupported_formats:
+        print(
+            "[bold yellow]Warning: the installed GDAL build does not support the "
+            f"following requested format(s), they will be ignored: "
+            f"{', '.join(unsupported_formats)}[/bold yellow]"
+        )
+        formats = ",".join(
+            fmt for fmt in requested_formats if fmt not in unsupported_formats
+        )
 
     # i18n
     if language is None:

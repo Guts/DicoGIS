@@ -24,6 +24,10 @@ from PyQt6.QtWidgets import QFileDialog, QMessageBox, QWidget
 # project
 from dicogis.constants import FormatsRaster
 from dicogis.utils.check_path import check_path
+from dicogis.utils.environment import (
+    get_available_gdal_drivers,
+    is_format_supported_by_gdal,
+)
 from dicogis.utils.utils import Utilities
 
 # ##############################################################################
@@ -31,6 +35,25 @@ from dicogis.utils.utils import Utilities
 # #################################
 
 logger = logging.getLogger(__name__)
+
+# format filter checkboxes (.ui objectName) mapped to the FormatsVector member
+# name gating their driver availability (dicogis.constants.FORMAT_TO_GDAL_DRIVERS)
+CHECKBOX_TO_FORMAT: dict[str, str] = {
+    "opt_shp": "esri_shapefile",
+    "opt_tab": "mapinfo_tab",
+    "opt_kml": "kml",
+    "opt_gml": "gml",
+    "opt_geoj": "geojson",
+    "opt_gxt": "gxt",
+    "opt_dxf": "dgn",
+    "opt_egdb": "file_geodatabase_esri",
+    "opt_gpkg": "file_geodatabase_geopackage",
+    "opt_spadb": "file_geodatabase_spatialite",
+}
+# opt_rast covers 3 formats at once (no per-format checkbox): available as
+# soon as GDAL can read at least one of them (GeoTIFF is a core driver, so
+# this is only ever False on a very unusual GDAL build).
+RASTER_FORMATS: tuple[str, ...] = ("ecw", "geotiff", "jpeg")
 
 # ##############################################################################
 # ########## Classes ###############
@@ -80,6 +103,33 @@ class TabFiles(QWidget):
         self.btn_browse.clicked.connect(self.on_browse_get_initial_listing_folder_path)
 
         self.retranslate_ui()
+        self.disable_unsupported_format_filters()
+
+    def disable_unsupported_format_filters(self) -> None:
+        """Grey out (and uncheck) filters for formats the installed GDAL
+        build cannot actually read. Some drivers (e.g. Geoconcept, ECW) are
+        optional/plugin drivers not included in every GDAL packaging."""
+        available_drivers = get_available_gdal_drivers()
+        unavailable_tooltip = self.tr(
+            "Not available: the installed GDAL build does not include the "
+            "driver required for this format."
+        )
+
+        for checkbox_name, format_name in CHECKBOX_TO_FORMAT.items():
+            if is_format_supported_by_gdal(format_name, available_drivers):
+                continue
+            checkbox = getattr(self, checkbox_name)
+            checkbox.setChecked(False)
+            checkbox.setEnabled(False)
+            checkbox.setToolTip(unavailable_tooltip)
+
+        if not any(
+            is_format_supported_by_gdal(format_name, available_drivers)
+            for format_name in RASTER_FORMATS
+        ):
+            self.opt_rast.setChecked(False)
+            self.opt_rast.setEnabled(False)
+            self.opt_rast.setToolTip(unavailable_tooltip)
 
     def on_browse_get_initial_listing_folder_path(self) -> Path | None:
         """Browse and insert the path of target folder.

@@ -216,6 +216,43 @@ class TestInventoryFormatFlagDerivation(unittest.TestCase):
         _, kwargs = processing_files_mock.call_args
         self.assertTrue(kwargs["opt_analyze_cdao"])
 
+    def test_unsupported_format_is_dropped_with_a_warning(self):
+        """A requested format whose GDAL driver isn't installed (e.g.
+        Geoconcept, an optional/plugin driver) is dropped from `formats`
+        before deriving opt_analyze_* flags, instead of failing later while
+        actually processing files."""
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 0
+
+        def fake_is_supported(format_name, available_drivers=None):
+            return format_name != "gxt"
+
+        with patch(
+            "dicogis.cli.cmd_inventory.is_format_supported_by_gdal",
+            side_effect=fake_is_supported,
+        ):
+            self._run_with_formats("esri_shapefile,gxt", processing_files_mock)
+
+        _, kwargs = processing_files_mock.call_args
+        self.assertFalse(kwargs["opt_analyze_gxt"])
+        self.assertTrue(kwargs["opt_analyze_shapefiles"])
+
+    def test_supported_formats_are_all_kept(self):
+        """When every requested format is reported as supported, none is
+        dropped."""
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 0
+
+        with patch(
+            "dicogis.cli.cmd_inventory.is_format_supported_by_gdal",
+            return_value=True,
+        ):
+            self._run_with_formats("esri_shapefile,gxt", processing_files_mock)
+
+        _, kwargs = processing_files_mock.call_args
+        self.assertTrue(kwargs["opt_analyze_gxt"])
+        self.assertTrue(kwargs["opt_analyze_shapefiles"])
+
 
 class TestInventoryNoDataFound(unittest.TestCase):
     """Test inventory()'s behavior when the input folder has no geodata."""
