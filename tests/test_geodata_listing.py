@@ -184,6 +184,17 @@ class TestFindGeodataFiles(unittest.TestCase):
 
         self.assertEqual(result["shp"], ())
 
+    def test_shapefile_uppercase_companions_are_detected(self):
+        """Legacy/DOS-era shapefile exports with uppercased companion
+        extensions (.DBF/.SHX) are still recognized as complete."""
+        shp = self._touch("cities.shp")
+        self._touch("cities.DBF")
+        self._touch("cities.SHX")
+
+        result = _find_geodata_files(self.start_folder)
+
+        self.assertEqual(result["shp"], (str(shp),))
+
     # -- MapInfo TAB ------------------------------------------------------------
 
     def test_mapinfo_tab_complete_is_detected(self):
@@ -207,6 +218,18 @@ class TestFindGeodataFiles(unittest.TestCase):
         result = _find_geodata_files(self.start_folder)
 
         self.assertEqual(result["tab"], ())
+
+    def test_mapinfo_tab_uppercase_companions_are_detected(self):
+        """Legacy MapInfo exports with uppercased companion extensions
+        (.DAT/.MAP/.ID) are still recognized as complete."""
+        tab = self._touch("parcels.tab")
+        self._touch("parcels.DAT")
+        self._touch("parcels.MAP")
+        self._touch("parcels.ID")
+
+        result = _find_geodata_files(self.start_folder)
+
+        self.assertEqual(result["tab"], (str(tab),))
 
     # -- single-file formats ----------------------------------------------------
 
