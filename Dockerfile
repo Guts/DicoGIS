@@ -22,7 +22,10 @@ ENV PATH="/opt/venv/bin:${PATH}"
 
 WORKDIR /src
 COPY . .
-RUN python3 -m pip install --no-cache-dir -U pip setuptools wheel \
+RUN python3 -m pip install --no-cache-dir \
+        pip==26.2.1 \
+        setuptools==84.0.0 \
+        wheel==0.48.0 \
     && python3 -m pip install --no-cache-dir .
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-${GDAL_VERSION} AS runtime
@@ -35,7 +38,7 @@ LABEL org.opencontainers.image.title="DicoGIS" \
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:${PATH}"
 
-RUN useradd --create-home --uid 1000 --shell /usr/sbin/nologin dicogis \
+RUN useradd --create-home --shell /usr/sbin/nologin dicogis \
     && mkdir -p /data \
     && chown dicogis:dicogis /data
 
