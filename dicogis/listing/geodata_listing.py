@@ -131,6 +131,14 @@ def find_geodata_files(
             # single dataset above and can otherwise contain thousands of
             # internal files that would be inspected for nothing
             dirs[:] = [d for d in dirs if d not in gdb_dirs]
+        # lowercased filenames of the current directory, built once: lets
+        # shapefile/MapInfo companion checks below be plain set membership
+        # tests instead of one isfile() stat() round-trip per case variant.
+        # This also makes the check tolerant to companions whose extension
+        # case differs from the main file's, e.g. "cities.shp" + "cities.DBF"
+        # (still seen in older/legacy GIS exports), which touching the disk
+        # per case variant already tried to cover.
+        files_lower: set[str] = {name.lower() for name in files}
         for f in files:
             """looking for files with geographic data"""
             try:
@@ -138,35 +146,21 @@ def find_geodata_files(
                 full_path = path.join(root, f)
             except UnicodeDecodeError:
                 full_path = path.join(root, f.decode("latin1"))
+            f_stem_lower, f_ext_lower = path.splitext(f.lower())
             # Looping on files contained
             if (
-                path.splitext(full_path.lower())[1].lower() == ".shp"
-                and (
-                    path.isfile(f"{full_path[:-4]}.dbf")
-                    or path.isfile(f"{full_path[:-4]}.DBF")
-                )
-                and (
-                    path.isfile(f"{full_path[:-4]}.shx")
-                    or path.isfile(f"{full_path[:-4]}.SHX")
-                )
+                f_ext_lower == ".shp"
+                and f"{f_stem_lower}.dbf" in files_lower
+                and f"{f_stem_lower}.shx" in files_lower
             ):
                 """listing compatible shapefiles"""
                 # add complete path of shapefile
                 li_shp.append(full_path)
             elif (
-                path.splitext(full_path.lower())[1] == ".tab"
-                and (
-                    path.isfile(full_path[:-4] + ".dat")
-                    or path.isfile(full_path[:-4] + ".DAT")
-                )
-                and (
-                    path.isfile(full_path[:-4] + ".map")
-                    or path.isfile(full_path[:-4] + ".MAP")
-                )
-                and (
-                    path.isfile(full_path[:-4] + ".id")
-                    or path.isfile(full_path[:-4] + ".ID")
-                )
+                f_ext_lower == ".tab"
+                and f"{f_stem_lower}.dat" in files_lower
+                and f"{f_stem_lower}.map" in files_lower
+                and f"{f_stem_lower}.id" in files_lower
             ):
                 """listing MapInfo tables"""
 
