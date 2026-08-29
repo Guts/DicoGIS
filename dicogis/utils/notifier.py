@@ -37,7 +37,9 @@ except Exception as err:
     # e.g. notify-py raises UnsupportedPlatform on Windows releases it doesn't
     # recognize (Windows Server editions): degrade to a no-op rather than
     # taking down every import of this module.
-    logger.warning(f"System notifications are unavailable on this platform. Trace: {err}")
+    logger.warning(
+        f"System notifications are unavailable on this platform. Trace: {err}"
+    )
     notification = None
 
 
