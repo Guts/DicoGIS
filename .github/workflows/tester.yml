@@ -164,10 +164,12 @@ jobs:
 
       - name: Install project requirements
         shell: pwsh
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
           python -m pip install -U pip setuptools wheel
-          $cpTag = "cp" + ("${{ matrix.python-version }}" -replace '\.', '')
-          $wheelUrl = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.7.4/gdal-${{ env.GDAL_VERSION }}-$cpTag-$cpTag-win_amd64.whl"
+          $cpTag = "cp" + ($env:PYTHON_VERSION -replace '\.', '')
+          $wheelUrl = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.7.4/gdal-${env:GDAL_VERSION}-$cpTag-$cpTag-win_amd64.whl"
           python -m pip install -U $wheelUrl
 
       - name: Install project as a package
