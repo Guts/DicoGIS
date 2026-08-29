@@ -112,6 +112,7 @@ def find_geodata_files(
     logger.info(f"Begin of folders parsing: {start_folder}")
     for root, dirs, files in walk(start_folder):
         num_folders = num_folders + len(dirs)
+        gdb_dirs: list[str] = []
         for d in dirs:
             """looking for File Geodatabase among directories"""
             try:
@@ -122,8 +123,14 @@ def find_geodata_files(
             if full_path[-4:].lower() == ".gdb":
                 # add complete path of Esri FileGeoDatabase
                 li_flat_geodatabases_esri_filegdb.append(path.abspath(full_path))
+                gdb_dirs.append(d)
             else:
                 pass
+        if gdb_dirs:
+            # prune FileGeoDatabases from the walk: they're captured as a
+            # single dataset above and can otherwise contain thousands of
+            # internal files that would be inspected for nothing
+            dirs[:] = [d for d in dirs if d not in gdb_dirs]
         for f in files:
             """looking for files with geographic data"""
             try:
