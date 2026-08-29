@@ -233,6 +233,14 @@ both the CLI and GUI executables, plus a Windows version-info templater. CI's
 single-sourced from `dicogis/__about__.py::__version__` (`pyproject.toml` reads
 it via `[tool.setuptools.dynamic]`).
 
+A root-level `Dockerfile` (multi-stage, based on the official
+`ghcr.io/osgeo/gdal:ubuntu-small-*` image so GDAL's Python bindings are
+already present and version-matched — no `gdal` extra to compile) packages
+`dicogis-cli` only, entrypoint `dicogis-cli`. CI's `docker_builder.yml`
+workflow builds it, smoke-tests `--version`/`--help`, and pushes to
+`ghcr.io/guts/dicogis` (tags: `X.Y.Z`/`X.Y` on releases, `edge` on `master`)
+via `docker/build-push-action`.
+
 ## Contributing
 
 Full guidelines: `CONTRIBUTING.md`. What matters most for changes made here:

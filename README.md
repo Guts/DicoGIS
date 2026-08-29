@@ -4,6 +4,7 @@
 [![Linter 🐍](https://github.com/Guts/DicoGIS/actions/workflows/linter_ubuntu.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/linter_ubuntu.yml)
 [![Tester 🎳](https://github.com/Guts/DicoGIS/actions/workflows/tester.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/tester.yml)
 [![📚 Documentation Builder](https://github.com/Guts/DicoGIS/actions/workflows/docs_builder.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/docs_builder.yml)
+[![Build 🐳 and publish container image](https://github.com/Guts/DicoGIS/actions/workflows/docker_builder.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/docker_builder.yml)
 [![codecov](https://codecov.io/gh/Guts/DicoGIS/branch/master/graph/badge.svg?token=phiBV8BfPA)](https://codecov.io/gh/Guts/DicoGIS)
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -30,4 +31,11 @@ dependency (the `gui` extra): `pip install dicogis[gui]` /
 
 If you'd rather avoid Python/GDAL packaging altogether, standalone CLI/GUI
 executables (Windows and Ubuntu) that embed GDAL are published on the
-[latest release](https://github.com/Guts/DicoGIS/releases/latest).
+[latest release](https://github.com/Guts/DicoGIS/releases/latest), and a
+`dicogis-cli` container image (GDAL included) is published to the
+[GitHub Container Registry](https://github.com/Guts/DicoGIS/pkgs/container/dicogis):
+
+```sh
+docker run --rm -v "$(pwd)":/data ghcr.io/guts/dicogis:latest \
+    inventory --input-folder /data --output-path /data/dicogis_inventory.xlsx
+```
