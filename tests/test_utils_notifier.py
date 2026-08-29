@@ -22,6 +22,11 @@ from dicogis.utils import notifier
 # ################################
 
 
+@unittest.skipIf(
+    notifier.notification is None,
+    "No supported notification backend on this platform "
+    "(notifier.notification is None).",
+)
 class TestSendSystemNotify(unittest.TestCase):
     """Test send_system_notify().
 
@@ -77,6 +82,21 @@ class TestSendSystemNotify(unittest.TestCase):
             notifier.notification, "send", side_effect=RuntimeError("boom")
         ):
             # should not raise despite notification.send() failing
+            notifier.send_system_notify(
+                notification_message="msg",
+                notification_title="title",
+                notification_sound=False,
+            )
+
+
+class TestSendSystemNotifyNoBackend(unittest.TestCase):
+    """send_system_notify() must degrade to a no-op, not crash, when no
+    notification backend is available (e.g. notify-py's UnsupportedPlatform
+    on a Windows release it doesn't recognize, such as Windows Server)."""
+
+    def test_skips_gracefully_when_notification_is_none(self):
+        with patch.object(notifier, "notification", None):
+            # should not raise despite there being no backend to notify with
             notifier.send_system_notify(
                 notification_message="msg",
                 notification_title="title",

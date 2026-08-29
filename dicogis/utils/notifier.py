@@ -26,12 +26,19 @@ logger = logging.getLogger(__name__)
 
 # common notification information
 dicogis_utils = Utilities()
-notification = Notify(
-    default_application_name=__title__,
-    default_notification_icon=dicogis_utils.resolve_internal_path(
-        internal_path=__icon_path__
-    ),
-)
+try:
+    notification = Notify(
+        default_application_name=__title__,
+        default_notification_icon=dicogis_utils.resolve_internal_path(
+            internal_path=__icon_path__
+        ),
+    )
+except Exception as err:
+    # e.g. notify-py raises UnsupportedPlatform on Windows releases it doesn't
+    # recognize (Windows Server editions): degrade to a no-op rather than
+    # taking down every import of this module.
+    logger.warning(f"System notifications are unavailable on this platform. Trace: {err}")
+    notification = None
 
 
 # ##############################################################################
@@ -46,6 +53,13 @@ def send_system_notify(
         notification_message (str): notification message
         notification_title (str): notification title
     """
+    if notification is None:
+        logger.info(
+            "Notification skipped (unavailable on this platform): "
+            f"{notification_title=}: {notification_message=}"
+        )
+        return
+
     notification.title = notification_title
     notification.message = notification_message
     if notification_sound:
