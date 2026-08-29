@@ -2,7 +2,7 @@
 
 [![Build 📦 and release 🚀](https://github.com/Guts/DicoGIS/actions/workflows/builder_releaser.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/builder_releaser.yml)
 [![Linter 🐍](https://github.com/Guts/DicoGIS/actions/workflows/linter_ubuntu.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/linter_ubuntu.yml)
-[![Tester 🎳](https://github.com/Guts/DicoGIS/actions/workflows/tester_ubuntu.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/tester_ubuntu.yml)
+[![Tester 🎳](https://github.com/Guts/DicoGIS/actions/workflows/tester.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/tester.yml)
 [![📚 Documentation Builder](https://github.com/Guts/DicoGIS/actions/workflows/docs_builder.yml/badge.svg)](https://github.com/Guts/DicoGIS/actions/workflows/docs_builder.yml)
 [![codecov](https://codecov.io/gh/Guts/DicoGIS/branch/master/graph/badge.svg?token=phiBV8BfPA)](https://codecov.io/gh/Guts/DicoGIS)
 
