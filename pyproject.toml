@@ -167,6 +167,15 @@ dicogis = [
     "ui/i18n/*.qm",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["dicogis"]
+[tool.setuptools]
+packages = [
+    "dicogis",
+    "dicogis.cli",
+    "dicogis.export",
+    "dicogis.georeaders",
+    "dicogis.listing",
+    "dicogis.models",
+    "dicogis.ui",
+    "dicogis.ui.dialogs",
+    "dicogis.utils",
+]
