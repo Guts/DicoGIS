@@ -270,6 +270,24 @@ class TestFindGeodataFiles(unittest.TestCase):
         self.assertEqual(result["filegdb"], (str(gdb_dir.resolve()),))
         self.assertIn(str(gdb_dir.resolve()), result["fdb"])
 
+    def test_gdb_internals_are_not_traversed(self):
+        """The walk does not descend into a detected .gdb: its internal files
+        and subfolders don't inflate num_folders or leak into other buckets."""
+        gdb_dir = self.start_folder / "data.gdb"
+        gdb_dir.mkdir()
+        (gdb_dir / "inner_subdir").mkdir()
+        self._touch("data.gdb", "leftover.shp")
+        self._touch("data.gdb", "leftover.dbf")
+        self._touch("data.gdb", "leftover.shx")
+
+        result = _find_geodata_files(self.start_folder)
+
+        self.assertEqual(result["filegdb"], (str(gdb_dir.resolve()),))
+        # only data.gdb itself is counted, not its internal subfolder
+        self.assertEqual(result["num_folders"], 1)
+        # the shapefile-looking file inside the .gdb is never visited
+        self.assertEqual(result["shp"], ())
+
     def test_geopackage_and_spatialite_are_grouped_into_fdb(self):
         """GeoPackage and Spatialite files are merged into the fdb bucket."""
         gpkg = self._touch("catalog.gpkg")
