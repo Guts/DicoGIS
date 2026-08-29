@@ -34,7 +34,10 @@ class TestInfosFlatVector(unittest.TestCase):
 
     #  -- Tests ------------------------------------------------------------
     def test_read_shapefiles(self):
-        fixtures_shp = Path(fixtures_folder).glob("**/*.shp")
+        fixtures_shp = list(Path(fixtures_folder).glob("**/*.shp"))
+        # guards against silently testing nothing if the fixtures path is wrong
+        self.assertGreater(len(fixtures_shp), 0, "No .shp fixture file found")
+
         georeader_vector = ReadVectorFlatDataset()
         for fixture_filepath in fixtures_shp:
             # run

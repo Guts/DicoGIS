@@ -69,7 +69,7 @@ class ReadVectorFlatDataset(GeoReaderBase):
             source_path = Path(source_path).resolve()
 
         if metadataset is None:
-            if self.dataset_type == "flat_vector":
+            if self.dataset_type in ("flat_vector", "flat_cad"):
                 metadataset = MetaVectorDataset(
                     path=source_path,
                     name=source_path.stem,
@@ -134,7 +134,10 @@ class ReadVectorFlatDataset(GeoReaderBase):
         )
 
         # get layer(s) informations
-        if self.dataset_type == "flat_vector" and dataset.GetLayerCount() == 1:
+        if (
+            self.dataset_type in ("flat_vector", "flat_cad")
+            and dataset.GetLayerCount() == 1
+        ):
             self.get_infos_layer(in_layer=dataset.GetLayer(), metadataset=metadataset)
         elif self.dataset_type == "flat_database":
             metadataset.layers_count = dataset.GetLayerCount()
