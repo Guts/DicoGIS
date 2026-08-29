@@ -50,7 +50,9 @@ RUN python3 -m pip install --no-cache-dir \
         shellingham==1.5.4 \
         typer==0.27.2 \
         urllib3==2.7.0 \
-    && python3 -m pip install --no-cache-dir --no-deps .
+    && python3 -m pip install --no-cache-dir --no-deps . \
+    && python3 -c "import dicogis.cli.main" \
+    && find /opt/venv/lib/*/site-packages/dicogis -maxdepth 1
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-${GDAL_VERSION} AS runtime
 
