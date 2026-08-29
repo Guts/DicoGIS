@@ -20,13 +20,36 @@ RUN apt-get update \
 RUN python3 -m venv --system-site-packages /opt/venv
 ENV PATH="/opt/venv/bin:${PATH}"
 
+# Runtime dependency versions below are pinned exactly (matching what pip
+# resolves from pyproject.toml's ranges at the time of writing) so the image
+# is reproducible instead of re-resolving floating ranges on every build.
+# Regenerate by rebuilding the image and copying the versions pip resolves.
 WORKDIR /src
 COPY . .
 RUN python3 -m pip install --no-cache-dir \
         pip==26.2.1 \
         setuptools==84.0.0 \
         wheel==0.48.0 \
-    && python3 -m pip install --no-cache-dir -r requirements-docker.txt \
+        annotated-doc==0.0.5 \
+        certifi==2026.7.22 \
+        charset-normalizer==3.5.1 \
+        et-xmlfile==2.0.0 \
+        idna==3.19 \
+        jeepney==0.9.0 \
+        loguru==0.6.0 \
+        lxml==6.1.2 \
+        markdown-it-py==4.2.0 \
+        mdurl==0.1.2 \
+        notify-py==0.3.43 \
+        numpy==2.5.2 \
+        openpyxl==3.1.5 \
+        pgserviceparser==2.5.0 \
+        pygments==2.21.0 \
+        requests==2.34.2 \
+        rich==15.0.0 \
+        shellingham==1.5.4 \
+        typer==0.27.2 \
+        urllib3==2.7.0 \
     && python3 -m pip install --no-cache-dir --no-deps .
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-${GDAL_VERSION} AS runtime

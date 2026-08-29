@@ -236,16 +236,15 @@ it via `[tool.setuptools.dynamic]`).
 A root-level `Dockerfile` (multi-stage, based on the official
 `ghcr.io/osgeo/gdal:ubuntu-small-*` image so GDAL's Python bindings are
 already present and version-matched — no `gdal` extra to compile) packages
-`dicogis-cli` only, entrypoint `dicogis-cli`. It installs runtime
-dependencies from `requirements-docker.txt` (exact `==` pins of the
-versions `pyproject.toml`'s ranges currently resolve to, picked up by
-Dependabot's existing `pip` config) before `pip install --no-deps .`, so
-the image is reproducible/locked rather than re-resolving ranges on every
-build — regenerate it by rebuilding the image and copying the versions pip
-resolves. CI's `docker_builder.yml` workflow builds it, smoke-tests
-`--version`/`--help`, and pushes to `ghcr.io/guts/dicogis` (tags:
-`X.Y.Z`/`X.Y` on releases, `edge` on `master`) via `docker/build-push-action`
-(pinned to a commit SHA, like the other third-party actions it uses).
+`dicogis-cli` only, entrypoint `dicogis-cli`. Runtime dependencies are
+installed with exact `==` pins (the versions `pyproject.toml`'s ranges
+currently resolve to) before `pip install --no-deps .`, so the image is
+reproducible instead of re-resolving ranges on every build — regenerate the
+pins by rebuilding the image and copying the versions pip resolves. CI's
+`docker_builder.yml` workflow builds it, smoke-tests `--version`/`--help`,
+and pushes to `ghcr.io/guts/dicogis` (tags: `X.Y.Z`/`X.Y` on releases, `edge`
+on `master`) via `docker/build-push-action` (pinned to a commit SHA, like the
+other third-party actions it uses).
 
 ## Contributing
 
