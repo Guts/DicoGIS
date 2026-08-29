@@ -12,6 +12,9 @@ import re
 import subprocess
 from os import getenv
 
+# project
+from dicogis.constants import FORMAT_TO_GDAL_DRIVERS
+
 try:
     from osgeo import gdal, osr
 
@@ -40,6 +43,52 @@ logger = logging.getLogger(__name__)
 # ############################################################################
 # ########### Functions ############
 # ##################################
+
+
+def get_available_gdal_drivers() -> frozenset[str]:
+    """List the short names of every GDAL/OGR driver registered in the
+    currently installed GDAL.
+
+    Since GDAL 2.0, raster and vector drivers share a single driver manager,
+    so `gdal.GetDriverCount()`/`gdal.GetDriver()` cover both (unlike
+    `ogr.GetDriverCount()`, which only reflects a legacy subset).
+
+    Returns:
+        short names of the registered drivers, or an empty frozenset if GDAL
+        isn't available.
+    """
+    if not GDAL_IS_AVAILABLE:
+        return frozenset()
+
+    gdal.AllRegister()
+    return frozenset(gdal.GetDriver(i).ShortName for i in range(gdal.GetDriverCount()))
+
+
+def is_format_supported_by_gdal(
+    format_name: str, available_drivers: frozenset[str] | None = None
+) -> bool:
+    """Check whether the installed GDAL can actually read a given supported
+    format (see `dicogis.constants.FORMAT_TO_GDAL_DRIVERS`).
+
+    Args:
+        format_name: a `FormatsVector`/`FormatsRaster` member name (e.g.
+            "geojson", "gxt").
+        available_drivers: drivers to check against. Defaults to
+            `get_available_gdal_drivers()`; pass it explicitly to avoid
+            re-enumerating GDAL's driver registry for every format checked.
+
+    Returns:
+        True if format_name is unknown (nothing to gate on) or at least one
+        of its required drivers is registered, False otherwise.
+    """
+    if available_drivers is None:
+        available_drivers = get_available_gdal_drivers()
+
+    required_drivers = FORMAT_TO_GDAL_DRIVERS.get(format_name)
+    if not required_drivers:
+        return True
+
+    return any(driver in available_drivers for driver in required_drivers)
 
 
 def get_gdal_version() -> str:

@@ -88,6 +88,29 @@ class FormatsRaster(ExtendedEnum):
 
 SUPPORTED_FORMATS: list[ExtendedEnum] = [*FormatsVector, *FormatsRaster]
 
+# GDAL/OGR driver short names required to read each supported format, keyed by
+# the corresponding FormatsVector/FormatsRaster member name. Some formats can be
+# read by more than one driver (e.g. KML via "LIBKML" or the older "KML"
+# driver): any one of them being registered is enough. Used to detect formats
+# that the installed GDAL build cannot actually read (some drivers, like
+# "Geoconcept" or "ECW", are optional/plugin drivers not included in every
+# GDAL packaging) and disable them in the GUI/CLI accordingly.
+FORMAT_TO_GDAL_DRIVERS: dict[str, tuple[str, ...]] = {
+    "dgn": ("DGN", "DXF"),  # the single "cdao" flag covers DXF/DWG/DGN files
+    "esri_shapefile": ("ESRI Shapefile",),
+    "file_geodatabase_esri": ("OpenFileGDB", "ESRI FileGDB"),
+    "file_geodatabase_geopackage": ("GPKG",),
+    "file_geodatabase_spatialite": ("SQLite",),
+    "geojson": ("GeoJSON",),
+    "gml": ("GML",),
+    "gxt": ("Geoconcept",),
+    "kml": ("LIBKML", "KML"),
+    "mapinfo_tab": ("MapInfo File",),
+    "ecw": ("ECW",),
+    "geotiff": ("GTiff",),
+    "jpeg": ("JPEG",),
+}
+
 # ############################################################################
 # #### Stand alone program ########
 # #################################

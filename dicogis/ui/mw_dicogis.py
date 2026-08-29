@@ -597,7 +597,7 @@ class DicoGIS(QMainWindow):
             li_geojson=self.li_geojson,
             li_geotiff=self.li_geotiff,
             # options
-            opt_analyze_cdao=self.tab_files.opt_gxt.isChecked(),
+            opt_analyze_cdao=self.tab_files.opt_dxf.isChecked(),
             opt_analyze_esri_filegdb=self.tab_files.opt_egdb.isChecked(),
             opt_analyze_geopackage=self.tab_files.opt_gpkg.isChecked(),
             opt_analyze_geojson=self.tab_files.opt_geoj.isChecked(),
