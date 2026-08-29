@@ -32,6 +32,9 @@ jobs:
     name: "🐧 Ubuntu LTS"
     runs-on: ubuntu-24.04
 
+    permissions:
+      contents: read
+
     env:
       export_output_folder: tests/ci/ubuntu
       GDAL_VERSION: 3.11.*
@@ -39,6 +42,8 @@ jobs:
     steps:
       - name: Get source code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -98,6 +103,7 @@ jobs:
         with:
           repository: qgis/QGIS-Training-Data
           path: tests/fixtures/qgisdata
+          persist-credentials: false
 
       - name: Minimal integration test - help
         run: ./dist/DicoGIS-cli.bin --help
@@ -122,6 +128,9 @@ jobs:
     name: "🏠 Windows"
     runs-on: windows-latest
 
+    permissions:
+      contents: read
+
     env:
       export_output_folder: tests/ci/windows
       GDAL_VERSION: "3.11.1"
@@ -130,6 +139,8 @@ jobs:
     steps:
       - name: Get source code
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -179,6 +190,7 @@ jobs:
         with:
           repository: qgis/QGIS-Training-Data
           path: tests/fixtures/qgisdata
+          persist-credentials: false
 
       - name: Minimal integration test
         run: |
