@@ -45,9 +45,14 @@ FIND_GEODATA_FILES_FIELDS = (
 )
 
 
-def _find_geodata_files(start_folder: Path) -> dict:
+def _find_geodata_files(start_folder: Path, parallel_scan: bool = False) -> dict:
     """Run find_geodata_files and return its tuple as a readable dict."""
-    return dict(zip(FIND_GEODATA_FILES_FIELDS, find_geodata_files(start_folder)))
+    return dict(
+        zip(
+            FIND_GEODATA_FILES_FIELDS,
+            find_geodata_files(start_folder, parallel_scan=parallel_scan),
+        )
+    )
 
 
 # ############################################################################
@@ -161,6 +166,29 @@ class TestFindGeodataFiles(unittest.TestCase):
 
         # sub_a, sub_b and sub_b/nested
         self.assertEqual(result["num_folders"], 3)
+
+    def test_files_across_multiple_top_level_folders_are_all_found(self):
+        """With parallel_scan=True, top-level subfolders are scanned as
+        independent units in worker threads: matches from every branch must
+        still all end up merged in the result, whichever branch finishes
+        first. Off by default (see find_geodata_files' docstring), so this
+        is the one test that opts in to exercise that code path."""
+        cadastre = self._touch("cadastre", "parcelle.shp")
+        self._touch("cadastre", "parcelle.dbf")
+        self._touch("cadastre", "parcelle.shx")
+        voirie = self._touch("voirie", "route.geojson")
+        hydro = self._touch("hydrographie", "riviere.gml")
+        gdb_dir = self.start_folder / "batiments" / "data.gdb"
+        gdb_dir.mkdir(parents=True)
+
+        result = _find_geodata_files(self.start_folder, parallel_scan=True)
+
+        self.assertEqual(result["shp"], (str(cadastre),))
+        self.assertEqual(result["geojson"], (str(voirie),))
+        self.assertEqual(result["gml"], (str(hydro),))
+        self.assertEqual(result["filegdb"], (str(gdb_dir),))
+        # cadastre, voirie, hydrographie, batiments, batiments/data.gdb
+        self.assertEqual(result["num_folders"], 5)
 
     # -- shapefiles -----------------------------------------------------------
 
