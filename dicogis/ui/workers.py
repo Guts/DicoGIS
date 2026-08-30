@@ -77,22 +77,34 @@ class FolderScanWorker(QObject):
     error = pyqtSignal(str)
 
     def __init__(
-        self, target_folder: str | Path, parent: QObject | None = None
+        self,
+        target_folder: str | Path,
+        parallel_scan: bool = False,
+        max_workers: int | None = None,
+        parent: QObject | None = None,
     ) -> None:
         """Initialize the worker.
 
         Args:
             target_folder: folder to walk into to look for geographic datasets.
+            parallel_scan: see find_geodata_files()' parallel_scan argument.
+            max_workers: see find_geodata_files()' max_workers argument.
             parent: Qt parent object.
         """
         super().__init__(parent)
         self.target_folder = target_folder
+        self.parallel_scan = parallel_scan
+        self.max_workers = max_workers
 
     def run(self) -> None:
         """Run the folder scan and emit the resulting lists of files."""
         try:
             self.status_message.emit(f"Scanning: {self.target_folder}")
-            result = find_geodata_files(start_folder=self.target_folder)
+            result = find_geodata_files(
+                start_folder=self.target_folder,
+                parallel_scan=self.parallel_scan,
+                max_workers=self.max_workers,
+            )
             self.finished.emit(result)
         except Exception as err:
             logger.error(f"Folder scan failed. Trace: {err}")

@@ -54,6 +54,53 @@ def test_folder_scan_worker_run_emits_finished(qtbot, tmp_path):
     assert result[0] == 1
 
 
+def test_folder_scan_worker_forwards_parallel_scan_and_max_workers(qtbot, monkeypatch):
+    captured = {}
+
+    def fake_find_geodata_files(**kwargs):
+        captured.update(kwargs)
+        return (0,) + ((),) * 6 + ([],) + ((),) + ([],) + ((),) * 7
+
+    monkeypatch.setattr(
+        "dicogis.ui.workers.find_geodata_files", fake_find_geodata_files
+    )
+
+    worker = FolderScanWorker(
+        target_folder="/does/not/matter", parallel_scan=True, max_workers=7
+    )
+
+    with qtbot.waitSignal(worker.finished, timeout=5000):
+        worker.run()
+
+    assert captured == {
+        "start_folder": "/does/not/matter",
+        "parallel_scan": True,
+        "max_workers": 7,
+    }
+
+
+def test_folder_scan_worker_defaults_to_sequential_scan(qtbot, monkeypatch):
+    """Off by default: matches find_geodata_files()' own default (see its
+    docstring for why parallel scan isn't the default)."""
+    captured = {}
+
+    def fake_find_geodata_files(**kwargs):
+        captured.update(kwargs)
+        return (0,) + ((),) * 6 + ([],) + ((),) + ([],) + ((),) * 7
+
+    monkeypatch.setattr(
+        "dicogis.ui.workers.find_geodata_files", fake_find_geodata_files
+    )
+
+    worker = FolderScanWorker(target_folder="/does/not/matter")
+
+    with qtbot.waitSignal(worker.finished, timeout=5000):
+        worker.run()
+
+    assert captured["parallel_scan"] is False
+    assert captured["max_workers"] is None
+
+
 def test_folder_scan_worker_run_emits_error_on_failure(qtbot, monkeypatch):
     def _boom(start_folder):
         raise RuntimeError("boom")
