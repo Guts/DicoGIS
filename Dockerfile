@@ -55,9 +55,17 @@ RUN python3 -m pip install --no-cache-dir \
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-${GDAL_VERSION} AS runtime
 
+# Static, per-project OCI labels. version/created/revision are intentionally
+# left out here (a static "created" timestamp would be wrong the moment it's
+# baked in) -- docker_builder.yml's docker/metadata-action step injects those
+# per build via `--label` for every image actually published from CI.
 LABEL org.opencontainers.image.title="DicoGIS" \
       org.opencontainers.image.description="Create Excel/JSON inventories of geographic datasets from a folder tree or a PostGIS database." \
       org.opencontainers.image.source="https://github.com/Guts/DicoGIS" \
+      org.opencontainers.image.url="https://guts.github.io/DicoGIS/" \
+      org.opencontainers.image.documentation="https://guts.github.io/DicoGIS/" \
+      org.opencontainers.image.authors="Julien Moura <dev@ingeoveritas.com>" \
+      org.opencontainers.image.vendor="Julien Moura" \
       org.opencontainers.image.licenses="Apache-2.0"
 
 RUN useradd --create-home --shell /usr/sbin/nologin dicogis \
