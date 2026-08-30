@@ -308,7 +308,10 @@ class TestFindGeodataFiles(unittest.TestCase):
 
         result = _find_geodata_files(self.start_folder)
 
-        self.assertEqual(result["filegdb"], (str(gdb_dir.resolve()),))
+        # production code normalizes with os.path.abspath(), not Path.resolve() -
+        # the latter also expands Windows 8.3 short names (e.g. RUNNER~1), which
+        # would make this comparison fail on GitHub Actions Windows runners.
+        self.assertEqual(result["filegdb"], (str(gdb_dir),))
         # only data.gdb itself is counted, not its internal subfolder
         self.assertEqual(result["num_folders"], 1)
         # the shapefile-looking file inside the .gdb is never visited
