@@ -5,7 +5,7 @@ on:
     branches:
         - master
     paths:
-      - ".github/workflows/tester_ubuntu.yml"
+      - ".github/workflows/tester.yml"
       - "**/*.py"
       - pyproject.toml
 
@@ -14,10 +14,12 @@ on:
         - master
         - feature/*
     paths:
-      - ".github/workflows/tester_ubuntu.yml"
+      - ".github/workflows/tester.yml"
       - "**/*.py"
       - pyproject.toml
 
+permissions:
+  contents: read
 
 env:
   GDAL_VERSION: 3.*
@@ -25,6 +27,7 @@ env:
 
 jobs:
   test-ubuntu:
+    name: "🐧 Ubuntu"
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -128,5 +131,88 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: dicogis_results_ubuntu-py${{ matrix.python-version }}
+          path: ${{ env.export_output_folder }}/*
+          if-no-files-found: error
+
+  test-windows:
+    name: "🏠 Windows"
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # no cp310 wheel published in the pinned geospatial-wheels release
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+
+    env:
+      export_output_folder: tests/ci/windows
+      GDAL_VERSION: "3.11.1"
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Get source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project requirements
+        shell: pwsh
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          python -m pip install -U pip setuptools wheel
+          $cpTag = "cp" + ($env:PYTHON_VERSION -replace '\.', '')
+          $wheelUrl = "https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.7.4/gdal-${env:GDAL_VERSION}-$cpTag-$cpTag-win_amd64.whl"
+          python -m pip install -U $wheelUrl
+
+      - name: Install project as a package
+        run: python -m pip install .[gdal,gui,test]
+
+      - name: Install tests fixtures
+        run: python -m pip install -U gisdata -t ./tests/fixtures
+
+      - name: Unit tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        # GitHub-hosted Windows runners don't support Linux service containers,
+        # so the PostGIS-backed reader test (which needs the `postgis` service
+        # used by the Ubuntu job) can't run here.
+        run: pytest --ignore=tests/test_georeader_postgis.py
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          PYTHON: ${{ matrix.python-version }}
+        with:
+          env_vars: PYTHON
+          flags: unittests
+          name: Code Coverage for unittests on Windows (python-${{ matrix.python-version }}]
+
+      - name: Minimal integration test - help
+        run: dicogis-cli --help
+
+      - name: Minimal integration test - version
+        run: dicogis-cli --version
+
+      - name: Minimal integration test - export xlsx
+        run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-path "${{ env.export_output_folder }}/dicogis_windows_tests.xlsx" --verbose
+
+      - name: Minimal integration test - export JSON
+        run: dicogis-cli inventory --input-folder ./tests/ --language EN --output-format json --output-path "${{ env.export_output_folder }}" --verbose
+
+      - name: Save generated files as artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: dicogis_results_windows-py${{ matrix.python-version }}
           path: ${{ env.export_output_folder }}/*
           if-no-files-found: error

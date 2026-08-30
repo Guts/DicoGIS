@@ -96,6 +96,13 @@ class LogManager:
         logger = logging.getLogger()
         logger.setLevel(min(self.console_level, self.file_level))
 
+        # close and detach handlers left over from a previous LogManager
+        # instance in this process: on Windows, doRollover() below can't
+        # rename a log file that a leftover handler still has open.
+        for handler in logger.handlers[:]:
+            handler.close()
+            logger.removeHandler(handler)
+
         # create console handler - seems to be ignored by click
         log_console_handler = logging.StreamHandler()
         log_console_handler.setLevel(self.console_level)
