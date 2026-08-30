@@ -107,3 +107,23 @@ If you'd rather not deal with GDAL at all, the
 standalone CLI/GUI executables (Windows and Ubuntu) that embed GDAL — no
 Python or pipx required. See the "Try it" section on the [documentation
 home page](../index.md).
+
+## Docker
+
+A container image for `dicogis-cli` is published to the [GitHub Container
+Registry](https://github.com/Guts/DicoGIS/pkgs/container/dicogis), built on
+top of the official [GDAL images](https://github.com/OSGeo/gdal/tree/master/docker)
+so GDAL is already installed and version-matched — nothing to compile or
+inject.
+
+```sh
+docker pull ghcr.io/guts/dicogis:latest
+docker run --rm -v "$(pwd)":/data ghcr.io/guts/dicogis:latest \
+    inventory --input-folder /data --output-path /data/dicogis_inventory.xlsx
+```
+
+The entrypoint is `dicogis-cli`, so any `dicogis-cli` subcommand/option works
+the same way, e.g. `docker run --rm ghcr.io/guts/dicogis:latest --version`.
+The working directory inside the container is `/data`; mount your input
+folder (and/or `pg_service.conf` for PostGIS) there. Tags follow the project's
+releases (`X.Y.Z`, `X.Y`) plus `edge` (latest `master`).

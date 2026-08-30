@@ -169,4 +169,4 @@ dicogis = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["dicogis"]
+include = ["dicogis", "dicogis.*"]
