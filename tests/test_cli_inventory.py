@@ -254,6 +254,88 @@ class TestInventoryFormatFlagDerivation(unittest.TestCase):
         self.assertTrue(kwargs["opt_analyze_shapefiles"])
 
 
+class TestInventoryParallelScanOptions(unittest.TestCase):
+    """Test that --opt-parallel-scan/--listing-max-workers (and their
+    DICOGIS_LISTING_PARALLEL_SCAN/DICOGIS_LISTING_MAX_WORKERS env vars, via
+    Typer's envvar= support) are forwarded to find_geodata_files()."""
+
+    # a find_geodata_files()-shaped, all-empty result: (num_folders, then 16
+    # per-format lists/tuples in its documented return order)
+    _EMPTY_FIND_RESULT = (
+        0,
+        (),
+        (),
+        (),
+        (),
+        (),
+        [],
+        (),
+        [],
+        (),
+        (),
+        (),
+        (),
+        (),
+        (),
+        (),
+        (),
+    )
+
+    def test_parallel_scan_and_max_workers_are_forwarded(self):
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            input_folder = Path(tmpdirname)
+            output_path = input_folder / "out.xlsx"
+
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch(
+                    "dicogis.cli.cmd_inventory.find_geodata_files",
+                    return_value=self._EMPTY_FIND_RESULT,
+                ) as mock_find,
+                _stub_georeader_modules(),
+                self.assertRaises(typer.Exit),
+            ):
+                inventory(
+                    input_folder=input_folder,
+                    output_path=output_path,
+                    output_format="excel",
+                    language="EN",
+                    opt_parallel_scan=True,
+                    listing_max_workers=4,
+                )
+
+        mock_find.assert_called_once_with(
+            start_folder=input_folder, parallel_scan=True, max_workers=4
+        )
+
+    def test_defaults_are_off_and_auto(self):
+        """Without the flags, parallel_scan defaults to False and
+        max_workers to None (ThreadPoolExecutor's own auto-sized default)."""
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            input_folder = Path(tmpdirname)
+            output_path = input_folder / "out.xlsx"
+
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch(
+                    "dicogis.cli.cmd_inventory.find_geodata_files",
+                    return_value=self._EMPTY_FIND_RESULT,
+                ) as mock_find,
+                _stub_georeader_modules(),
+                self.assertRaises(typer.Exit),
+            ):
+                inventory(
+                    input_folder=input_folder,
+                    output_path=output_path,
+                    output_format="excel",
+                    language="EN",
+                )
+
+        mock_find.assert_called_once_with(
+            start_folder=input_folder, parallel_scan=False, max_workers=None
+        )
+
+
 class TestInventoryNoDataFound(unittest.TestCase):
     """Test inventory()'s behavior when the input folder has no geodata."""
 

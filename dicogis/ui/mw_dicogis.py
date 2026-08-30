@@ -352,7 +352,9 @@ class DicoGIS(QMainWindow):
         logger.info(f"Begin of folders parsing: {target_folder}")
 
         self._scan_thread = QThread(self)
-        self._scan_worker = FolderScanWorker(target_folder)
+        self._scan_worker = FolderScanWorker(
+            target_folder, **self.tab_options.get_listing_scan_kwargs()
+        )
         self._scan_worker.moveToThread(self._scan_thread)
         self._scan_thread.started.connect(self._scan_worker.run)
         self._scan_worker.status_message.connect(self.set_status_message)
