@@ -15,6 +15,7 @@ Author:       Julien Moura (@geojulien)
 
 # Standard library
 import logging
+import threading
 from pathlib import Path
 
 # 3rd party
@@ -23,9 +24,10 @@ from PyQt6.QtCore import QObject, pyqtSignal
 # project
 from dicogis.cli.cmd_publish import PublishReport, publish_metadata_folder
 from dicogis.export.base_serializer import MetadatasetSerializerBase
-from dicogis.georeaders.process_files import ProcessingFiles, ProgressReporter
+from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
+from dicogis.utils.progress import OperationCanceled, ProgressReporter
 
 # ##############################################################################
 # ############ Globals ############
@@ -54,6 +56,8 @@ class QtProgressReporter(QObject):
         """Initialize the progress reporter."""
         super().__init__(parent)
         self._count = 0
+        self._count_lock = threading.Lock()
+        self._cancel_requested = threading.Event()
 
     def set_message(self, message: str) -> None:
         """Update the currently displayed status message."""
@@ -61,12 +65,26 @@ class QtProgressReporter(QObject):
 
     def increment(self, amount: int = 1) -> None:
         """Increment the progress counter."""
-        self._count += amount
-        self.progress_incremented.emit(self._count)
+        with self._count_lock:
+            self._count += amount
+            current_count = self._count
+        self.progress_incremented.emit(current_count)
 
     def set_total(self, total: int) -> None:
         """Set the total/maximum value of the progress counter."""
         self.total_changed.emit(total)
+
+    def request_cancel(self) -> None:
+        """Ask the running operation to stop at its next cancellation check.
+
+        Called from the GUI thread (a cancel button); the operation itself
+        polls is_canceled() from its own thread(s), hence the Event.
+        """
+        self._cancel_requested.set()
+
+    def is_canceled(self) -> bool:
+        """Whether a cancellation has been requested."""
+        return self._cancel_requested.is_set()
 
 
 class FolderScanWorker(QObject):
@@ -75,12 +93,14 @@ class FolderScanWorker(QObject):
     status_message = pyqtSignal(str)
     finished = pyqtSignal(tuple)
     error = pyqtSignal(str)
+    canceled = pyqtSignal()
 
     def __init__(
         self,
         target_folder: str | Path,
         parallel_scan: bool = False,
         max_workers: int | None = None,
+        progress_reporter: ProgressReporter | None = None,
         parent: QObject | None = None,
     ) -> None:
         """Initialize the worker.
@@ -89,12 +109,15 @@ class FolderScanWorker(QObject):
             target_folder: folder to walk into to look for geographic datasets.
             parallel_scan: see find_geodata_files()' parallel_scan argument.
             max_workers: see find_geodata_files()' max_workers argument.
+            progress_reporter: see find_geodata_files()' progress_reporter
+                argument. Also what makes the scan cancellable.
             parent: Qt parent object.
         """
         super().__init__(parent)
         self.target_folder = target_folder
         self.parallel_scan = parallel_scan
         self.max_workers = max_workers
+        self.progress_reporter = progress_reporter
 
     def run(self) -> None:
         """Run the folder scan and emit the resulting lists of files."""
@@ -104,8 +127,12 @@ class FolderScanWorker(QObject):
                 start_folder=self.target_folder,
                 parallel_scan=self.parallel_scan,
                 max_workers=self.max_workers,
+                progress_reporter=self.progress_reporter,
             )
             self.finished.emit(result)
+        except OperationCanceled:
+            logger.info(f"Folder scan canceled: {self.target_folder}")
+            self.canceled.emit()
         except Exception as err:
             logger.error(f"Folder scan failed. Trace: {err}")
             self.error.emit(str(err))
@@ -116,6 +143,7 @@ class ProcessingWorker(QObject):
 
     finished = pyqtSignal(int)
     error = pyqtSignal(str)
+    canceled = pyqtSignal()
 
     def __init__(
         self, processor: ProcessingFiles, parent: QObject | None = None
@@ -123,7 +151,8 @@ class ProcessingWorker(QObject):
         """Initialize the worker.
 
         Args:
-            processor: pre-configured files processor to run.
+            processor: pre-configured files processor to run. It's cancelled
+                through the progress reporter it was built with.
             parent: Qt parent object.
         """
         super().__init__(parent)
@@ -134,6 +163,11 @@ class ProcessingWorker(QObject):
         try:
             self.processor.process_datasets_in_queue()
             self.finished.emit(self.processor.total_files or 0)
+        except OperationCanceled:
+            # whatever was processed before the cancellation has still been
+            # written out by process_datasets_in_queue()
+            logger.info("Files processing canceled.")
+            self.canceled.emit()
         except Exception as err:
             logger.error(f"Files processing failed. Trace: {err}")
             self.error.emit(str(err))
@@ -144,6 +178,7 @@ class PostgisProcessingWorker(QObject):
 
     finished = pyqtSignal(int)
     error = pyqtSignal(str)
+    canceled = pyqtSignal()
 
     def __init__(
         self,
@@ -172,7 +207,19 @@ class PostgisProcessingWorker(QObject):
             if self.progress_reporter is not None:
                 self.progress_reporter.set_total(total_layers)
 
+            canceled = False
             for idx_layer in range(total_layers):
+                # cooperative cancellation, between two layers
+                if (
+                    self.progress_reporter is not None
+                    and self.progress_reporter.is_canceled()
+                ):
+                    logger.info(
+                        f"PostGIS processing canceled after {idx_layer} layer(s)."
+                    )
+                    canceled = True
+                    break
+
                 layer = self.sgbd_reader.conn.GetLayerByIndex(idx_layer)
                 if self.progress_reporter is not None:
                     self.progress_reporter.set_message(f"Reading: {layer.GetName()}")
@@ -183,8 +230,12 @@ class PostgisProcessingWorker(QObject):
                 if self.progress_reporter is not None:
                     self.progress_reporter.increment()
 
+            # save what has been serialized so far, cancellation included
             self.serializer.post_serializing()
-            self.finished.emit(total_layers)
+            if canceled:
+                self.canceled.emit()
+            else:
+                self.finished.emit(total_layers)
         except Exception as err:
             logger.error(f"PostGIS processing failed. Trace: {err}")
             self.error.emit(str(err))
