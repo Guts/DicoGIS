@@ -38,6 +38,7 @@ class MetaDataset:
     """Dataset abstraction model."""
 
     name: str | None = None
+    description: str | None = None  # e.g. PostgreSQL COMMENT ON TABLE/VIEW
     path: Path | None = None  # empty if storage_type == database
     parent_folder_name: str | None = None  # empty if storage_type == database
     dataset_type: (
@@ -85,6 +86,9 @@ class MetaDataset:
             markdown description of the metadataset
         """
         description = f"- Dataset type: {self.dataset_type}\n"
+
+        if self.description:
+            description += f"- Description: {self.description}\n"
 
         if self.format_gdal_long_name:
             description += f"- Format: {self.format_gdal_long_name}\n"

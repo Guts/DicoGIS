@@ -149,6 +149,37 @@ class ReadPostGIS(GeoReaderBase):
         pg_schemas: ogr.Layer = self.conn.ExecuteSQL(sql_schemas)
         return {feature["nspname"] for feature in pg_schemas}
 
+    @lru_cache
+    def get_relations_comments(self) -> dict[str, str]:
+        """Return comments (COMMENT ON TABLE/VIEW) set on tables and views, keyed by
+        their schema-qualified name.
+
+        Returns:
+            dict[str, str]: mapping of "schema.relation_name" to its comment, \
+                excluding relations without any comment
+        """
+        sql_comments = (
+            "SELECT n.nspname AS schema_name, c.relname AS relation_name, "
+            "d.description AS relation_comment "
+            "FROM pg_catalog.pg_class AS c "
+            "JOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace "
+            "LEFT JOIN pg_catalog.pg_description AS d "
+            "ON d.objoid = c.oid AND d.objsubid = 0 "
+            "WHERE c.relkind IN ('r', 'v', 'm', 'p', 'f');"
+        )
+        try:
+            pg_relations: ogr.Layer = self.conn.ExecuteSQL(sql_comments)
+            return {
+                f"{feature['schema_name']}.{feature['relation_name']}": feature[
+                    "relation_comment"
+                ]
+                for feature in pg_relations
+                if feature["relation_comment"]
+            }
+        except Exception as err:
+            logger.error(f"Unable to retrieve PostgreSQL relations comments: {err}")
+            return {}
+
     def infos_dataset(
         self,
         layer: ogr.Layer,
@@ -219,6 +250,14 @@ class ReadPostGIS(GeoReaderBase):
         # schema name
         if "." in metadataset.name:
             metadataset.schema_name = metadataset.name.split(".")[0]
+
+        # relation comment (COMMENT ON TABLE/VIEW), if any
+        relation_name = (
+            metadataset.name
+            if "." in metadataset.name
+            else f"{metadataset.schema_name}.{metadataset.name}"
+        )
+        metadataset.description = self.get_relations_comments().get(relation_name)
 
         # basic information
         # features

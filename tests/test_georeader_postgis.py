@@ -60,6 +60,9 @@ class TestGeoReaderPostgis(unittest.TestCase):
 
         pg_conn.ExecuteSQL("CREATE SCHEMA IF NOT EXISTS dicogis_unittests;")
 
+        cls.commented_table_comment = "A table with a comment for tests purposes."
+        cls.commented_table_name = None
+
         # load shapefiles to PostGIS
         gdal.SetConfigOption("PG_USE_COPY", "YES")
         for shapefile in cls.fixture_good_vector.glob("**/*.shp"):
@@ -84,6 +87,16 @@ class TestGeoReaderPostgis(unittest.TestCase):
                 destNameOrDestDS=cls.pg_connection_string,
                 srcDS=src_shp,
                 options=options,
+            )
+
+            if cls.commented_table_name is None:
+                cls.commented_table_name = f"dicogis_unittests.{shapefile.stem}"
+
+        # set a comment on one table, to test comment retrieval
+        if cls.commented_table_name is not None:
+            pg_conn.ExecuteSQL(
+                f"COMMENT ON TABLE {cls.commented_table_name} IS "
+                f"'{cls.commented_table_comment}';"
             )
 
     @classmethod
@@ -121,3 +134,20 @@ class TestGeoReaderPostgis(unittest.TestCase):
             metadaset = pg_reader.infos_dataset(layer=layer)
             self.assertIsInstance(metadaset, MetaDatabaseTable)
             self.assertIsInstance(metadaset, MetaDataset)
+
+    def test_postgis_reader_relation_comment(self):
+        """Test that a PostgreSQL relation's comment (COMMENT ON TABLE) is retrieved
+        and stored into the metadataset description."""
+        pg_reader = ReadPostGIS(service="dicogis_test")
+        pg_reader.get_connection()
+
+        relations_comments = pg_reader.get_relations_comments()
+        self.assertIsInstance(relations_comments, dict)
+        self.assertEqual(
+            relations_comments.get(self.commented_table_name),
+            self.commented_table_comment,
+        )
+
+        commented_layer = pg_reader.conn.GetLayerByName(self.commented_table_name)
+        metadaset = pg_reader.infos_dataset(layer=commented_layer)
+        self.assertEqual(metadaset.description, self.commented_table_comment)
