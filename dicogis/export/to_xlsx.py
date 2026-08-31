@@ -154,6 +154,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         "nomfic",
         "conn_chain",
         "schema",
+        "description",
         "num_attrib",
         "num_objets",
         "geometrie",
@@ -1024,29 +1025,33 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         # schema
         worksheet[f"C{row_index}"] = metadataset.schema_name
 
+        # description (PostgreSQL COMMENT ON TABLE/VIEW)
+        worksheet[f"D{row_index}"].style = "wrap"
+        worksheet[f"D{row_index}"] = metadataset.description
+
         # structure
-        worksheet[f"D{row_index}"] = metadataset.count_feature_attributes
-        worksheet[f"E{row_index}"] = metadataset.features_objects_count
-        worksheet[f"F{row_index}"] = metadataset.geometry_type
+        worksheet[f"E{row_index}"] = metadataset.count_feature_attributes
+        worksheet[f"F{row_index}"] = metadataset.features_objects_count
+        worksheet[f"G{row_index}"] = metadataset.geometry_type
 
         # SRS
         # Name of srs
-        worksheet[f"G{row_index}"] = metadataset.crs_name
+        worksheet[f"H{row_index}"] = metadataset.crs_name
         # Type of SRS
-        worksheet[f"H{row_index}"] = self.localized_strings.get(
+        worksheet[f"I{row_index}"] = self.localized_strings.get(
             metadataset.crs_type, str(metadataset.crs_type)
         )
         # SRS code
-        worksheet[f"I{row_index}"] = metadataset.crs_registry_code
+        worksheet[f"J{row_index}"] = metadataset.crs_registry_code
 
         # Spatial extent
-        worksheet[f"J{row_index}"].style = "wrap"
-        worksheet[f"J{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
+        worksheet[f"K{row_index}"].style = "wrap"
+        worksheet[f"K{row_index}"] = self.format_bbox(bbox=metadataset.bbox)
 
         # type
-        worksheet[f"K{row_index}"] = metadataset.format_gdal_long_name
+        worksheet[f"L{row_index}"] = metadataset.format_gdal_long_name
 
         # Field informations
-        worksheet[f"L{row_index}"] = self.format_feature_attributes(
+        worksheet[f"M{row_index}"] = self.format_feature_attributes(
             metadataset=metadataset
         )

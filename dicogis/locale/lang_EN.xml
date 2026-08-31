@@ -47,6 +47,7 @@
 <!-- Output file: PostGIS -->
     <schema>Schema</schema>
     <conn_chain>DB connection</conn_chain>
+    <description>Description (comment)</description>
     <gdal_err>GDAL errors</gdal_err>
 <!-- Output file: FileGDB -->
     <feats_class>Features classes</feats_class>

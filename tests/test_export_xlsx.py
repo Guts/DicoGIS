@@ -590,6 +590,7 @@ class TestStoreMdGeodatabasesServer(unittest.TestCase):
         serializer.pre_serializing(has_sgbd=True)
         metadataset = MetaDatabaseTable(
             name="public.roads",
+            description="Road network reference table",
             dataset_type="sgbd_postgis",
             schema_name="public",
             feature_attributes=[AttributeField(name="id", data_type="Integer")],
@@ -603,10 +604,11 @@ class TestStoreMdGeodatabasesServer(unittest.TestCase):
 
         sheet = serializer.sheet_server_geodatabases
         self.assertEqual(sheet["C2"].value, "public")
-        self.assertEqual(sheet["D2"].value, 1)
-        self.assertEqual(sheet["E2"].value, 7)
-        self.assertEqual(sheet["F2"].value, "LineString")
-        self.assertEqual(sheet["G2"].value, "RGF93")
+        self.assertEqual(sheet["D2"].value, "Road network reference table")
+        self.assertEqual(sheet["E2"].value, 1)
+        self.assertEqual(sheet["F2"].value, 7)
+        self.assertEqual(sheet["G2"].value, "LineString")
+        self.assertEqual(sheet["H2"].value, "RGF93")
 
 
 class TestPostSerializingAndTunningWorkbook(unittest.TestCase):
