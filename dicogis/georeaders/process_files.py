@@ -13,7 +13,6 @@ from dataclasses import dataclass
 from locale import getlocale
 from os import path
 from pathlib import Path
-from typing import Protocol
 
 # package
 from dicogis.export.base_serializer import MetadatasetSerializerBase
@@ -22,6 +21,15 @@ from dicogis.georeaders.read_raster import ReadRasters
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
 from dicogis.models.metadataset import MetaDataset
+
+# ProgressReporter used to be defined here; it now lives in a GDAL-free module
+# so dicogis.listing can use it too (this module imports GDAL-backed readers
+# above). Re-exported for backward compatibility with existing imports.
+from dicogis.utils.progress import (  # noqa: F401
+    OperationCanceled,
+    ProgressReporter,
+    raise_if_canceled,
+)
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -38,22 +46,6 @@ logger = logging.getLogger(__name__)
 # ##############################################################################
 # ############ Classes ############
 # #################################
-
-
-class ProgressReporter(Protocol):
-    """Toolkit-agnostic contract for reporting processing progress."""
-
-    def set_message(self, message: str) -> None:
-        """Update the currently displayed status message."""
-        ...
-
-    def increment(self, amount: int = 1) -> None:
-        """Increment the progress counter."""
-        ...
-
-    def set_total(self, total: int) -> None:
-        """Set the total/maximum value of the progress counter."""
-        ...
 
 
 @dataclass
@@ -181,8 +173,28 @@ class ProcessingFiles:
         self.progress_reporter = progress_reporter
 
     def process_datasets_in_queue(self):
-        """Process datasets in queue."""
+        """Process datasets in queue.
+
+        Raises:
+            OperationCanceled: if the progress reporter asked to stop. Raised
+                only after post_serializing(), so whatever was processed
+                before the cancellation is still written to the output file.
+        """
+        canceled = False
         for geofile in self.li_files_to_process:
+            # cooperative cancellation: checked between datasets, the only
+            # place we can stop without leaving a half-read dataset behind
+            if (
+                self.progress_reporter is not None
+                and self.progress_reporter.is_canceled()
+            ):
+                logger.info(
+                    "Processing canceled: stopping after "
+                    f"{self.li_files_to_process.index(geofile)} dataset(s)."
+                )
+                canceled = True
+                break
+
             if geofile.processed is True:
                 logger.warning(f"File has already been processed: {geofile.file_path}")
                 continue
@@ -200,7 +212,11 @@ class ProcessingFiles:
                 dataset_to_process=geofile, metadataset_to_serialize=metadataset
             )
 
+        # save what has been processed so far, cancellation included
         self.serializer.post_serializing()
+
+        if canceled:
+            raise OperationCanceled()
 
     def read_dataset(
         self, dataset_to_process: DatasetToProcess

@@ -18,6 +18,7 @@ from unittest.mock import patch
 
 # project
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
+from dicogis.utils.progress import OperationCanceled
 
 # ############################################################################
 # ########## Globals #############
@@ -106,6 +107,103 @@ class TestCheckUsablePgServices(unittest.TestCase):
         mock_conf_path.return_value = Path("/fake/pg_service.conf")
 
         self.assertEqual(check_usable_pg_services(["srv_a", "srv_b"]), [])
+
+
+class _RecordingReporter:
+    """Minimal ProgressReporter implementation recording what it's told.
+
+    Deliberately not a Mock: it also asserts the listing stage never calls
+    set_total(), since the folder count can't be known before walking.
+    """
+
+    def __init__(self, canceled: bool = False):
+        self.messages: list[str] = []
+        self.count = 0
+        self.canceled = canceled
+        self.set_total_calls = 0
+
+    def set_message(self, message: str) -> None:
+        self.messages.append(message)
+
+    def increment(self, amount: int = 1) -> None:
+        self.count += amount
+
+    def set_total(self, total: int) -> None:
+        self.set_total_calls += 1
+
+    def is_canceled(self) -> bool:
+        return self.canceled
+
+
+class TestFindGeodataFilesProgressAndCancellation(unittest.TestCase):
+    """Test the ProgressReporter plumbing of find_geodata_files()."""
+
+    def setUp(self):
+        self.tmp_dir = tempfile.TemporaryDirectory(
+            prefix="DicoGIS_test_listing_progress_", ignore_cleanup_errors=True
+        )
+        self.start_folder = Path(self.tmp_dir.name)
+        for theme in ("cadastre", "voirie", "hydrographie"):
+            leaf = self.start_folder / theme / "commune"
+            leaf.mkdir(parents=True)
+            (leaf / f"{theme}.gml").touch()
+
+    def tearDown(self):
+        self.tmp_dir.cleanup()
+
+    def test_sequential_scan_reports_every_folder(self):
+        """Increments add up to the folder count actually returned."""
+        reporter = _RecordingReporter()
+
+        result = find_geodata_files(self.start_folder, progress_reporter=reporter)
+
+        self.assertEqual(reporter.count, result[0])
+        self.assertTrue(reporter.messages)
+
+    def test_parallel_scan_reports_every_folder(self):
+        """Same total in parallel mode, even though progress is reported per
+        finished subtree rather than per folder."""
+        reporter = _RecordingReporter()
+
+        result = find_geodata_files(
+            self.start_folder, parallel_scan=True, progress_reporter=reporter
+        )
+
+        self.assertEqual(reporter.count, result[0])
+
+    def test_set_total_is_never_called(self):
+        """The listing stage has no knowable total, so it must not pretend to
+        report a percentage."""
+        reporter = _RecordingReporter()
+
+        find_geodata_files(self.start_folder, progress_reporter=reporter)
+
+        self.assertEqual(reporter.set_total_calls, 0)
+
+    def test_sequential_scan_is_canceled(self):
+        """A reporter asking to stop aborts the walk with OperationCanceled
+        rather than returning a partial listing indistinguishable from a
+        complete one."""
+        reporter = _RecordingReporter(canceled=True)
+
+        with self.assertRaises(OperationCanceled):
+            find_geodata_files(self.start_folder, progress_reporter=reporter)
+
+    def test_parallel_scan_is_canceled(self):
+        """Cancellation raised inside a worker thread is re-raised in the
+        calling thread by the executor."""
+        reporter = _RecordingReporter(canceled=True)
+
+        with self.assertRaises(OperationCanceled):
+            find_geodata_files(
+                self.start_folder, parallel_scan=True, progress_reporter=reporter
+            )
+
+    def test_no_reporter_never_cancels(self):
+        """dicogis-cli passes None: the scan must run to completion."""
+        result = find_geodata_files(self.start_folder, progress_reporter=None)
+
+        self.assertEqual(result[0], 6)  # 3 themes + 3 commune subfolders
 
 
 class TestFindGeodataFiles(unittest.TestCase):

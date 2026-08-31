@@ -12,6 +12,7 @@ Look for geographic datasets.
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, fields
+from functools import partial as partial_func
 from os import path, walk
 from pathlib import Path
 
@@ -20,6 +21,7 @@ import pgserviceparser
 
 # package
 from dicogis.constants import FormatsRaster
+from dicogis.utils.progress import ProgressReporter, raise_if_canceled
 
 # #############################################################################
 # ########## Globals ###############
@@ -197,15 +199,26 @@ def _process_one_walk_level(
     return pruned_dirs
 
 
-def _scan_directory_tree(root: str) -> _PartialListing:
+def _scan_directory_tree(
+    root: str, progress_reporter: ProgressReporter | None = None
+) -> _PartialListing:
     """Recursively scan one directory tree into its own partial result.
 
     Runs standalone - its own os.walk(), no shared mutable state - so it can
-    safely be handed to a worker thread by find_geodata_files().
+    safely be handed to a worker thread by find_geodata_files(). Only reads
+    from `progress_reporter` (is_canceled()), never writes progress to it:
+    when running in a worker thread, reporting is left to the main thread
+    merging the results, so implementations don't need a thread-safe counter.
+
+    Raises:
+        OperationCanceled: if the progress reporter asked to stop. Raised
+            from the worker thread, and re-raised in the calling thread by
+            the executor when the result is consumed.
     """
     result = _PartialListing()
     buckets = result.buckets()
     for current_root, dirs, files in walk(root):
+        raise_if_canceled(progress_reporter)
         dirs[:] = _process_one_walk_level(current_root, dirs, files, result, buckets)
     return result
 
@@ -223,6 +236,7 @@ def find_geodata_files(
     start_folder: Path,
     parallel_scan: bool = False,
     max_workers: int | None = None,
+    progress_reporter: ProgressReporter | None = None,
 ) -> tuple[
     int,
     list[str],
@@ -258,11 +272,22 @@ def find_geodata_files(
         max_workers (int | None): passed to ThreadPoolExecutor when
             parallel_scan is True; ignored otherwise. Defaults to
             ThreadPoolExecutor's own default (based on CPU count).
+        progress_reporter (ProgressReporter | None): reporter notified of
+            folders as they're scanned, and polled for cancellation. None
+            (the default, and what dicogis-cli passes) disables both.
+            Note that set_total() is never called: the number of folders
+            can't be known before walking the tree, so this stage reports a
+            running count and the folder being scanned, not a percentage.
 
     Returns:
         tuple[ int, list[str], list[str], list[str], list[str], list[str], list[str],
         list[str], list[str], list[str], list[str], list[str], list[str], list[str],
         list[str], ]: tuple with number of folders parsed and list of paths by formats
+
+    Raises:
+        OperationCanceled: if the progress reporter asked to stop. Nothing is
+            returned in that case: a partial listing is indistinguishable from
+            a complete one for callers downstream.
     """
     logger.info(f"Begin of folders parsing: {start_folder}")
     root_str = str(start_folder)
@@ -270,21 +295,44 @@ def find_geodata_files(
     result = _PartialListing()
     buckets = result.buckets()
 
+    already_reported = 0
+
+    def _report_scanned(folders_done: int, current_folder: str) -> None:
+        """Report scan advancement, from the calling thread only."""
+        nonlocal already_reported
+        if progress_reporter is None:
+            return
+        progress_reporter.set_message(f"Scanning ({folders_done}): {current_folder}")
+        progress_reporter.increment(amount=folders_done - already_reported)
+        already_reported = folders_done
+
     if not parallel_scan:
         for current_root, dirs, files in walk(root_str):
+            raise_if_canceled(progress_reporter)
             dirs[:] = _process_one_walk_level(
                 current_root, dirs, files, result, buckets
             )
+            _report_scanned(result.num_folders, current_root)
     else:
         top_root, top_dirs, top_files = next(walk(root_str), (root_str, [], []))
         pruned_dirs = _process_one_walk_level(
             top_root, top_dirs, top_files, result, buckets
         )
+        _report_scanned(result.num_folders, top_root)
         if pruned_dirs:
             subtree_roots = [path.join(top_root, d) for d in pruned_dirs]
+            scan_subtree = partial_func(
+                _scan_directory_tree, progress_reporter=progress_reporter
+            )
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                for partial in executor.map(_scan_directory_tree, subtree_roots):
-                    _merge_partial(result, partial)
+                # worker threads only poll is_canceled(); progress is reported
+                # here, in the calling thread, as each subtree comes back - so
+                # a ProgressReporter never needs a thread-safe counter.
+                for subtree_root, subtree in zip(
+                    subtree_roots, executor.map(scan_subtree, subtree_roots)
+                ):
+                    _merge_partial(result, subtree)
+                    _report_scanned(result.num_folders, subtree_root)
 
     # grouping raster
     li_raster = result.raster

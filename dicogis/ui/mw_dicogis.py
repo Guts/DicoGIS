@@ -210,6 +210,7 @@ class DicoGIS(QMainWindow):
         self.val.setEnabled(True)
         self.val.clicked.connect(self.process)
         self.can.clicked.connect(self.close)
+        self.btn_cancel.clicked.connect(self._on_cancel_clicked)
 
         # loading previous options
         if not self.settings.first_use:
@@ -243,6 +244,7 @@ class DicoGIS(QMainWindow):
         self.FrOutp.setTitle(self.tr(" Output file "))
         self.FrProg.setTitle(self.tr("Progression"))
         self.val.setText(self.tr("Go!"))
+        self.btn_cancel.setText(self.tr("Cancel"))
         self.lbl_outxl_filename.setText(self.tr("Name of output file: "))
 
         self.nb.setTabText(0, self.tr(" Files "))
@@ -348,22 +350,33 @@ class DicoGIS(QMainWindow):
         self.set_status_message(
             self.tr("Progress: parsing and retrieving compatible files")
         )
-        self.prog_layers.setRange(0, 0)  # indeterminate mode while scanning
+        # indeterminate: the number of folders can't be known before walking
+        # the tree, so the scan reports a running count as a message instead
+        self.prog_layers.setRange(0, 0)
         logger.info(f"Begin of folders parsing: {target_folder}")
+
+        self._progress_reporter = QtProgressReporter(self)
+        self._progress_reporter.message_changed.connect(self.set_status_message)
+        self._enable_cancel_button(True)
 
         self._scan_thread = QThread(self)
         self._scan_worker = FolderScanWorker(
-            target_folder, **self.tab_options.get_listing_scan_kwargs()
+            target_folder,
+            progress_reporter=self._progress_reporter,
+            **self.tab_options.get_listing_scan_kwargs(),
         )
         self._scan_worker.moveToThread(self._scan_thread)
         self._scan_thread.started.connect(self._scan_worker.run)
         self._scan_worker.status_message.connect(self.set_status_message)
         self._scan_worker.finished.connect(self._on_folder_scan_finished)
         self._scan_worker.error.connect(self._on_folder_scan_error)
+        self._scan_worker.canceled.connect(self._on_folder_scan_canceled)
         self._scan_worker.finished.connect(self._scan_thread.quit)
         self._scan_worker.error.connect(self._scan_thread.quit)
+        self._scan_worker.canceled.connect(self._scan_thread.quit)
         self._scan_worker.finished.connect(self._scan_worker.deleteLater)
         self._scan_worker.error.connect(self._scan_worker.deleteLater)
+        self._scan_worker.canceled.connect(self._scan_worker.deleteLater)
         self._scan_thread.finished.connect(self._scan_thread.deleteLater)
         self._scan_thread.finished.connect(self._clear_scan_thread_ref)
         self._scan_thread.start()
@@ -372,6 +385,37 @@ class DicoGIS(QMainWindow):
         """Drop the reference to the finished folder-scan thread."""
         self._scan_thread = None
 
+    def _enable_cancel_button(self, enabled: bool) -> None:
+        """Show/hide the cancel button along a cancellable operation.
+
+        Args:
+            enabled: whether a cancellable operation is running.
+        """
+        self.btn_cancel.setVisible(enabled)
+        self.btn_cancel.setEnabled(enabled)
+
+    def _on_cancel_clicked(self) -> None:
+        """Ask the running operation to stop at its next cancellation check."""
+        if self._progress_reporter is None:
+            return
+        logger.info("Cancellation requested by the user.")
+        self.btn_cancel.setEnabled(False)
+        self.set_status_message(self.tr("Canceling..."))
+        self._progress_reporter.request_cancel()
+
+    def _reset_progress_after_interruption(self) -> None:
+        """Put the progress widgets back to their idle state."""
+        self._enable_cancel_button(False)
+        self.prog_layers.setRange(0, 1)
+        self.prog_layers.setValue(0)
+        self.tab_files.btn_browse.setEnabled(True)
+
+    def _on_folder_scan_canceled(self) -> None:
+        """React to a folder scan interrupted by the user."""
+        logger.info("Folder scan canceled by the user.")
+        self._reset_progress_after_interruption()
+        self.set_status_message(self.tr("Folder scan canceled."))
+
     def _on_folder_scan_error(self, message: str) -> None:
         """React to a folder scan failure.
 
@@ -379,9 +423,7 @@ class DicoGIS(QMainWindow):
             message: error message.
         """
         logger.error(f"Folder scan failed: {message}")
-        self.prog_layers.setRange(0, 1)
-        self.prog_layers.setValue(0)
-        self.tab_files.btn_browse.setEnabled(True)
+        self._reset_progress_after_interruption()
         QMessageBox.critical(self, "DicoGIS", message)
 
     def _on_folder_scan_finished(self, result: tuple) -> None:
@@ -411,6 +453,7 @@ class DicoGIS(QMainWindow):
         ) = result
 
         # end of listing
+        self._enable_cancel_button(False)
         self.prog_layers.setRange(0, 1)
         self.prog_layers.setValue(0)
 
@@ -544,6 +587,7 @@ class DicoGIS(QMainWindow):
         """
         logger.error(f"Processing failed: {message}")
         self.lbl_status.setStyleSheet("color: red;")
+        self._enable_cancel_button(False)
         self._enable_processing_controls()
         QMessageBox.critical(self, "DicoGIS", message)
 
@@ -621,16 +665,20 @@ class DicoGIS(QMainWindow):
         self.prog_layers.setMaximum(total_files)
 
         # launch processing in a background thread
+        self._enable_cancel_button(True)
         self._proc_thread = QThread(self)
         self._proc_worker = ProcessingWorker(geofiles_processor)
         self._proc_worker.moveToThread(self._proc_thread)
         self._proc_thread.started.connect(self._proc_worker.run)
         self._proc_worker.finished.connect(self._on_files_processing_finished)
         self._proc_worker.error.connect(self._on_processing_error)
+        self._proc_worker.canceled.connect(self._on_processing_canceled)
         self._proc_worker.finished.connect(self._proc_thread.quit)
         self._proc_worker.error.connect(self._proc_thread.quit)
+        self._proc_worker.canceled.connect(self._proc_thread.quit)
         self._proc_worker.finished.connect(self._proc_worker.deleteLater)
         self._proc_worker.error.connect(self._proc_worker.deleteLater)
+        self._proc_worker.canceled.connect(self._proc_worker.deleteLater)
         self._proc_thread.finished.connect(self._proc_thread.deleteLater)
         self._proc_thread.finished.connect(self._clear_proc_thread_ref)
         self._proc_thread.start()
@@ -641,6 +689,7 @@ class DicoGIS(QMainWindow):
         Args:
             total_files: number of files processed.
         """
+        self._enable_cancel_button(False)
         launch(url=f"{self.serializer.output_path.resolve()}")
         send_system_notify(
             notification_title="DicoGIS analysis ended",
@@ -649,6 +698,20 @@ class DicoGIS(QMainWindow):
             notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
         )
         self._enable_processing_controls()
+
+    def _on_processing_canceled(self) -> None:
+        """React to a processing run interrupted by the user.
+
+        Whatever was processed before the cancellation has still been written
+        to the output file, so it's offered rather than silently discarded.
+        """
+        logger.info("Processing canceled by the user.")
+        self._enable_cancel_button(False)
+        self.prog_layers.setValue(0)
+        self._enable_processing_controls()
+        self.set_status_message(
+            self.tr("Processing canceled. Partial results were saved to the output.")
+        )
 
     def process_db(self, sgbd_reader: ReadPostGIS) -> None:
         """Launch PostGIS DB analysis in a background worker.
@@ -683,14 +746,18 @@ class DicoGIS(QMainWindow):
             serializer=self.serializer,
             progress_reporter=self._progress_reporter,
         )
+        self._enable_cancel_button(True)
         self._proc_worker.moveToThread(self._proc_thread)
         self._proc_thread.started.connect(self._proc_worker.run)
         self._proc_worker.finished.connect(self._on_db_processing_finished)
         self._proc_worker.error.connect(self._on_processing_error)
+        self._proc_worker.canceled.connect(self._on_processing_canceled)
         self._proc_worker.finished.connect(self._proc_thread.quit)
         self._proc_worker.error.connect(self._proc_thread.quit)
+        self._proc_worker.canceled.connect(self._proc_thread.quit)
         self._proc_worker.finished.connect(self._proc_worker.deleteLater)
         self._proc_worker.error.connect(self._proc_worker.deleteLater)
+        self._proc_worker.canceled.connect(self._proc_worker.deleteLater)
         self._proc_thread.finished.connect(self._proc_thread.deleteLater)
         self._proc_thread.finished.connect(self._clear_proc_thread_ref)
         self._proc_thread.start()
