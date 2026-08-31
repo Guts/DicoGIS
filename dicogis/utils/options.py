@@ -140,21 +140,20 @@ class OptionsManager:
     def save_settings(self, parent) -> bool:
         """save last options in order to make the next excution more easy"""
 
-        # add sections
-        if self.first_use:
-            self.config.add_section("config")
-            self.config.add_section("basics")
-            self.config.add_section("filters")
-            self.config.add_section("database")
-            self.config.add_section("proxy")
-
-        # backward compatibility: older options.ini files predate the "ui" section
-        if not self.config.has_section("ui"):
-            self.config.add_section("ui")
-
-        # backward compatibility: older options.ini files predate the "udata" section
-        if not self.config.has_section("udata"):
-            self.config.add_section("udata")
+        # add sections (guard against re-running save_settings within the same
+        # session, e.g. processing multiple times without recreating this
+        # OptionsManager instance, which left self.first_use stale)
+        for section_name in (
+            "config",
+            "basics",
+            "filters",
+            "database",
+            "proxy",
+            "ui",
+            "udata",
+        ):
+            if not self.config.has_section(section_name):
+                self.config.add_section(section_name)
 
         # config
         self.config.set("config", "DicoGIS_version", parent.package_about.__version__)
