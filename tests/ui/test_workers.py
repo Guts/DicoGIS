@@ -14,6 +14,7 @@ Usage from the repo root folder:
 # package
 from dicogis.cli.cmd_publish import PublishReport
 from dicogis.ui.workers import FolderScanWorker, PublishWorker, QtProgressReporter
+from dicogis.utils.progress import OperationCanceled, ProgressReporter
 
 # #############################################################################
 # ########## Tests ##################
@@ -54,8 +55,117 @@ def test_folder_scan_worker_run_emits_finished(qtbot, tmp_path):
     assert result[0] == 1
 
 
+def test_qt_progress_reporter_satisfies_the_protocol(qtbot):
+    """It's what the core pipeline is typed against, and what a QGIS plugin
+    would mirror on top of QgsTask."""
+    assert isinstance(QtProgressReporter(), ProgressReporter)
+
+
+def test_qt_progress_reporter_cancellation_flag(qtbot):
+    reporter = QtProgressReporter()
+
+    assert reporter.is_canceled() is False
+
+    reporter.request_cancel()
+
+    assert reporter.is_canceled() is True
+
+
+def test_folder_scan_worker_emits_canceled_instead_of_error(qtbot, monkeypatch):
+    """A cancellation is not a failure: it must reach the GUI through its own
+    signal, so the user doesn't get an error dialog for something they asked
+    for."""
+
+    def _canceled(**kwargs):
+        raise OperationCanceled()
+
+    monkeypatch.setattr("dicogis.ui.workers.find_geodata_files", _canceled)
+
+    worker = FolderScanWorker(target_folder="/does/not/matter")
+    errors = []
+    worker.error.connect(errors.append)
+
+    with qtbot.waitSignal(worker.canceled, timeout=5000):
+        worker.run()
+
+    assert errors == []
+
+
+def test_folder_scan_worker_forwards_progress_reporter(qtbot, monkeypatch):
+    captured = {}
+
+    def fake_find_geodata_files(**kwargs):
+        captured.update(kwargs)
+        return (0,) + ((),) * 6 + ([],) + ((),) + ([],) + ((),) * 7
+
+    monkeypatch.setattr(
+        "dicogis.ui.workers.find_geodata_files", fake_find_geodata_files
+    )
+    reporter = QtProgressReporter()
+
+    worker = FolderScanWorker(
+        target_folder="/does/not/matter", progress_reporter=reporter
+    )
+
+    with qtbot.waitSignal(worker.finished, timeout=5000):
+        worker.run()
+
+    assert captured["progress_reporter"] is reporter
+
+
+def test_folder_scan_worker_forwards_parallel_scan_and_max_workers(qtbot, monkeypatch):
+    captured = {}
+
+    def fake_find_geodata_files(**kwargs):
+        captured.update(kwargs)
+        return (0,) + ((),) * 6 + ([],) + ((),) + ([],) + ((),) * 7
+
+    monkeypatch.setattr(
+        "dicogis.ui.workers.find_geodata_files", fake_find_geodata_files
+    )
+
+    worker = FolderScanWorker(
+        target_folder="/does/not/matter", parallel_scan=True, max_workers=7
+    )
+
+    with qtbot.waitSignal(worker.finished, timeout=5000):
+        worker.run()
+
+    assert captured == {
+        "start_folder": "/does/not/matter",
+        "parallel_scan": True,
+        "max_workers": 7,
+        "progress_reporter": None,
+    }
+
+
+def test_folder_scan_worker_defaults_to_sequential_scan(qtbot, monkeypatch):
+    """Off by default: matches find_geodata_files()' own default (see its
+    docstring for why parallel scan isn't the default)."""
+    captured = {}
+
+    def fake_find_geodata_files(**kwargs):
+        captured.update(kwargs)
+        return (0,) + ((),) * 6 + ([],) + ((),) + ([],) + ((),) * 7
+
+    monkeypatch.setattr(
+        "dicogis.ui.workers.find_geodata_files", fake_find_geodata_files
+    )
+
+    worker = FolderScanWorker(target_folder="/does/not/matter")
+
+    with qtbot.waitSignal(worker.finished, timeout=5000):
+        worker.run()
+
+    assert captured["parallel_scan"] is False
+    assert captured["max_workers"] is None
+
+
 def test_folder_scan_worker_run_emits_error_on_failure(qtbot, monkeypatch):
-    def _boom(start_folder):
+    # **kwargs, not a fixed signature: the worker passes parallel_scan/
+    # max_workers/progress_reporter too, and a signature mismatch here would
+    # make this test pass on a TypeError rather than on the raised error
+    def _boom(**kwargs):
         raise RuntimeError("boom")
 
     monkeypatch.setattr("dicogis.ui.workers.find_geodata_files", _boom)

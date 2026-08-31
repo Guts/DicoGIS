@@ -23,7 +23,10 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QHBoxLayout,
+    QLabel,
     QPushButton,
+    QSpinBox,
     QStyleFactory,
     QVBoxLayout,
     QWidget,
@@ -150,6 +153,35 @@ class TabSettings(QWidget):
         self.opt_debug.setChecked(str2bool(getenv("DICOGIS_DEBUG", "False")))
         self.opt_debug.toggled.connect(self.apply_debug_logging)
         export_layout.addWidget(self.opt_debug)
+
+        self.opt_parallel_scan = QCheckBox(
+            self.tr(
+                "Parallelize folder scan (recommended only for network-mounted / "
+                "high-latency storage; can be slower on local/fast storage)"
+            ),
+            self.FrOptExport.sub_frame,
+        )
+        self.opt_parallel_scan.setChecked(
+            str2bool(getenv("DICOGIS_LISTING_PARALLEL_SCAN", "False"))
+        )
+        export_layout.addWidget(self.opt_parallel_scan)
+
+        max_workers_row = QHBoxLayout()
+        self.lbl_max_workers = QLabel(
+            self.tr("Parallel scan: max workers (0 = auto)"),
+            self.FrOptExport.sub_frame,
+        )
+        self.opt_max_workers = QSpinBox(self.FrOptExport.sub_frame)
+        self.opt_max_workers.setRange(0, 64)
+        self.opt_max_workers.setSpecialValueText(self.tr("Auto"))
+        env_max_workers = getenv("DICOGIS_LISTING_MAX_WORKERS", "")
+        self.opt_max_workers.setValue(
+            int(env_max_workers) if env_max_workers.isdigit() else 0
+        )
+        max_workers_row.addWidget(self.lbl_max_workers)
+        max_workers_row.addWidget(self.opt_max_workers)
+        export_layout.addLayout(max_workers_row)
+
         self.FrOptExport.sub_frame.setLayout(export_layout)
 
         self.verticalLayout.insertWidget(2, self.FrOptExport)
@@ -247,6 +279,8 @@ class TabSettings(QWidget):
             "quick_fail": self.opt_quick_fail.isChecked(),
             "notification_sound": self.opt_end_process_notification_sound.isChecked(),
             "debug": self.opt_debug.isChecked(),
+            "listing_parallel_scan": self.opt_parallel_scan.isChecked(),
+            "listing_max_workers": self.opt_max_workers.value(),
         }
 
     def set_export_options(self, values: dict) -> None:
@@ -267,6 +301,22 @@ class TabSettings(QWidget):
             )
         if "debug" in values:
             self.opt_debug.setChecked(bool(str2bool(values["debug"])))
+        if "listing_parallel_scan" in values:
+            self.opt_parallel_scan.setChecked(
+                bool(str2bool(values["listing_parallel_scan"]))
+            )
+        if "listing_max_workers" in values:
+            self.opt_max_workers.setValue(int(values["listing_max_workers"]))
+
+    def get_listing_scan_kwargs(self) -> dict:
+        """Return parallel_scan/max_workers kwargs ready for
+        find_geodata_files() (translating the spinbox's 0 = 'Auto' into the
+        None that find_geodata_files() expects)."""
+        max_workers = self.opt_max_workers.value()
+        return {
+            "parallel_scan": self.opt_parallel_scan.isChecked(),
+            "max_workers": max_workers if max_workers > 0 else None,
+        }
 
     def get_ui_options(self) -> dict:
         """Return interface options as a dict."""

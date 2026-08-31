@@ -191,6 +191,26 @@ def inventory(
             help="Enable raw path instead of hyperlink in formats which support it.",
         ),
     ] = False,
+    opt_parallel_scan: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_LISTING_PARALLEL_SCAN",
+            is_flag=True,
+            help="Scan top-level subfolders in parallel worker threads instead of "
+            "a single sequential walk. Only beneficial on high-latency storage "
+            "(e.g. network-mounted shares) with a deep folder tree - can be slower "
+            "on local/fast storage. Disabled by default.",
+        ),
+    ] = False,
+    listing_max_workers: Annotated[
+        int | None,
+        typer.Option(
+            envvar="DICOGIS_LISTING_MAX_WORKERS",
+            help="Maximum worker threads used when --opt-parallel-scan is enabled. "
+            "Ignored otherwise. Defaults to ThreadPoolExecutor's own default "
+            "(based on CPU count).",
+        ),
+    ] = None,
     language: Annotated[
         AvailableLocales | None,
         typer.Option(
@@ -324,7 +344,11 @@ def inventory(
             li_file_databases,
             li_file_database_spatialite,
             li_file_database_geopackage,
-        ) = find_geodata_files(start_folder=input_folder)
+        ) = find_geodata_files(
+            start_folder=input_folder,
+            parallel_scan=opt_parallel_scan,
+            max_workers=listing_max_workers,
+        )
 
         print(
             "Found: "

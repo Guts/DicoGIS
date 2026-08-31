@@ -16,8 +16,17 @@ from unittest.mock import MagicMock
 
 # project
 from dicogis.export.base_serializer import MetadatasetSerializerBase
-from dicogis.georeaders.process_files import DatasetToProcess, ProcessingFiles
+
+# ProgressReporter now lives in dicogis.utils.progress but must stay importable
+# from here: it was part of this module's public surface (see test below).
+from dicogis.georeaders.process_files import (
+    DatasetToProcess,
+    ProcessingFiles,
+    ProgressReporter,
+)
 from dicogis.models.metadataset import MetaDataset
+from dicogis.utils.progress import OperationCanceled
+from dicogis.utils.progress import ProgressReporter as ProgressReporterCanonical
 
 # ############################################################################
 # ########## Globals #############
@@ -275,6 +284,67 @@ class TestProcessDatasetsInQueue(unittest.TestCase):
         processor.process_datasets_in_queue()
 
         self.assertEqual(serializer.post_serializing_call_count, 1)
+
+
+class TestProcessDatasetsCancellation(unittest.TestCase):
+    """Test cooperative cancellation of ProcessingFiles."""
+
+    class _CancelingReporter:
+        """Reports a cancellation from the very first check."""
+
+        def set_message(self, message: str) -> None: ...
+
+        def increment(self, amount: int = 1) -> None: ...
+
+        def set_total(self, total: int) -> None: ...
+
+        def is_canceled(self) -> bool:
+            return True
+
+    def test_cancellation_stops_before_processing_and_still_saves(self):
+        """Nothing is read, but post_serializing() still runs so that what
+        was already exported isn't lost, and OperationCanceled is raised so
+        the caller can't mistake it for a completed run."""
+        serializer = FakeSerializer()
+        processor = _make_processor(
+            serializer=serializer, progress_reporter=self._CancelingReporter()
+        )
+        dataset = DatasetToProcess(
+            file_path="parcels.shp",
+            file_format="esri_shapefile",
+            georeader=SucceedingGeoReader,
+        )
+        processor.li_files_to_process = [dataset]
+
+        with self.assertRaises(OperationCanceled):
+            processor.process_datasets_in_queue()
+
+        self.assertFalse(dataset.processed)
+        self.assertEqual(serializer.post_serializing_call_count, 1)
+
+    def test_no_reporter_runs_to_completion(self):
+        """dicogis-cli passes no reporter: nothing to cancel with."""
+        serializer = FakeSerializer()
+        processor = _make_processor(serializer=serializer, progress_reporter=None)
+        dataset = DatasetToProcess(
+            file_path="parcels.shp",
+            file_format="esri_shapefile",
+            georeader=SucceedingGeoReader,
+        )
+        processor.li_files_to_process = [dataset]
+
+        processor.process_datasets_in_queue()
+
+        self.assertTrue(dataset.exported)
+
+
+class TestProgressReporterReexport(unittest.TestCase):
+    """ProgressReporter moved to dicogis.utils.progress (a GDAL-free module,
+    so dicogis.listing can import it too) but must stay importable from its
+    original location."""
+
+    def test_reexported_symbol_is_the_canonical_one(self):
+        self.assertIs(ProgressReporter, ProgressReporterCanonical)
 
 
 class TestAddFilesToProcessQueue(unittest.TestCase):

@@ -26,7 +26,26 @@ and the choice persists across runs in `options.ini`.
 | `DICOGIS_ENABLE_NOTIFICATION_SOUND` | `--opt-notify-sound` / `--no-opt-notify-sound`   | `true`        |
 | `DICOGIS_EXPORT_RAW_PATH`           | `--opt-raw-path`                                 | `false`       |
 | `DICOGIS_EXPORT_SIZE_PRETTIFY`      | `--opt-prettify-size` / `--no-opt-prettify-size` | `false`       |
+| `DICOGIS_LISTING_MAX_WORKERS`       | `--listing-max-workers`                          | unset (auto, based on CPU count) |
+| `DICOGIS_LISTING_PARALLEL_SCAN`     | `--opt-parallel-scan` / `--no-opt-parallel-scan` | `false`       |
 | `DICOGIS_QUICK_FAIL`                | `--opt-quick-fail`                               | `false`       |
+
+#### About the parallel folder scan
+
+`DICOGIS_LISTING_PARALLEL_SCAN` scans the top-level subfolders of the target
+folder in parallel worker threads instead of a single sequential walk. **It is
+off by default, and enabling it is not always a win**: the per-file work is
+mostly CPU-bound Python, so on local or otherwise fast storage the threads
+mainly contend for the GIL and the scan gets *slower* (benchmarked at ~11x
+slower on a local disk). It pays off on high-latency storage — typically a
+network-mounted share — and the deeper the folder tree, the more it helps
+(~5x faster on a 32-folder tree over a simulated 3 ms/`scandir()` link).
+
+Rule of thumb: leave it off, and turn it on only when scanning a location you
+know is slow to browse. `DICOGIS_LISTING_MAX_WORKERS` caps the number of worker
+threads used when it's enabled (it is ignored otherwise); leave it unset to let
+Python size the pool from the CPU count. In the GUI, the equivalent spinbox uses
+`0` to mean "auto".
 
 ### GUI only
 

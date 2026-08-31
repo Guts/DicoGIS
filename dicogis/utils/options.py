@@ -87,6 +87,12 @@ class OptionsManager:
                 "quick_fail": self.config.get("basics", "quick_fail"),
                 "notification_sound": self.config.get("basics", "notification_sound"),
                 "debug": self.config.get("basics", "debug", fallback="False"),
+                "listing_parallel_scan": self.config.get(
+                    "basics", "listing_parallel_scan", fallback="False"
+                ),
+                "listing_max_workers": self.config.get(
+                    "basics", "listing_max_workers", fallback="0"
+                ),
             }
         )
 
@@ -183,6 +189,16 @@ class OptionsManager:
             str(export_options["notification_sound"]),
         )
         self.config.set("basics", "debug", str(export_options["debug"]))
+        self.config.set(
+            "basics",
+            "listing_parallel_scan",
+            str(export_options["listing_parallel_scan"]),
+        )
+        self.config.set(
+            "basics",
+            "listing_max_workers",
+            str(export_options["listing_max_workers"]),
+        )
 
         # interface settings
         ui_options = parent.tab_options.get_ui_options()

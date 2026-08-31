@@ -10,6 +10,9 @@ Look for geographic datasets.
 
 # Standard library
 import logging
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field, fields
+from functools import partial as partial_func
 from os import path, walk
 from pathlib import Path
 
@@ -18,6 +21,7 @@ import pgserviceparser
 
 # package
 from dicogis.constants import FormatsRaster
+from dicogis.utils.progress import ProgressReporter, raise_if_canceled
 
 # #############################################################################
 # ########## Globals ###############
@@ -28,8 +32,8 @@ logger = logging.getLogger(__name__)
 # extension -> bucket key, for formats identified by extension alone (no
 # companion-file validation needed, unlike shapefiles/MapInfo TAB). Adding a
 # new such format only means adding an entry here and to the `buckets` dict
-# built in find_geodata_files(). FormatsRaster.has_value() is checked as a
-# fallback for any extension not listed here (currently .ecw, .jpeg).
+# built alongside every _PartialListing. FormatsRaster.has_value() is checked
+# as a fallback for any extension not listed here (currently .ecw, .jpeg).
 EXTENSION_TO_BUCKET: dict[str, str] = {
     ".kml": "kml",
     ".kmz": "kml",
@@ -45,6 +49,52 @@ EXTENSION_TO_BUCKET: dict[str, str] = {
     ".gpkg": "geopackage",
     ".sqlite": "spatialite",
 }
+
+
+# #############################################################################
+# ########## Classes ###############
+# ##################################
+
+
+@dataclass
+class _PartialListing:
+    """Geodata files found under one directory (sub)tree, before the final
+    sort/grouping pass done by find_geodata_files(). Each worker thread and
+    the top level of the walk get their own instance, merged afterwards -
+    this is what lets the scan be parallelized without any locking."""
+
+    num_folders: int = 0
+    shp: list[str] = field(default_factory=list)
+    tab: list[str] = field(default_factory=list)
+    kml: list[str] = field(default_factory=list)
+    gml: list[str] = field(default_factory=list)
+    geoj: list[str] = field(default_factory=list)
+    geotiff: list[str] = field(default_factory=list)
+    gxt: list[str] = field(default_factory=list)
+    dxf: list[str] = field(default_factory=list)
+    dwg: list[str] = field(default_factory=list)
+    dgn: list[str] = field(default_factory=list)
+    geopackage: list[str] = field(default_factory=list)
+    spatialite: list[str] = field(default_factory=list)
+    filegdb: list[str] = field(default_factory=list)
+    raster: list[str] = field(default_factory=list)
+
+    def buckets(self) -> dict[str, list[str]]:
+        """Bucket key (see EXTENSION_TO_BUCKET) -> list to append matches
+        into. Excludes shp/tab/raster/filegdb, which need extra logic beyond
+        a plain extension lookup and are handled separately."""
+        return {
+            "kml": self.kml,
+            "gml": self.gml,
+            "geoj": self.geoj,
+            "geotiff": self.geotiff,
+            "gxt": self.gxt,
+            "dxf": self.dxf,
+            "dwg": self.dwg,
+            "dgn": self.dgn,
+            "geopackage": self.geopackage,
+            "spatialite": self.spatialite,
+        }
 
 
 # ##############################################################################
@@ -78,8 +128,115 @@ def check_usable_pg_services(requested_pg_services: list[str]) -> list[str] | No
     return out_pg_srv_list
 
 
+def _process_one_walk_level(
+    root: str,
+    dirs: list[str],
+    files: list[str],
+    result: _PartialListing,
+    buckets: dict[str, list[str]],
+) -> list[str]:
+    """Classify one os.walk() level's dirs/files into `result`.
+
+    Args:
+        root: directory these dirs/files belong to (as yielded by os.walk()).
+        dirs: subdirectories of root, as yielded by os.walk().
+        files: files directly in root, as yielded by os.walk().
+        result: partial listing to fill in place.
+        buckets: result.buckets(), passed in rather than recomputed so
+            callers can build it once per tree instead of once per level.
+
+    Returns:
+        The subset of `dirs` that should still be descended into, i.e. with
+        detected FileGeoDatabases pruned out: they're captured as a single
+        dataset here and can otherwise contain thousands of internal files
+        that would be inspected for nothing.
+    """
+    result.num_folders += len(dirs)
+    gdb_dirs: list[str] = []
+    for d in dirs:
+        """looking for File Geodatabase among directories"""
+        full_path = path.join(root, d)
+        if full_path[-4:].lower() == ".gdb":
+            # add complete path of Esri FileGeoDatabase
+            result.filegdb.append(path.abspath(full_path))
+            gdb_dirs.append(d)
+    pruned_dirs = [d for d in dirs if d not in gdb_dirs] if gdb_dirs else dirs
+
+    # lowercased filenames of this directory, built once: lets shapefile/
+    # MapInfo companion checks below be plain set membership tests instead of
+    # one isfile() stat() round-trip per case variant. This also makes the
+    # check tolerant to companions whose extension case differs from the main
+    # file's, e.g. "cities.shp" + "cities.DBF" (still seen in older/legacy
+    # GIS exports), which touching the disk per case variant already tried
+    # to cover.
+    files_lower: set[str] = {name.lower() for name in files}
+    for f in files:
+        """looking for files with geographic data"""
+        full_path = path.join(root, f)
+        f_stem_lower, f_ext_lower = path.splitext(f.lower())
+        if (
+            f_ext_lower == ".shp"
+            and f"{f_stem_lower}.dbf" in files_lower
+            and f"{f_stem_lower}.shx" in files_lower
+        ):
+            """listing compatible shapefiles"""
+            # add complete path of shapefile
+            result.shp.append(full_path)
+        elif (
+            f_ext_lower == ".tab"
+            and f"{f_stem_lower}.dat" in files_lower
+            and f"{f_stem_lower}.map" in files_lower
+            and f"{f_stem_lower}.id" in files_lower
+        ):
+            """listing MapInfo tables"""
+            result.tab.append(full_path)
+        elif bucket_key := EXTENSION_TO_BUCKET.get(f_ext_lower):
+            buckets[bucket_key].append(full_path)
+        elif FormatsRaster.has_value(f_ext_lower):
+            """listing compatible rasters"""
+            result.raster.append(full_path)
+
+    return pruned_dirs
+
+
+def _scan_directory_tree(
+    root: str, progress_reporter: ProgressReporter | None = None
+) -> _PartialListing:
+    """Recursively scan one directory tree into its own partial result.
+
+    Runs standalone - its own os.walk(), no shared mutable state - so it can
+    safely be handed to a worker thread by find_geodata_files(). Only reads
+    from `progress_reporter` (is_canceled()), never writes progress to it:
+    when running in a worker thread, reporting is left to the main thread
+    merging the results, so implementations don't need a thread-safe counter.
+
+    Raises:
+        OperationCanceled: if the progress reporter asked to stop. Raised
+            from the worker thread, and re-raised in the calling thread by
+            the executor when the result is consumed.
+    """
+    result = _PartialListing()
+    buckets = result.buckets()
+    for current_root, dirs, files in walk(root):
+        raise_if_canceled(progress_reporter)
+        dirs[:] = _process_one_walk_level(current_root, dirs, files, result, buckets)
+    return result
+
+
+def _merge_partial(into: _PartialListing, other: _PartialListing) -> None:
+    """Fold `other`'s matches into `into`, in place."""
+    into.num_folders += other.num_folders
+    for a_field in fields(_PartialListing):
+        if a_field.name == "num_folders":
+            continue
+        getattr(into, a_field.name).extend(getattr(other, a_field.name))
+
+
 def find_geodata_files(
     start_folder: Path,
+    parallel_scan: bool = False,
+    max_workers: int | None = None,
+    progress_reporter: ProgressReporter | None = None,
 ) -> tuple[
     int,
     list[str],
@@ -103,149 +260,130 @@ def find_geodata_files(
 
     Args:
         start_folder (Path): folder to start.
+        parallel_scan (bool): scan top-level subfolders in parallel worker
+            threads (each recursing through its own branch independently)
+            instead of a single sequential walk. Off by default: benchmarks
+            show this is a net loss on local/fast storage (the per-file
+            classification work is CPU-bound Python, so threads mostly
+            fight over the GIL instead of overlapping I/O) and only pays
+            off on high-latency storage such as network-mounted shares,
+            with a tree deep enough to have many directories to overlap.
+            Only enable it when scanning a known-slow/network location.
+        max_workers (int | None): passed to ThreadPoolExecutor when
+            parallel_scan is True; ignored otherwise. Defaults to
+            ThreadPoolExecutor's own default (based on CPU count).
+        progress_reporter (ProgressReporter | None): reporter notified of
+            folders as they're scanned, and polled for cancellation. None
+            (the default, and what dicogis-cli passes) disables both.
+            Note that set_total() is never called: the number of folders
+            can't be known before walking the tree, so this stage reports a
+            running count and the folder being scanned, not a percentage.
 
     Returns:
         tuple[ int, list[str], list[str], list[str], list[str], list[str], list[str],
         list[str], list[str], list[str], list[str], list[str], list[str], list[str],
         list[str], ]: tuple with number of folders parsed and list of paths by formats
+
+    Raises:
+        OperationCanceled: if the progress reporter asked to stop. Nothing is
+            returned in that case: a partial listing is indistinguishable from
+            a complete one for callers downstream.
     """
-    # counter
-    num_folders: int = 0
-    # final list by formats
-    li_shp: list[str] = []
-    li_tab: list[str] = []
-    li_kml: list[str] = []
-    li_gml: list[str] = []
-    li_geoj: list[str] = []
-    li_geotiff: list[str] = []
-    li_gxt: list[str] = []
-    li_dxf: list[str] = []
-    li_dwg: list[str] = []
-    li_dgn: list[str] = []
-    li_cdao: list[str] = []
-    li_raster: list[str] = []
-    li_flat_geodatabases_geopackage: list[str] = []
-    li_fdb: list[str] = []
-    li_flat_geodatabases_esri_filegdb: list[str] = []
-    li_flat_geodatabases_spatialite: list[str] = []
-    # bucket key (see EXTENSION_TO_BUCKET) -> list to append matches into
-    buckets: dict[str, list[str]] = {
-        "kml": li_kml,
-        "gml": li_gml,
-        "geoj": li_geoj,
-        "geotiff": li_geotiff,
-        "gxt": li_gxt,
-        "dxf": li_dxf,
-        "dwg": li_dwg,
-        "dgn": li_dgn,
-        "geopackage": li_flat_geodatabases_geopackage,
-        "spatialite": li_flat_geodatabases_spatialite,
-    }
-
-    # Looping in folders structure
     logger.info(f"Begin of folders parsing: {start_folder}")
-    for root, dirs, files in walk(start_folder):
-        num_folders = num_folders + len(dirs)
-        gdb_dirs: list[str] = []
-        for d in dirs:
-            """looking for File Geodatabase among directories"""
-            full_path = path.join(root, d)
-            if full_path[-4:].lower() == ".gdb":
-                # add complete path of Esri FileGeoDatabase
-                li_flat_geodatabases_esri_filegdb.append(path.abspath(full_path))
-                gdb_dirs.append(d)
-            else:
-                pass
-        if gdb_dirs:
-            # prune FileGeoDatabases from the walk: they're captured as a
-            # single dataset above and can otherwise contain thousands of
-            # internal files that would be inspected for nothing
-            dirs[:] = [d for d in dirs if d not in gdb_dirs]
-        # lowercased filenames of the current directory, built once: lets
-        # shapefile/MapInfo companion checks below be plain set membership
-        # tests instead of one isfile() stat() round-trip per case variant.
-        # This also makes the check tolerant to companions whose extension
-        # case differs from the main file's, e.g. "cities.shp" + "cities.DBF"
-        # (still seen in older/legacy GIS exports), which touching the disk
-        # per case variant already tried to cover.
-        files_lower: set[str] = {name.lower() for name in files}
-        for f in files:
-            """looking for files with geographic data"""
-            full_path = path.join(root, f)
-            f_stem_lower, f_ext_lower = path.splitext(f.lower())
-            # Looping on files contained
-            if (
-                f_ext_lower == ".shp"
-                and f"{f_stem_lower}.dbf" in files_lower
-                and f"{f_stem_lower}.shx" in files_lower
-            ):
-                """listing compatible shapefiles"""
-                # add complete path of shapefile
-                li_shp.append(full_path)
-            elif (
-                f_ext_lower == ".tab"
-                and f"{f_stem_lower}.dat" in files_lower
-                and f"{f_stem_lower}.map" in files_lower
-                and f"{f_stem_lower}.id" in files_lower
-            ):
-                """listing MapInfo tables"""
+    root_str = str(start_folder)
 
-                li_tab.append(full_path)
-            elif bucket_key := EXTENSION_TO_BUCKET.get(f_ext_lower):
-                buckets[bucket_key].append(full_path)
-            elif FormatsRaster.has_value(f_ext_lower):
-                """listing compatible rasters"""
+    result = _PartialListing()
+    buckets = result.buckets()
 
-                li_raster.append(full_path)
-            else:
-                continue
+    already_reported = 0
+
+    def _report_scanned(folders_done: int, current_folder: str) -> None:
+        """Report scan advancement, from the calling thread only."""
+        nonlocal already_reported
+        if progress_reporter is None:
+            return
+        progress_reporter.set_message(f"Scanning ({folders_done}): {current_folder}")
+        progress_reporter.increment(amount=folders_done - already_reported)
+        already_reported = folders_done
+
+    if not parallel_scan:
+        for current_root, dirs, files in walk(root_str):
+            raise_if_canceled(progress_reporter)
+            dirs[:] = _process_one_walk_level(
+                current_root, dirs, files, result, buckets
+            )
+            _report_scanned(result.num_folders, current_root)
+    else:
+        top_root, top_dirs, top_files = next(walk(root_str), (root_str, [], []))
+        pruned_dirs = _process_one_walk_level(
+            top_root, top_dirs, top_files, result, buckets
+        )
+        _report_scanned(result.num_folders, top_root)
+        if pruned_dirs:
+            subtree_roots = [path.join(top_root, d) for d in pruned_dirs]
+            scan_subtree = partial_func(
+                _scan_directory_tree, progress_reporter=progress_reporter
+            )
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                # worker threads only poll is_canceled(); progress is reported
+                # here, in the calling thread, as each subtree comes back - so
+                # a ProgressReporter never needs a thread-safe counter.
+                for subtree_root, subtree in zip(
+                    subtree_roots, executor.map(scan_subtree, subtree_roots)
+                ):
+                    _merge_partial(result, subtree)
+                    _report_scanned(result.num_folders, subtree_root)
+
     # grouping raster
-    li_raster.extend(li_geotiff)
+    li_raster = result.raster
+    li_raster.extend(result.geotiff)
 
     # grouping CAO/DAO files
-    li_cdao.extend(li_dxf)
-    li_cdao.extend(li_dwg)
-    li_cdao.extend(li_dgn)
+    li_cdao: list[str] = []
+    li_cdao.extend(result.dxf)
+    li_cdao.extend(result.dwg)
+    li_cdao.extend(result.dgn)
     # grouping File geodatabases
-    li_fdb.extend(li_flat_geodatabases_esri_filegdb)
-    li_fdb.extend(li_flat_geodatabases_spatialite)
-    li_fdb.extend(li_flat_geodatabases_geopackage)
+    li_fdb: list[str] = []
+    li_fdb.extend(result.filegdb)
+    li_fdb.extend(result.spatialite)
+    li_fdb.extend(result.geopackage)
 
     logger.info(
-        f"End of folders parsing: {len(li_shp)} shapefiles - "
-        f"{len(li_tab)} tables (MapInfo) - "
-        f"{len(li_kml)} KML - "
-        f"{len(li_gml)} GML - "
-        f"{len(li_geoj)} GeoJSON"
+        f"End of folders parsing: {len(result.shp)} shapefiles - "
+        f"{len(result.tab)} tables (MapInfo) - "
+        f"{len(result.kml)} KML - "
+        f"{len(result.gml)} GML - "
+        f"{len(result.geoj)} GeoJSON"
         f"{len(li_raster)} rasters - "
-        f"{len(li_flat_geodatabases_esri_filegdb)} Esri FileGDB - "
-        f"{len(li_flat_geodatabases_geopackage)} Geopackages - "
-        f"{len(li_flat_geodatabases_spatialite)} Spatialite - "
+        f"{len(result.filegdb)} Esri FileGDB - "
+        f"{len(result.geopackage)} Geopackages - "
+        f"{len(result.spatialite)} Spatialite - "
         f"{len(li_cdao)} CAO/DAO - "
-        f"{len(li_gxt)} GXT - in {num_folders} folders"
+        f"{len(result.gxt)} GXT - in {result.num_folders} folders"
     )
 
     # Lists ordering and tupling
-    li_shp = tuple(sorted(li_shp))
-    li_tab = tuple(sorted(li_tab))
+    li_shp = tuple(sorted(result.shp))
+    li_tab = tuple(sorted(result.tab))
     li_raster = sorted(li_raster)
-    li_kml = tuple(sorted(li_kml))
-    li_gml = tuple(sorted(li_gml))
-    li_geoj = tuple(sorted(li_geoj))
-    li_geotiff = sorted(li_geotiff)
-    li_gxt = tuple(sorted(li_gxt))
-    li_flat_geodatabases_esri_filegdb = tuple(sorted(li_flat_geodatabases_esri_filegdb))
-    li_flat_geodatabases_geopackage = tuple(sorted(li_flat_geodatabases_geopackage))
-    li_flat_geodatabases_spatialite = tuple(sorted(li_flat_geodatabases_spatialite))
+    li_kml = tuple(sorted(result.kml))
+    li_gml = tuple(sorted(result.gml))
+    li_geoj = tuple(sorted(result.geoj))
+    li_geotiff = sorted(result.geotiff)
+    li_gxt = tuple(sorted(result.gxt))
+    li_flat_geodatabases_esri_filegdb = tuple(sorted(result.filegdb))
+    li_flat_geodatabases_geopackage = tuple(sorted(result.geopackage))
+    li_flat_geodatabases_spatialite = tuple(sorted(result.spatialite))
     li_fdb = tuple(sorted(li_fdb))
-    li_dxf = tuple(sorted(li_dxf))
-    li_dwg = tuple(sorted(li_dwg))
-    li_dgn = tuple(sorted(li_dgn))
+    li_dxf = tuple(sorted(result.dxf))
+    li_dwg = tuple(sorted(result.dwg))
+    li_dgn = tuple(sorted(result.dgn))
     li_cdao = tuple(sorted(li_cdao))
 
     # End of function
     return (
-        num_folders,
+        result.num_folders,
         li_shp,
         li_tab,
         li_kml,
