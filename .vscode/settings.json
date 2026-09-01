@@ -27,7 +27,7 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit"
         },
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
         "editor.guides.bracketPairs": "active",
         "editor.rulers": [
@@ -52,11 +52,6 @@
     "autoDocstring.guessTypes": true,
     "autoDocstring.docstringFormat": "google-notypes",
     "autoDocstring.generateDocstringOnEnter": false,
-    "isort.args": [
-        "--profile",
-        "black"
-    ],
-    "isort.check": true,
     "markdownlint.config": {
         "MD007": {
             "indent": 4
