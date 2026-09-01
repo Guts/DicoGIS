@@ -97,9 +97,9 @@ def test_main_window_check_fields_accepts_any_single_format(
         window.tab_files.set_filters_state(all_filters_off)
         window.tab_files.set_filters_state({filter_name: "1"})
 
-        assert window.check_fields(tab_data_type=0) is True, (
-            f"a selection limited to {filter_name} was rejected"
-        )
+        assert (
+            window.check_fields(tab_data_type=0) is True
+        ), f"a selection limited to {filter_name} was rejected"
         assert not shown_messages
 
 
