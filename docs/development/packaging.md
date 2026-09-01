@@ -12,8 +12,11 @@ The output binary and all embedded dependencies is located into a subfolder name
 # Generates MS Version Info
 python .\builder\version_info_templater.py
 
-# Generates MS Executable
-python -O .\builder\pyinstaller_build_windows.py
+# Generates MS Executable for CLI
+python -O .\builder\pyinstaller_build_windows_cli.py
+
+# Generates MS Executable for GUI
+python -O .\builder\pyinstaller_build_windows_gui.py
 ```
 
 To run it, double-click on the executable file (*.exe).

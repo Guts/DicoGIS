@@ -54,7 +54,8 @@ python -m pip install -U pip setuptools wheel
 ## Install project
 
 ```sh
-python -m pip install -U -e .[dev,windows]
+python -m pip install --index https://gisidx.github.io/gwi gdal
+python -m pip install -U -e .[dev,gui]
 ```
 
 ### Try it
