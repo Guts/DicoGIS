@@ -865,20 +865,11 @@ class DicoGIS(QMainWindow):
                 )
                 return False
 
-            # check if at least a format has been choosen
-            filters = self.tab_files.get_filters_state()
-            if not (
-                filters["opt_shp"]
-                or filters["opt_tab"]
-                or filters["opt_kml"]
-                or filters["opt_gml"]
-                or filters["opt_geoj"]
-                or filters["opt_rast"]
-                or filters["opt_egdb"]
-                or filters["opt_gpkg"]
-                or filters["opt_spadb"]
-                or filters["opt_dxf"]
-            ):
+            # check if at least a format has been choosen. Every value of
+            # get_filters_state() is a format filter, so testing them all
+            # keeps this in sync when a format is added - enumerating them
+            # by hand had already let "opt_gxt" be forgotten.
+            if not any(self.tab_files.get_filters_state().values()):
                 QMessageBox.critical(
                     self, "DicoGIS - User error", self.tr("Any format selected")
                 )
