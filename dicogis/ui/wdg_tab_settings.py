@@ -75,7 +75,6 @@ class TabSettings(QWidget):
         )
 
         self._init_interface_options()
-        self._init_proxy_options()
         self._init_export_options()
         self._init_env_vars()
 
@@ -98,10 +97,6 @@ class TabSettings(QWidget):
         if style_idx >= 0:
             self.opt_ui_style.setCurrentIndex(style_idx)
         self.opt_ui_style.currentTextChanged.connect(self.apply_ui_style)
-
-    def _init_proxy_options(self) -> None:
-        """Wire the proxy settings group box toggle."""
-        self.FrOptProxy.toggled.connect(self.FrOptProxy.setEnabled)
 
     def _init_export_options(self) -> None:
         """Create the export/general options collapsible frame."""

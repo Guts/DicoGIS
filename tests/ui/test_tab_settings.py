@@ -1,9 +1,12 @@
 #! python3
 
 """
-Tests for the TabSettings widget's parallel-scan options (checkbox + max
-workers spinbox): env var defaults, get/set round-trip, and the kwargs
-handed to FolderScanWorker/find_geodata_files().
+Tests for the TabSettings widget:
+
+- parallel-scan options (checkbox + max workers spinbox): env var defaults,
+  get/set round-trip, and the kwargs handed to
+  FolderScanWorker/find_geodata_files();
+- proxy settings group box: toggling and get/set round-trip.
 
 Usage from the repo root folder:
     pytest tests/ui/test_tab_settings.py
@@ -82,6 +85,69 @@ def test_get_set_export_options_round_trip_for_parallel_scan(qtbot):
     assert widget.get_listing_scan_kwargs() == {
         "parallel_scan": True,
         "max_workers": 5,
+    }
+
+
+def test_proxy_group_box_stays_toggleable(qtbot):
+    """The proxy group box must remain clickable at all times.
+
+    Regression: the .ui declared it `enabled=false` and the widget wired
+    `toggled -> setEnabled`, so it started disabled and, once unchecked,
+    disabled itself -- leaving no way to (re)enable proxy support from the
+    GUI at all.
+    """
+    widget = TabSettings()
+    qtbot.addWidget(widget)
+
+    assert widget.FrOptProxy.isEnabled() is True
+
+    for checked in (True, False, True):
+        widget.FrOptProxy.setChecked(checked)
+        assert widget.FrOptProxy.isChecked() is checked
+        assert widget.FrOptProxy.isEnabled() is True
+
+
+def test_proxy_fields_follow_the_check_state(qtbot):
+    """A checkable QGroupBox already enables/disables its children with its
+    check state: the proxy inputs must follow it, without any extra wiring.
+    """
+    widget = TabSettings()
+    qtbot.addWidget(widget)
+    proxy_inputs = (
+        widget.prox_ent_host,
+        widget.prox_ent_port,
+        widget.prox_ent_user,
+    )
+
+    widget.FrOptProxy.setChecked(False)
+    assert not any(proxy_input.isEnabled() for proxy_input in proxy_inputs)
+
+    widget.FrOptProxy.setChecked(True)
+    assert all(proxy_input.isEnabled() for proxy_input in proxy_inputs)
+
+
+def test_get_set_proxy_settings_round_trip(qtbot):
+    """Proxy settings round-trip through set_proxy_settings()/
+    get_proxy_settings(), as OptionsManager persists them to options.ini."""
+    widget = TabSettings()
+    qtbot.addWidget(widget)
+
+    widget.set_proxy_settings(
+        {
+            "proxy_needed": "1",
+            "proxy_type": "0",
+            "proxy_server": "proxy.example.org",
+            "proxy_port": "8080",
+            "proxy_user": "jdoe",
+        }
+    )
+
+    assert widget.get_proxy_settings() == {
+        "proxy_needed": True,
+        "proxy_type": False,
+        "proxy_server": "proxy.example.org",
+        "proxy_port": 8080,
+        "proxy_user": "jdoe",
     }
 
 
