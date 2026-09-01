@@ -29,18 +29,28 @@ matching GDAL into that venv yourself, using one of the options below.
 
 [Geospatial Wheels Index](https://geospatial-wheels-index.readthedocs.io/en/latest/)
 publishes prebuilt GDAL wheels behind a package index, so pip can resolve and
-install them like any other package: no manual `.whl` download, no compilation
-against `libgdal-dev`, no system GDAL to match.
+install them like any other package: no manual `.whl` download and no
+compilation against `libgdal-dev`.
+
+On Linux, the wheel still links against the system `libgdal` (install it first,
+see below), so the version has to be pinned to it:
 
 ```sh
+python -m pip install --index-url https://gisidx.github.io/gwi gdal=="$(gdal-config --version).*"
+```
+
+On Windows, where there is no system GDAL to match, the version can be left to
+pip:
+
+```powershell
 python -m pip install --index-url https://gisidx.github.io/gwi gdal
 ```
 
-Within a DicoGIS installed through pipx:
+Within a DicoGIS installed through pipx (Linux form shown):
 
 ```sh
 pipx install dicogis
-pipx inject dicogis gdal --pip-args="--index-url https://gisidx.github.io/gwi"
+pipx inject dicogis "gdal==$(gdal-config --version).*" --pip-args="--index-url https://gisidx.github.io/gwi"
 ```
 
 ```{note}

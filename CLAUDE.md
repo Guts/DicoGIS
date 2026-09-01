@@ -26,14 +26,15 @@ python -m pip install -U -e .[gdal,dev,gui,test]
 pre-commit install
 ```
 
-To avoid building GDAL against system headers (no `libgdal-dev`, no matching
-`gdal-config` version to chase), the prebuilt wheels served by
+To pull a prebuilt wheel instead of building GDAL against system headers, the
+wheels served by
 [Geospatial Wheels Index](https://geospatial-wheels-index.readthedocs.io/en/latest/)
 can replace the `gdal==...` line above — a third-party index, not an official
-PyPI channel:
+PyPI channel. The version pin stays necessary: the wheel links against the
+system `libgdal`.
 
 ```sh
-python -m pip install --index-url https://gisidx.github.io/gwi gdal
+python -m pip install --index-url https://gisidx.github.io/gwi gdal=="$(gdal-config --version).*"
 ```
 
 ### Running the app
