@@ -73,7 +73,7 @@ class FormatsVector(ExtendedEnum):
     file_geodatabase_spatialite = ".sqlite"
     geojson = ".geojson"
     gml = ".gml"
-    gxt = ".gml"
+    gxt = ".gxt"
     kml = ".kml"
     mapinfo_tab = ".tab"
 
