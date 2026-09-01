@@ -24,7 +24,20 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 - Python 3.10+ installed with the Windows MSI installer (version from the Windows store is not working)
 
-### Download GDAL wheel
+### Install GDAL
+
+The quickest way is to let pip pull a prebuilt wheel from
+[Geospatial Wheels Index](https://geospatial-wheels-index.readthedocs.io/en/latest/),
+once your virtual environment is created and activated (see below):
+
+```powershell
+python -m pip install --index-url https://gisidx.github.io/gwi gdal
+```
+
+Mind that this is a third-party index rather than an official PyPI channel. To
+stick to a wheel you downloaded yourself instead:
+
+#### Download GDAL wheel
 
 1. Go to <https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal> or to <https://github.com/cgohlke/geospatial-wheels/releases/latest>
 1. Download the appropriate package for the Python environment (version, type...). For example: `GDAL-3.8.4-cp310-cp310-win_amd64`

@@ -25,6 +25,31 @@ package on PyPI is not a portable wheel: it must match the version of the
 pip cannot resolve on its own inside an isolated pipx venv. You need to get a
 matching GDAL into that venv yourself, using one of the options below.
 
+## Prebuilt wheels, any platform
+
+[Geospatial Wheels Index](https://geospatial-wheels-index.readthedocs.io/en/latest/)
+publishes prebuilt GDAL wheels behind a package index, so pip can resolve and
+install them like any other package: no manual `.whl` download, no compilation
+against `libgdal-dev`, no system GDAL to match.
+
+```sh
+python -m pip install --index-url https://gisidx.github.io/gwi gdal
+```
+
+Within a DicoGIS installed through pipx:
+
+```sh
+pipx install dicogis
+pipx inject dicogis gdal --pip-args="--index-url https://gisidx.github.io/gwi"
+```
+
+```{note}
+This is a third-party index, not an official PyPI channel: it is a convenience,
+and you should weigh it against your own supply-chain policy. The
+platform/Python-version coverage is the index's, so check its documentation if
+your combination is unusual. The per-OS options below have no such caveat.
+```
+
 ## Linux (Debian/Ubuntu)
 
 First, install the GDAL system library and its `gdal-config` companion (see
