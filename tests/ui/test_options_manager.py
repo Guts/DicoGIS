@@ -18,6 +18,7 @@ from pathlib import Path
 from dicogis.ui.mw_dicogis import DicoGIS
 from dicogis.utils.options import OptionsManager
 
+
 # #############################################################################
 # ########## Tests ##################
 # ##################################

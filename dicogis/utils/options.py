@@ -24,6 +24,7 @@ from dicogis.__about__ import __title__
 from dicogis.utils.check_path import check_path
 from dicogis.utils.str2bool import str2bool
 
+
 # #############################################################################
 # ########## Globals ###############
 # ##################################

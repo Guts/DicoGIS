@@ -16,6 +16,7 @@ from dicogis.__about__ import __title__, __version__
 from dicogis.cli.cmd_inventory import inventory
 from dicogis.cli.cmd_publish import publish
 
+
 # ############################################################################
 # ########## Globals ###############
 # ##################################

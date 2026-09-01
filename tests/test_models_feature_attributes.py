@@ -16,6 +16,7 @@ import unittest
 # project
 from dicogis.models.feature_attributes import AttributeField
 
+
 # ############################################################################
 # ########## Classes #############
 # ################################

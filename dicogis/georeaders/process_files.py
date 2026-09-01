@@ -33,6 +33,7 @@ from dicogis.utils.progress import (  # noqa: F401
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################

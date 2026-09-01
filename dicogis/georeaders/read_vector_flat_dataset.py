@@ -26,6 +26,7 @@ from dicogis.georeaders.base_georeader import GeoReaderBase
 from dicogis.models.metadataset import MetaDatabaseFlat, MetaVectorDataset
 from dicogis.utils.check_path import check_var_can_be_path
 
+
 # ############################################################################
 # ######### Globals ############
 # ##############################
@@ -203,32 +204,27 @@ class ReadVectorFlatDataset(GeoReaderBase):
 # #################################
 if __name__ == "__main__":
     """Standalone execution."""
-    from pprint import pprint
 
     # Shapefile
     georeader = ReadVectorFlatDataset()
     metadataset = georeader.infos_dataset(
         source_path="tests/fixtures/gisdata/data/good/vector/san_andres_y_providencia_coastline.shp",
     )
-    pprint(metadataset)
 
     # SpatiaLite
     georeader = ReadVectorFlatDataset(dataset_type="flat_database")
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/QGIS Training Data/QGIS-Training-Data-release_3.28/exercise_data/qgis-server-tutorial-data/naturalearth.sqlite",
     )
-    pprint(metadataset)
 
     # Geopackage
     georeader = ReadVectorFlatDataset(dataset_type="flat_database")
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gpkg"
     )
-    pprint(metadataset)
 
     # Esri FileGDB
     georeader = ReadVectorFlatDataset(dataset_type="flat_database")
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gdb"
     )
-    pprint(metadataset)

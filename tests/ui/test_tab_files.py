@@ -17,6 +17,7 @@ from unittest.mock import patch
 # package
 from dicogis.ui.wdg_tab_files import CHECKBOX_TO_FORMAT, RASTER_FORMATS, TabFiles
 
+
 # #############################################################################
 # ########## Tests ##################
 # ##################################

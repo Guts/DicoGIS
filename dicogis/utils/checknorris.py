@@ -24,6 +24,7 @@ from urllib.request import (
     urlopen,
 )
 
+
 # #############################################################################
 # ########## Globals ###############
 # ##################################
@@ -64,7 +65,7 @@ class CheckNorris:
         # end of method
         return False
 
-    def check_proxy(self, specific: dict = {}):
+    def check_proxy(self, specific: dict | None = None):
         """Check if proxy settings are set on the OS.
 
         Returns:
@@ -73,6 +74,8 @@ class CheckNorris:
         -- 3 and settings when direct connection fails but a proxy is set
         see: https://docs.python.org/2/library/urllib.html#urllib.getproxies
         """
+        if specific is None:
+            specific = {}
         os_proxies = getproxies()
         if len(os_proxies) == 0 and self.check_internet_connection:
             logger.info("No proxy needed nor set. Direct connection works.")

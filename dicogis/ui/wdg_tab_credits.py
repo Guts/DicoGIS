@@ -29,6 +29,7 @@ from PyQt6.QtWidgets import QLabel, QWidget
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.utils import Utilities
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################

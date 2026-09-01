@@ -16,6 +16,7 @@ import pgserviceparser
 # package
 from dicogis.__about__ import __title_clean__
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################
@@ -142,11 +143,9 @@ class DatabaseConnection:
 
 if __name__ == "__main__":
     db = DatabaseConnection(service_name="empty")
-    print(db.connection_params_as_dict, bool(db.connection_params_as_dict))
     db.store_in_pgservice_file()
 
     db = DatabaseConnection(service_name="minimal", host="localhost")
-    print(db.connection_params_as_dict, bool(db.connection_params_as_dict))
     db.store_in_pgservice_file()
 
     pgserviceparser.remove_service("minimal")

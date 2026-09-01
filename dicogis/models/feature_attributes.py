@@ -17,6 +17,7 @@ import logging
 from dataclasses import dataclass
 from hashlib import sha256
 
+
 # ############################################################################
 # ########## Globals ###############
 # ##################################

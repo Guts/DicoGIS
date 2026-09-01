@@ -9,10 +9,12 @@ import os
 import sys
 from datetime import datetime
 
+
 sys.path.insert(0, os.path.abspath(r".."))
 
 # 3rd party
 from dicogis import __about__
+
 
 # -- Build environment -----------------------------------------------------
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"

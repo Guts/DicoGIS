@@ -6,6 +6,7 @@ from string import ascii_letters
 
 from osgeo import ogr, osr
 
+
 # -- GLOBALS --
 
 # Create a spatial reference object

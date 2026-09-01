@@ -5,6 +5,7 @@
 # standard library
 from enum import Enum
 
+
 GDAL_POSTGIS_OPEN_OPTIONS: list[str] = []
 
 

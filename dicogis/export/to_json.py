@@ -22,6 +22,7 @@ from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.models.metadataset import MetaDataset
 from dicogis.utils.slugger import sluggy
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################

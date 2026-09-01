@@ -30,6 +30,7 @@ from dicogis.utils.environment import GDAL_IS_AVAILABLE
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.str2bool import str2bool
 
+
 # GDAL is an optional dependency (see pyproject.toml `gdal` extra): dicogis.ui.mw_dicogis
 # imports it at module level, so importing it here eagerly would break `dicogis-gui`
 # entirely when GDAL isn't installed, e.g. under pipx. Deferred into dicogis_gui().

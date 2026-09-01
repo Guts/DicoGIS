@@ -17,6 +17,7 @@ from unittest.mock import patch
 # project
 from dicogis.utils import notifier
 
+
 # ############################################################################
 # ########## Classes #############
 # ################################

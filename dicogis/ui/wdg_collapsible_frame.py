@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import QWidget
 # project
 from dicogis.utils.utils import Utilities
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################

@@ -19,6 +19,7 @@ from dicogis.__about__ import __title_clean__ as package_name
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.slugger import sluggy
 
+
 # #############################################################################
 # ########## Classes ###############
 # ##################################

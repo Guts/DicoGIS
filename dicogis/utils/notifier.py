@@ -16,6 +16,7 @@ from notifypy import Notify
 from dicogis.__about__ import __icon_path__, __notification_sound_path__, __title__
 from dicogis.utils.utils import Utilities
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################

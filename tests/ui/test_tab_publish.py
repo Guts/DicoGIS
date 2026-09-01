@@ -15,6 +15,7 @@ Usage from the repo root folder:
 from dicogis.cli.cmd_publish import PublishReport
 from dicogis.ui.wdg_tab_publish import TabPublish
 
+
 # #############################################################################
 # ########## Tests ##################
 # ##################################

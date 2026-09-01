@@ -20,6 +20,7 @@ from dicogis.models.feature_attributes import AttributeField
 from dicogis.utils.formatters import convert_octets
 from dicogis.utils.slugger import sluggy
 
+
 # ############################################################################
 # ########## Globals ###############
 # ##################################

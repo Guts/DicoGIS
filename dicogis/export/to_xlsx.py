@@ -27,6 +27,7 @@ from dicogis.models.metadataset import (
 )
 from dicogis.utils.formatters import convert_octets
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################
@@ -919,7 +920,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         worksheet[f"S{row_index}"] = metadataset.features_objects_count
 
         for layer_idx, layer_name in zip(
-            metadataset.get("layers_idx"), metadataset.get("layers_names")
+            metadataset.get("layers_idx"), metadataset.get("layers_names"), strict=False
         ):
             # increment line
             self.row_index_map_worskpaces += 1

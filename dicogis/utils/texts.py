@@ -23,6 +23,7 @@ from xml.etree import ElementTree as ET
 from dicogis.constants import AvailableLocales
 from dicogis.utils.utils import Utilities
 
+
 # #############################################################################
 # ########## Globals ###############
 # ##################################

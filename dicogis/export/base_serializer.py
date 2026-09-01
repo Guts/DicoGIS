@@ -9,11 +9,16 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 # project
 from dicogis.constants import OutputFormats
 from dicogis.utils.texts import TextsManager
+
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 # ############################################################################
 # ######### Globals ############

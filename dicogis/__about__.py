@@ -10,6 +10,7 @@ See: https://packaging.python.org/guides/single-sourcing-package-version/
 from datetime import date
 from pathlib import Path
 
+
 __all__ = [
     "__author__",
     "__copyright__",

@@ -14,6 +14,7 @@ from importlib import resources
 from pathlib import Path
 from sys import platform as opersys
 
+
 # Imports depending on operating system
 if opersys == "win32":
     """windows"""
@@ -21,6 +22,7 @@ if opersys == "win32":
 
 # package
 from dicogis.__about__ import __package_name__
+
 
 # ##############################################################################
 # ############ Globals ############

@@ -20,6 +20,7 @@ from unittest.mock import patch
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.progress import OperationCanceled
 
+
 # ############################################################################
 # ########## Globals #############
 # ################################
@@ -52,6 +53,7 @@ def _find_geodata_files(start_folder: Path, parallel_scan: bool = False) -> dict
         zip(
             FIND_GEODATA_FILES_FIELDS,
             find_geodata_files(start_folder, parallel_scan=parallel_scan),
+            strict=False,
         )
     )
 
