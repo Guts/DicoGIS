@@ -12,9 +12,11 @@ Usage from the repo root folder:
 
 # standard library
 import unittest
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as installed_version
 
 # 3rd party
-from packaging.version import parse
+from packaging.version import Version, parse
 from validators import url
 
 # project
@@ -60,6 +62,21 @@ class TestAbout(unittest.TestCase):
     def test_version_semver(self):
         """Test if version comply with semantic versioning."""
         self.assertTrue(parse(__about__.__version__))
+
+    def test_version_matches_distribution_metadata(self):
+        """The built distribution must report the version single-sourced from
+        __about__, not a stale copy: pyproject.toml declares it as dynamic, so a
+        static `version` re-added to [project] would silently shadow it and ship
+        packages labelled with the wrong version.
+        """
+        try:
+            dist_version = installed_version(__about__.__package_name__)
+        except PackageNotFoundError:
+            self.skipTest("dicogis is not installed: no distribution metadata to check")
+
+        # compared as PEP 440 versions: metadata stores the normalized form
+        # ("4.0.0b12") of what __about__ spells "4.0.0-beta12"
+        self.assertEqual(Version(dist_version), Version(__about__.__version__))
 
 
 # ############################################################################
