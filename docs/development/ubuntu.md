@@ -116,6 +116,17 @@ python -m pip install -U pip setuptools wheel
 python -m pip install -U gdal=="$(gdal-config --version).*"
 ```
 
+Alternatively, to pull a prebuilt wheel instead of compiling one against your
+system `libgdal-dev`, [Geospatial Wheels Index](https://geospatial-wheels-index.readthedocs.io/en/latest/)
+serves GDAL wheels from a package index. The wheel still links against the
+system GDAL, so the version has to be pinned exactly as above:
+
+```sh
+python -m pip install --index-url https://gisidx.github.io/gwi gdal=="$(gdal-config --version).*"
+```
+
+Mind that this is a third-party index rather than an official PyPI channel.
+
 ## Install project
 
 ```sh
