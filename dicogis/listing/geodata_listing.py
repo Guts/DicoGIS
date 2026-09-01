@@ -23,6 +23,7 @@ import pgserviceparser
 from dicogis.constants import FormatsRaster
 from dicogis.utils.progress import ProgressReporter, raise_if_canceled
 
+
 # #############################################################################
 # ########## Globals ###############
 # ##################################
@@ -329,7 +330,9 @@ def find_geodata_files(
                 # here, in the calling thread, as each subtree comes back - so
                 # a ProgressReporter never needs a thread-safe counter.
                 for subtree_root, subtree in zip(
-                    subtree_roots, executor.map(scan_subtree, subtree_roots)
+                    subtree_roots,
+                    executor.map(scan_subtree, subtree_roots),
+                    strict=False,
                 ):
                     _merge_partial(result, subtree)
                     _report_scanned(result.num_folders, subtree_root)

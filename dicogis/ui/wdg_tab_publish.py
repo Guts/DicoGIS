@@ -28,6 +28,7 @@ from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.check_path import check_path
 from dicogis.utils.utils import Utilities
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################

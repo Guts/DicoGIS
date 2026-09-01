@@ -12,8 +12,7 @@ Usage from the repo root folder:
 
 # standard library
 import unittest
-from importlib.metadata import PackageNotFoundError
-from importlib.metadata import version as installed_version
+from importlib.metadata import PackageNotFoundError, version as installed_version
 
 # 3rd party
 from packaging.version import Version, parse
@@ -21,6 +20,7 @@ from validators import url
 
 # project
 from dicogis import __about__
+
 
 # ############################################################################
 # ########## Classes #############

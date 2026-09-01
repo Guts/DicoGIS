@@ -13,6 +13,7 @@ import logging
 # package
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 
+
 # #############################################################################
 # ########## Globals ###############
 # ##################################
@@ -40,26 +41,21 @@ class ReadFlatDatabase(ReadVectorFlatDataset):
 # #################################
 if __name__ == "__main__":
     """Standalone execution."""
-    from pprint import pprint
 
     # SpatiaLite
     georeader = ReadFlatDatabase()
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/QGIS Training Data/QGIS-Training-Data-release_3.28/exercise_data/qgis-server-tutorial-data/naturalearth.sqlite",
     )
-    print(metadataset.name, metadataset.count_layers, metadataset.dataset_type)
 
     # Geopackage
     georeader = ReadFlatDatabase()
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gpkg"
     )
-    print(metadataset.name, metadataset.count_layers, metadataset.dataset_type)
 
     # Esri FileGDB
     georeader = ReadFlatDatabase()
     metadataset = georeader.infos_dataset(
         source_path="/home/jmo/Documents/GIS Database/SIRAD/SIRAD_2012.gdb"
     )
-    print(metadataset.name, metadataset.count_layers, metadataset.dataset_type)
-    pprint(metadataset.layers[1])

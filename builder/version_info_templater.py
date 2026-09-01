@@ -19,10 +19,12 @@ import sys
 from os import W_OK, access, path
 from pathlib import Path
 
+
 sys.path.insert(0, path.abspath(r"."))
 
 # module
 from dicogis import __about__
+
 
 # #############################################################################
 # ########### MAIN #################

@@ -25,8 +25,11 @@ from dicogis.georeaders.process_files import (
     ProgressReporter,
 )
 from dicogis.models.metadataset import MetaDataset
-from dicogis.utils.progress import OperationCanceled
-from dicogis.utils.progress import ProgressReporter as ProgressReporterCanonical
+from dicogis.utils.progress import (
+    OperationCanceled,
+    ProgressReporter as ProgressReporterCanonical,
+)
+
 
 # ############################################################################
 # ########## Globals #############

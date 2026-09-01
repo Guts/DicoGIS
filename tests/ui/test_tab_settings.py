@@ -22,6 +22,7 @@ from unittest.mock import patch
 # package
 from dicogis.ui.wdg_tab_settings import TabSettings
 
+
 # #############################################################################
 # ########## Tests ##################
 # ##################################

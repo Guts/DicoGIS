@@ -26,6 +26,7 @@ import typer
 from dicogis.cli.cmd_inventory import determine_output_path, inventory
 from dicogis.models.metadataset import MetaDatabaseTable
 
+
 # ############################################################################
 # ########## Globals #############
 # ################################

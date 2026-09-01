@@ -39,6 +39,7 @@ from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.str2bool import str2bool
 from dicogis.utils.utils import Utilities
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################

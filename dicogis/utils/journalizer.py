@@ -18,16 +18,15 @@ from getpass import getuser
 from logging.handlers import RotatingFileHandler
 from os import environ
 from pathlib import Path
-from platform import architecture
-from platform import platform as opersys
+from platform import architecture, platform as opersys
 from socket import gethostname
 from urllib.request import getproxies
 
 # modules
-from dicogis.__about__ import __title_clean__ as package_name
-from dicogis.__about__ import __version__
+from dicogis.__about__ import __title_clean__ as package_name, __version__
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.slugger import sluggy
+
 
 # #############################################################################
 # ########## Globals ###############

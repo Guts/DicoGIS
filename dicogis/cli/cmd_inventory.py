@@ -30,6 +30,7 @@ from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.slugger import sluggy
 from dicogis.utils.texts import TextsManager
 
+
 # GDAL is an optional dependency (see pyproject.toml `gdal` extra): importing the
 # georeaders modules here at module level would break `dicogis-cli` entirely
 # (even --help/--version) when GDAL isn't installed, e.g. under pipx. So the

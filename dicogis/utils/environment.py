@@ -15,6 +15,7 @@ from os import getenv
 # project
 from dicogis.constants import FORMAT_TO_GDAL_DRIVERS
 
+
 try:
     from osgeo import gdal, osr
 
@@ -213,5 +214,3 @@ def get_proj_version() -> str | None:
 
 if __name__ == "__main__":
     """Standalone execution."""
-    print(get_gdal_version())
-    print(get_proj_version())

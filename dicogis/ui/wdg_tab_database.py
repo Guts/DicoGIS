@@ -26,6 +26,7 @@ from dicogis.models.database_connection import DatabaseConnection
 from dicogis.ui.dialogs.dlg_database_connection import DatabaseConnectionDialog
 from dicogis.utils.utils import Utilities
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################

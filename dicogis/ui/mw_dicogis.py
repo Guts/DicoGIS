@@ -21,6 +21,7 @@ import logging
 from datetime import date
 from pathlib import Path
 from sys import platform as opersys
+from typing import TYPE_CHECKING
 
 # 3rd party
 from osgeo import gdal
@@ -38,7 +39,6 @@ from dicogis.cli.cmd_inventory import determine_output_path
 from dicogis.cli.cmd_publish import PublishReport
 from dicogis.constants import AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
-from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.ui.wdg_misc_buttons import MiscButtons
@@ -59,6 +59,11 @@ from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.options import OptionsManager
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
+
+
+if TYPE_CHECKING:
+    from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
+
 
 # ##############################################################################
 # ############ Globals ############

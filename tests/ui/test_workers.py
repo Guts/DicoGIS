@@ -12,9 +12,12 @@ Usage from the repo root folder:
 # ##################################
 
 # package
+from typing import NoReturn
+
 from dicogis.cli.cmd_publish import PublishReport
 from dicogis.ui.workers import FolderScanWorker, PublishWorker, QtProgressReporter
 from dicogis.utils.progress import OperationCanceled, ProgressReporter
+
 
 # #############################################################################
 # ########## Tests ##################
@@ -76,7 +79,7 @@ def test_folder_scan_worker_emits_canceled_instead_of_error(qtbot, monkeypatch):
     signal, so the user doesn't get an error dialog for something they asked
     for."""
 
-    def _canceled(**kwargs):
+    def _canceled(**kwargs) -> NoReturn:
         raise OperationCanceled()
 
     monkeypatch.setattr("dicogis.ui.workers.find_geodata_files", _canceled)
@@ -165,7 +168,7 @@ def test_folder_scan_worker_run_emits_error_on_failure(qtbot, monkeypatch):
     # **kwargs, not a fixed signature: the worker passes parallel_scan/
     # max_workers/progress_reporter too, and a signature mismatch here would
     # make this test pass on a TypeError rather than on the raised error
-    def _boom(**kwargs):
+    def _boom(**kwargs) -> NoReturn:
         raise RuntimeError("boom")
 
     monkeypatch.setattr("dicogis.ui.workers.find_geodata_files", _boom)
@@ -210,7 +213,7 @@ def test_publish_worker_run_emits_finished(qtbot, tmp_path, monkeypatch):
 
 
 def test_publish_worker_run_emits_error_on_failure(qtbot, tmp_path, monkeypatch):
-    def _boom(**kwargs):
+    def _boom(**kwargs) -> NoReturn:
         raise RuntimeError("boom")
 
     monkeypatch.setattr("dicogis.ui.workers.publish_metadata_folder", _boom)

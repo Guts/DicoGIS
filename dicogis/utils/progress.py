@@ -16,6 +16,7 @@ Author:       Julien Moura (@geojulien)
 # Standard library
 from typing import Protocol, runtime_checkable
 
+
 # ##############################################################################
 # ############ Classes ############
 # #################################

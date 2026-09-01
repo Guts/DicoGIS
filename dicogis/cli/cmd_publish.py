@@ -24,6 +24,7 @@ from dicogis.constants import SUPPORTED_FORMATS
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 
+
 # ############################################################################
 # ########## Globals ###############
 # ##################################

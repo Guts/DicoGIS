@@ -17,9 +17,11 @@ from pathlib import Path
 # 3rd party
 import PyInstaller.__main__
 
+
 # package
-sys.path.insert(0, str(Path(".").resolve()))
+sys.path.insert(0, str(Path().resolve()))
 from dicogis import __about__
+
 
 # #############################################################################
 # ########### MAIN #################

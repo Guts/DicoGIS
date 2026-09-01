@@ -11,6 +11,7 @@ import unittest
 # project
 from dicogis.models.data_format import FormatMatcher
 
+
 # ############################################################################
 # ########## Classes #############
 # ################################

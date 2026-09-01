@@ -75,20 +75,14 @@ not part of the suite). PostGIS-related tests expect
 
 ### Lint / format
 
-Formatting/linting is enforced through pre-commit (ruff, ruff-format, black, isort,
-pyupgrade, flake8 syntax-only check). Run everything pre-commit would run:
+Formatting/linting is enforced through pre-commit (ruff check, ruff-format and
+pyupgrade). Run everything pre-commit would run:
 
 ```sh
 pre-commit run --all-files
 ```
 
-CI's dedicated lint job only checks for syntax errors/undefined names:
-
-```sh
-flake8 dicogis --select=E9,F63,F7,F82
-```
-
-Line length: 88 (black/ruff-format/isort), docstrings are Google-style.
+Line length: 88 (ruff-format), docstrings are Google-style.
 
 ## Architecture
 
@@ -132,6 +126,7 @@ runtime, nested custom widgets) is still applied/composed in Python after the
 load call.
 
 File naming follows a prefix convention:
+
 - `dlg_` — `QDialog` subclasses (`dicogis/ui/dialogs/dlg_database_connection.py`)
 - `wdg_` — `QWidget` subclasses, including notebook tab pages
   (`wdg_tab_files.py`, `wdg_collapsible_frame.py`, `wdg_scrollable_table.py`, …)

@@ -21,6 +21,7 @@ from unittest.mock import patch
 from dicogis.__about__ import __package_name__
 from dicogis.utils.utils import Utilities
 
+
 # ############################################################################
 # ########## Classes #############
 # ################################

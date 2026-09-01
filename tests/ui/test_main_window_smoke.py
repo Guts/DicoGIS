@@ -14,6 +14,7 @@ Usage from the repo root folder:
 # package
 from dicogis.ui.mw_dicogis import DicoGIS
 
+
 # #############################################################################
 # ########## Tests ##################
 # ##################################

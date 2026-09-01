@@ -16,6 +16,7 @@ import unittest
 # project
 from dicogis.utils.formatters import convert_octets
 
+
 # ############################################################################
 # ########## Classes #############
 # ################################

@@ -17,6 +17,7 @@ from pathlib import Path
 # package
 from dicogis.utils.texts import TextsManager
 
+
 # #############################################################################
 # ########## Classes ###############
 # ##################################

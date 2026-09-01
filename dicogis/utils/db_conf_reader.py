@@ -11,6 +11,7 @@ import logging
 from configparser import ConfigParser
 from pathlib import Path
 
+
 # #############################################################################
 # ########## Globals ###############
 # ##################################
@@ -49,7 +50,7 @@ def read_db_conf(dbconf_path: Path) -> list | dict:
                 "username": "db_user_name",
                 "password": "db_user_password",
                 "schemas": "db_schemas",
-                "esri_sde": False
+                "esri_sde": False,
             }
 
     """

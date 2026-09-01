@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import QDialog, QWidget
 from dicogis.models.database_connection import DatabaseConnection
 from dicogis.utils.utils import Utilities
 
+
 # ##############################################################################
 # ############ Globals ############
 # #################################
@@ -101,4 +102,3 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     dialog = DatabaseConnectionDialog()
     dialog.exec()
-    print(dialog.out_database_connection)

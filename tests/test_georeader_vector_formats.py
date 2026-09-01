@@ -21,6 +21,7 @@ from osgeo import ogr
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from tests.fixtures.fixture_data_generator import generate_simple_vector_dataset
 
+
 # #############################################################################
 # ########## Globals ###############
 # ##################################
