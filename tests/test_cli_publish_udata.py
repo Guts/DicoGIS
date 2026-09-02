@@ -22,6 +22,7 @@ from unittest.mock import patch
 
 # 3rd party
 import responses
+import typer
 
 # project
 from dicogis.cli.cmd_publish import publish
@@ -443,6 +444,27 @@ class TestCliPublishUdata(unittest.TestCase):
         self.assertEqual(len(post_calls), 1)
 
         self.assertPublishReport(published=1, ignored=0, failed=0)
+
+    def test_publish_without_input_folder_exits(self) -> None:
+        """--input-folder defaults to None, which publish_metadata_folder()
+        used to dereference as `None.glob("*.json")`: an AttributeError
+        traceback instead of a usage error.
+        """
+        with self.assertRaises(typer.Exit) as raised:
+            publish(
+                input_folder=None,
+                udata_api_key="fake-api-key",
+                udata_api_url_base=UDATA_API_URL_BASE,
+                udata_api_version=UDATA_API_VERSION,
+                udata_organization_id=None,
+                opt_notify_sound=False,
+            )
+
+        self.assertEqual(raised.exception.exit_code, 1)
+        # the guard runs before anything is attempted: no HTTP call, no
+        # end-of-run notification
+        self.assertEqual(len(responses.calls), 0)
+        self.mock_notify.assert_not_called()
 
 
 if __name__ == "__main__":

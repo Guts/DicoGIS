@@ -336,6 +336,16 @@ def publish(
     logger.debug(f"DicoGIS working folder: {app_dir}")
     logger.debug(f"CLI passed parameters: {input_folder=} - {verbose=}")
 
+    # check minimal parameters: the option defaults to None, and
+    # publish_metadata_folder() would otherwise fail on `None.glob()`
+    if input_folder is None:
+        console_err.print(
+            ":boom: [bold red]Error![/bold red] No input folder specified. Use "
+            "--input-folder, or set the DICOGIS_PUBLISH_INPUT_FOLDER environment "
+            "variable, to point at the folder holding the JSON files to publish."
+        )
+        raise typer.Exit(code=1)
+
     try:
         with Progress(console=console_out) as progress:
             task_id = progress.add_task("Processing...", total=None)
