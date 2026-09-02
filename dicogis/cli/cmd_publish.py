@@ -60,6 +60,26 @@ class PublishReport:
 # ##################################
 
 
+def _dicogis_extras(dataset_payload: object) -> dict:
+    """Return the "extras" mapping of a uData dataset payload.
+
+    Both the JSON files found on disk and the datasets returned by the catalog
+    go through here, and neither is guaranteed to carry an "extras" object: a
+    hand-written JSON file, or any dataset in the catalog not published by
+    DicoGIS, simply has none.
+
+    Args:
+        dataset_payload: decoded JSON of a uData dataset, of any shape
+
+    Returns:
+        the "extras" mapping, or an empty one when absent or not a mapping
+    """
+    if not isinstance(dataset_payload, dict):
+        return {}
+    extras = dataset_payload.get("extras")
+    return extras if isinstance(extras, dict) else {}
+
+
 def _fetch_already_published(
     req_session: Session,
     udata_api_url_base: str,
@@ -96,11 +116,22 @@ def _fetch_already_published(
         response.raise_for_status()
         already_published_datasets = response.json()
 
-    already_published_slugs = tuple(d.get("slug") for d in already_published_datasets)
-    already_published_signatures = tuple(
-        d.get("extras", {}).get("dicogis_signature") for d in already_published_datasets
-    )
-    return already_published_slugs, already_published_signatures
+    # empty values are dropped: kept in, a missing slug/signature on the catalog
+    # side would compare equal to a missing one on ours and wrongly mark the
+    # file as already published
+    already_published_slugs: list[str] = []
+    already_published_signatures: list[str] = []
+    for published_dataset in already_published_datasets or []:
+        if slug := (
+            published_dataset.get("slug")
+            if isinstance(published_dataset, dict)
+            else None
+        ):
+            already_published_slugs.append(slug)
+        if signature := _dicogis_extras(published_dataset).get("dicogis_signature"):
+            already_published_signatures.append(signature)
+
+    return tuple(already_published_slugs), tuple(already_published_signatures)
 
 
 def publish_metadata_folder(
@@ -180,7 +211,8 @@ def publish_metadata_folder(
             continue
 
         # filter out JSON files not related to DicoGIS
-        if not data.get("extras").get("dicogis_version"):
+        metadataset_extras = _dicogis_extras(data)
+        if not metadataset_extras.get("dicogis_version"):
             if verbose:
                 logger.info(
                     f"Looks like this file is not a metadataset from DicoGIS: {json_file}"
@@ -190,11 +222,12 @@ def publish_metadata_folder(
                 progress_callback(files_done, files_total, json_file)
             continue
 
-        # check if the metadata has been already published
-        if (
-            data.get("slug") in already_published_slugs
-            or data.get("extras", {}).get("dicogis_signature")
-            in already_published_signature
+        # check if the metadata has been already published. Reaching this point
+        # means data is a mapping: _dicogis_extras() returned something for it.
+        dataset_slug = data.get("slug")
+        dataset_signature = metadataset_extras.get("dicogis_signature")
+        if (dataset_slug and dataset_slug in already_published_slugs) or (
+            dataset_signature and dataset_signature in already_published_signature
         ):
             if verbose:
                 logger.info(
