@@ -350,6 +350,7 @@ def inventory(
 
         output_serializer = MetadatasetSerializerBase.get_serializer_from_parameters(
             format_or_serializer=output_format,
+            localized_strings=localized_strings,
             output_path=output_path,
             opt_prettify_size=opt_prettify_size,
             opt_raw_path=opt_raw_path,
@@ -479,6 +480,7 @@ def inventory(
 
         output_serializer = MetadatasetSerializerBase.get_serializer_from_parameters(
             format_or_serializer=output_format,
+            localized_strings=localized_strings,
             output_path=output_path,
             opt_prettify_size=opt_prettify_size,
             opt_raw_path=opt_raw_path,

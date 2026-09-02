@@ -24,6 +24,7 @@ import typer
 
 # project
 from dicogis.cli.cmd_inventory import determine_output_path, inventory
+from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.models.metadataset import MetaDatabaseTable
 
 
@@ -600,6 +601,102 @@ class TestInventoryPgServices(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         mock_notify.assert_not_called()
         self.assertFalse(output_written)
+
+
+class TestInventoryLocalizedOutput(unittest.TestCase):
+    """Test that --language reaches the output serializer.
+
+    Regression: inventory() built its serializer without passing
+    localized_strings, so it fell back to English and --language only ever
+    affected the console output, never the generated workbook.
+    """
+
+    def _run_postgis_inventory(self, language: str, output_path: Path):
+        """Run inventory() over a single stubbed PostGIS layer.
+
+        The PostGIS branch drives the serializer itself (pre_serializing,
+        serialize_metadaset, post_serializing), so the workbook is really
+        written to output_path and can be reopened to check its headers.
+        """
+        fake_conn = MagicMock()
+        fake_conn.GetLayerCount.return_value = 1
+        fake_conn.GetLayerByIndex.return_value = MagicMock()
+
+        read_postgis_mock = MagicMock()
+        fake_reader = read_postgis_mock.return_value
+        fake_reader.conn = fake_conn
+        fake_reader.infos_dataset.return_value = MetaDatabaseTable(
+            name="public.roads", dataset_type="sgbd_postgis"
+        )
+
+        with (
+            patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+            patch(
+                "dicogis.cli.cmd_inventory.check_usable_pg_services",
+                return_value=["srv_a"],
+            ),
+            patch("dicogis.cli.cmd_inventory.send_system_notify"),
+            _stub_georeader_modules(read_postgis_mock=read_postgis_mock),
+        ):
+            inventory(
+                input_folder=None,
+                pg_services=["srv_a"],
+                output_path=output_path,
+                output_format="excel",
+                language=language,
+                opt_open_output=False,
+            )
+
+    def test_workbook_headers_are_written_in_the_requested_language(self):
+        """The first column header of the PostGIS sheet is "nomfic", spelled
+        "Filename" in English and "Nom du fichier" in French."""
+        from openpyxl import load_workbook
+
+        expected_first_header = {"EN": "Filename", "FR": "Nom du fichier"}
+
+        for language, expected in expected_first_header.items():
+            with self.subTest(language=language):
+                with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+                    output_path = Path(tmpdirname) / f"out_{language}.xlsx"
+                    self._run_postgis_inventory(
+                        language=language, output_path=output_path
+                    )
+
+                    self.assertTrue(output_path.is_file())
+                    worksheet = load_workbook(output_path)["PostGIS"]
+                    self.assertEqual(worksheet["A1"].value, expected)
+
+    def test_serializer_receives_localized_strings_for_the_files_branch(self):
+        """Same wiring for the files branch, whose serializer is driven by
+        ProcessingFiles rather than by inventory() itself."""
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 0
+
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            input_folder = Path(tmpdirname)
+            for suffix in (".shp", ".dbf", ".shx"):
+                (input_folder / f"parcels{suffix}").touch()
+
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch("dicogis.cli.cmd_inventory.send_system_notify"),
+                patch.object(
+                    MetadatasetSerializerBase,
+                    "get_serializer_from_parameters",
+                    wraps=MetadatasetSerializerBase.get_serializer_from_parameters,
+                ) as mock_get_serializer,
+                _stub_georeader_modules(processing_files_mock=processing_files_mock),
+            ):
+                inventory(
+                    input_folder=input_folder,
+                    output_path=input_folder / "out.xlsx",
+                    output_format="excel",
+                    language="FR",
+                    opt_open_output=False,
+                )
+
+        _, kwargs = mock_get_serializer.call_args
+        self.assertEqual(kwargs["localized_strings"]["nomfic"], "Nom du fichier")
 
 
 # ############################################################################
