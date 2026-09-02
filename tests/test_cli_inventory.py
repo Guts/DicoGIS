@@ -496,6 +496,111 @@ class TestInventoryPgServices(unittest.TestCase):
         fake_reader.infos_dataset.assert_called_once_with(layer=fake_layer)
         mock_notify.assert_called_once()
 
+    @staticmethod
+    def _fake_reader(layers_count: int | None):
+        """Build a stub ReadPostGIS instance.
+
+        layers_count None means the connection failed: get_connection() leaves
+        `conn` at None and the reason is read from db_connection.state_msg.
+        """
+        fake_reader = MagicMock()
+        if layers_count is None:
+            fake_reader.conn = None
+            fake_reader.db_connection.state_msg = "connection refused"
+            return fake_reader
+
+        fake_conn = MagicMock()
+        fake_conn.GetLayerCount.return_value = layers_count
+        fake_conn.GetLayerByIndex.side_effect = lambda index: MagicMock(
+            name=f"l{index}"
+        )
+        fake_reader.conn = fake_conn
+        fake_reader.infos_dataset.side_effect = lambda layer: MetaDatabaseTable(
+            name="public.roads", dataset_type="sgbd_postgis"
+        )
+        return fake_reader
+
+    def _run_with_services(self, services_layers: dict[str, int | None]):
+        """Run inventory() over several stubbed services.
+
+        Maps each service name to its layer count, or to None for a service
+        whose connection fails.
+
+        Returns:
+            the send_system_notify mock, whether the output file was written
+            (checked before the temporary folder is cleaned up) and the exit
+            code, 0 when inventory() returned without raising typer.Exit.
+        """
+        read_postgis_mock = MagicMock()
+        read_postgis_mock.side_effect = [
+            self._fake_reader(layers_count) for layers_count in services_layers.values()
+        ]
+        exit_code = 0
+
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            output_path = Path(tmpdirname) / "out.xlsx"
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch(
+                    "dicogis.cli.cmd_inventory.check_usable_pg_services",
+                    return_value=list(services_layers),
+                ),
+                patch("dicogis.cli.cmd_inventory.send_system_notify") as mock_notify,
+                patch("typer.launch"),
+                _stub_georeader_modules(read_postgis_mock=read_postgis_mock),
+            ):
+                try:
+                    inventory(
+                        input_folder=None,
+                        pg_services=list(services_layers),
+                        output_path=output_path,
+                        output_format="excel",
+                        language="EN",
+                        opt_open_output=False,
+                    )
+                except typer.Exit as err:
+                    exit_code = err.exit_code
+
+            # inside the context manager: the folder is gone right after
+            output_written = output_path.is_file()
+
+        return mock_notify, output_written, exit_code
+
+    def test_notification_counts_layers_of_every_service(self):
+        """Regression: the count was read back from the last reader only, so
+        tables inventoried through the other services went unreported."""
+        mock_notify, _, exit_code = self._run_with_services({"srv_a": 2, "srv_b": 3})
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn(
+            "5 PostGIS tables", mock_notify.call_args.kwargs["notification_message"]
+        )
+
+    def test_last_service_failing_to_connect_does_not_crash(self):
+        """Regression: the final notification dereferenced the last reader's
+        `conn`, which a failed connection leaves at None -- an AttributeError
+        at the very end of an otherwise successful run."""
+        mock_notify, output_written, exit_code = self._run_with_services(
+            {"srv_ok": 2, "srv_ko": None}
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn(
+            "2 PostGIS tables", mock_notify.call_args.kwargs["notification_message"]
+        )
+        self.assertTrue(output_written)
+
+    def test_every_service_failing_exits_without_writing_the_output(self):
+        """Nothing could be read: exit non-zero rather than report success over
+        an empty workbook, which a calling script would take at face value."""
+        mock_notify, output_written, exit_code = self._run_with_services(
+            {"srv_ko_1": None, "srv_ko_2": None}
+        )
+
+        self.assertEqual(exit_code, 1)
+        mock_notify.assert_not_called()
+        self.assertFalse(output_written)
+
 
 # ############################################################################
 # ####### Stand-alone run ########
