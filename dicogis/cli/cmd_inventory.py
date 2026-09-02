@@ -9,7 +9,7 @@ import logging
 from datetime import date
 from locale import getlocale
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 # 3rd party
 import typer
@@ -35,6 +35,9 @@ from dicogis.utils.texts import TextsManager
 # georeaders modules here at module level would break `dicogis-cli` entirely
 # (even --help/--version) when GDAL isn't installed, e.g. under pipx. So the
 # imports below are deferred into `inventory()`, guarded by GDAL_IS_AVAILABLE.
+# Type-checking-only imports are not executed at runtime, so they are safe here.
+if TYPE_CHECKING:
+    from dicogis.georeaders.read_postgis import ReadPostGIS
 
 # ############################################################################
 # ########## Globals ###############
@@ -97,6 +100,32 @@ def determine_output_path(
         final_output_path = output_path
 
     return final_output_path
+
+
+def serialize_pg_service_layers(
+    sgbd_reader: "ReadPostGIS",
+    output_serializer: MetadatasetSerializerBase,
+) -> int:
+    """Serialize the metadata of every layer exposed by a connected PostGIS service.
+
+    Args:
+        sgbd_reader: PostGIS reader with an already opened connection
+        output_serializer: serializer to write each layer's metadata into
+
+    Returns:
+        number of layers read from this service
+    """
+    layers_count: int = sgbd_reader.conn.GetLayerCount()
+    logger.info(f"{layers_count} tables found in PostGIS database.")
+
+    for idx_layer in range(layers_count):
+        layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
+        metadataset = sgbd_reader.infos_dataset(layer=layer)
+        logger.info(f"Table examined: {metadataset.name}")
+        output_serializer.serialize_metadaset(metadataset=metadataset)
+        logger.debug("Layer metadata stored into workbook.")
+
+    return layers_count
 
 
 def inventory(
@@ -461,6 +490,10 @@ def inventory(
         # configure output workbook
         output_serializer.pre_serializing(has_sgbd=True)
 
+        # counted across every service, not just the last one
+        total_layers: int = 0
+        failed_pg_services: list[str] = []
+
         for pg_service in pg_services:
             print(f"Start processing using PostgreSQL service: {pg_service}")
 
@@ -474,27 +507,40 @@ def inventory(
                 logger.error(
                     f"Connection failed using pg_service {pg_service}. Trace: {fail_reason}."
                 )
+                # the CLI installs no console log handler, so a failed service
+                # would otherwise only show up in the log file
+                print(
+                    "[bold yellow]Warning: connection failed using PostgreSQL service "
+                    f"{pg_service}, it is skipped. Trace: {fail_reason}[/bold yellow]"
+                )
+                failed_pg_services.append(pg_service)
                 continue
 
-            # show must go on
-            logger.info(
-                f"{sgbd_reader.conn.GetLayerCount()} tables found in PostGIS database."
+            # show must go on: parse the layers of this service
+            total_layers += serialize_pg_service_layers(
+                sgbd_reader=sgbd_reader, output_serializer=output_serializer
             )
 
-            # parsing the layers
-            for idx_layer in range(sgbd_reader.conn.GetLayerCount()):
-                layer = sgbd_reader.conn.GetLayerByIndex(idx_layer)
-                metadataset = sgbd_reader.infos_dataset(layer=layer)
-                logger.info(f"Table examined: {metadataset.name}")
-                output_serializer.serialize_metadaset(metadataset=metadataset)
-                logger.debug("Layer metadata stored into workbook.")
+        # nothing could be read: fail instead of writing an empty inventory and
+        # reporting success, which a calling script would take at face value
+        if len(failed_pg_services) == len(pg_services):
+            logger.error(
+                "Connection failed for every requested PostgreSQL service: "
+                f"{', '.join(failed_pg_services)}."
+            )
+            print(
+                "[bold red]Error: connection failed for every requested PostgreSQL "
+                f"service ({', '.join(failed_pg_services)}). No output written."
+                "[/bold red]"
+            )
+            raise typer.Exit(code=1)
 
         output_serializer.post_serializing()
 
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "
-            f"{sgbd_reader.conn.GetLayerCount()} PostGIS tables. "
+            f"{total_layers} PostGIS tables. "
             "\nOpen the application to save the workbook.",
             notification_sound=opt_notify_sound,
         )
