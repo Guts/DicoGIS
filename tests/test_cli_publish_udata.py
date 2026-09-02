@@ -343,6 +343,107 @@ class TestCliPublishUdata(unittest.TestCase):
 
         self.assertPublishReport(published=0, ignored=1, failed=0)
 
+    @responses.activate
+    def test_publish_survives_json_files_without_extras(self) -> None:
+        """A JSON file carrying no "extras" key at all, or not even an object,
+        must be ignored like any other foreign file.
+
+        Regression: the DicoGIS filter did `data.get("extras").get(...)`, which
+        raised AttributeError on such a file. Being raised outside the loop's
+        try/except, it aborted the whole run: every remaining file went
+        unpublished, and the command died on a traceback.
+        """
+        no_extras_file = self.input_folder / "no-extras.json"
+        with no_extras_file.open(mode="w", encoding="UTF-8") as f:
+            json.dump({"title": "No extras at all"}, f)
+
+        null_extras_file = self.input_folder / "null-extras.json"
+        with null_extras_file.open(mode="w", encoding="UTF-8") as f:
+            json.dump({"title": "Null extras", "extras": None}, f)
+
+        json_array_file = self.input_folder / "an-array.json"
+        with json_array_file.open(mode="w", encoding="UTF-8") as f:
+            json.dump([{"title": "Not even an object"}], f)
+
+        # a genuine DicoGIS file, listed last alphabetically to prove the run
+        # reaches it instead of dying on one of the files above
+        make_udata_metadata_file(
+            self.input_folder, "z-dataset.json", "Dataset Z", "dataset-z", "sig-z"
+        )
+
+        responses.get(
+            f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/me/datasets/",
+            json=[],
+            status=200,
+        )
+        responses.post(
+            f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/datasets",
+            json={"id": "new-dataset-z"},
+            status=201,
+        )
+
+        publish(
+            input_folder=self.input_folder,
+            udata_api_key="fake-api-key",
+            udata_api_url_base=UDATA_API_URL_BASE,
+            udata_api_version=UDATA_API_VERSION,
+            udata_organization_id=None,
+            opt_notify_sound=False,
+            verbose=True,
+        )
+
+        post_calls = [call for call in responses.calls if call.request.method == "POST"]
+        self.assertEqual(len(post_calls), 1)
+        self.assertEqual(json.loads(post_calls[0].request.body)["slug"], "dataset-z")
+
+        self.assertPublishReport(published=1, ignored=3, failed=0)
+
+    @responses.activate
+    def test_publish_is_not_blocked_by_a_catalog_dataset_without_signature(
+        self,
+    ) -> None:
+        """A catalog holding datasets that DicoGIS did not publish (hence with
+        no dicogis_signature) must not prevent publishing a file that has none
+        either: two missing values used to compare equal, marking the file as
+        already published.
+        """
+        unsigned_file = self.input_folder / "unsigned.json"
+        with unsigned_file.open(mode="w", encoding="UTF-8") as f:
+            json.dump(
+                {
+                    "title": "Hand-written but DicoGIS-flavored",
+                    "slug": "hand-written",
+                    "extras": {"dicogis_version": "test-dev"},
+                },
+                f,
+            )
+
+        responses.get(
+            f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/me/datasets/",
+            json=[{"title": "Someone else's dataset", "slug": "unrelated"}],
+            status=200,
+        )
+        responses.post(
+            f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/datasets",
+            json={"id": "new-hand-written"},
+            status=201,
+        )
+
+        publish(
+            input_folder=self.input_folder,
+            udata_api_key="fake-api-key",
+            udata_api_url_base=UDATA_API_URL_BASE,
+            udata_api_version=UDATA_API_VERSION,
+            udata_organization_id=None,
+            opt_notify_sound=False,
+            verbose=True,
+        )
+
+        post_calls = [call for call in responses.calls if call.request.method == "POST"]
+        self.assertEqual(len(post_calls), 1)
+
+        self.assertPublishReport(published=1, ignored=0, failed=0)
+
 
 if __name__ == "__main__":
     unittest.main()
