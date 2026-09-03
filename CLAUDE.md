@@ -293,3 +293,6 @@ Full guidelines: `CONTRIBUTING.md`. What matters most for changes made here:
   large-scale IT infrastructures.
 - GUI widgets: `.ui` files loaded with `uic.loadUi()`, not built up in Python —
   see "GUI widgets: `.ui` files + naming convention" above.
+- Markdown prose (`docs/**/*.md`, PR descriptions, commit bodies): don't hard-wrap
+  lines at a fixed column — one line per paragraph/list item, as the existing
+  `docs/**/*.md` files already do (see e.g. `docs/development/documentation.md`).
