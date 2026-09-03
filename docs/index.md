@@ -115,6 +115,7 @@ development/windows
 development/ubuntu
 development/tests
 development/documentation
+development/translation
 development/packaging
 development/releasing
 Code documentation <_apidoc/modules>
