@@ -28,6 +28,7 @@ from typer import get_app_dir
 from dicogis.__about__ import __package_name__, __title__
 from dicogis.utils.environment import GDAL_IS_AVAILABLE
 from dicogis.utils.journalizer import LogManager
+from dicogis.utils.options import DEFAULT_OPTIONS_FILEPATH
 from dicogis.utils.str2bool import str2bool
 
 
@@ -56,6 +57,10 @@ def _get_persisted_option(section: str, option: str) -> str | None:
     only consulted as a fallback, before the OptionsManager/main window (which
     need a QApplication to already exist) are available.
 
+    Reads the very file OptionsManager saves to, i.e. the per-platform user
+    config folder: looking for a relative "options.ini" in the current working
+    directory, as this used to, never found anything.
+
     Args:
         section: options.ini section name.
         option: options.ini option name.
@@ -64,7 +69,7 @@ def _get_persisted_option(section: str, option: str) -> str | None:
         the stored value, or None if unset/unreadable.
     """
     config = ConfigParser()
-    if not config.read("options.ini"):
+    if not config.read(DEFAULT_OPTIONS_FILEPATH):
         return None
     return config.get(section, option, fallback=None) or None
 
