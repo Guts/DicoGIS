@@ -571,7 +571,13 @@ class DicoGIS(QMainWindow):
             logger.critical("Unrecognized data type to process. Report it!")
 
     def _enable_processing_controls(self) -> None:
-        """Re-enable the controls disabled while a process was running."""
+        """Re-enable the controls disabled while a process was running.
+
+        Every path out of a run goes through here -- success, error and
+        cancellation alike -- so the cancel button is hidden here rather than
+        in each handler, where the PostGIS one had been forgotten.
+        """
+        self._enable_cancel_button(False)
         self.val.setEnabled(True)
         self.nb.setTabEnabled(0, True)
         self.nb.setTabEnabled(1, True)
@@ -592,7 +598,6 @@ class DicoGIS(QMainWindow):
         """
         logger.error(f"Processing failed: {message}")
         self.lbl_status.setStyleSheet("color: red;")
-        self._enable_cancel_button(False)
         self._enable_processing_controls()
         QMessageBox.critical(self, "DicoGIS", message)
 
@@ -694,7 +699,6 @@ class DicoGIS(QMainWindow):
         Args:
             total_files: number of files processed.
         """
-        self._enable_cancel_button(False)
         launch(url=f"{self.serializer.output_path.resolve()}")
         send_system_notify(
             notification_title="DicoGIS analysis ended",
@@ -711,7 +715,6 @@ class DicoGIS(QMainWindow):
         to the output file, so it's offered rather than silently discarded.
         """
         logger.info("Processing canceled by the user.")
-        self._enable_cancel_button(False)
         self.prog_layers.setValue(0)
         self._enable_processing_controls()
         self.set_status_message(
@@ -983,7 +986,16 @@ class DicoGIS(QMainWindow):
     # =================================================================================
 
     def closeEvent(self, event) -> None:
-        """Ensure background threads are stopped before the window closes."""
+        """Ensure background threads are stopped before the window closes.
+
+        quit() only asks a thread's event loop to return, which a worker
+        blocked in its own run() never reaches: without the cancellation
+        request below, closing during a scan or an analysis froze the window
+        for the whole timeout and still left the thread running.
+        """
+        if self._progress_reporter is not None:
+            self._progress_reporter.request_cancel()
+
         for thread in (self._scan_thread, self._proc_thread):
             if thread is not None and thread.isRunning():
                 thread.quit()

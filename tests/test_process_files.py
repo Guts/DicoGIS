@@ -159,8 +159,14 @@ class TestReadDataset(unittest.TestCase):
         # should not raise
         processor.read_dataset(dataset_to_process=dataset)
 
-    def test_progress_reporter_receives_message_and_increment(self):
-        """A configured progress_reporter is updated on success."""
+    def test_progress_reporter_receives_messages_but_no_increment(self):
+        """A configured progress_reporter gets the phase messages.
+
+        It is not incremented here: the counter counts datasets, and
+        process_datasets_in_queue() steps it once per dataset. Incrementing
+        on each successful phase, as this used to, advanced it twice per
+        dataset -- against a maximum of one per dataset.
+        """
         reporter = MagicMock()
         processor = _make_processor(progress_reporter=reporter)
         dataset = DatasetToProcess(
@@ -172,7 +178,7 @@ class TestReadDataset(unittest.TestCase):
         processor.read_dataset(dataset_to_process=dataset)
 
         self.assertGreaterEqual(reporter.set_message.call_count, 2)
-        reporter.increment.assert_called_once()
+        reporter.increment.assert_not_called()
 
 
 class TestExportMetadataset(unittest.TestCase):
@@ -278,6 +284,69 @@ class TestProcessDatasetsInQueue(unittest.TestCase):
 
         self.assertTrue(dataset.exported)
         self.assertEqual(len(serializer.serialize_calls), 1)
+
+    @staticmethod
+    def _reporter_never_canceling() -> MagicMock:
+        """A progress reporter double: a bare MagicMock would make
+        is_canceled() truthy and stop the run at its first check."""
+        reporter = MagicMock()
+        reporter.is_canceled.return_value = False
+        return reporter
+
+    def test_progress_advances_once_per_successful_dataset(self):
+        """Regression: read and export each incremented on success, so a queue
+        of N readable datasets advanced the counter up to 2N against a maximum
+        of N -- the GUI progress bar hit 100% halfway through and stayed there.
+        """
+        reporter = self._reporter_never_canceling()
+        serializer = FakeSerializer()
+        processor = _make_processor(
+            serializer=serializer,
+            progress_reporter=reporter,
+            li_shapefiles=["ok_a.shp", "ok_b.shp", "ok_c.shp"],
+        )
+        # count_files_to_process() fills the queue, so the fake georeaders can
+        # only be attached afterwards
+        total_files = processor.count_files_to_process()
+        for dataset in processor.li_files_to_process:
+            dataset.georeader = SucceedingGeoReader
+
+        processor.process_datasets_in_queue()
+
+        self.assertEqual(total_files, 3)
+        self.assertEqual(reporter.increment.call_count, 3)
+        self.assertEqual(len(serializer.serialize_calls), 3)
+
+    def test_progress_advances_once_per_dataset_whatever_the_outcome(self):
+        """The counter must reach exactly count_files_to_process() even when
+        some datasets are unreadable or already processed: those used to
+        advance it not at all, leaving the bar short of its maximum."""
+        reporter = self._reporter_never_canceling()
+        serializer = FakeSerializer()
+        processor = _make_processor(
+            serializer=serializer,
+            progress_reporter=reporter,
+            li_shapefiles=["ok_a.shp", "broken.shp", "ok_b.shp", "already_done.shp"],
+        )
+
+        total_files = processor.count_files_to_process()
+        self.assertEqual(total_files, 4)
+
+        # one dataset fails to read, another is already marked processed
+        for dataset in processor.li_files_to_process:
+            dataset.georeader = (
+                FailingGeoReader
+                if dataset.file_path == "broken.shp"
+                else SucceedingGeoReader
+            )
+            if dataset.file_path == "already_done.shp":
+                dataset.processed = True
+
+        processor.process_datasets_in_queue()
+
+        self.assertEqual(reporter.increment.call_count, total_files)
+        # only the two readable, not-yet-processed datasets reach the output
+        self.assertEqual(len(serializer.serialize_calls), 2)
 
     def test_post_serializing_called_even_with_empty_queue(self):
         """post_serializing() runs even when there is nothing to process."""

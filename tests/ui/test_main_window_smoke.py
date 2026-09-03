@@ -11,8 +11,12 @@ Usage from the repo root folder:
 # ########## Libraries #############
 # ##################################
 
+# standard library
+from unittest.mock import MagicMock
+
 # package
 from dicogis.ui.mw_dicogis import DicoGIS
+from dicogis.ui.workers import QtProgressReporter
 
 
 # #############################################################################
@@ -132,6 +136,65 @@ def test_main_window_check_fields_requires_publish_api_key(
     window.tab_publish.set_input_folder(str(tmp_path))
     window.tab_publish.ent_udata_api_key.setText("")
     assert window.check_fields(tab_data_type=3) is False
+
+
+def test_main_window_close_requests_cancellation(qtbot):
+    """Closing the window must ask the running operation to stop.
+
+    Regression: closeEvent() only called QThread.quit(), which asks a thread's
+    event loop to return -- something a worker blocked inside its own run()
+    never reaches. Closing during a scan froze the window for the whole
+    wait() timeout and still left the thread running.
+    """
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window._progress_reporter = QtProgressReporter(window)
+    assert window._progress_reporter.is_canceled() is False
+
+    window.close()
+
+    assert window._progress_reporter.is_canceled() is True
+
+
+def test_main_window_close_without_a_running_operation(qtbot):
+    """No operation ever started: closing must not raise on the absent
+    progress reporter."""
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    assert window._progress_reporter is None
+
+    window.close()
+
+
+def test_main_window_hides_cancel_button_when_a_run_ends(qtbot, monkeypatch):
+    """Every path out of a run hides the cancel button.
+
+    Regression: each handler hid it on its own and the PostGIS one had been
+    forgotten, so the button stayed visible after a successful database run.
+    """
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    monkeypatch.setattr("dicogis.ui.mw_dicogis.launch", lambda url: None)
+    monkeypatch.setattr(
+        "dicogis.ui.mw_dicogis.send_system_notify", lambda **kwargs: None
+    )
+    window.serializer = MagicMock()
+
+    for end_of_run in (
+        lambda: window._on_db_processing_finished(total_layers=3),
+        lambda: window._on_files_processing_finished(total_files=3),
+        lambda: window._on_processing_canceled(),
+    ):
+        window._enable_cancel_button(True)
+        # isHidden() rather than isVisible(): the window itself is never shown
+        # in tests, so every child reports isVisible() False regardless
+        assert window.btn_cancel.isHidden() is False
+        assert window.btn_cancel.isEnabled() is True
+
+        end_of_run()
+
+        assert window.btn_cancel.isEnabled() is False
+        assert window.btn_cancel.isHidden() is True
 
 
 def test_main_window_folder_selected_sets_default_output_name(qtbot):

@@ -198,20 +198,23 @@ class ProcessingFiles:
 
             if geofile.processed is True:
                 logger.warning(f"File has already been processed: {geofile.file_path}")
-                continue
+            else:
+                # extract dataset metadata
+                geofile, metadataset = self.read_dataset(dataset_to_process=geofile)
+                if metadataset is None:
+                    logger.error(
+                        f"Reading {geofile.file_path} failed. It can't be serialized."
+                    )
+                else:
+                    # storing informations into the output file
+                    geofile, metadataset = self.export_metadataset(
+                        dataset_to_process=geofile,
+                        metadataset_to_serialize=metadataset,
+                    )
 
-            # extract dataset metadata
-            geofile, metadataset = self.read_dataset(dataset_to_process=geofile)
-            if metadataset is None:
-                logger.error(
-                    f"Reading {geofile.file_path} failed. It can't be serialized."
-                )
-                continue
-
-            # storing informations into the output file
-            geofile, metadataset = self.export_metadataset(
-                dataset_to_process=geofile, metadataset_to_serialize=metadataset
-            )
+            # exactly one step per dataset, whatever its outcome: the counter
+            # counts datasets, and count_files_to_process() is its maximum
+            self.update_progress(increment_counter=True)
 
         # save what has been processed so far, cancellation included
         self.serializer.post_serializing()
@@ -241,8 +244,7 @@ class ProcessingFiles:
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: OK",
-                increment_counter=True,
+                message_to_display=f"Reading {dataset_to_process.file_path}: OK"
             )
             dataset_to_process.processed = True
             return dataset_to_process, metadataset
@@ -256,8 +258,7 @@ class ProcessingFiles:
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: OK",
-                increment_counter=True,
+                message_to_display=f"Reading {dataset_to_process.file_path}: OK"
             )
             dataset_to_process.processed = True
         except Exception as err:
@@ -296,8 +297,7 @@ class ProcessingFiles:
             self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}: OK",
-                increment_counter=True,
+                f"{dataset_to_process.file_path}: OK"
             )
             logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
             dataset_to_process.exported = True
@@ -312,8 +312,7 @@ class ProcessingFiles:
             self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}: OK",
-                increment_counter=True,
+                f"{dataset_to_process.file_path}: OK"
             )
             logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
             dataset_to_process.exported = True
