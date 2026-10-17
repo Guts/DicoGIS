@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>TabCredits</class>
- <widget class="QWidget" name="TabCredits">
+ <widget class="QWidget" name="wdg_tab_credits">
   <layout class="QGridLayout" name="gridLayout"/>
  </widget>
  <resources/>

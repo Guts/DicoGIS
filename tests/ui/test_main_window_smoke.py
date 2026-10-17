@@ -29,7 +29,7 @@ def test_main_window_constructs(qtbot):
     window = DicoGIS()
     qtbot.addWidget(window)
 
-    assert window.nb.count() == 5
+    assert window.tab_main.count() == 5
 
 
 def test_main_window_retranslate_ui_all_languages(qtbot):
@@ -37,10 +37,10 @@ def test_main_window_retranslate_ui_all_languages(qtbot):
     qtbot.addWidget(window)
 
     for language_code in ("EN", "FR", "ES", "EN"):
-        window.ddl_lang.setCurrentText(language_code)
+        window.cbb_lang.setCurrentText(language_code)
         window.retranslate_ui()
 
-        assert window.welcome.text()
+        assert window.lbl_welcome.text()
         assert window.get_selected_language() == language_code
 
 
@@ -54,7 +54,7 @@ def test_main_window_check_fields_requires_folder(qtbot, monkeypatch):
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
 
-    window.tab_files.set_target_path("")
+    window.wdg_tab_files.set_target_path("")
     assert window.check_fields(tab_data_type=0) is False
     assert shown_messages
 
@@ -68,9 +68,9 @@ def test_main_window_check_fields_requires_format(qtbot, monkeypatch):
         staticmethod(lambda *args, **kwargs: None),
     )
 
-    window.tab_files.set_target_path("/tmp")
-    window.tab_files.set_filters_state(
-        {key: "0" for key in window.tab_files.get_filters_state()}
+    window.wdg_tab_files.set_target_path("/tmp")
+    window.wdg_tab_files.set_filters_state(
+        {key: "0" for key in window.wdg_tab_files.get_filters_state()}
     )
     assert window.check_fields(tab_data_type=0) is False
 
@@ -93,14 +93,14 @@ def test_main_window_check_fields_accepts_any_single_format(
         "dicogis.ui.mw_dicogis.QMessageBox.critical",
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
-    window.tab_files.set_target_path(str(tmp_path))
+    window.wdg_tab_files.set_target_path(str(tmp_path))
 
-    all_filters_off = {key: "0" for key in window.tab_files.get_filters_state()}
+    all_filters_off = {key: "0" for key in window.wdg_tab_files.get_filters_state()}
     assert len(all_filters_off) > 1, "no format filter found to check"
 
     for filter_name in all_filters_off:
-        window.tab_files.set_filters_state(all_filters_off)
-        window.tab_files.set_filters_state({filter_name: "1"})
+        window.wdg_tab_files.set_filters_state(all_filters_off)
+        window.wdg_tab_files.set_filters_state({filter_name: "1"})
 
         assert window.check_fields(tab_data_type=0) is True, (
             f"a selection limited to {filter_name} was rejected"
@@ -118,7 +118,7 @@ def test_main_window_check_fields_requires_publish_input_folder(qtbot, monkeypat
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
 
-    window.tab_publish.set_input_folder("")
+    window.wdg_tab_publish.set_input_folder("")
     assert window.check_fields(tab_data_type=3) is False
     assert shown_messages
 
@@ -134,8 +134,8 @@ def test_main_window_check_fields_requires_publish_api_key(
         staticmethod(lambda *args, **kwargs: None),
     )
 
-    window.tab_publish.set_input_folder(str(tmp_path))
-    window.tab_publish.ent_udata_api_key.setText("")
+    window.wdg_tab_publish.set_input_folder(str(tmp_path))
+    window.wdg_tab_publish.lne_udata_api_key.setText("")
     assert window.check_fields(tab_data_type=3) is False
 
 
@@ -204,7 +204,7 @@ def test_main_window_folder_selected_sets_default_output_name(qtbot):
 
     window.on_folder_selected("/tmp/some_folder")
 
-    assert window.ent_outxl_filename.text().startswith("DicoGIS_some_folder_")
+    assert window.lne_outxl_filename.text().startswith("DicoGIS_some_folder_")
     assert window._scan_thread is not None
 
     with qtbot.waitSignal(window._scan_thread.finished, timeout=5000):

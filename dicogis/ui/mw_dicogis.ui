@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>DicoGIS</class>
- <widget class="QMainWindow" name="DicoGIS">
-  <widget class="QWidget" name="centralwidget">
+ <widget class="QMainWindow" name="mw_dicogis">
+  <widget class="QWidget" name="wdg_central">
    <layout class="QGridLayout" name="main_layout">
     <item row="0" column="1">
      <layout class="QHBoxLayout" name="top_bar">
       <item>
-       <widget class="QLabel" name="welcome">
+       <widget class="QLabel" name="lbl_welcome">
         <property name="styleSheet">
          <string notr="true">color: blue;</string>
         </property>
@@ -30,21 +30,21 @@
        </spacer>
       </item>
       <item>
-       <widget class="QComboBox" name="ddl_lang"/>
+       <widget class="QComboBox" name="cbb_lang"/>
       </item>
      </layout>
     </item>
     <item row="1" column="1">
-     <widget class="QTabWidget" name="nb"/>
+     <widget class="QTabWidget" name="tab_main"/>
     </item>
     <item row="2" column="1">
-     <widget class="QGroupBox" name="FrProg">
+     <widget class="QGroupBox" name="grp_progress">
       <property name="title">
        <string>Progression</string>
       </property>
       <layout class="QVBoxLayout" name="prog_layout">
        <item>
-        <widget class="QProgressBar" name="prog_layers">
+        <widget class="QProgressBar" name="prg_layers">
          <property name="value">
           <number>0</number>
          </property>
@@ -77,7 +77,7 @@
      </widget>
     </item>
     <item row="3" column="1">
-     <widget class="QGroupBox" name="FrOutp">
+     <widget class="QGroupBox" name="grp_output">
       <property name="title">
        <string>Output</string>
       </property>
@@ -90,7 +90,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="ent_outxl_filename"/>
+        <widget class="QLineEdit" name="lne_outxl_filename"/>
        </item>
       </layout>
      </widget>
@@ -98,14 +98,14 @@
     <item row="4" column="1">
      <layout class="QHBoxLayout" name="buttons_bar">
       <item>
-       <widget class="QPushButton" name="can">
+       <widget class="QPushButton" name="btn_close">
         <property name="text">
          <string>Quit</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="val">
+       <widget class="QPushButton" name="btn_process">
         <property name="text">
          <string>Launch</string>
         </property>

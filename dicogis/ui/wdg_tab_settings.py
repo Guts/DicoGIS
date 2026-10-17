@@ -81,108 +81,108 @@ class TabSettings(QWidget):
 
     def _init_interface_options(self) -> None:
         """Populate and wire the interface style combobox."""
-        self.opt_ui_style.addItems(QStyleFactory.keys())
+        self.cbb_ui_style.addItems(QStyleFactory.keys())
         current_style = getenv("DICOGIS_UI_STYLE") or self.style().objectName()
-        style_idx = self.opt_ui_style.findText(current_style)
+        style_idx = self.cbb_ui_style.findText(current_style)
         if style_idx < 0:
             style_idx = next(
                 (
                     i
-                    for i in range(self.opt_ui_style.count())
-                    if self.opt_ui_style.itemText(i).lower() == current_style.lower()
+                    for i in range(self.cbb_ui_style.count())
+                    if self.cbb_ui_style.itemText(i).lower() == current_style.lower()
                 ),
                 -1,
             )
         if style_idx >= 0:
-            self.opt_ui_style.setCurrentIndex(style_idx)
-        self.opt_ui_style.currentTextChanged.connect(self.apply_ui_style)
+            self.cbb_ui_style.setCurrentIndex(style_idx)
+        self.cbb_ui_style.currentTextChanged.connect(self.apply_ui_style)
 
     def _init_export_options(self) -> None:
         """Create the export/general options collapsible frame."""
-        self.FrOptExport = ToggledFrame(
+        self.wdg_frame_export = ToggledFrame(
             self,
             in_text=self.tr("Export"),
             start_opened=False,
         )
         export_layout = QVBoxLayout()
 
-        self.opt_export_size_prettify = QCheckBox(
+        self.cbx_export_size_prettify = QCheckBox(
             self.tr("Export: prettify files size"),
-            self.FrOptExport.sub_frame,
+            self.wdg_frame_export.frm_sub,
         )
-        self.opt_export_size_prettify.setChecked(
+        self.cbx_export_size_prettify.setChecked(
             str2bool(getenv("DICOGIS_EXPORT_SIZE_PRETTIFY", "True"))
         )
-        export_layout.addWidget(self.opt_export_size_prettify)
+        export_layout.addWidget(self.cbx_export_size_prettify)
 
-        self.opt_export_raw_path = QCheckBox(
+        self.cbx_export_raw_path = QCheckBox(
             self.tr("Export: raw path"),
-            self.FrOptExport.sub_frame,
+            self.wdg_frame_export.frm_sub,
         )
-        self.opt_export_raw_path.setChecked(
+        self.cbx_export_raw_path.setChecked(
             str2bool(getenv("DICOGIS_EXPORT_RAW_PATH", "False"))
         )
-        export_layout.addWidget(self.opt_export_raw_path)
+        export_layout.addWidget(self.cbx_export_raw_path)
 
-        self.opt_quick_fail = QCheckBox(
+        self.cbx_quick_fail = QCheckBox(
             self.tr("Quick fail"),
-            self.FrOptExport.sub_frame,
+            self.wdg_frame_export.frm_sub,
         )
-        self.opt_quick_fail.setChecked(str2bool(getenv("DICOGIS_QUICK_FAIL", "False")))
-        export_layout.addWidget(self.opt_quick_fail)
+        self.cbx_quick_fail.setChecked(str2bool(getenv("DICOGIS_QUICK_FAIL", "False")))
+        export_layout.addWidget(self.cbx_quick_fail)
 
-        self.opt_end_process_notification_sound = QCheckBox(
+        self.cbx_end_process_notification_sound = QCheckBox(
             self.tr("Play a notification sound when processing has finished."),
-            self.FrOptExport.sub_frame,
+            self.wdg_frame_export.frm_sub,
         )
-        self.opt_end_process_notification_sound.setChecked(
+        self.cbx_end_process_notification_sound.setChecked(
             str2bool(getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", "True"))
         )
-        export_layout.addWidget(self.opt_end_process_notification_sound)
+        export_layout.addWidget(self.cbx_end_process_notification_sound)
 
-        self.opt_debug = QCheckBox(
+        self.cbx_debug = QCheckBox(
             self.tr("Enable verbose (debug) logging"),
-            self.FrOptExport.sub_frame,
+            self.wdg_frame_export.frm_sub,
         )
-        self.opt_debug.setChecked(str2bool(getenv("DICOGIS_DEBUG", "False")))
-        self.opt_debug.toggled.connect(self.apply_debug_logging)
-        export_layout.addWidget(self.opt_debug)
+        self.cbx_debug.setChecked(str2bool(getenv("DICOGIS_DEBUG", "False")))
+        self.cbx_debug.toggled.connect(self.apply_debug_logging)
+        export_layout.addWidget(self.cbx_debug)
 
-        self.opt_parallel_scan = QCheckBox(
+        self.cbx_parallel_scan = QCheckBox(
             self.tr(
                 "Parallelize folder scan (recommended only for network-mounted / "
                 "high-latency storage; can be slower on local/fast storage)"
             ),
-            self.FrOptExport.sub_frame,
+            self.wdg_frame_export.frm_sub,
         )
-        self.opt_parallel_scan.setChecked(
+        self.cbx_parallel_scan.setChecked(
             str2bool(getenv("DICOGIS_LISTING_PARALLEL_SCAN", "False"))
         )
-        export_layout.addWidget(self.opt_parallel_scan)
+        export_layout.addWidget(self.cbx_parallel_scan)
 
         max_workers_row = QHBoxLayout()
         self.lbl_max_workers = QLabel(
             self.tr("Parallel scan: max workers (0 = auto)"),
-            self.FrOptExport.sub_frame,
+            self.wdg_frame_export.frm_sub,
         )
-        self.opt_max_workers = QSpinBox(self.FrOptExport.sub_frame)
-        self.opt_max_workers.setRange(0, 64)
-        self.opt_max_workers.setSpecialValueText(self.tr("Auto"))
+        self.sbx_max_workers = QSpinBox(self.wdg_frame_export.frm_sub)
+        self.sbx_max_workers.setRange(0, 64)
+        self.sbx_max_workers.setSpecialValueText(self.tr("Auto"))
         env_max_workers = getenv("DICOGIS_LISTING_MAX_WORKERS", "")
-        self.opt_max_workers.setValue(
+        self.sbx_max_workers.setValue(
             int(env_max_workers) if env_max_workers.isdigit() else 0
         )
         max_workers_row.addWidget(self.lbl_max_workers)
-        max_workers_row.addWidget(self.opt_max_workers)
+        max_workers_row.addWidget(self.sbx_max_workers)
         export_layout.addLayout(max_workers_row)
 
-        self.FrOptExport.sub_frame.setLayout(export_layout)
+        self.wdg_frame_export.frm_sub.setLayout(export_layout)
 
-        self.verticalLayout.insertWidget(2, self.FrOptExport)
+        self.verticalLayout.insertWidget(2, self.wdg_frame_export)
 
     def _init_env_vars(self) -> None:
         """Create the environment variables collapsible frame."""
-        self.FrOptEnv = ToggledFrame(
+        self.wdg_frame_env = ToggledFrame(
             self,
             in_text=self.tr("Environment variables"),
             start_opened=False,
@@ -191,7 +191,7 @@ class TabSettings(QWidget):
 
         self.btn_doc_env_vars = QPushButton(
             self.tr("See supported variables"),
-            self.FrOptEnv.sub_frame,
+            self.wdg_frame_env.frm_sub,
         )
         self.btn_doc_env_vars.clicked.connect(
             lambda: open_new_tab(
@@ -199,7 +199,7 @@ class TabSettings(QWidget):
             )
         )
 
-        self.tab_env_vars = ScrollableTable(self.FrOptEnv.sub_frame)
+        self.wdg_env_vars = ScrollableTable(self.wdg_frame_env.frm_sub)
         dicogis_env_vars = {
             env_var: value
             for env_var, value in environ.items()
@@ -211,13 +211,13 @@ class TabSettings(QWidget):
             )
             for var_name, var_value in dicogis_env_vars.items():
                 logger.debug(f"{var_name}={var_value}")
-                self.tab_env_vars.add_row(var_name, var_value)
+                self.wdg_env_vars.add_row(var_name, var_value)
 
         env_layout.addWidget(self.btn_doc_env_vars)
-        env_layout.addWidget(self.tab_env_vars)
-        self.FrOptEnv.sub_frame.setLayout(env_layout)
+        env_layout.addWidget(self.wdg_env_vars)
+        self.wdg_frame_env.frm_sub.setLayout(env_layout)
 
-        self.verticalLayout.insertWidget(3, self.FrOptEnv)
+        self.verticalLayout.insertWidget(3, self.wdg_frame_env)
 
     # -- Live-apply handlers ---------------------------------------------------------
 
@@ -247,94 +247,94 @@ class TabSettings(QWidget):
     def get_proxy_settings(self) -> dict:
         """Return proxy settings as a dict."""
         return {
-            "proxy_needed": self.FrOptProxy.isChecked(),
-            "proxy_type": self.opt_ntlm.isChecked(),
-            "proxy_server": self.prox_ent_host.text(),
-            "proxy_port": self.prox_ent_port.value(),
-            "proxy_user": self.prox_ent_user.text(),
+            "proxy_needed": self.grp_proxy.isChecked(),
+            "proxy_type": self.cbx_ntlm.isChecked(),
+            "proxy_server": self.lne_proxy_host.text(),
+            "proxy_port": self.sbx_proxy_port.value(),
+            "proxy_user": self.lne_proxy_user.text(),
         }
 
     def set_proxy_settings(self, values: dict) -> None:
         """Apply proxy settings from a dict."""
-        self.FrOptProxy.setChecked(bool(str2bool(values.get("proxy_needed", False))))
-        self.opt_ntlm.setChecked(bool(str2bool(values.get("proxy_type", False))))
+        self.grp_proxy.setChecked(bool(str2bool(values.get("proxy_needed", False))))
+        self.cbx_ntlm.setChecked(bool(str2bool(values.get("proxy_type", False))))
         if server := values.get("proxy_server"):
-            self.prox_ent_host.setText(server)
+            self.lne_proxy_host.setText(server)
         if port := values.get("proxy_port"):
-            self.prox_ent_port.setValue(int(port))
+            self.sbx_proxy_port.setValue(int(port))
         if user := values.get("proxy_user"):
-            self.prox_ent_user.setText(user)
+            self.lne_proxy_user.setText(user)
 
     def get_export_options(self) -> dict:
         """Return export/general options as a dict."""
         return {
-            "export_prettify_size": self.opt_export_size_prettify.isChecked(),
-            "export_raw_path": self.opt_export_raw_path.isChecked(),
-            "quick_fail": self.opt_quick_fail.isChecked(),
-            "notification_sound": self.opt_end_process_notification_sound.isChecked(),
-            "debug": self.opt_debug.isChecked(),
-            "listing_parallel_scan": self.opt_parallel_scan.isChecked(),
-            "listing_max_workers": self.opt_max_workers.value(),
+            "export_prettify_size": self.cbx_export_size_prettify.isChecked(),
+            "export_raw_path": self.cbx_export_raw_path.isChecked(),
+            "quick_fail": self.cbx_quick_fail.isChecked(),
+            "notification_sound": self.cbx_end_process_notification_sound.isChecked(),
+            "debug": self.cbx_debug.isChecked(),
+            "listing_parallel_scan": self.cbx_parallel_scan.isChecked(),
+            "listing_max_workers": self.sbx_max_workers.value(),
         }
 
     def set_export_options(self, values: dict) -> None:
         """Apply export/general options from a dict."""
         if "export_prettify_size" in values:
-            self.opt_export_size_prettify.setChecked(
+            self.cbx_export_size_prettify.setChecked(
                 bool(str2bool(values["export_prettify_size"]))
             )
         if "export_raw_path" in values:
-            self.opt_export_raw_path.setChecked(
+            self.cbx_export_raw_path.setChecked(
                 bool(str2bool(values["export_raw_path"]))
             )
         if "quick_fail" in values:
-            self.opt_quick_fail.setChecked(bool(str2bool(values["quick_fail"])))
+            self.cbx_quick_fail.setChecked(bool(str2bool(values["quick_fail"])))
         if "notification_sound" in values:
-            self.opt_end_process_notification_sound.setChecked(
+            self.cbx_end_process_notification_sound.setChecked(
                 bool(str2bool(values["notification_sound"]))
             )
         if "debug" in values:
-            self.opt_debug.setChecked(bool(str2bool(values["debug"])))
+            self.cbx_debug.setChecked(bool(str2bool(values["debug"])))
         if "listing_parallel_scan" in values:
-            self.opt_parallel_scan.setChecked(
+            self.cbx_parallel_scan.setChecked(
                 bool(str2bool(values["listing_parallel_scan"]))
             )
         if "listing_max_workers" in values:
-            self.opt_max_workers.setValue(int(values["listing_max_workers"]))
+            self.sbx_max_workers.setValue(int(values["listing_max_workers"]))
 
     def get_listing_scan_kwargs(self) -> dict:
         """Return parallel_scan/max_workers kwargs ready for
         find_geodata_files() (translating the spinbox's 0 = 'Auto' into the
         None that find_geodata_files() expects)."""
-        max_workers = self.opt_max_workers.value()
+        max_workers = self.sbx_max_workers.value()
         return {
-            "parallel_scan": self.opt_parallel_scan.isChecked(),
+            "parallel_scan": self.cbx_parallel_scan.isChecked(),
             "max_workers": max_workers if max_workers > 0 else None,
         }
 
     def get_ui_options(self) -> dict:
         """Return interface options as a dict."""
-        return {"style": self.opt_ui_style.currentText()}
+        return {"style": self.cbb_ui_style.currentText()}
 
     def set_ui_options(self, values: dict) -> None:
         """Apply interface options from a dict."""
         if style := values.get("style"):
-            idx = self.opt_ui_style.findText(style)
+            idx = self.cbb_ui_style.findText(style)
             if idx >= 0:
-                self.opt_ui_style.setCurrentIndex(idx)
+                self.cbb_ui_style.setCurrentIndex(idx)
 
     def retranslate_ui(self) -> None:
         """Update widgets texts for the currently active language."""
-        self.FrOptInterface.setTitle(self.tr("Interface"))
+        self.grp_interface.setTitle(self.tr("Interface"))
         self.lbl_ui_style.setText(self.tr("Interface style:"))
-        self.opt_debug.setText(self.tr("Enable verbose (debug) logging"))
-        self.FrOptProxy.setTitle(self.tr("Proxy settings"))
-        self.prox_lb_host.setText(self.tr("Server: "))
-        self.prox_lb_port.setText(self.tr("Port: "))
-        self.prox_lb_user.setText(self.tr("User: "))
-        self.prox_lb_password.setText(self.tr("Password: "))
-        self.FrOptExport.btn_toggle.setText(self.tr("Export"))
-        self.FrOptEnv.btn_toggle.setText(self.tr("Environment variables"))
+        self.cbx_debug.setText(self.tr("Enable verbose (debug) logging"))
+        self.grp_proxy.setTitle(self.tr("Proxy settings"))
+        self.lbl_proxy_host.setText(self.tr("Server: "))
+        self.lbl_proxy_port.setText(self.tr("Port: "))
+        self.lbl_proxy_user.setText(self.tr("User: "))
+        self.lbl_proxy_password.setText(self.tr("Password: "))
+        self.wdg_frame_export.btn_toggle.setText(self.tr("Export"))
+        self.wdg_frame_env.btn_toggle.setText(self.tr("Environment variables"))
 
 
 # #############################################################################

@@ -59,18 +59,18 @@ class DatabaseConnectionDialog(QDialog):
 
         self.retranslate_ui()
 
-        self.buttons.accepted.connect(self._on_submit)
-        self.buttons.rejected.connect(self.reject)
+        self.bbx_ok_cancel.accepted.connect(self._on_submit)
+        self.bbx_ok_cancel.rejected.connect(self.reject)
 
     def _on_submit(self) -> None:
         """Collect the data from the entries and accept the dialog."""
         self.out_database_connection = DatabaseConnection(
-            database_name=self.ent_db_name.text(),
-            service_name=self.ent_service_name.text(),
-            host=self.ent_host.text(),
-            port=self.ent_port.value(),
-            user_name=self.ent_user.text(),
-            user_password=self.ent_password.text(),
+            database_name=self.lne_db_name.text(),
+            service_name=self.lne_service_name.text(),
+            host=self.lne_host.text(),
+            port=self.sbx_port.value(),
+            user_name=self.lne_user.text(),
+            user_password=self.lne_password.text(),
         )
         self.accept()
 

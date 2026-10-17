@@ -12,7 +12,7 @@ class ScrollableTable(QWidget):
     A scrollable table with two columns in read-only mode.
 
     Attributes:
-        table (QTableWidget): The table widget displaying key/value rows.
+        tbw_content (QTableWidget): The table widget displaying key/value rows.
     """
 
     def __init__(
@@ -32,14 +32,14 @@ class ScrollableTable(QWidget):
             self,
         )
 
-        self.table.setHorizontalHeaderLabels(
+        self.tbw_content.setHorizontalHeaderLabels(
             [
                 self.tr("Key"),
                 self.tr("Value"),
             ]
         )
-        self.table.verticalHeader().setVisible(False)
-        self.table.horizontalHeader().setStretchLastSection(True)
+        self.tbw_content.verticalHeader().setVisible(False)
+        self.tbw_content.horizontalHeader().setStretchLastSection(True)
 
     def add_row(self, key: str, value: str) -> None:
         """Append a key/value row to the table.
@@ -48,7 +48,7 @@ class ScrollableTable(QWidget):
             key: value for the first column.
             value: value for the second column.
         """
-        row_index = self.table.rowCount()
-        self.table.insertRow(row_index)
-        self.table.setItem(row_index, 0, QTableWidgetItem(str(key)))
-        self.table.setItem(row_index, 1, QTableWidgetItem(str(value)))
+        row_index = self.tbw_content.rowCount()
+        self.tbw_content.insertRow(row_index)
+        self.tbw_content.setItem(row_index, 0, QTableWidgetItem(str(key)))
+        self.tbw_content.setItem(row_index, 1, QTableWidgetItem(str(value)))

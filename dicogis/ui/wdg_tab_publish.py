@@ -62,27 +62,27 @@ class TabPublish(QWidget):
             self,
         )
 
-        self.ent_input_folder.setText(getenv("DICOGIS_PUBLISH_INPUT_FOLDER", ""))
+        self.lne_input_folder.setText(getenv("DICOGIS_PUBLISH_INPUT_FOLDER", ""))
         self.btn_browse_input_folder.clicked.connect(self.on_browse_input_folder)
 
-        self.ent_udata_api_url_base.setText(
+        self.lne_udata_api_url_base.setText(
             getenv("DICOGIS_UDATA_API_URL_BASE", "https://demo.data.gouv.fr/api/")
         )
-        self.ent_udata_api_version.setText(getenv("DICOGIS_UDATA_API_VERSION", "1"))
-        self.ent_udata_api_key.setEchoMode(QLineEdit.EchoMode.Password)
-        self.ent_udata_api_key.setText(getenv("DICOGIS_UDATA_API_KEY", ""))
-        self.ent_udata_organization_id.setText(
+        self.lne_udata_api_version.setText(getenv("DICOGIS_UDATA_API_VERSION", "1"))
+        self.lne_udata_api_key.setEchoMode(QLineEdit.EchoMode.Password)
+        self.lne_udata_api_key.setText(getenv("DICOGIS_UDATA_API_KEY", ""))
+        self.lne_udata_organization_id.setText(
             getenv("DICOGIS_UDATA_ORGANIZATION_ID", "")
         )
 
-        self.tab_publish_errors = ScrollableTable(self.FrReport)
-        self.tab_publish_errors.table.setHorizontalHeaderLabels(
+        self.wdg_publish_errors = ScrollableTable(self.grp_report)
+        self.wdg_publish_errors.tbw_content.setHorizontalHeaderLabels(
             [
                 self.tr("File"),
                 self.tr("Error"),
             ]
         )
-        self.FrReport.layout().addWidget(self.tab_publish_errors)
+        self.grp_report.layout().addWidget(self.wdg_publish_errors)
 
         self.retranslate_ui()
 
@@ -92,7 +92,7 @@ class TabPublish(QWidget):
         Returns:
             selected folder path or None if something went wrong
         """
-        initial_folder = Path(self.ent_input_folder.text() or Path().home())
+        initial_folder = Path(self.lne_input_folder.text() or Path().home())
         try:
             check_path(
                 input_path=initial_folder,
@@ -116,13 +116,13 @@ class TabPublish(QWidget):
         if not foldername:
             return None
 
-        self.ent_input_folder.setText(foldername)
+        self.lne_input_folder.setText(foldername)
         return Path(foldername)
 
     def clear_report(self) -> None:
         """Reset the publication report (summary + errors table)."""
         self.lbl_publish_summary.setText("")
-        self.tab_publish_errors.table.setRowCount(0)
+        self.wdg_publish_errors.tbw_content.setRowCount(0)
 
     def show_report(self, report: PublishReport) -> None:
         """Display a publish_metadata_folder() report in the tab.
@@ -138,33 +138,33 @@ class TabPublish(QWidget):
             )
         )
         for error_message in report.errors:
-            self.tab_publish_errors.add_row("", error_message)
+            self.wdg_publish_errors.add_row("", error_message)
 
     # -- Accessors used by the main window / OptionsManager --------------------------
 
     def get_input_folder(self) -> str:
         """Return the currently entered JSON metadata folder path."""
-        return self.ent_input_folder.text()
+        return self.lne_input_folder.text()
 
     def set_input_folder(self, folder_path: str) -> None:
         """Set the JSON metadata folder path."""
-        self.ent_input_folder.setText(folder_path)
+        self.lne_input_folder.setText(folder_path)
 
     def get_udata_api_key(self) -> str:
         """Return the currently entered uData API key."""
-        return self.ent_udata_api_key.text()
+        return self.lne_udata_api_key.text()
 
     def get_udata_api_url_base(self) -> str:
         """Return the currently entered uData API base URL."""
-        return self.ent_udata_api_url_base.text()
+        return self.lne_udata_api_url_base.text()
 
     def get_udata_api_version(self) -> str:
         """Return the currently entered uData API version."""
-        return self.ent_udata_api_version.text()
+        return self.lne_udata_api_version.text()
 
     def get_udata_organization_id(self) -> str | None:
         """Return the currently entered uData organization ID, or None if empty."""
-        return self.ent_udata_organization_id.text() or None
+        return self.lne_udata_organization_id.text() or None
 
     def get_publish_options(self) -> dict:
         """Return publish options as a dict. The API key is not included: it is not
@@ -182,24 +182,24 @@ class TabPublish(QWidget):
         if input_folder := values.get("input_folder"):
             self.set_input_folder(input_folder)
         if api_url_base := values.get("udata_api_url_base"):
-            self.ent_udata_api_url_base.setText(api_url_base)
+            self.lne_udata_api_url_base.setText(api_url_base)
         if api_version := values.get("udata_api_version"):
-            self.ent_udata_api_version.setText(api_version)
+            self.lne_udata_api_version.setText(api_version)
         if organization_id := values.get("udata_organization_id"):
-            self.ent_udata_organization_id.setText(organization_id)
+            self.lne_udata_organization_id.setText(organization_id)
 
     def retranslate_ui(self) -> None:
         """Update widgets texts for the currently active language."""
-        self.FrSource.setTitle(self.tr("Metadata source"))
-        self.lb_input_folder.setText(self.tr("JSON metadata folder: "))
+        self.grp_source.setTitle(self.tr("Metadata source"))
+        self.lbl_input_folder.setText(self.tr("JSON metadata folder: "))
         self.btn_browse_input_folder.setText(self.tr("Browse"))
-        self.FrCatalog.setTitle(self.tr("uData catalog"))
-        self.lb_udata_api_url_base.setText(self.tr("API URL:"))
-        self.lb_udata_api_version.setText(self.tr("API version:"))
-        self.lb_udata_api_key.setText(self.tr("API key:"))
-        self.lb_udata_organization_id.setText(self.tr("Organization ID (optional):"))
-        self.FrReport.setTitle(self.tr("Publication report"))
-        self.tab_publish_errors.table.setHorizontalHeaderLabels(
+        self.grp_catalog.setTitle(self.tr("uData catalog"))
+        self.lbl_udata_api_url_base.setText(self.tr("API URL:"))
+        self.lbl_udata_api_version.setText(self.tr("API version:"))
+        self.lbl_udata_api_key.setText(self.tr("API key:"))
+        self.lbl_udata_organization_id.setText(self.tr("Organization ID (optional):"))
+        self.grp_report.setTitle(self.tr("Publication report"))
+        self.wdg_publish_errors.tbw_content.setHorizontalHeaderLabels(
             [
                 self.tr("File"),
                 self.tr("Error"),

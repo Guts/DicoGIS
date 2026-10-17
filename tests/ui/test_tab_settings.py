@@ -39,8 +39,8 @@ def test_parallel_scan_options_default_off_and_auto(qtbot):
         widget = TabSettings()
     qtbot.addWidget(widget)
 
-    assert widget.opt_parallel_scan.isChecked() is False
-    assert widget.opt_max_workers.value() == 0
+    assert widget.cbx_parallel_scan.isChecked() is False
+    assert widget.sbx_max_workers.value() == 0
     assert widget.get_listing_scan_kwargs() == {
         "parallel_scan": False,
         "max_workers": None,
@@ -61,8 +61,8 @@ def test_parallel_scan_options_read_from_env_vars(qtbot):
         widget = TabSettings()
     qtbot.addWidget(widget)
 
-    assert widget.opt_parallel_scan.isChecked() is True
-    assert widget.opt_max_workers.value() == 12
+    assert widget.cbx_parallel_scan.isChecked() is True
+    assert widget.sbx_max_workers.value() == 12
     assert widget.get_listing_scan_kwargs() == {
         "parallel_scan": True,
         "max_workers": 12,
@@ -100,12 +100,12 @@ def test_proxy_group_box_stays_toggleable(qtbot):
     widget = TabSettings()
     qtbot.addWidget(widget)
 
-    assert widget.FrOptProxy.isEnabled() is True
+    assert widget.grp_proxy.isEnabled() is True
 
     for checked in (True, False, True):
-        widget.FrOptProxy.setChecked(checked)
-        assert widget.FrOptProxy.isChecked() is checked
-        assert widget.FrOptProxy.isEnabled() is True
+        widget.grp_proxy.setChecked(checked)
+        assert widget.grp_proxy.isChecked() is checked
+        assert widget.grp_proxy.isEnabled() is True
 
 
 def test_proxy_fields_follow_the_check_state(qtbot):
@@ -115,15 +115,15 @@ def test_proxy_fields_follow_the_check_state(qtbot):
     widget = TabSettings()
     qtbot.addWidget(widget)
     proxy_inputs = (
-        widget.prox_ent_host,
-        widget.prox_ent_port,
-        widget.prox_ent_user,
+        widget.lne_proxy_host,
+        widget.sbx_proxy_port,
+        widget.lne_proxy_user,
     )
 
-    widget.FrOptProxy.setChecked(False)
+    widget.grp_proxy.setChecked(False)
     assert not any(proxy_input.isEnabled() for proxy_input in proxy_inputs)
 
-    widget.FrOptProxy.setChecked(True)
+    widget.grp_proxy.setChecked(True)
     assert all(proxy_input.isEnabled() for proxy_input in proxy_inputs)
 
 

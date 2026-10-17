@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ScrollableTable</class>
- <widget class="QWidget" name="ScrollableTable">
+ <widget class="QWidget" name="wdg_scrollable_table">
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -16,7 +16,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QTableWidget" name="table">
+    <widget class="QTableWidget" name="tbw_content">
      <property name="editTriggers">
       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>

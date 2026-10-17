@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>TabDatabaseServer</class>
- <widget class="QWidget" name="TabDatabaseServer">
+ <widget class="QWidget" name="wdg_tab_database">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="FrameDatabaseServicePicker">
+    <widget class="QGroupBox" name="grp_service_picker">
      <property name="title">
       <string>PostGIS</string>
      </property>
      <layout class="QFormLayout" name="form_layout">
       <item row="0" column="0">
-       <widget class="QLabel" name="lb_pg_services">
+       <widget class="QLabel" name="lbl_pg_services">
         <property name="text">
          <string>PG service:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="ddl_pg_services"/>
+       <widget class="QComboBox" name="cbb_pg_services"/>
       </item>
       <item row="1" column="0" colspan="2">
-       <widget class="QPushButton" name="open_form_button">
+       <widget class="QPushButton" name="btn_open_form">
         <property name="text">
          <string>+</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="caz_pg_views">
+       <widget class="QCheckBox" name="cbx_pg_views">
         <property name="text">
          <string>Views enabled</string>
         </property>

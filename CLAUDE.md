@@ -157,6 +157,15 @@ File naming follows a prefix convention:
 Plain, unprefixed modules (`workers.py`, `main.py`) hold non-widget code
 (QThread workers, the app entry point) and have no `.ui` counterpart.
 
+Widget names (`objectName` in `.ui` files, and Python attributes holding
+widgets) are snake_case and start with their class prefix: `cbx_` checkbox,
+`cbb_` combo box, `lne_` line edit, `lbl_` label, `btn_` push/tool button,
+`grp_` group box, `sbx_` spin box, `wdg_` plain or custom widget (tab pages are
+`wdg_tab_*`, like their module)… The full table is in `CONTRIBUTING.md` and
+`tests/test_ui_widget_naming.py` enforces it on `.ui` files. Dict keys such as
+`get_filters_state()`'s `opt_*` are `options.ini` keys, not widget names: don't
+rename them, saved settings depend on them.
+
 ### Processing pipeline
 
 1. **Listing** (`dicogis/listing/geodata_listing.py`) — `find_geodata_files()`

@@ -71,11 +71,11 @@ class OptionsManager:
         """load settings from last execution"""
         # basics
         parent.set_selected_language(self.config.get("basics", "def_codelang"))
-        parent.tab_files.listing_initial_folder_path = Path(
+        parent.wdg_tab_files.listing_initial_folder_path = Path(
             self.config.get("basics", "def_rep")
         )
         parent.set_active_tab_index(int(self.config.get("basics", "def_tab")))
-        parent.tab_options.set_export_options(
+        parent.wdg_tab_settings.set_export_options(
             {
                 "export_prettify_size": self.config.get(
                     "basics", "export_prettify_size"
@@ -94,14 +94,14 @@ class OptionsManager:
         )
 
         # interface settings
-        parent.tab_options.set_ui_options(
+        parent.wdg_tab_settings.set_ui_options(
             {"style": self.config.get("ui", "style", fallback="")}
         )
 
         # uData publication settings (backward compatibility: older options.ini files
         # predate the "udata" section)
         if self.config.has_section("udata"):
-            parent.tab_publish.set_publish_options(
+            parent.wdg_tab_publish.set_publish_options(
                 {
                     "input_folder": self.config.get(
                         "udata", "input_folder", fallback=""
@@ -119,17 +119,17 @@ class OptionsManager:
             )
 
         # filters
-        parent.tab_files.set_filters_state(dict(self.config.items("filters")))
+        parent.wdg_tab_files.set_filters_state(dict(self.config.items("filters")))
 
         # database settings
         last_used_pg_service = self.config.get("database", "last_used_pg_service")
-        parent.tab_sgbd.set_selected_pg_service(last_used_pg_service)
-        parent.tab_sgbd.set_views_enabled(
+        parent.wdg_tab_database.set_selected_pg_service(last_used_pg_service)
+        parent.wdg_tab_database.set_views_enabled(
             bool(str2bool(self.config.get("database", "opt_views")))
         )
 
         # proxy settings
-        parent.tab_options.set_proxy_settings(dict(self.config.items("proxy")))
+        parent.wdg_tab_settings.set_proxy_settings(dict(self.config.items("proxy")))
 
         # log
         logging.info("Last options loaded")
@@ -158,18 +158,18 @@ class OptionsManager:
 
         # basics
         self.config.set("basics", "def_codelang", parent.get_selected_language())
-        target_path = parent.tab_files.get_target_path()
+        target_path = parent.wdg_tab_files.get_target_path()
         if target_path:
             self.config.set("basics", "def_rep", target_path)
         else:
             self.config.set(
                 "basics",
                 "def_rep",
-                str(parent.tab_files.listing_initial_folder_path.resolve()),
+                str(parent.wdg_tab_files.listing_initial_folder_path.resolve()),
             )
         self.config.set("basics", "def_tab", str(parent.get_active_tab_index()))
 
-        export_options = parent.tab_options.get_export_options()
+        export_options = parent.wdg_tab_settings.get_export_options()
         self.config.set(
             "basics",
             "export_prettify_size",
@@ -197,11 +197,11 @@ class OptionsManager:
         )
 
         # interface settings
-        ui_options = parent.tab_options.get_ui_options()
+        ui_options = parent.wdg_tab_settings.get_ui_options()
         self.config.set("ui", "style", ui_options["style"])
 
         # uData publication settings (the API key is never persisted, for security)
-        publish_options = parent.tab_publish.get_publish_options()
+        publish_options = parent.wdg_tab_publish.get_publish_options()
         self.config.set("udata", "input_folder", publish_options["input_folder"])
         self.config.set("udata", "api_url_base", publish_options["udata_api_url_base"])
         self.config.set("udata", "api_version", publish_options["udata_api_version"])
@@ -210,21 +210,21 @@ class OptionsManager:
         )
 
         # filters
-        for key, value in parent.tab_files.get_filters_state().items():
+        for key, value in parent.wdg_tab_files.get_filters_state().items():
             self.config.set("filters", key, str(int(value)))
 
         # database settings
         self.config.set(
             "database",
             "last_used_pg_service",
-            parent.tab_sgbd.get_selected_pg_service(),
+            parent.wdg_tab_database.get_selected_pg_service(),
         )
         self.config.set(
-            "database", "opt_views", str(parent.tab_sgbd.get_views_enabled())
+            "database", "opt_views", str(parent.wdg_tab_database.get_views_enabled())
         )
 
         # proxy settings
-        proxy_settings = parent.tab_options.get_proxy_settings()
+        proxy_settings = parent.wdg_tab_settings.get_proxy_settings()
         self.config.set("proxy", "proxy_needed", str(proxy_settings["proxy_needed"]))
         self.config.set("proxy", "proxy_type", str(proxy_settings["proxy_type"]))
         self.config.set("proxy", "proxy_server", proxy_settings["proxy_server"])

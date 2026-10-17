@@ -189,34 +189,34 @@ class DicoGIS(QMainWindow):
         )
 
         # tabs
-        self.tab_files = TabFiles(parent=self.nb)  # tab_id = 0
-        self.tab_sgbd = TabDatabaseServer(parent=self.nb)  # tab_id = 1
-        self.tab_options = TabSettings(parent=self.nb)  # tab_id = 2
-        self.tab_publish = TabPublish(parent=self.nb)  # tab_id = 3
-        self.tab_credits = TabCredits(parent=self.nb)  # tab_id = 4
+        self.wdg_tab_files = TabFiles(parent=self.tab_main)  # tab_id = 0
+        self.wdg_tab_database = TabDatabaseServer(parent=self.tab_main)  # tab_id = 1
+        self.wdg_tab_settings = TabSettings(parent=self.tab_main)  # tab_id = 2
+        self.wdg_tab_publish = TabPublish(parent=self.tab_main)  # tab_id = 3
+        self.wdg_tab_credits = TabCredits(parent=self.tab_main)  # tab_id = 4
 
-        self.nb.addTab(self.tab_files, " Files ")
-        self.nb.addTab(self.tab_sgbd, " PostGIS ")
-        self.nb.addTab(self.tab_options, "Options")
-        self.nb.addTab(self.tab_publish, "Publish")
-        self.nb.addTab(self.tab_credits, "Credits")
+        self.tab_main.addTab(self.wdg_tab_files, " Files ")
+        self.tab_main.addTab(self.wdg_tab_database, " PostGIS ")
+        self.tab_main.addTab(self.wdg_tab_settings, "Options")
+        self.tab_main.addTab(self.wdg_tab_publish, "Publish")
+        self.tab_main.addTab(self.wdg_tab_credits, "Credits")
 
-        self.tab_files.folder_selected.connect(self.on_folder_selected)
+        self.wdg_tab_files.folder_selected.connect(self.on_folder_selected)
 
         # miscellaneous (left side panel)
-        self.misc_frame = MiscButtons(self, images_folder=self.dir_imgs)
-        self.main_layout.addWidget(self.misc_frame, 0, 0, 5, 1)
+        self.wdg_misc_buttons = MiscButtons(self, images_folder=self.dir_imgs)
+        self.main_layout.addWidget(self.wdg_misc_buttons, 0, 0, 5, 1)
 
         # language switcher
         li_lang = [v.value for v in AvailableLocales]
-        self.ddl_lang.addItems(li_lang)
-        self.ddl_lang.setCurrentText(self.def_lang)
-        self.ddl_lang.activated.connect(lambda _index: self.retranslate_ui())
+        self.cbb_lang.addItems(li_lang)
+        self.cbb_lang.setCurrentText(self.def_lang)
+        self.cbb_lang.activated.connect(lambda _index: self.retranslate_ui())
 
         # Basic buttons
-        self.val.setEnabled(True)
-        self.val.clicked.connect(self.process)
-        self.can.clicked.connect(self.close)
+        self.btn_process.setEnabled(True)
+        self.btn_process.clicked.connect(self.process)
+        self.btn_close.clicked.connect(self.close)
         self.btn_cancel.clicked.connect(self._on_cancel_clicked)
 
         # loading previous options
@@ -232,38 +232,38 @@ class DicoGIS(QMainWindow):
 
         # checking connection
         if not checker.check_internet_connection():
-            self.nb.setTabEnabled(1, False)
-            self.nb.setTabEnabled(2, False)
-            self.nb.setTabEnabled(3, False)
+            self.tab_main.setTabEnabled(1, False)
+            self.tab_main.setTabEnabled(2, False)
+            self.tab_main.setTabEnabled(3, False)
 
     # =================================================================================
 
     def retranslate_ui(self) -> None:
         """Update widgets text with the language currently selected."""
-        new_lang = self.ddl_lang.currentText()
+        new_lang = self.cbb_lang.currentText()
         self._install_qt_translator(new_lang)
         # still needed for the shared processing pipeline (export/georeaders), which
         # has no PyQt6/Qt translator dependency of its own
         self.localized_strings = self.txt_manager.load_texts(language_code=new_lang)
 
-        self.welcome.setText(self.tr("Hello ") + self.uzer)
-        self.can.setText(self.tr("Quit"))
-        self.FrOutp.setTitle(self.tr(" Output file "))
-        self.FrProg.setTitle(self.tr("Progression"))
-        self.val.setText(self.tr("Go!"))
+        self.lbl_welcome.setText(self.tr("Hello ") + self.uzer)
+        self.btn_close.setText(self.tr("Quit"))
+        self.grp_output.setTitle(self.tr(" Output file "))
+        self.grp_progress.setTitle(self.tr("Progression"))
+        self.btn_process.setText(self.tr("Go!"))
         self.btn_cancel.setText(self.tr("Cancel"))
         self.lbl_outxl_filename.setText(self.tr("Name of output file: "))
 
-        self.nb.setTabText(0, self.tr(" Files "))
-        self.nb.setTabText(1, self.tr(" Database "))
-        self.nb.setTabText(2, self.tr(" Settings "))
-        self.nb.setTabText(3, self.tr("Publish"))
-        self.nb.setTabText(4, self.tr(" Credits "))
+        self.tab_main.setTabText(0, self.tr(" Files "))
+        self.tab_main.setTabText(1, self.tr(" Database "))
+        self.tab_main.setTabText(2, self.tr(" Settings "))
+        self.tab_main.setTabText(3, self.tr("Publish"))
+        self.tab_main.setTabText(4, self.tr(" Credits "))
 
-        self.tab_files.retranslate_ui()
-        self.tab_sgbd.retranslate_ui()
-        self.tab_options.retranslate_ui()
-        self.tab_publish.retranslate_ui()
+        self.wdg_tab_files.retranslate_ui()
+        self.wdg_tab_database.retranslate_ui()
+        self.wdg_tab_settings.retranslate_ui()
+        self.wdg_tab_publish.retranslate_ui()
 
         self._apply_locale(new_lang)
 
@@ -342,7 +342,7 @@ class DicoGIS(QMainWindow):
         Args:
             foldername: selected folder path.
         """
-        self.ent_outxl_filename.setText(
+        self.lne_outxl_filename.setText(
             f"DicoGIS_{Path(foldername).name}_{date.today()}.xlsx"
         )
         self._start_folder_scan(foldername)
@@ -353,13 +353,13 @@ class DicoGIS(QMainWindow):
         Args:
             target_folder: folder to walk into.
         """
-        self.tab_files.btn_browse.setEnabled(False)
+        self.wdg_tab_files.btn_browse.setEnabled(False)
         self.set_status_message(
             self.tr("Progress: parsing and retrieving compatible files")
         )
         # indeterminate: the number of folders can't be known before walking
         # the tree, so the scan reports a running count as a message instead
-        self.prog_layers.setRange(0, 0)
+        self.prg_layers.setRange(0, 0)
         logger.info(f"Begin of folders parsing: {target_folder}")
 
         self._progress_reporter = QtProgressReporter(self)
@@ -370,7 +370,7 @@ class DicoGIS(QMainWindow):
         self._scan_worker = FolderScanWorker(
             target_folder,
             progress_reporter=self._progress_reporter,
-            **self.tab_options.get_listing_scan_kwargs(),
+            **self.wdg_tab_settings.get_listing_scan_kwargs(),
         )
         self._scan_worker.moveToThread(self._scan_thread)
         self._scan_thread.started.connect(self._scan_worker.run)
@@ -413,9 +413,9 @@ class DicoGIS(QMainWindow):
     def _reset_progress_after_interruption(self) -> None:
         """Put the progress widgets back to their idle state."""
         self._enable_cancel_button(False)
-        self.prog_layers.setRange(0, 1)
-        self.prog_layers.setValue(0)
-        self.tab_files.btn_browse.setEnabled(True)
+        self.prg_layers.setRange(0, 1)
+        self.prg_layers.setValue(0)
+        self.wdg_tab_files.btn_browse.setEnabled(True)
 
     def _on_folder_scan_canceled(self) -> None:
         """React to a folder scan interrupted by the user."""
@@ -461,8 +461,8 @@ class DicoGIS(QMainWindow):
 
         # end of listing
         self._enable_cancel_button(False)
-        self.prog_layers.setRange(0, 1)
-        self.prog_layers.setValue(0)
+        self.prg_layers.setRange(0, 1)
+        self.prg_layers.setValue(0)
 
         # status message
         self.set_status_message(
@@ -500,15 +500,15 @@ class DicoGIS(QMainWindow):
         self.li_vectors.extend(self.li_gxt)
 
         # reactivating the buttons
-        self.tab_files.btn_browse.setEnabled(True)
-        self.val.setEnabled(True)
+        self.wdg_tab_files.btn_browse.setEnabled(True)
+        self.btn_process.setEnabled(True)
 
     # =================================================================================
     # -- Processing dispatch ------------------------------------------------------------
 
     def process(self) -> None:
         """Check needed info and launch different processes."""
-        self.typo: int = self.nb.currentIndex()
+        self.typo: int = self.tab_main.currentIndex()
         logger.info(f"Selected tab: {self.typo}")
 
         if self.typo not in (0, 1, 3):
@@ -519,11 +519,11 @@ class DicoGIS(QMainWindow):
         self.settings.save_settings(self)
 
         # disabling UI to avoid unattended actions
-        self.val.setEnabled(False)
-        self.nb.setTabEnabled(0, False)
-        self.nb.setTabEnabled(1, False)
-        self.nb.setTabEnabled(2, False)
-        self.nb.setTabEnabled(3, False)
+        self.btn_process.setEnabled(False)
+        self.tab_main.setTabEnabled(0, False)
+        self.tab_main.setTabEnabled(1, False)
+        self.tab_main.setTabEnabled(2, False)
+        self.tab_main.setTabEnabled(3, False)
 
         # check form fields
         if not self.check_fields(tab_data_type=self.typo):
@@ -546,14 +546,12 @@ class DicoGIS(QMainWindow):
                 return
 
         # creating the output serializer
-        self.serializer: MetadatasetSerializerXlsx = (
-            MetadatasetSerializerBase.get_serializer_from_parameters(
-                format_or_serializer=OutputFormats.excel,
-                localized_strings=self.localized_strings,
-                output_path=None,
-                opt_prettify_size=self.tab_options.opt_export_size_prettify.isChecked(),
-                opt_raw_path=self.tab_options.opt_export_raw_path.isChecked(),
-            )
+        self.serializer: MetadatasetSerializerXlsx = MetadatasetSerializerBase.get_serializer_from_parameters(
+            format_or_serializer=OutputFormats.excel,
+            localized_strings=self.localized_strings,
+            output_path=None,
+            opt_prettify_size=self.wdg_tab_settings.cbx_export_size_prettify.isChecked(),
+            opt_raw_path=self.wdg_tab_settings.cbx_export_raw_path.isChecked(),
         )
 
         self.lbl_status.setStyleSheet("color: DodgerBlue;")
@@ -561,11 +559,11 @@ class DicoGIS(QMainWindow):
 
         # process files or PostGIS database
         if self.typo == 0:
-            self.nb.setCurrentIndex(0)
+            self.tab_main.setCurrentIndex(0)
             logger.info("PROCESS LAUNCHED: files")
             self.process_files()
         elif self.typo == 1:
-            self.nb.setCurrentIndex(1)
+            self.tab_main.setCurrentIndex(1)
             self.serializer.pre_serializing(has_sgbd=1)
             logger.info("PROCESS LAUNCHED: SGBD")
             self.process_db(sgbd_reader=pg_reader)
@@ -580,17 +578,17 @@ class DicoGIS(QMainWindow):
         in each handler, where the PostGIS one had been forgotten.
         """
         self._enable_cancel_button(False)
-        self.val.setEnabled(True)
-        self.nb.setTabEnabled(0, True)
-        self.nb.setTabEnabled(1, True)
-        self.nb.setTabEnabled(2, True)
-        self.nb.setTabEnabled(3, True)
+        self.btn_process.setEnabled(True)
+        self.tab_main.setTabEnabled(0, True)
+        self.tab_main.setTabEnabled(1, True)
+        self.tab_main.setTabEnabled(2, True)
+        self.tab_main.setTabEnabled(3, True)
 
     def _on_check_failed(self) -> None:
         """React to a check_fields()/test_connection() failure."""
         self.lbl_status.setStyleSheet("color: red;")
         self._enable_processing_controls()
-        self.nb.setCurrentIndex(self.typo)
+        self.tab_main.setCurrentIndex(self.typo)
 
     def _on_processing_error(self, message: str) -> None:
         """React to a processing worker failure.
@@ -623,15 +621,15 @@ class DicoGIS(QMainWindow):
         # set output path
         if self.serializer.output_path is None:
             self.serializer.output_path = Path(
-                self.tab_files.get_target_path()
-            ).joinpath(self.ent_outxl_filename.text())
+                self.wdg_tab_files.get_target_path()
+            ).joinpath(self.lne_outxl_filename.text())
 
         logger.info(f"Output path: {self.serializer.output_path.resolve()}")
 
         self._progress_reporter = QtProgressReporter(self)
         self._progress_reporter.message_changed.connect(self.set_status_message)
-        self._progress_reporter.progress_incremented.connect(self.prog_layers.setValue)
-        self._progress_reporter.total_changed.connect(self.prog_layers.setMaximum)
+        self._progress_reporter.progress_incremented.connect(self.prg_layers.setValue)
+        self._progress_reporter.total_changed.connect(self.prg_layers.setMaximum)
 
         # instanciate geofiles processor
         geofiles_processor = ProcessingFiles(
@@ -655,26 +653,26 @@ class DicoGIS(QMainWindow):
             li_geojson=self.li_geojson,
             li_geotiff=self.li_geotiff,
             # options
-            opt_analyze_cdao=self.tab_files.opt_dxf.isChecked(),
-            opt_analyze_esri_filegdb=self.tab_files.opt_egdb.isChecked(),
-            opt_analyze_geopackage=self.tab_files.opt_gpkg.isChecked(),
-            opt_analyze_geojson=self.tab_files.opt_geoj.isChecked(),
-            opt_analyze_gml=self.tab_files.opt_gml.isChecked(),
-            opt_analyze_gxt=self.tab_files.opt_gxt.isChecked(),
-            opt_analyze_kml=self.tab_files.opt_kml.isChecked(),
-            opt_analyze_mapinfo_tab=self.tab_files.opt_tab.isChecked(),
-            opt_analyze_raster=self.tab_files.opt_rast.isChecked(),
-            opt_analyze_shapefiles=self.tab_files.opt_shp.isChecked(),
-            opt_analyze_spatialite=self.tab_files.opt_spadb.isChecked(),
+            opt_analyze_cdao=self.wdg_tab_files.cbx_dxf.isChecked(),
+            opt_analyze_esri_filegdb=self.wdg_tab_files.cbx_egdb.isChecked(),
+            opt_analyze_geopackage=self.wdg_tab_files.cbx_gpkg.isChecked(),
+            opt_analyze_geojson=self.wdg_tab_files.cbx_geoj.isChecked(),
+            opt_analyze_gml=self.wdg_tab_files.cbx_gml.isChecked(),
+            opt_analyze_gxt=self.wdg_tab_files.cbx_gxt.isChecked(),
+            opt_analyze_kml=self.wdg_tab_files.cbx_kml.isChecked(),
+            opt_analyze_mapinfo_tab=self.wdg_tab_files.cbx_tab.isChecked(),
+            opt_analyze_raster=self.wdg_tab_files.cbx_rast.isChecked(),
+            opt_analyze_shapefiles=self.wdg_tab_files.cbx_shp.isChecked(),
+            opt_analyze_spatialite=self.wdg_tab_files.cbx_spadb.isChecked(),
             # progress
             progress_reporter=self._progress_reporter,
             # misc
-            opt_quick_fail=self.tab_options.opt_quick_fail.isChecked(),
+            opt_quick_fail=self.wdg_tab_settings.cbx_quick_fail.isChecked(),
         )
 
         # sheets and progress bar
         total_files = geofiles_processor.count_files_to_process()
-        self.prog_layers.setMaximum(total_files)
+        self.prg_layers.setMaximum(total_files)
 
         # launch processing in a background thread
         self._enable_cancel_button(True)
@@ -713,7 +711,7 @@ class DicoGIS(QMainWindow):
             notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files. "
             "\nOpen the application to save the workbook.",
-            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
+            notification_sound=self.wdg_tab_settings.cbx_end_process_notification_sound.isChecked(),
         )
         self._enable_processing_controls()
 
@@ -724,7 +722,7 @@ class DicoGIS(QMainWindow):
         to the output file, so it's offered rather than silently discarded.
         """
         logger.info("Processing canceled by the user.")
-        self.prog_layers.setValue(0)
+        self.prg_layers.setValue(0)
         self._enable_processing_controls()
         self.set_status_message(
             self.tr("Processing canceled. Partial results were saved to the output.")
@@ -738,10 +736,10 @@ class DicoGIS(QMainWindow):
         """
         logger.info("Start processing PostGIS tables...")
 
-        pg_service_name = self.tab_sgbd.get_selected_pg_service()
+        pg_service_name = self.wdg_tab_database.get_selected_pg_service()
 
         # set the default output file in UI and as serializer attribute
-        self.ent_outxl_filename.setText(
+        self.lne_outxl_filename.setText(
             str(
                 determine_output_path(
                     output_path=None,
@@ -750,12 +748,12 @@ class DicoGIS(QMainWindow):
                 )
             )
         )
-        self.serializer.output_path = Path(self.ent_outxl_filename.text())
+        self.serializer.output_path = Path(self.lne_outxl_filename.text())
 
         self._progress_reporter = QtProgressReporter(self)
         self._progress_reporter.message_changed.connect(self.set_status_message)
-        self._progress_reporter.progress_incremented.connect(self.prog_layers.setValue)
-        self._progress_reporter.total_changed.connect(self.prog_layers.setMaximum)
+        self._progress_reporter.progress_incremented.connect(self.prg_layers.setValue)
+        self._progress_reporter.total_changed.connect(self.prg_layers.setMaximum)
 
         self._proc_thread = QThread(self)
         self._proc_worker = PostgisProcessingWorker(
@@ -795,24 +793,24 @@ class DicoGIS(QMainWindow):
             notification_message="DicoGIS successfully processed "
             f"{total_layers} PostGIS tables. "
             "\nOpen the application to save the workbook.",
-            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
+            notification_sound=self.wdg_tab_settings.cbx_end_process_notification_sound.isChecked(),
         )
         self._enable_processing_controls()
 
     def process_publish(self) -> None:
         """Launch uData publication of metadata JSON files in a background worker."""
         self._progress_reporter = None
-        self.prog_layers.setRange(0, 0)  # indeterminate mode while fetching the catalog
+        self.prg_layers.setRange(0, 0)  # indeterminate mode while fetching the catalog
         self.set_status_message("Publishing to uData...")
-        self.tab_publish.clear_report()
+        self.wdg_tab_publish.clear_report()
 
         self._proc_thread = QThread(self)
         self._proc_worker = PublishWorker(
-            input_folder=Path(self.tab_publish.get_input_folder()),
-            udata_api_key=self.tab_publish.get_udata_api_key(),
-            udata_api_url_base=self.tab_publish.get_udata_api_url_base(),
-            udata_api_version=self.tab_publish.get_udata_api_version(),
-            udata_organization_id=self.tab_publish.get_udata_organization_id(),
+            input_folder=Path(self.wdg_tab_publish.get_input_folder()),
+            udata_api_key=self.wdg_tab_publish.get_udata_api_key(),
+            udata_api_url_base=self.wdg_tab_publish.get_udata_api_url_base(),
+            udata_api_version=self.wdg_tab_publish.get_udata_api_version(),
+            udata_organization_id=self.wdg_tab_publish.get_udata_organization_id(),
         )
         self._proc_worker.moveToThread(self._proc_thread)
         self._proc_thread.started.connect(self._proc_worker.run)
@@ -834,9 +832,9 @@ class DicoGIS(QMainWindow):
             files_done: number of JSON files already examined.
             files_total: total number of JSON files to examine.
         """
-        if self.prog_layers.maximum() != files_total:
-            self.prog_layers.setRange(0, files_total)
-        self.prog_layers.setValue(files_done)
+        if self.prg_layers.maximum() != files_total:
+            self.prg_layers.setRange(0, files_total)
+        self.prg_layers.setValue(files_done)
         self.set_status_message(f"Publishing to uData: {files_done}/{files_total}")
 
     def _on_publish_finished(self, report: PublishReport) -> None:
@@ -845,19 +843,19 @@ class DicoGIS(QMainWindow):
         Args:
             report: outcome of the publication run.
         """
-        self.prog_layers.setRange(0, max(report.total, 1))
-        self.prog_layers.setValue(report.total)
+        self.prg_layers.setRange(0, max(report.total, 1))
+        self.prg_layers.setValue(report.total)
         self.set_status_message(
             f"{report.published} published, {report.ignored} ignored, "
             f"{report.failed} failed."
         )
-        self.tab_publish.show_report(report)
+        self.wdg_tab_publish.show_report(report)
         send_system_notify(
             notification_title="DicoGIS publication ended",
             notification_message=f"{report.published} published, "
             f"{report.ignored} ignored,"
             f"{report.failed} failed.",
-            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
+            notification_sound=self.wdg_tab_settings.cbx_end_process_notification_sound.isChecked(),
         )
         self._enable_processing_controls()
 
@@ -871,7 +869,7 @@ class DicoGIS(QMainWindow):
             True if everything is OK
         """
         if tab_data_type == 0:
-            if not len(self.tab_files.get_target_path()):
+            if not len(self.wdg_tab_files.get_target_path()):
                 QMessageBox.critical(
                     self, "DicoGIS - User error", self.tr("Any folder selected")
                 )
@@ -881,27 +879,27 @@ class DicoGIS(QMainWindow):
             # get_filters_state() is a format filter, so testing them all
             # keeps this in sync when a format is added - enumerating them
             # by hand had already let "opt_gxt" be forgotten.
-            if not any(self.tab_files.get_filters_state().values()):
+            if not any(self.wdg_tab_files.get_filters_state().values()):
                 QMessageBox.critical(
                     self, "DicoGIS - User error", self.tr("Any format selected")
                 )
                 return False
 
         elif tab_data_type == 1:
-            if not self.tab_sgbd.get_selected_pg_service():
-                self.tab_sgbd.ddl_pg_services.setStyleSheet("color: red;")
+            if not self.wdg_tab_database.get_selected_pg_service():
+                self.wdg_tab_database.cbb_pg_services.setStyleSheet("color: red;")
                 self.set_status_message(
                     f"PG service name is a {self.tr('required field')}"
                 )
                 return False
 
         elif tab_data_type == 3:
-            if not self.tab_publish.get_input_folder():
+            if not self.wdg_tab_publish.get_input_folder():
                 QMessageBox.critical(
                     self, "DicoGIS - User error", self.tr("Any folder selected")
                 )
                 return False
-            if not self.tab_publish.get_udata_api_key():
+            if not self.wdg_tab_publish.get_udata_api_key():
                 QMessageBox.critical(
                     self,
                     "DicoGIS - User error",
@@ -923,14 +921,14 @@ class DicoGIS(QMainWindow):
         # check if a proxy is needed
         # more information about the GDAL HTTP proxy options here:
         # http://trac.osgeo.org/gdal/wiki/ConfigOptions#GDALOGRHTTPoptions
-        if self.tab_options.FrOptProxy.isChecked():
+        if self.wdg_tab_settings.grp_proxy.isChecked():
             logger.info("Proxy configured.")
             gdal.SetConfigOption(
                 "GDAL_HTTP_PROXY",
-                f"{self.tab_options.prox_ent_host.text()}:"
-                f"{self.tab_options.prox_ent_port.value()}",
+                f"{self.wdg_tab_settings.lne_proxy_host.text()}:"
+                f"{self.wdg_tab_settings.sbx_proxy_port.value()}",
             )
-            if self.tab_options.opt_ntlm.isChecked():
+            if self.wdg_tab_settings.cbx_ntlm.isChecked():
                 # NTLM: GDAL negotiates credentials itself, so this is an
                 # intentionally empty "user:password" placeholder, not a
                 # real secret.
@@ -941,8 +939,8 @@ class DicoGIS(QMainWindow):
 
         # testing connection settings
         sgbd_reader = ReadPostGIS(
-            service=self.tab_sgbd.get_selected_pg_service(),
-            views_included=self.tab_sgbd.get_views_enabled(),
+            service=self.wdg_tab_database.get_selected_pg_service(),
+            views_included=self.wdg_tab_database.get_views_enabled(),
         )
         sgbd_reader.get_connection()
 
@@ -969,7 +967,7 @@ class DicoGIS(QMainWindow):
 
     def get_selected_language(self) -> str:
         """Return the currently selected language code."""
-        return self.ddl_lang.currentText()
+        return self.cbb_lang.currentText()
 
     def set_selected_language(self, language_code: str) -> None:
         """Select a language and retranslate the UI.
@@ -978,11 +976,11 @@ class DicoGIS(QMainWindow):
             language_code: 2 letters language code (EN, FR, ES)
         """
         if AvailableLocales.has_value(language_code):
-            self.ddl_lang.setCurrentText(language_code)
+            self.cbb_lang.setCurrentText(language_code)
 
     def get_active_tab_index(self) -> int:
         """Return the currently active tab index."""
-        return self.nb.currentIndex()
+        return self.tab_main.currentIndex()
 
     def set_active_tab_index(self, index: int) -> None:
         """Select the active tab by index.
@@ -990,7 +988,7 @@ class DicoGIS(QMainWindow):
         Args:
             index: tab index to select.
         """
-        self.nb.setCurrentIndex(int(index))
+        self.tab_main.setCurrentIndex(int(index))
 
     # =================================================================================
 
