@@ -8,7 +8,6 @@
 # Standard library
 import logging
 from locale import getlocale
-from os import path
 from pathlib import Path
 from typing import Literal
 
@@ -128,8 +127,8 @@ class GeoReaderBase:
         """
         if self.dataset_type == "flat":
             # local variables
-            target_container.name = path.basename(src_path)
-            target_container.parent_folder_name = path.dirname(src_path)
+            target_container.name = Path(src_path).name
+            target_container.parent_folder_name = str(Path(src_path).parent)
             target_container.processing_error_type = err_type
             target_container.processing_error_msg = err_msg
             # method end

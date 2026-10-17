@@ -11,7 +11,6 @@ import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
 from locale import getlocale
-from os import path
 from pathlib import Path
 
 # package
@@ -21,6 +20,7 @@ from dicogis.georeaders.read_raster import ReadRasters
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
 from dicogis.models.metadataset import MetaDataset
+from dicogis.utils.paths import absolute_path
 
 # ProgressReporter used to be defined here; it now lives in a GDAL-free module
 # so dicogis.listing can use it too (this module imports GDAL-backed readers
@@ -253,7 +253,7 @@ class ProcessingFiles:
         )
         if self.opt_quick_fail:
             metadataset = dataset_to_process.georeader().infos_dataset(
-                source_path=path.abspath(dataset_to_process.file_path),
+                source_path=str(absolute_path(dataset_to_process.file_path)),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
@@ -264,7 +264,7 @@ class ProcessingFiles:
 
         try:
             metadataset = dataset_to_process.georeader().infos_dataset(
-                source_path=path.abspath(dataset_to_process.file_path),
+                source_path=str(absolute_path(dataset_to_process.file_path)),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
