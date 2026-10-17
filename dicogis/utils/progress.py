@@ -22,7 +22,8 @@ from typing import Protocol, runtime_checkable
 # #################################
 
 
-class OperationCanceled(Exception):
+# not named ...Error on purpose (N818): see the docstring
+class OperationCanceled(Exception):  # noqa: N818
     """Raised by the processing pipeline when its progress reporter asked it
     to stop. Distinct from a real error: the operation didn't fail, a caller
     (typically an end-user hitting a cancel button) interrupted it."""
