@@ -17,10 +17,15 @@ import configparser
 import logging
 import platform
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.check_path import check_path
 from dicogis.utils.str2bool import str2bool
+
+
+if TYPE_CHECKING:
+    from dicogis.ui.mw_dicogis import DicoGIS
 
 
 # #############################################################################
@@ -69,7 +74,7 @@ class OptionsManager:
         self.config = configparser.ConfigParser()
         self.config.read(self.confile)
 
-    def load_settings(self, parent) -> None:
+    def load_settings(self, parent: "DicoGIS") -> None:
         """load settings from last execution"""
         # basics
         parent.set_selected_language(self.config.get("basics", "def_codelang"))
@@ -136,7 +141,7 @@ class OptionsManager:
         # log
         logger.info("Last options loaded")
 
-    def save_settings(self, parent) -> bool:
+    def save_settings(self, parent: "DicoGIS") -> bool:
         """save last options in order to make the next excution more easy"""
 
         # add sections (guard against re-running save_settings within the same

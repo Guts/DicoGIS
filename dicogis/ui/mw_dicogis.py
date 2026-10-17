@@ -36,7 +36,7 @@ from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.publishing.udata import PublishReport
 from dicogis.ui.qt_compat import uic
 from dicogis.ui.qt_compat.QtCore import QThread, QTranslator, QUrl
-from dicogis.ui.qt_compat.QtGui import QDesktopServices, QIcon
+from dicogis.ui.qt_compat.QtGui import QCloseEvent, QDesktopServices, QIcon
 from dicogis.ui.qt_compat.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -992,7 +992,7 @@ class DicoGIS(QMainWindow):
 
     # =================================================================================
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 - Qt override
         """Ensure background threads are stopped before the window closes.
 
         quit() only asks a thread's event loop to return, which a worker
