@@ -67,11 +67,12 @@ class TestGetSrsDetails(unittest.TestCase):
         spatial_ref.ImportFromProj4("+proj=ortho +lat_0=40 +lon_0=-5 +ellps=WGS84")
         _datasource, layer = _memory_layer(spatial_ref)
 
-        crs_name, _crs_registry, _crs_code, crs_type = self.georeader.get_srs_details(
+        crs_name, _crs_registry, crs_code, crs_type = self.georeader.get_srs_details(
             dataset_or_layer=layer
         )
 
         self.assertEqual(crs_name, spatial_ref.GetName())
+        self.assertEqual(crs_code, "srs_no_epsg")
         self.assertEqual(crs_type, "srs_proj")
 
 

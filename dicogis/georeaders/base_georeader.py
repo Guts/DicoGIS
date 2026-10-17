@@ -276,12 +276,9 @@ class GeoReaderBase:
             logger.debug(
                 f"No EPSG code identified for '{layer_spatial_ref.GetName()}': {err}"
             )
-        srs_code = layer_spatial_ref.GetAuthorityCode(None)
-        if not srs_code:
-            if layer_spatial_ref.GetAttrValue("AUTHORITY", 1):
-                srs_code = layer_spatial_ref.GetAttrValue("AUTHORITY", 1)
-            else:
-                srs_code = "srs_no_epsg"
+        # only the root node's authority identifies the CRS: GetAttrValue("AUTHORITY")
+        # would return the first one found, e.g. its datum's or ellipsoid's code
+        srs_code = layer_spatial_ref.GetAuthorityCode(None) or "srs_no_epsg"
 
         # registry
         srs_registry = layer_spatial_ref.GetAuthorityName(None)
