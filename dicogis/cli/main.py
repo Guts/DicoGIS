@@ -72,7 +72,7 @@ def main(
     """
     if verbose:
         state["verbose"] = True
-        logger.setLevel = logging.DEBUG
+        logger.setLevel(logging.DEBUG)
 
     if version:
         typer.echo(f"{__title__} {__version__}")

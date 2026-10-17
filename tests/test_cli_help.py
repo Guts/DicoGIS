@@ -13,6 +13,7 @@ Usage from the repo root folder:
 
 # standard library
 import importlib
+import logging
 import warnings
 
 # 3rd party
@@ -81,3 +82,18 @@ def test_output_format_help_describes_every_format():
 
     assert "only Excel" not in help_page
     assert "JSON" in help_page
+
+
+def test_top_level_verbose_keeps_the_logger_usable():
+    """--verbose used to assign logging.DEBUG to the logger's setLevel attribute
+    instead of calling it, replacing the method by an int."""
+    cli_logger = logging.getLogger("dicogis.cli.main")
+    try:
+        result = runner.invoke(dicogis_cli, ["--verbose", "inventory", "--help"])
+
+        assert result.exit_code == 0, result.output
+        assert callable(cli_logger.setLevel)
+        assert cli_logger.level == logging.DEBUG
+    finally:
+        vars(cli_logger).pop("setLevel", None)
+        cli_logger.setLevel(logging.NOTSET)
