@@ -19,7 +19,12 @@ from dicogis.georeaders.read_dxf import ReadCadDxf
 from dicogis.georeaders.read_raster import ReadRasters
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
-from dicogis.models.metadataset import MetaDataset
+from dicogis.models.metadataset import (
+    MetaDatabaseFlat,
+    MetaDataset,
+    MetaRasterDataset,
+    MetaVectorDataset,
+)
 from dicogis.utils.paths import absolute_path
 
 # ProgressReporter used to be defined here; it now lives in a GDAL-free module
@@ -91,6 +96,15 @@ class ProcessingFiles:
         "kml": ReadVectorFlatDataset,
         "mapinfo_tab": ReadVectorFlatDataset,
         "raster": ReadRasters,
+    }
+
+    # metadataset model matching each georeader's dataset_type, to describe a
+    # dataset whose reading failed (see read_dataset())
+    MATRIX_DATASET_TYPE_METADATASET: dict[str, type[MetaDataset]] = {
+        "flat_cad": MetaVectorDataset,
+        "flat_database": MetaDatabaseFlat,
+        "flat_raster": MetaRasterDataset,
+        "flat_vector": MetaVectorDataset,
     }
 
     def __init__(
@@ -240,7 +254,8 @@ class ProcessingFiles:
             dataset_to_process: dataset path or URI to read
 
         Returns:
-            dataset and metadataset, None if an error occurs
+            dataset and metadataset, flagged as failed (processing_succeeded is
+            False) if reading raised
         """
         metadataset = None
 
@@ -260,10 +275,12 @@ class ProcessingFiles:
             dataset_to_process.processed = True
             return dataset_to_process, metadataset
 
+        georeader = None
         try:
-            metadataset = dataset_to_process.georeader(
+            georeader = dataset_to_process.georeader(
                 localized_strings=self.localized_strings
-            ).infos_dataset(
+            )
+            metadataset = georeader.infos_dataset(
                 source_path=str(absolute_path(dataset_to_process.file_path)),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
@@ -281,8 +298,46 @@ class ProcessingFiles:
             )
             dataset_to_process.processed = True
             dataset_to_process.process_error = err
+            # still described in the output, flagged as failed, rather than
+            # silently missing from it
+            metadataset = self.failed_metadataset(
+                dataset_to_process=dataset_to_process,
+                dataset_type=getattr(georeader, "dataset_type", None),
+                error=err,
+            )
 
         return dataset_to_process, metadataset
+
+    def failed_metadataset(
+        self,
+        dataset_to_process: DatasetToProcess,
+        dataset_type: str | None,
+        error: Exception,
+    ) -> MetaDataset:
+        """Describe a dataset whose reading raised, so that it can be serialized
+        as an error (e.g. a highlighted row in its Excel sheet).
+
+        Args:
+            dataset_to_process: dataset which failed to be read
+            dataset_type: dataset_type of the georeader used, picking the model
+            error: exception raised while reading
+
+        Returns:
+            metadataset with name, path and error filled, processing_succeeded False
+        """
+        dataset_path = absolute_path(dataset_to_process.file_path)
+        metadataset_model = self.MATRIX_DATASET_TYPE_METADATASET.get(
+            dataset_type, MetaDataset
+        )
+        return metadataset_model(
+            name=dataset_path.stem,
+            path=dataset_path,
+            parent_folder_name=dataset_path.parent.name,
+            dataset_type=dataset_type,
+            processing_succeeded=False,
+            processing_error_type=type(error).__name__,
+            processing_error_msg=str(error),
+        )
 
     def export_metadataset(
         self,

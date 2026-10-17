@@ -18,6 +18,7 @@ from unittest.mock import MagicMock
 
 # project
 from dicogis.export.base_serializer import MetadatasetSerializerBase
+from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 
 # ProgressReporter now lives in dicogis.utils.progress but must stay importable
 # from here: it was part of this module's public surface (see test below).
@@ -27,11 +28,12 @@ from dicogis.georeaders.process_files import (
     ProgressReporter,
 )
 from dicogis.listing.geodata_listing import find_geodata_files
-from dicogis.models.metadataset import MetaDataset
+from dicogis.models.metadataset import MetaDataset, MetaVectorDataset
 from dicogis.utils.progress import (
     OperationCanceled,
     ProgressReporter as ProgressReporterCanonical,
 )
+from dicogis.utils.texts import TextsManager
 
 
 # ############################################################################
@@ -74,11 +76,19 @@ class SucceedingGeoReader:
 class FailingGeoReader:
     """Fake georeader that always raises while reading."""
 
+    dataset_type = "flat_vector"
+
     def __init__(self, localized_strings: dict | None = None) -> None:
         self.localized_strings = localized_strings
 
     def infos_dataset(self, source_path: str) -> MetaDataset:
         raise RuntimeError("boom reading dataset")
+
+
+class FailingRasterGeoReader(FailingGeoReader):
+    """Fake raster georeader that always raises while reading."""
+
+    dataset_type = "flat_raster"
 
 
 def _make_processor(serializer: MetadatasetSerializerBase | None = None, **overrides):
@@ -184,7 +194,14 @@ class TestReadDataset(unittest.TestCase):
 
         self.assertTrue(result_dataset.processed)
         self.assertIsNotNone(result_dataset.process_error)
-        self.assertIsNone(metadataset)
+        # described as a failed dataset, rather than dropped from the output
+        self.assertIsInstance(metadataset, MetaVectorDataset)
+        self.assertEqual(metadataset.dataset_type, "flat_vector")
+        self.assertEqual(metadataset.name, "broken")
+        self.assertEqual(metadataset.parent_folder_name, Path.cwd().name)
+        self.assertIs(metadataset.processing_succeeded, False)
+        self.assertEqual(metadataset.processing_error_type, "RuntimeError")
+        self.assertEqual(metadataset.processing_error_msg, "boom reading dataset")
 
     def test_quick_fail_propagates_exception(self):
         """With opt_quick_fail, a reading error is not caught."""
@@ -392,8 +409,9 @@ class TestProcessDatasetsInQueue(unittest.TestCase):
         self.assertEqual(serializer.serialize_calls, [])
         self.assertEqual(serializer.post_serializing_call_count, 1)
 
-    def test_dataset_that_fails_to_read_is_not_exported(self):
-        """When reading fails, the dataset is never handed to the serializer."""
+    def test_dataset_that_fails_to_read_is_exported_as_an_error(self):
+        """When reading fails, the dataset still reaches the output, flagged
+        as failed, instead of silently disappearing from it."""
         serializer = FakeSerializer()
         processor = _make_processor(serializer=serializer)
         dataset = DatasetToProcess(
@@ -405,8 +423,30 @@ class TestProcessDatasetsInQueue(unittest.TestCase):
 
         processor.process_datasets_in_queue()
 
-        self.assertEqual(serializer.serialize_calls, [])
-        self.assertFalse(dataset.exported)
+        self.assertEqual(len(serializer.serialize_calls), 1)
+        self.assertIs(serializer.serialize_calls[0].processing_succeeded, False)
+        self.assertTrue(dataset.exported)
+
+    def test_raster_that_fails_to_read_gets_an_error_row_in_its_sheet(self):
+        """End to end with the real xlsx serializer: the failed raster lands in
+        the raster sheet, highlighted, with the error message."""
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            serializer = MetadatasetSerializerXlsx(
+                localized_strings=TextsManager().load_texts(language_code="EN"),
+                output_path=Path(tmpdirname, "inventory.xlsx"),
+            )
+            processor = _make_processor(
+                serializer=serializer, li_rasters=["broken.tif"]
+            )
+            processor.count_files_to_process()
+            processor.li_files_to_process[0].georeader = FailingRasterGeoReader
+
+            processor.process_datasets_in_queue()
+
+        sheet = serializer.sheet_raster_files
+        self.assertEqual(sheet["A2"].value, "broken")
+        self.assertEqual(sheet["A2"].style, "Warning Text")
+        self.assertEqual(sheet["C2"].value, "boom reading dataset")
 
     def test_successful_dataset_is_read_and_exported(self):
         """A dataset that reads successfully is serialized."""
@@ -484,8 +524,9 @@ class TestProcessDatasetsInQueue(unittest.TestCase):
         processor.process_datasets_in_queue()
 
         self.assertEqual(reporter.increment.call_count, total_files)
-        # only the two readable, not-yet-processed datasets reach the output
-        self.assertEqual(len(serializer.serialize_calls), 2)
+        # the already processed one is skipped, the unreadable one is exported
+        # as an error
+        self.assertEqual(len(serializer.serialize_calls), 3)
 
     def test_post_serializing_called_even_with_empty_queue(self):
         """post_serializing() runs even when there is nothing to process."""
