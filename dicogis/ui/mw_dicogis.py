@@ -193,13 +193,13 @@ class DicoGIS(QMainWindow):
         self.tab_sgbd = TabDatabaseServer(parent=self.tab_main)  # tab_id = 1
         self.tab_options = TabSettings(parent=self.tab_main)  # tab_id = 2
         self.tab_publish = TabPublish(parent=self.tab_main)  # tab_id = 3
-        self.tab_credits = TabCredits(parent=self.tab_main)  # tab_id = 4
+        self.wdg_tab_credits = TabCredits(parent=self.tab_main)  # tab_id = 4
 
         self.tab_main.addTab(self.tab_files, " Files ")
         self.tab_main.addTab(self.tab_sgbd, " PostGIS ")
         self.tab_main.addTab(self.tab_options, "Options")
         self.tab_main.addTab(self.tab_publish, "Publish")
-        self.tab_main.addTab(self.tab_credits, "Credits")
+        self.tab_main.addTab(self.wdg_tab_credits, "Credits")
 
         self.tab_files.folder_selected.connect(self.on_folder_selected)
 
