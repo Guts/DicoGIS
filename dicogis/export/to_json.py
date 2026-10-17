@@ -55,6 +55,8 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
             )
         output_path.mkdir(parents=True, exist_ok=True)
         self.flavor = flavor
+        # file names written during this run, to tell homonym datasets apart
+        self.written_filenames: set[str] = set()
 
         super().__init__(
             localized_strings=localized_strings,
@@ -130,9 +132,15 @@ class MetadatasetSerializerJson(MetadatasetSerializerBase):
         if self.flavor not in ("dicogis", "udata"):
             raise ValueError(f"Unsupported JSON flavor: {self.flavor!r}")
 
-        output_json_filepath = self.output_path.joinpath(
-            f"{sluggy(metadataset.name)}.json"
-        )
+        # datasets are often homonyms (lines.shp in several folders): suffixed
+        # with a counter rather than overwriting the one written before
+        file_stem = sluggy(metadataset.name)
+        filename, counter = f"{file_stem}.json", 1
+        while filename in self.written_filenames:
+            counter += 1
+            filename = f"{file_stem}-{counter}.json"
+        self.written_filenames.add(filename)
+        output_json_filepath = self.output_path.joinpath(filename)
 
         with output_json_filepath.open(mode="w", encoding="UTF-8") as out_json:
             if self.flavor == "dicogis":
