@@ -67,3 +67,17 @@ def test_cli_options_use_no_deprecated_typer_parameter(module_name):
     with warnings.catch_warnings():
         warnings.simplefilter("error", DeprecationWarning)
         importlib.reload(module)
+
+
+@pytest.mark.parametrize("command", [(), ("inventory",), ("publish",)])
+def test_help_pages_leave_out_the_docstring_args_section(command):
+    """The Args: section of the docstrings documents the Python parameters for
+    developers: the options' own help already describes them to users."""
+    assert "Args:" not in _help_of(*command)
+
+
+def test_output_format_help_describes_every_format():
+    help_page = _help_of("inventory")
+
+    assert "only Excel" not in help_page
+    assert "JSON" in help_page

@@ -65,7 +65,7 @@ def main(
     ] = None,
 ):
     """Common options to commands or option only applicable to the main command.
-
+    \f
     Args:
         verbose: enable verbose mode. Defaults to False.
         version: show version and exit. Defaults to version_callback.

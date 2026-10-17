@@ -85,7 +85,7 @@ def inventory(
             envvar="DICOGIS_START_FOLDER",
             file_okay=False,
             help="Starting folder for listing files. "
-            "The folder must exist and be readable."
+            "The folder must exist and be readable. "
             "If None, files listing is ignored. Defaults to None.",
             readable=True,
             resolve_path=True,
@@ -114,8 +114,9 @@ def inventory(
             dir_okay=True,
             envvar="DICOGIS_OUTPUT_FILEPATH",
             file_okay=True,
-            help="If not set, the file is created in the current working directory "
-            "(cwd) and the filename is a concatenation of various informations.",
+            help="Output file (excel) or folder (json, udata). If not set, it's "
+            "created in the current working directory (cwd), named after the input "
+            "folder or PostgreSQL services and the date.",
             resolve_path=True,
             writable=True,
         ),
@@ -125,8 +126,9 @@ def inventory(
         typer.Option(
             case_sensitive=False,
             envvar="DICOGIS_OUTPUT_FORMAT",
-            help="Output format. For now, only Excel (Microsoft Excel .xlsx) is "
-            "supported. Here for the future!",
+            help="Output format: excel for a Microsoft Excel workbook (.xlsx), json "
+            "for one JSON file per dataset, udata for JSON files shaped for a uData "
+            "catalog (see the publish command).",
         ),
     ] = "excel",
     opt_notify_sound: Annotated[
@@ -206,13 +208,11 @@ def inventory(
     Make an inventory of geodata files starting from a folder and/or
     databases using connection listed in pg_service.conf and store everything in an
     output file.
-
+    \f
     Args:
         input_folder: starting folder for files. Defaults to None.
         formats: List of files extensions to include into listing. Defaults to every
             supported formats.
-        pg_services: name(s) of PostgreSQL services to use. Repeatable. If None,
-            database listing is ignored. Defaults to None.
         pg_services: name(s) of PostgreSQL services to use. Repeatable. If None,
             database listing is ignored. Defaults to None.
         language: language code to use. If not set, the current default locale is used.
