@@ -66,6 +66,31 @@ class TestCommandOutput(unittest.TestCase):
             self.assertIsNone(_command_output("python", "-c", "raise SystemExit(1)"))
 
 
+class TestGdalVersionFromCommandLine(unittest.TestCase):
+    """Test get_gdal_version() when the GDAL Python bindings are missing."""
+
+    def _version_from(self, gdalinfo_output: str | None) -> str:
+        with (
+            patch("dicogis.utils.environment.GDAL_IS_AVAILABLE", False),
+            patch(
+                "dicogis.utils.environment._command_output",
+                side_effect=lambda *args, **kwargs: (
+                    gdalinfo_output if args[0] == "gdalinfo" else None
+                ),
+            ),
+        ):
+            return get_gdal_version()
+
+    def test_two_digits_minor_version(self):
+        """A fixed slice of the output used to return "3.10." here."""
+        self.assertEqual(
+            self._version_from("GDAL 3.10.1, released 2025/01/08"), "3.10.1"
+        )
+
+    def test_one_digit_minor_version(self):
+        self.assertEqual(self._version_from("GDAL 3.8.4, released 2024/02/08"), "3.8.4")
+
+
 class TestUtilsEnvironment(unittest.TestCase):
     """Test envirpnment utils."""
 

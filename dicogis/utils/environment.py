@@ -137,7 +137,9 @@ def get_gdal_version() -> str:
     # try to get it from gdalinfo (installed with gdal)
     if gdalinfo_output := _command_output("gdalinfo", "--version"):
         logger.debug(f"GDAL version retrieved from gdalinfo: {gdalinfo_output}")
-        return gdalinfo_output[5:10]
+        # e.g. "GDAL 3.10.1, released 2025/01/08"
+        if version_match := re.search(r"GDAL (\d+\.\d+\.\d+)", gdalinfo_output):
+            return version_match.group(1)
 
     # try to get it from gdal-config (installed with gdaldev)
     if gdal_config_output := _command_output("gdal-config", "--version"):
