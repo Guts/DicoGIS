@@ -174,7 +174,7 @@ def test_main_window_hides_cancel_button_when_a_run_ends(qtbot, monkeypatch):
     """
     window = DicoGIS()
     qtbot.addWidget(window)
-    monkeypatch.setattr("dicogis.ui.mw_dicogis.launch", lambda url: None)
+    monkeypatch.setattr(window, "_open_output", lambda: None)
     monkeypatch.setattr(
         "dicogis.ui.mw_dicogis.send_system_notify", lambda **kwargs: None
     )
@@ -208,3 +208,30 @@ def test_main_window_folder_selected_sets_default_output_name(qtbot):
 
     with qtbot.waitSignal(window._scan_thread.finished, timeout=5000):
         pass
+
+
+def test_main_window_opens_the_output_with_the_desktop(
+    qtbot, monkeypatch, tmp_path, caplog
+):
+    """The output is opened through Qt, not Typer, so the GUI also runs where
+    Typer isn't installed (QGIS); a failure is logged rather than raised."""
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.serializer = MagicMock()
+    window.serializer.output_path = tmp_path / "out.xlsx"
+    opened_urls = []
+
+    def _fake_open_url(url):
+        opened_urls.append(url)
+        return False
+
+    monkeypatch.setattr(
+        "dicogis.ui.mw_dicogis.QDesktopServices.openUrl", staticmethod(_fake_open_url)
+    )
+
+    window._open_output()
+
+    assert [url.toLocalFile() for url in opened_urls] == [
+        str((tmp_path / "out.xlsx").resolve())
+    ]
+    assert "Opening" in caplog.text

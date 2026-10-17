@@ -18,9 +18,9 @@ from webbrowser import open_new_tab
 
 # 3rd party
 from PyQt6 import uic
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import QUrl
+from PyQt6.QtGui import QDesktopServices, QPixmap
 from PyQt6.QtWidgets import QWidget
-from typer import get_app_dir, launch
 
 # package
 from dicogis.__about__ import (
@@ -30,6 +30,7 @@ from dicogis.__about__ import (
     __uri__,
     __uri_homepage__,
 )
+from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.utils import Utilities
 
 
@@ -37,7 +38,7 @@ from dicogis.utils.utils import Utilities
 # ############ Globals ############
 # #################################
 
-app_dir = get_app_dir(app_name=__title__, force_posix=True)
+app_dir = get_app_dir()
 logger = logging.getLogger(__name__)
 
 # ##############################################################################
@@ -104,7 +105,9 @@ class MiscButtons(QWidget):
 
         # application folder
         self.btn_app_dir.setText(self.tr("Application folder"))
-        self.btn_app_dir.clicked.connect(lambda: launch(app_dir))
+        self.btn_app_dir.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(app_dir)))
+        )
 
 
 # #############################################################################
