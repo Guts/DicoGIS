@@ -11,6 +11,7 @@ Usage from the repo root folder:
 """
 
 # standard library
+import os
 import stat
 import tempfile
 import unittest
@@ -26,6 +27,16 @@ from dicogis.utils.check_path import (
     check_path_is_writable,
     check_var_can_be_path,
 )
+
+
+# ############################################################################
+# ########## Globals #############
+# ################################
+
+# root bypasses file permissions: a file without read/write rights stays
+# readable/writable for it (e.g. in a container, where root is the default user)
+RUNNING_AS_ROOT = hasattr(os, "geteuid") and os.geteuid() == 0
+SKIP_REASON_ROOT = "File permissions don't apply to root."
 
 
 # ############################################################################
@@ -101,6 +112,7 @@ class TestUtilsCheckPath(unittest.TestCase):
     @unittest.skipIf(
         getenv("CI"), "Creating file on CI with specific rights is not working."
     )
+    @unittest.skipIf(RUNNING_AS_ROOT, SKIP_REASON_ROOT)
     def test_check_path_readable_ko_specific(self):
         """Test path is readable fail cases."""
         # temporary fixture
@@ -130,6 +142,7 @@ class TestUtilsCheckPath(unittest.TestCase):
             check_path_exists(input_path=1000)
         self.assertFalse(check_path_is_writable(input_path=1000, raise_error=False))
 
+    @unittest.skipIf(RUNNING_AS_ROOT, SKIP_REASON_ROOT)
     def test_check_path_writable_ko_specific(self):
         """Test path is writable fail cases (specific)."""
         with tempfile.TemporaryDirectory(
@@ -276,6 +289,7 @@ class TestUtilsCheckPath(unittest.TestCase):
     @unittest.skipIf(
         getenv("CI"), "Creating file on CI with specific rights is not working."
     )
+    @unittest.skipIf(RUNNING_AS_ROOT, SKIP_REASON_ROOT)
     def test_check_path_meta_ko_specific(self):
         """Test meta check path is readbale / writable fail cases (specific)."""
         # temporary fixture
