@@ -159,4 +159,4 @@ if __name__ == "__main__":
     new_srv = pgserviceparser.write_service(
         service_name="gis_prod_ro", settings=new_srv_settings, create_if_not_found=True
     )
-    assert isinstance(new_srv, dict)
+    assert isinstance(new_srv, dict)  # noqa: S101 - manual check, standalone run only
