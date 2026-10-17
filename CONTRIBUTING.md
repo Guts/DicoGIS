@@ -28,6 +28,35 @@ The GUI is designed to run both standalone and as a QGIS plugin (QGIS >= 4.4, so
 
 - **Qt binding**: never import `PyQt6` (or any other binding) in `dicogis/ui`. Import from `dicogis.ui.qt_compat` instead, which mirrors the `qgis.PyQt` layout and resolves to `qgis.PyQt` inside QGIS and to PyQt6 otherwise: `from dicogis.ui.qt_compat.QtWidgets import QWidget`, `from dicogis.ui.qt_compat import uic`. If you need a Qt module it doesn't provide yet, add the matching submodule there. The `DICOGIS_QT_API` environment variable (`auto`, `qgis`, `pyqt6`) forces the binding for troubleshooting. A test fails on any direct binding import.
 - **Interfaces**: widgets and dialogs are designed in [Qt Designer](https://doc.qt.io/qt-6/qtdesigner-manual.html) `.ui` files, loaded at runtime with `uic.loadUi()` from the Python module of the same name (`wdg_tab_files.py` loads `wdg_tab_files.ui`). Don't compile them with `pyuic`, and don't build widgets in Python when they can live in the `.ui` file.
+- **Widget names**: a widget's `objectName` becomes the Python attribute holding it, so it must be PEP 8 compliant (lowercase, words separated by `_`) and start with the prefix of its class, which groups widgets by type and keeps names consistent across the project. Python attributes holding widgets follow the same rule, custom widgets (tab pages, collapsible frames…) taking `wdg_`. A test checks every `.ui` file against this table; extend both when using a new widget class.
+
+| Widget class | Prefix |
+| :----------- | :----: |
+| `QCheckBox` | `cbx_` |
+| `QComboBox` | `cbb_` |
+| `QDialog` | `dlg_` |
+| `QDialogButtonBox` | `bbx_` |
+| `QFrame` | `frm_` |
+| `QGroupBox` | `grp_` |
+| `QLabel` | `lbl_` |
+| `QLineEdit` | `lne_` |
+| `QListWidget` | `lst_` |
+| `QMainWindow` | `mw_` |
+| `QProgressBar` | `prg_` |
+| `QPushButton` | `btn_` |
+| `QRadioButton` | `rbn_` |
+| `QSpinBox` | `sbx_` |
+| `QTabWidget` | `tab_` |
+| `QTableView` | `tbv_` |
+| `QTableWidget` | `tbw_` |
+| `QTextEdit` | `txt_` |
+| `QToolButton` | `btn_` |
+| `QWidget` and custom widgets | `wdg_` |
+| `QgsCollapsibleGroupBox` | `qgrp_` |
+| `QgsFileWidget` | `qfil_` |
+| `QgsSpinBox` | `qsbx_` |
+
+- **Object names**: give every `QAction` and toolbar an `objectName`, so QGIS can save the interface state and offer them in its interface customization.
 
 ## Commit messages
 
