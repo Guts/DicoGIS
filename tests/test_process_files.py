@@ -12,6 +12,7 @@ Usage from the repo root folder:
 
 # standard library
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock
 
 # project
@@ -100,6 +101,29 @@ def _make_processor(serializer: MetadatasetSerializerBase | None = None, **overr
 # ############################################################################
 # ########## Classes #############
 # ################################
+
+
+class TestDatasetToProcess(unittest.TestCase):
+    """Test the DatasetToProcess model."""
+
+    def test_file_name_from_a_string_path(self):
+        """The listing provides plain strings (os.path.join), not Paths."""
+        dataset = DatasetToProcess(
+            file_path=str(Path("data", "vectors", "parcels.shp")),
+            file_format="esri_shapefile",
+            georeader=MagicMock(),
+        )
+
+        self.assertEqual(dataset.file_name, "parcels.shp")
+
+    def test_file_name_from_a_path(self):
+        dataset = DatasetToProcess(
+            file_path=Path("data", "vectors", "parcels.shp"),
+            file_format="esri_shapefile",
+            georeader=MagicMock(),
+        )
+
+        self.assertEqual(dataset.file_name, "parcels.shp")
 
 
 class TestReadDataset(unittest.TestCase):

@@ -61,6 +61,19 @@ class DatasetToProcess:
     exported: bool = False
     export_error: str | None = None
 
+    @property
+    def file_name(self) -> str:
+        """Name of the dataset file, without its folders, to keep progress
+        messages short.
+
+        file_path is typed as a Path but the listing actually provides plain
+        strings (os.path.join), so both are accepted.
+
+        Returns:
+            file name, extension included
+        """
+        return Path(self.file_path).name
+
 
 class ProcessingFiles:
     """Geofiles processor."""
