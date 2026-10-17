@@ -87,7 +87,6 @@ def publish(
         bool,
         typer.Option(
             envvar="DICOGIS_ENABLE_NOTIFICATION_SOUND",
-            is_flag=True,
             help="Enable/disable notification's sound at the end of processing.",
         ),
     ] = True,

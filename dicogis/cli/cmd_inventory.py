@@ -133,7 +133,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_ENABLE_NOTIFICATION_SOUND",
-            is_flag=True,
             help="Enable/disable notification's sound at the end of processing.",
         ),
     ] = True,
@@ -141,7 +140,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_OPEN_OUTPUT",
-            is_flag=True,
             help="Enable/disable auto opening output file when processing has finished.",
         ),
     ] = True,
@@ -149,7 +147,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_EXPORT_SIZE_PRETTIFY",
-            is_flag=True,
             help="Enable prettified files size in output. "
             "Example: 1 ko instead of 1024.",
         ),
@@ -158,7 +155,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_QUICK_FAIL",
-            is_flag=True,
             help="Enable quick fail instead of passing errors. Useful for debug.",
         ),
     ] = False,
@@ -166,7 +162,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_EXPORT_RAW_PATH",
-            is_flag=True,
             help="Enable raw path instead of hyperlink in formats which support it.",
         ),
     ] = False,
@@ -174,7 +169,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_LISTING_PARALLEL_SCAN",
-            is_flag=True,
             help="Scan top-level subfolders in parallel worker threads instead of "
             "a single sequential walk. Only beneficial on high-latency storage "
             "(e.g. network-mounted shares) with a deep folder tree - can be slower "

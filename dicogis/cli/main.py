@@ -50,7 +50,6 @@ def main(
     verbose: Annotated[
         bool,
         typer.Option(
-            is_flag=True,
             help="Increase verbosity to show debug logs.",
             envvar="DICOGIS_DEBUG",
         ),
