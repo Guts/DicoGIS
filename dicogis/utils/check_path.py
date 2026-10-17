@@ -13,7 +13,7 @@ Author: Julien Moura (https://github.com/guts)
 # Standard library
 import logging
 from os import R_OK, W_OK, access
-from os.path import expanduser, expandvars
+from os.path import expandvars
 from pathlib import Path
 
 
@@ -27,6 +27,20 @@ logger = logging.getLogger(__name__)
 # #############################################################################
 # ########## Functions #############
 # ##################################
+
+
+def _expand_user_and_vars(input_path: Path | str) -> Path:
+    """Expand a leading "~" then environment variables in a path.
+
+    os.path.expandvars() is kept: pathlib has no equivalent for it.
+
+    Args:
+        input_path: path to expand
+
+    Returns:
+        expanded path
+    """
+    return Path(expandvars(Path(input_path).expanduser()))
 
 
 def check_folder_is_empty(input_var: Path, raise_error: bool = True) -> bool:
@@ -76,7 +90,7 @@ def check_var_can_be_path(
 
     try:
         if attempt == 2:
-            input_var = Path(expandvars(expanduser(input_var)))
+            input_var = _expand_user_and_vars(input_var)
         else:
             input_var = Path(input_var)
         return True
@@ -125,7 +139,7 @@ def check_path_exists(
     # if second attempt, try to expand user and vars
 
     if attempt == 2:
-        input_path = Path(expandvars(expanduser(input_path)))
+        input_path = _expand_user_and_vars(input_path)
     else:
         input_path = Path(input_path)
 
