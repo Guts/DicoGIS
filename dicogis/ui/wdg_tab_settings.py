@@ -108,7 +108,7 @@ class TabSettings(QWidget):
 
         self.opt_export_size_prettify = QCheckBox(
             self.tr("Export: prettify files size"),
-            self.FrOptExport.sub_frame,
+            self.FrOptExport.frm_sub,
         )
         self.opt_export_size_prettify.setChecked(
             str2bool(getenv("DICOGIS_EXPORT_SIZE_PRETTIFY", "True"))
@@ -117,7 +117,7 @@ class TabSettings(QWidget):
 
         self.opt_export_raw_path = QCheckBox(
             self.tr("Export: raw path"),
-            self.FrOptExport.sub_frame,
+            self.FrOptExport.frm_sub,
         )
         self.opt_export_raw_path.setChecked(
             str2bool(getenv("DICOGIS_EXPORT_RAW_PATH", "False"))
@@ -126,14 +126,14 @@ class TabSettings(QWidget):
 
         self.opt_quick_fail = QCheckBox(
             self.tr("Quick fail"),
-            self.FrOptExport.sub_frame,
+            self.FrOptExport.frm_sub,
         )
         self.opt_quick_fail.setChecked(str2bool(getenv("DICOGIS_QUICK_FAIL", "False")))
         export_layout.addWidget(self.opt_quick_fail)
 
         self.opt_end_process_notification_sound = QCheckBox(
             self.tr("Play a notification sound when processing has finished."),
-            self.FrOptExport.sub_frame,
+            self.FrOptExport.frm_sub,
         )
         self.opt_end_process_notification_sound.setChecked(
             str2bool(getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", "True"))
@@ -142,7 +142,7 @@ class TabSettings(QWidget):
 
         self.opt_debug = QCheckBox(
             self.tr("Enable verbose (debug) logging"),
-            self.FrOptExport.sub_frame,
+            self.FrOptExport.frm_sub,
         )
         self.opt_debug.setChecked(str2bool(getenv("DICOGIS_DEBUG", "False")))
         self.opt_debug.toggled.connect(self.apply_debug_logging)
@@ -153,7 +153,7 @@ class TabSettings(QWidget):
                 "Parallelize folder scan (recommended only for network-mounted / "
                 "high-latency storage; can be slower on local/fast storage)"
             ),
-            self.FrOptExport.sub_frame,
+            self.FrOptExport.frm_sub,
         )
         self.opt_parallel_scan.setChecked(
             str2bool(getenv("DICOGIS_LISTING_PARALLEL_SCAN", "False"))
@@ -163,9 +163,9 @@ class TabSettings(QWidget):
         max_workers_row = QHBoxLayout()
         self.lbl_max_workers = QLabel(
             self.tr("Parallel scan: max workers (0 = auto)"),
-            self.FrOptExport.sub_frame,
+            self.FrOptExport.frm_sub,
         )
-        self.opt_max_workers = QSpinBox(self.FrOptExport.sub_frame)
+        self.opt_max_workers = QSpinBox(self.FrOptExport.frm_sub)
         self.opt_max_workers.setRange(0, 64)
         self.opt_max_workers.setSpecialValueText(self.tr("Auto"))
         env_max_workers = getenv("DICOGIS_LISTING_MAX_WORKERS", "")
@@ -176,7 +176,7 @@ class TabSettings(QWidget):
         max_workers_row.addWidget(self.opt_max_workers)
         export_layout.addLayout(max_workers_row)
 
-        self.FrOptExport.sub_frame.setLayout(export_layout)
+        self.FrOptExport.frm_sub.setLayout(export_layout)
 
         self.verticalLayout.insertWidget(2, self.FrOptExport)
 
@@ -191,7 +191,7 @@ class TabSettings(QWidget):
 
         self.btn_doc_env_vars = QPushButton(
             self.tr("See supported variables"),
-            self.FrOptEnv.sub_frame,
+            self.FrOptEnv.frm_sub,
         )
         self.btn_doc_env_vars.clicked.connect(
             lambda: open_new_tab(
@@ -199,7 +199,7 @@ class TabSettings(QWidget):
             )
         )
 
-        self.tab_env_vars = ScrollableTable(self.FrOptEnv.sub_frame)
+        self.tab_env_vars = ScrollableTable(self.FrOptEnv.frm_sub)
         dicogis_env_vars = {
             env_var: value
             for env_var, value in environ.items()
@@ -215,7 +215,7 @@ class TabSettings(QWidget):
 
         env_layout.addWidget(self.btn_doc_env_vars)
         env_layout.addWidget(self.tab_env_vars)
-        self.FrOptEnv.sub_frame.setLayout(env_layout)
+        self.FrOptEnv.frm_sub.setLayout(env_layout)
 
         self.verticalLayout.insertWidget(3, self.FrOptEnv)
 

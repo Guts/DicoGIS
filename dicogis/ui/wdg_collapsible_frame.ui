@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ToggledFrame</class>
- <widget class="QWidget" name="ToggledFrame">
+ <widget class="QWidget" name="wdg_collapsible_frame">
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -29,7 +29,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="sub_frame">
+    <widget class="QFrame" name="frm_sub">
      <property name="visible">
       <bool>false</bool>
      </property>

@@ -69,7 +69,7 @@ class ToggledFrame(QWidget):
         self.btn_toggle.setArrowType(
             Qt.ArrowType.DownArrow if start_opened else Qt.ArrowType.RightArrow
         )
-        self.sub_frame.setVisible(start_opened)
+        self.frm_sub.setVisible(start_opened)
         self.btn_toggle.toggled.connect(self._on_toggled)
 
     def _on_toggled(self, checked: bool) -> None:
@@ -78,7 +78,7 @@ class ToggledFrame(QWidget):
         Args:
             checked: whether the frame should be expanded.
         """
-        self.sub_frame.setVisible(checked)
+        self.frm_sub.setVisible(checked)
         self.btn_toggle.setArrowType(
             Qt.ArrowType.DownArrow if checked else Qt.ArrowType.RightArrow
         )
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     window_layout = QVBoxLayout(window)
 
     collapsible_frame = ToggledFrame(parent=window, in_text="Rotate", start_opened=True)
-    inner_layout = QVBoxLayout(collapsible_frame.sub_frame)
+    inner_layout = QVBoxLayout(collapsible_frame.frm_sub)
     button = QPushButton("Close window")
     button.clicked.connect(window.close)
     inner_layout.addWidget(button)
