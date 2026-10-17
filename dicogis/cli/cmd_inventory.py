@@ -351,7 +351,6 @@ def inventory(
         li_vectors.extend(li_gml)
         li_vectors.extend(li_geojson)
         li_vectors.extend(li_gxt)
-        li_raster.extend(li_geotiff)
 
         # check if there are some layers into the folder structure
         if not (

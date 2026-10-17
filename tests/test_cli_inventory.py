@@ -328,6 +328,33 @@ class TestInventoryHappyPath(unittest.TestCase):
         self.assertEqual(mock_notify.call_args.kwargs["notification_sound"], False)
         mock_launch.assert_called_once_with(url=f"{output_path.resolve()}")
 
+    def test_geotiff_is_passed_once_in_the_raster_list(self):
+        """find_geodata_files() already merges GeoTIFFs into its raster list:
+        inventory() must not append them a second time."""
+        processing_files_mock = MagicMock()
+        processing_files_mock.return_value.count_files_to_process.return_value = 1
+
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            input_folder = Path(tmpdirname)
+            (input_folder / "ortho.tif").touch()
+
+            with (
+                patch("dicogis.cli.cmd_inventory.GDAL_IS_AVAILABLE", True),
+                patch("dicogis.cli.cmd_inventory.send_system_notify"),
+                _stub_georeader_modules(processing_files_mock=processing_files_mock),
+            ):
+                inventory(
+                    input_folder=input_folder,
+                    output_path=input_folder / "out.xlsx",
+                    output_format="excel",
+                    language="EN",
+                    opt_open_output=False,
+                    opt_notify_sound=False,
+                )
+
+        _, kwargs = processing_files_mock.call_args
+        self.assertEqual(list(kwargs["li_rasters"]), [str(input_folder / "ortho.tif")])
+
     def test_opt_open_output_false_does_not_launch(self):
         processing_files_mock = MagicMock()
         processing_files_mock.return_value.count_files_to_process.return_value = 1
