@@ -42,9 +42,18 @@ logger = logging.getLogger(__name__)
 class ReadVectorFlatDataset(GeoReaderBase):
     """Reader for geographic dataset stored as flat vector files."""
 
-    def __init__(self, dataset_type: str = "flat_vector"):
-        """Class constructor."""
-        super().__init__(dataset_type=dataset_type)
+    def __init__(
+        self,
+        dataset_type: str = "flat_vector",
+        localized_strings: dict | None = None,
+    ) -> None:
+        """Class constructor.
+
+        Args:
+            dataset_type: type of dataset to read. Defaults to "flat_vector".
+            localized_strings: translated strings. Defaults to the system locale's.
+        """
+        super().__init__(dataset_type=dataset_type, localized_strings=localized_strings)
 
     def infos_dataset(
         self,

@@ -31,9 +31,15 @@ class ReadFlatDatabase(ReadVectorFlatDataset):
     Typically ESRI FileGDB, Geopackage, Spatialite...
     """
 
-    def __init__(self):
-        """Class constructor."""
-        super().__init__(dataset_type="flat_database")
+    def __init__(self, localized_strings: dict | None = None) -> None:
+        """Class constructor.
+
+        Args:
+            localized_strings: translated strings. Defaults to the system locale's.
+        """
+        super().__init__(
+            dataset_type="flat_database", localized_strings=localized_strings
+        )
 
 
 # ###########################################################################

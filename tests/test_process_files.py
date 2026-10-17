@@ -64,12 +64,18 @@ class FakeSerializer(MetadatasetSerializerBase):
 class SucceedingGeoReader:
     """Fake georeader returning a canned MetaDataset."""
 
+    def __init__(self, localized_strings: dict | None = None) -> None:
+        self.localized_strings = localized_strings
+
     def infos_dataset(self, source_path: str) -> MetaDataset:
         return MetaDataset(name=source_path)
 
 
 class FailingGeoReader:
     """Fake georeader that always raises while reading."""
+
+    def __init__(self, localized_strings: dict | None = None) -> None:
+        self.localized_strings = localized_strings
 
     def infos_dataset(self, source_path: str) -> MetaDataset:
         raise RuntimeError("boom reading dataset")
@@ -144,6 +150,26 @@ class TestReadDataset(unittest.TestCase):
         self.assertTrue(result_dataset.processed)
         self.assertIsNone(result_dataset.process_error)
         self.assertIsInstance(metadataset, MetaDataset)
+
+    def test_georeader_gets_the_run_localized_strings(self):
+        """Readers write their error messages in the run's language (--language
+        or the GUI's), not in the system locale's."""
+        for quick_fail in (True, False):
+            with self.subTest(quick_fail=quick_fail):
+                localized_strings = {"err_corrupt": "Fichier corrompu"}
+                processor = _make_processor(
+                    localized_strings=localized_strings, opt_quick_fail=quick_fail
+                )
+                georeader = MagicMock()
+                dataset = DatasetToProcess(
+                    file_path="parcels.shp",
+                    file_format="esri_shapefile",
+                    georeader=georeader,
+                )
+
+                processor.read_dataset(dataset_to_process=dataset)
+
+                georeader.assert_called_once_with(localized_strings=localized_strings)
 
     def test_failure_is_caught_and_recorded_when_not_quick_fail(self):
         """A reading error is swallowed: dataset is marked processed with an error."""

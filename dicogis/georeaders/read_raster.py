@@ -32,11 +32,15 @@ logger = logging.getLogger(__name__)
 class ReadRasters(GeoReaderBase):
     """Reader for geographic dataset stored as flat raster files."""
 
-    def __init__(
-        self,
-    ):
-        """Initialize module."""
-        super().__init__(dataset_type="flat_raster")
+    def __init__(self, localized_strings: dict | None = None) -> None:
+        """Initialize module.
+
+        Args:
+            localized_strings: translated strings. Defaults to the system locale's.
+        """
+        super().__init__(
+            dataset_type="flat_raster", localized_strings=localized_strings
+        )
 
     def infos_dataset(
         self,

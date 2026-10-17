@@ -248,7 +248,9 @@ class ProcessingFiles:
             message_to_display=f"Reading {dataset_to_process.file_name}..."
         )
         if self.opt_quick_fail:
-            metadataset = dataset_to_process.georeader().infos_dataset(
+            metadataset = dataset_to_process.georeader(
+                localized_strings=self.localized_strings
+            ).infos_dataset(
                 source_path=str(absolute_path(dataset_to_process.file_path)),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
@@ -259,7 +261,9 @@ class ProcessingFiles:
             return dataset_to_process, metadataset
 
         try:
-            metadataset = dataset_to_process.georeader().infos_dataset(
+            metadataset = dataset_to_process.georeader(
+                localized_strings=self.localized_strings
+            ).infos_dataset(
                 source_path=str(absolute_path(dataset_to_process.file_path)),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
