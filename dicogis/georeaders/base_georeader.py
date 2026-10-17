@@ -268,7 +268,14 @@ class GeoReaderBase:
                 "srs_nr",
             )
 
-        layer_spatial_ref.AutoIdentifyEPSG()
+        # with GDAL exceptions enabled, a CRS without EPSG equivalent (custom
+        # projection, ESRI WKT...) raises instead of returning an error code
+        try:
+            layer_spatial_ref.AutoIdentifyEPSG()
+        except RuntimeError as err:
+            logger.debug(
+                f"No EPSG code identified for '{layer_spatial_ref.GetName()}': {err}"
+            )
         srs_code = layer_spatial_ref.GetAuthorityCode(None)
         if not srs_code:
             if layer_spatial_ref.GetAttrValue("AUTHORITY", 1):
