@@ -18,9 +18,7 @@ import logging
 import platform
 from pathlib import Path
 
-from typer import get_app_dir
-
-from dicogis.__about__ import __title__
+from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.check_path import check_path
 from dicogis.utils.str2bool import str2bool
 
@@ -29,11 +27,9 @@ from dicogis.utils.str2bool import str2bool
 # ########## Globals ###############
 # ##################################
 
-# default location: a per-platform user config folder, e.g. ~/.config/DicoGIS
-# on Linux, instead of a hardcoded, Windows-style relative path
-DEFAULT_OPTIONS_FILEPATH = (
-    Path(get_app_dir(app_name=__title__, force_posix=True)) / "options.ini"
-)
+# default location: the per-user application folder (%APPDATA%\DicoGIS on
+# Windows, ~/.dicogis elsewhere), instead of a hardcoded relative path
+DEFAULT_OPTIONS_FILEPATH = get_app_dir() / "options.ini"
 
 # #############################################################################
 # ############ Classes #############
