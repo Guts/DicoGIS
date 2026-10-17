@@ -53,6 +53,7 @@ class ReadRasters(GeoReaderBase):
                 path=source_path,
                 name=source_path.stem,
                 parent_folder_name=source_path.parent.name,
+                dataset_type=self.dataset_type,
             )
 
         # opening dataset
