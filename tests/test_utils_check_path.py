@@ -14,7 +14,7 @@ Usage from the repo root folder:
 import stat
 import tempfile
 import unittest
-from os import chmod, getenv
+from os import getenv
 from pathlib import Path
 
 # project
@@ -140,7 +140,7 @@ class TestUtilsCheckPath(unittest.TestCase):
             unwritable_file.touch(exist_ok=True)
             unwritable_file.write_text("this content is the last to be written here")
 
-            chmod(unwritable_file, stat.S_IROTH)
+            unwritable_file.chmod(stat.S_IROTH)
 
             # str not valid, an existing file but not writable
             with self.assertRaises(IOError):
@@ -281,7 +281,7 @@ class TestUtilsCheckPath(unittest.TestCase):
         # temporary fixture
         not_writable_file = Path("tests/fixtures/tmp_file_no_writable.txt")
         not_writable_file.touch()
-        chmod(not_writable_file, stat.S_IREAD | stat.S_IROTH)
+        not_writable_file.chmod(stat.S_IREAD | stat.S_IROTH)
 
         # str not valid, an existing file but not writable
         with self.assertRaises(IOError):
