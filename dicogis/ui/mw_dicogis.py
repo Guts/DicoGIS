@@ -190,13 +190,13 @@ class DicoGIS(QMainWindow):
 
         # tabs
         self.tab_files = TabFiles(parent=self.tab_main)  # tab_id = 0
-        self.tab_sgbd = TabDatabaseServer(parent=self.tab_main)  # tab_id = 1
+        self.wdg_tab_database = TabDatabaseServer(parent=self.tab_main)  # tab_id = 1
         self.tab_options = TabSettings(parent=self.tab_main)  # tab_id = 2
         self.tab_publish = TabPublish(parent=self.tab_main)  # tab_id = 3
         self.wdg_tab_credits = TabCredits(parent=self.tab_main)  # tab_id = 4
 
         self.tab_main.addTab(self.tab_files, " Files ")
-        self.tab_main.addTab(self.tab_sgbd, " PostGIS ")
+        self.tab_main.addTab(self.wdg_tab_database, " PostGIS ")
         self.tab_main.addTab(self.tab_options, "Options")
         self.tab_main.addTab(self.tab_publish, "Publish")
         self.tab_main.addTab(self.wdg_tab_credits, "Credits")
@@ -261,7 +261,7 @@ class DicoGIS(QMainWindow):
         self.tab_main.setTabText(4, self.tr(" Credits "))
 
         self.tab_files.retranslate_ui()
-        self.tab_sgbd.retranslate_ui()
+        self.wdg_tab_database.retranslate_ui()
         self.tab_options.retranslate_ui()
         self.tab_publish.retranslate_ui()
 
@@ -738,7 +738,7 @@ class DicoGIS(QMainWindow):
         """
         logger.info("Start processing PostGIS tables...")
 
-        pg_service_name = self.tab_sgbd.get_selected_pg_service()
+        pg_service_name = self.wdg_tab_database.get_selected_pg_service()
 
         # set the default output file in UI and as serializer attribute
         self.lne_outxl_filename.setText(
@@ -888,8 +888,8 @@ class DicoGIS(QMainWindow):
                 return False
 
         elif tab_data_type == 1:
-            if not self.tab_sgbd.get_selected_pg_service():
-                self.tab_sgbd.ddl_pg_services.setStyleSheet("color: red;")
+            if not self.wdg_tab_database.get_selected_pg_service():
+                self.wdg_tab_database.cbb_pg_services.setStyleSheet("color: red;")
                 self.set_status_message(
                     f"PG service name is a {self.tr('required field')}"
                 )
@@ -941,8 +941,8 @@ class DicoGIS(QMainWindow):
 
         # testing connection settings
         sgbd_reader = ReadPostGIS(
-            service=self.tab_sgbd.get_selected_pg_service(),
-            views_included=self.tab_sgbd.get_views_enabled(),
+            service=self.wdg_tab_database.get_selected_pg_service(),
+            views_included=self.wdg_tab_database.get_views_enabled(),
         )
         sgbd_reader.get_connection()
 

@@ -123,8 +123,8 @@ class OptionsManager:
 
         # database settings
         last_used_pg_service = self.config.get("database", "last_used_pg_service")
-        parent.tab_sgbd.set_selected_pg_service(last_used_pg_service)
-        parent.tab_sgbd.set_views_enabled(
+        parent.wdg_tab_database.set_selected_pg_service(last_used_pg_service)
+        parent.wdg_tab_database.set_views_enabled(
             bool(str2bool(self.config.get("database", "opt_views")))
         )
 
@@ -217,10 +217,10 @@ class OptionsManager:
         self.config.set(
             "database",
             "last_used_pg_service",
-            parent.tab_sgbd.get_selected_pg_service(),
+            parent.wdg_tab_database.get_selected_pg_service(),
         )
         self.config.set(
-            "database", "opt_views", str(parent.tab_sgbd.get_views_enabled())
+            "database", "opt_views", str(parent.wdg_tab_database.get_views_enabled())
         )
 
         # proxy settings

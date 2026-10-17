@@ -73,8 +73,8 @@ class TabDatabaseServer(QWidget):
             )
             self.pg_services_names = []
 
-        self.ddl_pg_services.addItems(self.pg_services_names)
-        self.open_form_button.clicked.connect(self.open_form)
+        self.cbb_pg_services.addItems(self.pg_services_names)
+        self.btn_open_form.clicked.connect(self.open_form)
 
         self.retranslate_ui()
 
@@ -92,8 +92,8 @@ class TabDatabaseServer(QWidget):
         if save_status:
             logger.info(log_msg)
             self.pg_services_names = pgserviceparser.service_names()
-            self.ddl_pg_services.clear()
-            self.ddl_pg_services.addItems(self.pg_services_names)
+            self.cbb_pg_services.clear()
+            self.cbb_pg_services.addItems(self.pg_services_names)
         else:
             logger.error(log_msg, stack_info=True)
             QMessageBox.critical(
@@ -106,29 +106,27 @@ class TabDatabaseServer(QWidget):
 
     def get_selected_pg_service(self) -> str:
         """Return the currently selected PG service name."""
-        return self.ddl_pg_services.currentText()
+        return self.cbb_pg_services.currentText()
 
     def set_selected_pg_service(self, service_name: str) -> None:
         """Select a PG service by name if it exists in the combobox."""
         if service_name in self.pg_services_names:
-            self.ddl_pg_services.setCurrentText(service_name)
+            self.cbb_pg_services.setCurrentText(service_name)
 
     def get_views_enabled(self) -> bool:
         """Return whether PostGIS views are enabled."""
-        return self.caz_pg_views.isChecked()
+        return self.cbx_pg_views.isChecked()
 
     def set_views_enabled(self, value: bool) -> None:
         """Set whether PostGIS views are enabled."""
-        self.caz_pg_views.setChecked(bool(value))
+        self.cbx_pg_views.setChecked(bool(value))
 
     def retranslate_ui(self) -> None:
         """Update widgets texts for the currently active language."""
-        self.FrameDatabaseServicePicker.setTitle(
-            self.tr(" Database connection settings ")
-        )
-        self.caz_pg_views.setText(self.tr("See views? "))
-        self.open_form_button.setText(self.tr("+"))
-        self.lb_pg_services.setText(self.tr("PG service:"))
+        self.grp_service_picker.setTitle(self.tr(" Database connection settings "))
+        self.cbx_pg_views.setText(self.tr("See views? "))
+        self.btn_open_form.setText(self.tr("+"))
+        self.lbl_pg_services.setText(self.tr("PG service:"))
 
 
 # #############################################################################
