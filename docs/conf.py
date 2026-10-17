@@ -5,19 +5,20 @@ Configuration for project documentation using Sphinx.
 """
 
 # standard
-import os
 import sys
 from datetime import datetime
+from os import environ
+from pathlib import Path
 
 
-sys.path.insert(0, os.path.abspath(r".."))
+sys.path.insert(0, str(Path.cwd().parent))
 
 # 3rd party
 from dicogis import __about__
 
 
 # -- Build environment -----------------------------------------------------
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
+on_rtd = environ.get("READTHEDOCS", None) == "True"
 
 
 # -- Project information -----------------------------------------------------
@@ -209,11 +210,11 @@ sitemap_url_scheme = "{link}"
 def run_apidoc(_):
     from sphinx.ext.apidoc import main
 
-    cur_dir = os.path.normpath(os.path.dirname(__file__))
-    output_path = os.path.join(cur_dir, "_apidoc")
-    modules = os.path.normpath(os.path.join(cur_dir, "../dicogis/"))
+    cur_dir = Path(__file__).parent
+    output_path = cur_dir / "_apidoc"
+    modules = cur_dir.parent / "dicogis"
     exclusions = ["../input", "../output", "/tests"]
-    main(["-e", "-f", "-M", "-o", output_path, modules] + exclusions)
+    main(["-e", "-f", "-M", "-o", str(output_path), str(modules)] + exclusions)
 
 
 # launch setup

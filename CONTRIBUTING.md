@@ -21,6 +21,7 @@ Make sure your code *roughly* follows [PEP-8](https://www.python.org/dev/peps/pe
 
 - docstrings: [google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) is used to write technical documentation right into the code.
 - formatting, imports and static analisis: [ruff](https://docs.astral.sh/ruff/) is used to automatically format the code without debate, sort imports and run a bunch of flake8 lint checks
+- file system paths: use [`pathlib`](https://docs.python.org/3/library/pathlib.html), not `os.path` (nor `open()`, `os.chmod()`, etc. where pathlib has a method). A pre-commit hook fails on such usages (ruff's `PTH` rules). The rare deliberate exceptions carry a `# noqa: PTHxxx` comment saying why: `dicogis.utils.paths.absolute_path()`, since pathlib has no exact `os.path.abspath()` equivalent, and the per-file loop of the folder listing, where pathlib was measured about 6 times slower.
 
 ### Graphical interface
 
