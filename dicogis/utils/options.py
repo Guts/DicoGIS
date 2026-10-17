@@ -27,6 +27,8 @@ from dicogis.utils.str2bool import str2bool
 # ########## Globals ###############
 # ##################################
 
+logger = logging.getLogger(__name__)
+
 # default location: the per-user application folder (%APPDATA%\DicoGIS on
 # Windows, ~/.dicogis elsewhere), instead of a hardcoded relative path
 DEFAULT_OPTIONS_FILEPATH = get_app_dir() / "options.ini"
@@ -57,10 +59,10 @@ class OptionsManager:
             must_be_readable=True,
             raise_error=False,
         ):
-            logging.info("No options.ini file found. First use: welcome!")
+            logger.info("No options.ini file found. First use: welcome!")
             self.first_use = 1
         else:
-            logging.info("Options.ini file found. ")
+            logger.info("Options.ini file found. ")
             self.first_use = 0
 
         # using safe parser
@@ -132,7 +134,7 @@ class OptionsManager:
         parent.wdg_tab_settings.set_proxy_settings(dict(self.config.items("proxy")))
 
         # log
-        logging.info("Last options loaded")
+        logger.info("Last options loaded")
 
     def save_settings(self, parent) -> bool:
         """save last options in order to make the next excution more easy"""
@@ -236,8 +238,8 @@ class OptionsManager:
         with Path(self.confile).open(mode="w", encoding="UTF-8") as configfile:
             try:
                 self.config.write(configfile)
-                logging.info(f"Options saved to {self.confile}")
+                logger.info(f"Options saved to {self.confile}")
                 return True
             except Exception as err:
-                logging.error(f"Options couldn't be saved because of: {err}")
+                logger.error(f"Options couldn't be saved because of: {err}")
                 return False

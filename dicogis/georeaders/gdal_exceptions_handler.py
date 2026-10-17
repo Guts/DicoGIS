@@ -65,4 +65,4 @@ if __name__ == "__main__":
     try:
         gdal.Error(gdal.CE_Failure, 42, "Test error message")
     except Exception as err:
-        logging.error(err)
+        logger.error(err)

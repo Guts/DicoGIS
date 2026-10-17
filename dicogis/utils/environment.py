@@ -16,12 +16,19 @@ from os import getenv
 from dicogis.constants import FORMAT_TO_GDAL_DRIVERS
 
 
+# ############################################################################
+# ########### Globals ##############
+# ##################################
+
+# defined before the optional imports below, which log when they fail
+logger = logging.getLogger(__name__)
+
 try:
     from osgeo import gdal, osr
 
     GDAL_IS_AVAILABLE: bool = True
 except ImportError:
-    logging.info("GDAL (ou ses bindings Python) n'est pas installé.")
+    logger.info("GDAL (ou ses bindings Python) n'est pas installé.")
     gdal = osr = None
     GDAL_IS_AVAILABLE: bool = False
 
@@ -30,16 +37,9 @@ try:
 
     PYPROJ_IS_AVAILABLE: bool = True
 except ImportError:
-    logging.info("PyProj n'est pas installé.")
+    logger.info("PyProj n'est pas installé.")
     pyproj = None
     PYPROJ_IS_AVAILABLE: bool = False
-
-# ############################################################################
-# ########### Globals ##############
-# ##################################
-
-# logs
-logger = logging.getLogger(__name__)
 
 # ############################################################################
 # ########### Functions ############
@@ -136,7 +136,7 @@ def get_gdal_version() -> str:
     if gdal_version:
         return gdal_version
 
-    logging.warning(
+    logger.warning(
         "Unable to retrieve GDAL version from command-line or environment var. "
         f"Using default version: {gdal_fallback_version}"
     )
@@ -201,7 +201,7 @@ def get_proj_version() -> str | None:
     if proj_version := getenv("PROJ_VERSION"):
         return proj_version
 
-    logging.warning(
+    logger.warning(
         "Impossible de déterminer la version de PROJ depuis les bindings GDAL, PyProj, "
         "les binaires proj ou la variable d'environnement PROJ_VERSION. "
     )
