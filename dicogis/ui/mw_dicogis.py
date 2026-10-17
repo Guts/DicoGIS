@@ -35,9 +35,9 @@ from typer import launch
 
 # Project
 from dicogis import __about__
-from dicogis.cli.cmd_inventory import determine_output_path
 from dicogis.constants import AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
+from dicogis.export.output_path import determine_output_path
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.publishing.udata import PublishReport

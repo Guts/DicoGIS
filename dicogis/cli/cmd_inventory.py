@@ -6,7 +6,6 @@
 
 # standard lib
 import logging
-from datetime import date
 from locale import getlocale
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated
@@ -19,6 +18,7 @@ from rich import print
 from dicogis.__about__ import __package_name__, __title__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
+from dicogis.export.output_path import determine_output_path
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
 from dicogis.utils.environment import (
     GDAL_IS_AVAILABLE,
@@ -27,7 +27,6 @@ from dicogis.utils.environment import (
 )
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
-from dicogis.utils.slugger import sluggy
 from dicogis.utils.texts import TextsManager
 
 
@@ -49,57 +48,6 @@ default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 # ############################################################################
 # ########## Functions #############
 # ##################################
-
-
-def determine_output_path(
-    output_path: Path | str | None,
-    output_format: str = "excel",
-    input_folder: Path | None = None,
-    pg_services: list[str] | None = None,
-) -> Path:
-    """Get the output path depending on options passed.
-
-    Args:
-        output_path: output path passed to inventory CLI
-        output_format: input output format passed to inventory CLI
-        input_folder: input folder passed to inventory CLI
-        pg_services: list of postgres services names to use
-
-    Raises:
-        ValueError: if output format is not supported
-
-    Returns:
-        output path to use. A folder if output_format=='json',
-            a file if output_format=='excel'
-    """
-    final_output_path = None
-    if isinstance(pg_services, list):
-        pg_srv_names = "__".join(
-            sluggy(pg_service_name) for pg_service_name in pg_services
-        )
-
-    # output file path
-    if output_path is None:
-        if output_format == "excel":
-            if isinstance(input_folder, Path):
-                final_output_path = Path(
-                    f"DicoGIS_{input_folder.name}_{date.today()}.xlsx"
-                )
-            elif isinstance(pg_services, list):
-                final_output_path = Path(
-                    f"DicoGIS_PostGIS_{pg_srv_names}_{date.today()}.xlsx"
-                )
-        elif output_format in ("json", "udata"):
-            if isinstance(input_folder, Path):
-                final_output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}")
-            elif isinstance(pg_services, list):
-                final_output_path = Path(f"DicoGIS_{pg_srv_names}_{date.today()}")
-        else:
-            raise ValueError(f"Unsupported output format: {output_format}.")
-    else:
-        final_output_path = output_path
-
-    return final_output_path
 
 
 def serialize_pg_service_layers(
