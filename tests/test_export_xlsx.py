@@ -71,6 +71,11 @@ class TestFormatBbox(unittest.TestCase):
         serializer = _make_serializer()
         self.assertEqual(serializer.format_bbox(bbox="not-a-bbox"), "")
 
+    def test_list_returns_empty_string_instead_of_raising(self):
+        """An unhashable bbox used to raise TypeError from the method cache."""
+        serializer = _make_serializer()
+        self.assertEqual(serializer.format_bbox(bbox=[1.0, 2.0, 3, 4]), "")
+
     def test_tuple_with_non_numeric_member_returns_empty_string(self):
         serializer = _make_serializer()
         self.assertEqual(serializer.format_bbox(bbox=(1.0, "oops", 3, 4)), "")
