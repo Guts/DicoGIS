@@ -12,6 +12,7 @@ Usage from the repo root folder:
 
 # standard library
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock
 
 # project
@@ -100,6 +101,29 @@ def _make_processor(serializer: MetadatasetSerializerBase | None = None, **overr
 # ############################################################################
 # ########## Classes #############
 # ################################
+
+
+class TestDatasetToProcess(unittest.TestCase):
+    """Test the DatasetToProcess model."""
+
+    def test_file_name_from_a_string_path(self):
+        """The listing provides plain strings (os.path.join), not Paths."""
+        dataset = DatasetToProcess(
+            file_path=str(Path("data", "vectors", "parcels.shp")),
+            file_format="esri_shapefile",
+            georeader=MagicMock(),
+        )
+
+        self.assertEqual(dataset.file_name, "parcels.shp")
+
+    def test_file_name_from_a_path(self):
+        dataset = DatasetToProcess(
+            file_path=Path("data", "vectors", "parcels.shp"),
+            file_format="esri_shapefile",
+            georeader=MagicMock(),
+        )
+
+        self.assertEqual(dataset.file_name, "parcels.shp")
 
 
 class TestReadDataset(unittest.TestCase):
@@ -231,6 +255,94 @@ class TestExportMetadataset(unittest.TestCase):
 
         self.assertFalse(result_dataset.exported)
         self.assertIsInstance(result_dataset.export_error, RuntimeError)
+
+
+class TestProgressMessages(unittest.TestCase):
+    """Reading and exporting report the same message pattern, in both modes:
+    "<step> <file name>..." then "<step> <file name>: OK" or ": FAIL"."""
+
+    @staticmethod
+    def _dataset(georeader: type = SucceedingGeoReader) -> DatasetToProcess:
+        # a string, as the listing provides: messages show the name only
+        return DatasetToProcess(
+            file_path=str(Path("data", "parcels.shp")),
+            file_format="esri_shapefile",
+            georeader=georeader,
+        )
+
+    @staticmethod
+    def _messages(reporter: MagicMock) -> list[str]:
+        return [call.args[0] for call in reporter.set_message.call_args_list]
+
+    def test_reading_messages(self):
+        for quick_fail in (True, False):
+            with self.subTest(quick_fail=quick_fail):
+                reporter = MagicMock()
+                processor = _make_processor(
+                    progress_reporter=reporter, opt_quick_fail=quick_fail
+                )
+
+                processor.read_dataset(dataset_to_process=self._dataset())
+
+                self.assertEqual(
+                    self._messages(reporter),
+                    ["Reading parcels.shp...", "Reading parcels.shp: OK"],
+                )
+
+    def test_reading_failure_message(self):
+        reporter = MagicMock()
+        processor = _make_processor(progress_reporter=reporter, opt_quick_fail=False)
+
+        processor.read_dataset(dataset_to_process=self._dataset(FailingGeoReader))
+
+        self.assertEqual(
+            self._messages(reporter),
+            ["Reading parcels.shp...", "Reading parcels.shp: FAIL"],
+        )
+
+    def test_export_messages(self):
+        for quick_fail in (True, False):
+            with self.subTest(quick_fail=quick_fail):
+                reporter = MagicMock()
+                processor = _make_processor(
+                    serializer=FakeSerializer(),
+                    progress_reporter=reporter,
+                    opt_quick_fail=quick_fail,
+                )
+
+                processor.export_metadataset(
+                    dataset_to_process=self._dataset(),
+                    metadataset_to_serialize=MetaDataset(name="parcels"),
+                )
+
+                self.assertEqual(
+                    self._messages(reporter),
+                    [
+                        "Exporting metadata of parcels.shp...",
+                        "Exporting metadata of parcels.shp: OK",
+                    ],
+                )
+
+    def test_export_failure_message(self):
+        reporter = MagicMock()
+        processor = _make_processor(
+            serializer=FakeSerializer(fail_on_serialize=True),
+            progress_reporter=reporter,
+            opt_quick_fail=False,
+        )
+
+        processor.export_metadataset(
+            dataset_to_process=self._dataset(),
+            metadataset_to_serialize=MetaDataset(name="parcels"),
+        )
+
+        self.assertEqual(
+            self._messages(reporter),
+            [
+                "Exporting metadata of parcels.shp...",
+                "Exporting metadata of parcels.shp: FAIL",
+            ],
+        )
 
 
 class TestProcessDatasetsInQueue(unittest.TestCase):

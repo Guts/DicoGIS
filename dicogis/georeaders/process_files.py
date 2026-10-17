@@ -61,6 +61,19 @@ class DatasetToProcess:
     exported: bool = False
     export_error: str | None = None
 
+    @property
+    def file_name(self) -> str:
+        """Name of the dataset file, without its folders, to keep progress
+        messages short.
+
+        file_path is typed as a Path but the listing actually provides plain
+        strings (os.path.join), so both are accepted.
+
+        Returns:
+            file name, extension included
+        """
+        return Path(self.file_path).name
+
 
 class ProcessingFiles:
     """Geofiles processor."""
@@ -235,35 +248,32 @@ class ProcessingFiles:
         """
         metadataset = None
 
+        self.update_progress(
+            message_to_display=f"Reading {dataset_to_process.file_name}..."
+        )
         if self.opt_quick_fail:
-            self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}..."
-            )
             metadataset = dataset_to_process.georeader().infos_dataset(
                 source_path=path.abspath(dataset_to_process.file_path),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: OK"
+                message_to_display=f"Reading {dataset_to_process.file_name}: OK"
             )
             dataset_to_process.processed = True
             return dataset_to_process, metadataset
 
         try:
-            self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}..."
-            )
             metadataset = dataset_to_process.georeader().infos_dataset(
                 source_path=path.abspath(dataset_to_process.file_path),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: OK"
+                message_to_display=f"Reading {dataset_to_process.file_name}: OK"
             )
             dataset_to_process.processed = True
         except Exception as err:
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: FAIL"
+                message_to_display=f"Reading {dataset_to_process.file_name}: FAIL"
             )
             logger.error(
                 f"Reading {dataset_to_process.file_path} "
@@ -288,35 +298,35 @@ class ProcessingFiles:
         Returns:
             dataset to process, metadataset or None if something went wrong
         """
+        self.update_progress(
+            message_to_display="Exporting metadata of "
+            f"{dataset_to_process.file_name}..."
+        )
         if self.opt_quick_fail:
-            self.update_progress(
-                message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}..."
-            )
             # writing to the Excel file
             self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}: OK"
+                f"{dataset_to_process.file_name}: OK"
             )
             logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
             dataset_to_process.exported = True
             return dataset_to_process, metadataset_to_serialize
 
         try:
-            self.update_progress(
-                message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}..."
-            )
             # writing to the Excel file
             self.serializer.serialize_metadaset(metadataset=metadataset_to_serialize)
             self.update_progress(
                 message_to_display="Exporting metadata of "
-                f"{dataset_to_process.file_path}: OK"
+                f"{dataset_to_process.file_name}: OK"
             )
             logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
             dataset_to_process.exported = True
         except Exception as err:
+            self.update_progress(
+                message_to_display="Exporting metadata of "
+                f"{dataset_to_process.file_name}: FAIL"
+            )
             dataset_to_process.exported = False
             dataset_to_process.export_error = err
             logger.error(
