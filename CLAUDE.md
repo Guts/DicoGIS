@@ -311,6 +311,12 @@ Full guidelines: `CONTRIBUTING.md`. What matters most for changes made here:
 
 ## Conventions
 
+- Paths: `pathlib`, not `os.path`; the `ruff-pathlib` pre-commit hook fails on
+  ruff's `PTH` rules. To make a path absolute, use
+  `dicogis/utils/paths.py::absolute_path()` (abspath semantics), not
+  `Path.resolve()`, which follows symlinks and expands Windows 8.3 short names.
+  The listing's per-file loop keeps `os.path` on purpose (performance, see the
+  comment there); `os.walk` stays too, as `Path.walk()` needs Python 3.12.
 - Files start with the shebang comment `#! python3  # noqa: E265` and use the
   `# ###...` section-banner comment style (Libraries / Globals / Classes /
   Functions) seen throughout `dicogis/`; new files should follow the same layout
