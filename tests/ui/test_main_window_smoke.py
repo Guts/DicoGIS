@@ -54,7 +54,7 @@ def test_main_window_check_fields_requires_folder(qtbot, monkeypatch):
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
 
-    window.tab_files.set_target_path("")
+    window.wdg_tab_files.set_target_path("")
     assert window.check_fields(tab_data_type=0) is False
     assert shown_messages
 
@@ -68,9 +68,9 @@ def test_main_window_check_fields_requires_format(qtbot, monkeypatch):
         staticmethod(lambda *args, **kwargs: None),
     )
 
-    window.tab_files.set_target_path("/tmp")
-    window.tab_files.set_filters_state(
-        {key: "0" for key in window.tab_files.get_filters_state()}
+    window.wdg_tab_files.set_target_path("/tmp")
+    window.wdg_tab_files.set_filters_state(
+        {key: "0" for key in window.wdg_tab_files.get_filters_state()}
     )
     assert window.check_fields(tab_data_type=0) is False
 
@@ -93,14 +93,14 @@ def test_main_window_check_fields_accepts_any_single_format(
         "dicogis.ui.mw_dicogis.QMessageBox.critical",
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
-    window.tab_files.set_target_path(str(tmp_path))
+    window.wdg_tab_files.set_target_path(str(tmp_path))
 
-    all_filters_off = {key: "0" for key in window.tab_files.get_filters_state()}
+    all_filters_off = {key: "0" for key in window.wdg_tab_files.get_filters_state()}
     assert len(all_filters_off) > 1, "no format filter found to check"
 
     for filter_name in all_filters_off:
-        window.tab_files.set_filters_state(all_filters_off)
-        window.tab_files.set_filters_state({filter_name: "1"})
+        window.wdg_tab_files.set_filters_state(all_filters_off)
+        window.wdg_tab_files.set_filters_state({filter_name: "1"})
 
         assert window.check_fields(tab_data_type=0) is True, (
             f"a selection limited to {filter_name} was rejected"

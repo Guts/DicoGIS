@@ -32,8 +32,8 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
     window.settings = OptionsManager(str(ini_path))
 
     window.cbb_lang.setCurrentText("FR")
-    window.tab_files.set_target_path(str(tmp_path))
-    window.tab_files.set_filters_state({"opt_shp": "1", "opt_tab": "0"})
+    window.wdg_tab_files.set_target_path(str(tmp_path))
+    window.wdg_tab_files.set_filters_state({"opt_shp": "1", "opt_tab": "0"})
     window.tab_options.set_proxy_settings(
         {
             "proxy_needed": True,
@@ -61,8 +61,8 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
     other_window.settings.load_settings(other_window)
 
     assert other_window.get_selected_language() == "FR"
-    assert other_window.tab_files.get_filters_state()["opt_shp"] is True
-    assert other_window.tab_files.get_filters_state()["opt_tab"] is False
+    assert other_window.wdg_tab_files.get_filters_state()["opt_shp"] is True
+    assert other_window.wdg_tab_files.get_filters_state()["opt_tab"] is False
     proxy_settings = other_window.tab_options.get_proxy_settings()
     assert proxy_settings["proxy_needed"] is True
     assert proxy_settings["proxy_server"] == "proxy.example.com"

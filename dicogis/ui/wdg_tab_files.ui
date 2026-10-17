@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>TabFiles</class>
- <widget class="QWidget" name="TabFiles">
+ <widget class="QWidget" name="wdg_tab_files">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="FrPath">
+    <widget class="QGroupBox" name="grp_path">
      <property name="title">
       <string>Path</string>
      </property>
      <layout class="QGridLayout" name="path_layout">
       <item row="0" column="0">
-       <widget class="QLabel" name="lb_target">
+       <widget class="QLabel" name="lbl_target">
         <property name="text">
          <string>Folder path: </string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="ent_target"/>
+       <widget class="QLineEdit" name="lne_target"/>
       </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="btn_browse">
@@ -30,83 +30,83 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="FrFilters">
+    <widget class="QGroupBox" name="grp_filters">
      <property name="title">
       <string>Filters</string>
      </property>
      <layout class="QGridLayout" name="filters_layout">
       <item row="0" column="0">
-       <widget class="QCheckBox" name="opt_shp">
+       <widget class="QCheckBox" name="cbx_shp">
         <property name="text">
          <string>.shp</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QCheckBox" name="opt_tab">
+       <widget class="QCheckBox" name="cbx_tab">
         <property name="text">
          <string>.tab</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QCheckBox" name="opt_kml">
+       <widget class="QCheckBox" name="cbx_kml">
         <property name="text">
          <string>.kml</string>
         </property>
        </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QCheckBox" name="opt_gml">
+       <widget class="QCheckBox" name="cbx_gml">
         <property name="text">
          <string>.gml</string>
         </property>
        </widget>
       </item>
       <item row="0" column="4">
-       <widget class="QCheckBox" name="opt_geoj">
+       <widget class="QCheckBox" name="cbx_geoj">
         <property name="text">
          <string>.geojson</string>
         </property>
        </widget>
       </item>
       <item row="0" column="5">
-       <widget class="QCheckBox" name="opt_gxt">
+       <widget class="QCheckBox" name="cbx_gxt">
         <property name="text">
          <string>.gxt</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0" rowspan="1" colspan="2">
-       <widget class="QCheckBox" name="opt_rast">
+       <widget class="QCheckBox" name="cbx_rast">
         <property name="text">
          <string>rasters</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QCheckBox" name="opt_dxf">
+       <widget class="QCheckBox" name="cbx_dxf">
         <property name="text">
          <string>DXF</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0" rowspan="1" colspan="2">
-       <widget class="QCheckBox" name="opt_egdb">
+       <widget class="QCheckBox" name="cbx_egdb">
         <property name="text">
          <string>Esri FileGDB</string>
         </property>
        </widget>
       </item>
       <item row="2" column="2" rowspan="1" colspan="2">
-       <widget class="QCheckBox" name="opt_gpkg">
+       <widget class="QCheckBox" name="cbx_gpkg">
         <property name="text">
          <string>GeoPackage</string>
         </property>
        </widget>
       </item>
       <item row="2" column="4" rowspan="1" colspan="2">
-       <widget class="QCheckBox" name="opt_spadb">
+       <widget class="QCheckBox" name="cbx_spadb">
         <property name="text">
          <string>Spatialite</string>
         </property>

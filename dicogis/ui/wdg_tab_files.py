@@ -38,18 +38,18 @@ logger = logging.getLogger(__name__)
 # format filter checkboxes (.ui objectName) mapped to the FormatsVector member
 # name gating their driver availability (dicogis.constants.FORMAT_TO_GDAL_DRIVERS)
 CHECKBOX_TO_FORMAT: dict[str, str] = {
-    "opt_shp": "esri_shapefile",
-    "opt_tab": "mapinfo_tab",
-    "opt_kml": "kml",
-    "opt_gml": "gml",
-    "opt_geoj": "geojson",
-    "opt_gxt": "gxt",
-    "opt_dxf": "dgn",
-    "opt_egdb": "file_geodatabase_esri",
-    "opt_gpkg": "file_geodatabase_geopackage",
-    "opt_spadb": "file_geodatabase_spatialite",
+    "cbx_shp": "esri_shapefile",
+    "cbx_tab": "mapinfo_tab",
+    "cbx_kml": "kml",
+    "cbx_gml": "gml",
+    "cbx_geoj": "geojson",
+    "cbx_gxt": "gxt",
+    "cbx_dxf": "dgn",
+    "cbx_egdb": "file_geodatabase_esri",
+    "cbx_gpkg": "file_geodatabase_geopackage",
+    "cbx_spadb": "file_geodatabase_spatialite",
 }
-# opt_rast covers 3 formats at once (no per-format checkbox): available as
+# cbx_rast covers 3 formats at once (no per-format checkbox): available as
 # soon as GDAL can read at least one of them (GeoTIFF is a core driver, so
 # this is only ever False on a very unusual GDAL build).
 RASTER_FORMATS: tuple[str, ...] = ("ecw", "geotiff", "jpeg")
@@ -93,7 +93,7 @@ class TabFiles(QWidget):
         if not self.listing_initial_folder_path:
             self.listing_initial_folder_path = Path().home()
 
-        self.opt_rast.setText(
+        self.cbx_rast.setText(
             "rasters ({})".format(
                 ", ".join([raster_format.value for raster_format in FormatsRaster])
             )
@@ -126,9 +126,9 @@ class TabFiles(QWidget):
             is_format_supported_by_gdal(format_name, available_drivers)
             for format_name in RASTER_FORMATS
         ):
-            self.opt_rast.setChecked(False)
-            self.opt_rast.setEnabled(False)
-            self.opt_rast.setToolTip(unavailable_tooltip)
+            self.cbx_rast.setChecked(False)
+            self.cbx_rast.setEnabled(False)
+            self.cbx_rast.setToolTip(unavailable_tooltip)
 
     def on_browse_get_initial_listing_folder_path(self) -> Path | None:
         """Browse and insert the path of target folder.
@@ -165,7 +165,7 @@ class TabFiles(QWidget):
             )
             return None
 
-        self.ent_target.setText(foldername)
+        self.lne_target.setText(foldername)
 
         # let the owning window react (default output filename, launch scan worker)
         self.folder_selected.emit(foldername)
@@ -177,42 +177,42 @@ class TabFiles(QWidget):
 
     def get_target_path(self) -> str:
         """Return the currently entered target folder path."""
-        return self.ent_target.text()
+        return self.lne_target.text()
 
     def set_target_path(self, path: str) -> None:
         """Set the target folder path."""
-        self.ent_target.setText(path)
+        self.lne_target.setText(path)
 
     def get_filters_state(self) -> dict[str, bool]:
         """Return the state of every format filter checkbox."""
         return {
-            "opt_shp": self.opt_shp.isChecked(),
-            "opt_tab": self.opt_tab.isChecked(),
-            "opt_kml": self.opt_kml.isChecked(),
-            "opt_gml": self.opt_gml.isChecked(),
-            "opt_geoj": self.opt_geoj.isChecked(),
-            "opt_gxt": self.opt_gxt.isChecked(),
-            "opt_rast": self.opt_rast.isChecked(),
-            "opt_egdb": self.opt_egdb.isChecked(),
-            "opt_gpkg": self.opt_gpkg.isChecked(),
-            "opt_spadb": self.opt_spadb.isChecked(),
-            "opt_dxf": self.opt_dxf.isChecked(),
+            "opt_shp": self.cbx_shp.isChecked(),
+            "opt_tab": self.cbx_tab.isChecked(),
+            "opt_kml": self.cbx_kml.isChecked(),
+            "opt_gml": self.cbx_gml.isChecked(),
+            "opt_geoj": self.cbx_geoj.isChecked(),
+            "opt_gxt": self.cbx_gxt.isChecked(),
+            "opt_rast": self.cbx_rast.isChecked(),
+            "opt_egdb": self.cbx_egdb.isChecked(),
+            "opt_gpkg": self.cbx_gpkg.isChecked(),
+            "opt_spadb": self.cbx_spadb.isChecked(),
+            "opt_dxf": self.cbx_dxf.isChecked(),
         }
 
     def set_filters_state(self, values: dict) -> None:
         """Apply the state of every format filter checkbox from a dict."""
         mapping = {
-            "opt_shp": self.opt_shp,
-            "opt_tab": self.opt_tab,
-            "opt_kml": self.opt_kml,
-            "opt_gml": self.opt_gml,
-            "opt_geoj": self.opt_geoj,
-            "opt_gxt": self.opt_gxt,
-            "opt_rast": self.opt_rast,
-            "opt_egdb": self.opt_egdb,
-            "opt_gpkg": self.opt_gpkg,
-            "opt_spadb": self.opt_spadb,
-            "opt_dxf": self.opt_dxf,
+            "opt_shp": self.cbx_shp,
+            "opt_tab": self.cbx_tab,
+            "opt_kml": self.cbx_kml,
+            "opt_gml": self.cbx_gml,
+            "opt_geoj": self.cbx_geoj,
+            "opt_gxt": self.cbx_gxt,
+            "opt_rast": self.cbx_rast,
+            "opt_egdb": self.cbx_egdb,
+            "opt_gpkg": self.cbx_gpkg,
+            "opt_spadb": self.cbx_spadb,
+            "opt_dxf": self.cbx_dxf,
         }
         for key, checkbox in mapping.items():
             if key in values:
@@ -220,9 +220,9 @@ class TabFiles(QWidget):
 
     def retranslate_ui(self) -> None:
         """Update widgets texts for the currently active language."""
-        self.FrPath.setTitle(self.tr(" Folders structure target "))
-        self.FrFilters.setTitle(self.tr(" Formats "))
-        self.lb_target.setText(self.tr("Folder path: "))
+        self.grp_path.setTitle(self.tr(" Folders structure target "))
+        self.grp_filters.setTitle(self.tr(" Formats "))
+        self.lbl_target.setText(self.tr("Folder path: "))
         self.btn_browse.setText(self.tr("Browse"))
 
 

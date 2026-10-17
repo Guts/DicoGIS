@@ -189,19 +189,19 @@ class DicoGIS(QMainWindow):
         )
 
         # tabs
-        self.tab_files = TabFiles(parent=self.tab_main)  # tab_id = 0
+        self.wdg_tab_files = TabFiles(parent=self.tab_main)  # tab_id = 0
         self.wdg_tab_database = TabDatabaseServer(parent=self.tab_main)  # tab_id = 1
         self.tab_options = TabSettings(parent=self.tab_main)  # tab_id = 2
         self.tab_publish = TabPublish(parent=self.tab_main)  # tab_id = 3
         self.wdg_tab_credits = TabCredits(parent=self.tab_main)  # tab_id = 4
 
-        self.tab_main.addTab(self.tab_files, " Files ")
+        self.tab_main.addTab(self.wdg_tab_files, " Files ")
         self.tab_main.addTab(self.wdg_tab_database, " PostGIS ")
         self.tab_main.addTab(self.tab_options, "Options")
         self.tab_main.addTab(self.tab_publish, "Publish")
         self.tab_main.addTab(self.wdg_tab_credits, "Credits")
 
-        self.tab_files.folder_selected.connect(self.on_folder_selected)
+        self.wdg_tab_files.folder_selected.connect(self.on_folder_selected)
 
         # miscellaneous (left side panel)
         self.wdg_misc_buttons = MiscButtons(self, images_folder=self.dir_imgs)
@@ -260,7 +260,7 @@ class DicoGIS(QMainWindow):
         self.tab_main.setTabText(3, self.tr("Publish"))
         self.tab_main.setTabText(4, self.tr(" Credits "))
 
-        self.tab_files.retranslate_ui()
+        self.wdg_tab_files.retranslate_ui()
         self.wdg_tab_database.retranslate_ui()
         self.tab_options.retranslate_ui()
         self.tab_publish.retranslate_ui()
@@ -353,7 +353,7 @@ class DicoGIS(QMainWindow):
         Args:
             target_folder: folder to walk into.
         """
-        self.tab_files.btn_browse.setEnabled(False)
+        self.wdg_tab_files.btn_browse.setEnabled(False)
         self.set_status_message(
             self.tr("Progress: parsing and retrieving compatible files")
         )
@@ -415,7 +415,7 @@ class DicoGIS(QMainWindow):
         self._enable_cancel_button(False)
         self.prg_layers.setRange(0, 1)
         self.prg_layers.setValue(0)
-        self.tab_files.btn_browse.setEnabled(True)
+        self.wdg_tab_files.btn_browse.setEnabled(True)
 
     def _on_folder_scan_canceled(self) -> None:
         """React to a folder scan interrupted by the user."""
@@ -500,7 +500,7 @@ class DicoGIS(QMainWindow):
         self.li_vectors.extend(self.li_gxt)
 
         # reactivating the buttons
-        self.tab_files.btn_browse.setEnabled(True)
+        self.wdg_tab_files.btn_browse.setEnabled(True)
         self.btn_process.setEnabled(True)
 
     # =================================================================================
@@ -623,7 +623,7 @@ class DicoGIS(QMainWindow):
         # set output path
         if self.serializer.output_path is None:
             self.serializer.output_path = Path(
-                self.tab_files.get_target_path()
+                self.wdg_tab_files.get_target_path()
             ).joinpath(self.lne_outxl_filename.text())
 
         logger.info(f"Output path: {self.serializer.output_path.resolve()}")
@@ -655,17 +655,17 @@ class DicoGIS(QMainWindow):
             li_geojson=self.li_geojson,
             li_geotiff=self.li_geotiff,
             # options
-            opt_analyze_cdao=self.tab_files.opt_dxf.isChecked(),
-            opt_analyze_esri_filegdb=self.tab_files.opt_egdb.isChecked(),
-            opt_analyze_geopackage=self.tab_files.opt_gpkg.isChecked(),
-            opt_analyze_geojson=self.tab_files.opt_geoj.isChecked(),
-            opt_analyze_gml=self.tab_files.opt_gml.isChecked(),
-            opt_analyze_gxt=self.tab_files.opt_gxt.isChecked(),
-            opt_analyze_kml=self.tab_files.opt_kml.isChecked(),
-            opt_analyze_mapinfo_tab=self.tab_files.opt_tab.isChecked(),
-            opt_analyze_raster=self.tab_files.opt_rast.isChecked(),
-            opt_analyze_shapefiles=self.tab_files.opt_shp.isChecked(),
-            opt_analyze_spatialite=self.tab_files.opt_spadb.isChecked(),
+            opt_analyze_cdao=self.wdg_tab_files.cbx_dxf.isChecked(),
+            opt_analyze_esri_filegdb=self.wdg_tab_files.cbx_egdb.isChecked(),
+            opt_analyze_geopackage=self.wdg_tab_files.cbx_gpkg.isChecked(),
+            opt_analyze_geojson=self.wdg_tab_files.cbx_geoj.isChecked(),
+            opt_analyze_gml=self.wdg_tab_files.cbx_gml.isChecked(),
+            opt_analyze_gxt=self.wdg_tab_files.cbx_gxt.isChecked(),
+            opt_analyze_kml=self.wdg_tab_files.cbx_kml.isChecked(),
+            opt_analyze_mapinfo_tab=self.wdg_tab_files.cbx_tab.isChecked(),
+            opt_analyze_raster=self.wdg_tab_files.cbx_rast.isChecked(),
+            opt_analyze_shapefiles=self.wdg_tab_files.cbx_shp.isChecked(),
+            opt_analyze_spatialite=self.wdg_tab_files.cbx_spadb.isChecked(),
             # progress
             progress_reporter=self._progress_reporter,
             # misc
@@ -871,7 +871,7 @@ class DicoGIS(QMainWindow):
             True if everything is OK
         """
         if tab_data_type == 0:
-            if not len(self.tab_files.get_target_path()):
+            if not len(self.wdg_tab_files.get_target_path()):
                 QMessageBox.critical(
                     self, "DicoGIS - User error", self.tr("Any folder selected")
                 )
@@ -881,7 +881,7 @@ class DicoGIS(QMainWindow):
             # get_filters_state() is a format filter, so testing them all
             # keeps this in sync when a format is added - enumerating them
             # by hand had already let "opt_gxt" be forgotten.
-            if not any(self.tab_files.get_filters_state().values()):
+            if not any(self.wdg_tab_files.get_filters_state().values()):
                 QMessageBox.critical(
                     self, "DicoGIS - User error", self.tr("Any format selected")
                 )

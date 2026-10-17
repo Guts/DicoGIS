@@ -71,7 +71,7 @@ class OptionsManager:
         """load settings from last execution"""
         # basics
         parent.set_selected_language(self.config.get("basics", "def_codelang"))
-        parent.tab_files.listing_initial_folder_path = Path(
+        parent.wdg_tab_files.listing_initial_folder_path = Path(
             self.config.get("basics", "def_rep")
         )
         parent.set_active_tab_index(int(self.config.get("basics", "def_tab")))
@@ -119,7 +119,7 @@ class OptionsManager:
             )
 
         # filters
-        parent.tab_files.set_filters_state(dict(self.config.items("filters")))
+        parent.wdg_tab_files.set_filters_state(dict(self.config.items("filters")))
 
         # database settings
         last_used_pg_service = self.config.get("database", "last_used_pg_service")
@@ -158,14 +158,14 @@ class OptionsManager:
 
         # basics
         self.config.set("basics", "def_codelang", parent.get_selected_language())
-        target_path = parent.tab_files.get_target_path()
+        target_path = parent.wdg_tab_files.get_target_path()
         if target_path:
             self.config.set("basics", "def_rep", target_path)
         else:
             self.config.set(
                 "basics",
                 "def_rep",
-                str(parent.tab_files.listing_initial_folder_path.resolve()),
+                str(parent.wdg_tab_files.listing_initial_folder_path.resolve()),
             )
         self.config.set("basics", "def_tab", str(parent.get_active_tab_index()))
 
@@ -210,7 +210,7 @@ class OptionsManager:
         )
 
         # filters
-        for key, value in parent.tab_files.get_filters_state().items():
+        for key, value in parent.wdg_tab_files.get_filters_state().items():
             self.config.set("filters", key, str(int(value)))
 
         # database settings
