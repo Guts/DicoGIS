@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>DatabaseConnectionDialog</class>
- <widget class="QDialog" name="DatabaseConnectionDialog">
+ <widget class="QDialog" name="dlg_database_connection">
   <property name="windowTitle">
    <string>Add a new database connection</string>
   </property>
@@ -14,7 +14,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QLineEdit" name="ent_service_name"/>
+    <widget class="QLineEdit" name="lne_service_name"/>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="lbl_host">
@@ -24,7 +24,7 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QLineEdit" name="ent_host"/>
+    <widget class="QLineEdit" name="lne_host"/>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="lbl_port">
@@ -34,7 +34,7 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QSpinBox" name="ent_port">
+    <widget class="QSpinBox" name="sbx_port">
      <property name="minimum">
       <number>1</number>
      </property>
@@ -54,7 +54,7 @@
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QLineEdit" name="ent_db_name"/>
+    <widget class="QLineEdit" name="lne_db_name"/>
    </item>
    <item row="4" column="0">
     <widget class="QLabel" name="lbl_user">
@@ -64,7 +64,7 @@
     </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QLineEdit" name="ent_user"/>
+    <widget class="QLineEdit" name="lne_user"/>
    </item>
    <item row="5" column="0">
     <widget class="QLabel" name="lbl_password">
@@ -74,14 +74,14 @@
     </widget>
    </item>
    <item row="5" column="1">
-    <widget class="QLineEdit" name="ent_password">
+    <widget class="QLineEdit" name="lne_password">
      <property name="echoMode">
       <enum>QLineEdit::EchoMode::Password</enum>
      </property>
     </widget>
    </item>
    <item row="6" column="0" colspan="2">
-    <widget class="QDialogButtonBox" name="buttons">
+    <widget class="QDialogButtonBox" name="bbx_ok_cancel">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
