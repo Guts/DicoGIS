@@ -90,11 +90,17 @@ Line length: 88 (ruff-format), docstrings are Google-style.
 
 `dicogis-cli` (`dicogis/cli/main.py`, a Typer app with `inventory` and `publish`
 subcommands) and `dicogis-gui` (`dicogis/ui/main.py`, PyQt6) are thin wrappers
-around the same core pipeline in `dicogis/georeaders`, `dicogis/listing`, and
-`dicogis/export`. When changing core processing logic, check both entry points
-for how they call into it — the GUI additionally wires up progress bars/counters
-and runs long-running work in `QThread` workers (`dicogis/ui/workers.py`) that
-the CLI passes as `None`.
+around the same core pipeline in `dicogis/georeaders`, `dicogis/listing`,
+`dicogis/export` and `dicogis/publishing` (uData publication). When changing
+core processing logic, check both entry points for how they call into it — the
+GUI additionally wires up progress bars/counters and runs long-running work in
+`QThread` workers (`dicogis/ui/workers.py`) that the CLI passes as `None`.
+
+`dicogis/cli` holds the Typer commands only: nothing outside it may import it
+(`tests/test_cli_isolation.py`), since the GUI must also run inside QGIS, where
+Typer and Rich aren't available. Logic needed by both entry points goes in a core
+package (e.g. `dicogis/export/output_path.py::determine_output_path()`,
+`dicogis/publishing/udata.py::publish_metadata_folder()`).
 
 GDAL is an optional extra (`pip install dicogis[gdal]`), so `dicogis-cli`/
 `dicogis-gui` must stay importable without it (e.g. installed via `pipx` on a
