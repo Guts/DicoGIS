@@ -445,7 +445,9 @@ def inventory(
             rich_print(f"Start processing using PostgreSQL service: {pg_service}")
 
             # testing connection settings
-            sgbd_reader = ReadPostGIS(service=pg_service)
+            sgbd_reader = ReadPostGIS(
+                service=pg_service, localized_strings=localized_strings
+            )
             sgbd_reader.get_connection()
 
             # check connection state

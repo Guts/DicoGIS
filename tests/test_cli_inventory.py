@@ -25,6 +25,7 @@ import typer
 from dicogis.cli.cmd_inventory import inventory
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.models.metadataset import MetaDatabaseTable
+from dicogis.utils.texts import TextsManager
 
 
 # ############################################################################
@@ -436,7 +437,9 @@ class TestInventoryPgServices(unittest.TestCase):
                     opt_open_output=False,
                 )
 
-        read_postgis_mock.assert_called_once_with(service="srv_a")
+        read_postgis_mock.assert_called_once_with(
+            service="srv_a", localized_strings=TextsManager().load_texts("EN")
+        )
         fake_reader.infos_dataset.assert_called_once_with(layer=fake_layer)
         mock_notify.assert_called_once()
 

@@ -940,6 +940,7 @@ class DicoGIS(QMainWindow):
         sgbd_reader = ReadPostGIS(
             service=self.wdg_tab_database.get_selected_pg_service(),
             views_included=self.wdg_tab_database.get_views_enabled(),
+            localized_strings=self.localized_strings,
         )
         sgbd_reader.get_connection()
 
