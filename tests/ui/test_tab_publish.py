@@ -26,10 +26,10 @@ def test_tab_publish_accessors_round_trip(qtbot, tmp_path):
     qtbot.addWidget(widget)
 
     widget.set_input_folder(str(tmp_path))
-    widget.ent_udata_api_url_base.setText("https://udata-test.example/api/")
-    widget.ent_udata_api_version.setText("2")
-    widget.ent_udata_api_key.setText("fake-api-key")
-    widget.ent_udata_organization_id.setText("some-org-id")
+    widget.lne_udata_api_url_base.setText("https://udata-test.example/api/")
+    widget.lne_udata_api_version.setText("2")
+    widget.lne_udata_api_key.setText("fake-api-key")
+    widget.lne_udata_organization_id.setText("some-org-id")
 
     assert widget.get_input_folder() == str(tmp_path)
     assert widget.get_udata_api_url_base() == "https://udata-test.example/api/"
@@ -42,7 +42,7 @@ def test_tab_publish_organization_id_empty_is_none(qtbot):
     widget = TabPublish()
     qtbot.addWidget(widget)
 
-    widget.ent_udata_organization_id.setText("")
+    widget.lne_udata_organization_id.setText("")
     assert widget.get_udata_organization_id() is None
 
 
@@ -51,7 +51,7 @@ def test_tab_publish_options_do_not_include_api_key(qtbot, tmp_path):
     qtbot.addWidget(widget)
 
     widget.set_input_folder(str(tmp_path))
-    widget.ent_udata_api_key.setText("super-secret-key")
+    widget.lne_udata_api_key.setText("super-secret-key")
 
     options = widget.get_publish_options()
     assert "udata_api_key" not in options
@@ -85,9 +85,9 @@ def test_tab_publish_show_report_and_clear_report(qtbot):
     widget.show_report(report)
 
     assert widget.lbl_publish_summary.text()
-    assert widget.tab_publish_errors.tbw_content.rowCount() == 1
+    assert widget.wdg_publish_errors.tbw_content.rowCount() == 1
 
     widget.clear_report()
 
     assert widget.lbl_publish_summary.text() == ""
-    assert widget.tab_publish_errors.tbw_content.rowCount() == 0
+    assert widget.wdg_publish_errors.tbw_content.rowCount() == 0

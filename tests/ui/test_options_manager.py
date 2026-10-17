@@ -43,11 +43,13 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
             "proxy_user": "someone",
         }
     )
-    window.tab_publish.set_input_folder(str(tmp_path))
-    window.tab_publish.ent_udata_api_url_base.setText("https://udata-test.example/api/")
-    window.tab_publish.ent_udata_api_version.setText("2")
-    window.tab_publish.ent_udata_organization_id.setText("some-org-id")
-    window.tab_publish.ent_udata_api_key.setText("super-secret-key")
+    window.wdg_tab_publish.set_input_folder(str(tmp_path))
+    window.wdg_tab_publish.lne_udata_api_url_base.setText(
+        "https://udata-test.example/api/"
+    )
+    window.wdg_tab_publish.lne_udata_api_version.setText("2")
+    window.wdg_tab_publish.lne_udata_organization_id.setText("some-org-id")
+    window.wdg_tab_publish.lne_udata_api_key.setText("super-secret-key")
 
     assert window.settings.save_settings(window) is True
     assert ini_path.is_file()
@@ -67,15 +69,15 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
     assert proxy_settings["proxy_needed"] is True
     assert proxy_settings["proxy_server"] == "proxy.example.com"
     assert proxy_settings["proxy_port"] == 8080
-    assert other_window.tab_publish.get_input_folder() == str(tmp_path)
+    assert other_window.wdg_tab_publish.get_input_folder() == str(tmp_path)
     assert (
-        other_window.tab_publish.get_udata_api_url_base()
+        other_window.wdg_tab_publish.get_udata_api_url_base()
         == "https://udata-test.example/api/"
     )
-    assert other_window.tab_publish.get_udata_api_version() == "2"
-    assert other_window.tab_publish.get_udata_organization_id() == "some-org-id"
+    assert other_window.wdg_tab_publish.get_udata_api_version() == "2"
+    assert other_window.wdg_tab_publish.get_udata_organization_id() == "some-org-id"
     # the API key is never persisted, so it stays empty after a load
-    assert other_window.tab_publish.get_udata_api_key() == ""
+    assert other_window.wdg_tab_publish.get_udata_api_key() == ""
 
 
 def test_options_manager_load_settings_without_udata_section(qtbot, tmp_path):
@@ -112,7 +114,7 @@ def test_options_manager_load_settings_without_udata_section(qtbot, tmp_path):
 
     window.settings.load_settings(window)
 
-    assert window.tab_publish.get_input_folder() == ""
+    assert window.wdg_tab_publish.get_input_folder() == ""
 
 
 def test_options_manager_first_use(tmp_path):

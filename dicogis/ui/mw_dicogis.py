@@ -192,13 +192,13 @@ class DicoGIS(QMainWindow):
         self.wdg_tab_files = TabFiles(parent=self.tab_main)  # tab_id = 0
         self.wdg_tab_database = TabDatabaseServer(parent=self.tab_main)  # tab_id = 1
         self.tab_options = TabSettings(parent=self.tab_main)  # tab_id = 2
-        self.tab_publish = TabPublish(parent=self.tab_main)  # tab_id = 3
+        self.wdg_tab_publish = TabPublish(parent=self.tab_main)  # tab_id = 3
         self.wdg_tab_credits = TabCredits(parent=self.tab_main)  # tab_id = 4
 
         self.tab_main.addTab(self.wdg_tab_files, " Files ")
         self.tab_main.addTab(self.wdg_tab_database, " PostGIS ")
         self.tab_main.addTab(self.tab_options, "Options")
-        self.tab_main.addTab(self.tab_publish, "Publish")
+        self.tab_main.addTab(self.wdg_tab_publish, "Publish")
         self.tab_main.addTab(self.wdg_tab_credits, "Credits")
 
         self.wdg_tab_files.folder_selected.connect(self.on_folder_selected)
@@ -263,7 +263,7 @@ class DicoGIS(QMainWindow):
         self.wdg_tab_files.retranslate_ui()
         self.wdg_tab_database.retranslate_ui()
         self.tab_options.retranslate_ui()
-        self.tab_publish.retranslate_ui()
+        self.wdg_tab_publish.retranslate_ui()
 
         self._apply_locale(new_lang)
 
@@ -804,15 +804,15 @@ class DicoGIS(QMainWindow):
         self._progress_reporter = None
         self.prg_layers.setRange(0, 0)  # indeterminate mode while fetching the catalog
         self.set_status_message("Publishing to uData...")
-        self.tab_publish.clear_report()
+        self.wdg_tab_publish.clear_report()
 
         self._proc_thread = QThread(self)
         self._proc_worker = PublishWorker(
-            input_folder=Path(self.tab_publish.get_input_folder()),
-            udata_api_key=self.tab_publish.get_udata_api_key(),
-            udata_api_url_base=self.tab_publish.get_udata_api_url_base(),
-            udata_api_version=self.tab_publish.get_udata_api_version(),
-            udata_organization_id=self.tab_publish.get_udata_organization_id(),
+            input_folder=Path(self.wdg_tab_publish.get_input_folder()),
+            udata_api_key=self.wdg_tab_publish.get_udata_api_key(),
+            udata_api_url_base=self.wdg_tab_publish.get_udata_api_url_base(),
+            udata_api_version=self.wdg_tab_publish.get_udata_api_version(),
+            udata_organization_id=self.wdg_tab_publish.get_udata_organization_id(),
         )
         self._proc_worker.moveToThread(self._proc_thread)
         self._proc_thread.started.connect(self._proc_worker.run)
@@ -851,7 +851,7 @@ class DicoGIS(QMainWindow):
             f"{report.published} published, {report.ignored} ignored, "
             f"{report.failed} failed."
         )
-        self.tab_publish.show_report(report)
+        self.wdg_tab_publish.show_report(report)
         send_system_notify(
             notification_title="DicoGIS publication ended",
             notification_message=f"{report.published} published, "
@@ -896,12 +896,12 @@ class DicoGIS(QMainWindow):
                 return False
 
         elif tab_data_type == 3:
-            if not self.tab_publish.get_input_folder():
+            if not self.wdg_tab_publish.get_input_folder():
                 QMessageBox.critical(
                     self, "DicoGIS - User error", self.tr("Any folder selected")
                 )
                 return False
-            if not self.tab_publish.get_udata_api_key():
+            if not self.wdg_tab_publish.get_udata_api_key():
                 QMessageBox.critical(
                     self,
                     "DicoGIS - User error",

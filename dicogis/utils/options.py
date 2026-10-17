@@ -101,7 +101,7 @@ class OptionsManager:
         # uData publication settings (backward compatibility: older options.ini files
         # predate the "udata" section)
         if self.config.has_section("udata"):
-            parent.tab_publish.set_publish_options(
+            parent.wdg_tab_publish.set_publish_options(
                 {
                     "input_folder": self.config.get(
                         "udata", "input_folder", fallback=""
@@ -201,7 +201,7 @@ class OptionsManager:
         self.config.set("ui", "style", ui_options["style"])
 
         # uData publication settings (the API key is never persisted, for security)
-        publish_options = parent.tab_publish.get_publish_options()
+        publish_options = parent.wdg_tab_publish.get_publish_options()
         self.config.set("udata", "input_folder", publish_options["input_folder"])
         self.config.set("udata", "api_url_base", publish_options["udata_api_url_base"])
         self.config.set("udata", "api_version", publish_options["udata_api_version"])

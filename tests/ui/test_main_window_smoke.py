@@ -118,7 +118,7 @@ def test_main_window_check_fields_requires_publish_input_folder(qtbot, monkeypat
         staticmethod(lambda *args, **kwargs: shown_messages.append(args)),
     )
 
-    window.tab_publish.set_input_folder("")
+    window.wdg_tab_publish.set_input_folder("")
     assert window.check_fields(tab_data_type=3) is False
     assert shown_messages
 
@@ -134,8 +134,8 @@ def test_main_window_check_fields_requires_publish_api_key(
         staticmethod(lambda *args, **kwargs: None),
     )
 
-    window.tab_publish.set_input_folder(str(tmp_path))
-    window.tab_publish.ent_udata_api_key.setText("")
+    window.wdg_tab_publish.set_input_folder(str(tmp_path))
+    window.wdg_tab_publish.lne_udata_api_key.setText("")
     assert window.check_fields(tab_data_type=3) is False
 
 
