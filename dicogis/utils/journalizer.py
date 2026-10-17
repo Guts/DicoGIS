@@ -126,8 +126,8 @@ class LogManager:
         # apply format
         log_file_handler.setFormatter(self.LOG_FORMAT)
 
-        # add only file handler to the logger, to avoid duplicated messages
-        # logger.addHandler(log_console_handler)
+        # add only the file handler: the console one is deliberately left out
+        # of this logger, to avoid duplicated messages
         logger.addHandler(log_file_handler)
 
         return logger

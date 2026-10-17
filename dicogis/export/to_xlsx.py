@@ -351,15 +351,6 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             sheet.column_dimensions["A"].auto_size = True
             sheet.column_dimensions["B"].auto_size = True
 
-            # dims = {}
-            # for row in sheet.rows:
-            #     for cell in row:
-            #         if cell.value:
-            #             val = cell.value
-            #             dims[cell.column] = max((dims.get(cell.column, 0), len(val)))
-            # for col, value in dims.items():
-            #     sheet.column_dimensions[col].width = value
-
     def is_style_registered(self, style_name: str) -> bool:
         """Function to check if a named style already exists/
 
