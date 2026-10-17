@@ -92,6 +92,23 @@ class TestLocaleLoader(unittest.TestCase):
         # checks
         self.assertTrue(len(en_txts) == len(fr_txts) == len(sp_txts))
 
+    def test_language_code_follows_each_load(self):
+        """Switching back to an already loaded language updates language_code
+        (a method-level cache used to skip the update on a cache hit)."""
+        txtmngr = TextsManager(locale_folder=Path("locale"))
+
+        for language_code in ("EN", "FR", "EN"):
+            txtmngr.load_texts(language_code=language_code)
+            self.assertEqual(txtmngr.language_code, language_code)
+
+    def test_returned_texts_are_a_copy(self):
+        """Changing returned texts doesn't alter what the next load returns."""
+        txtmngr = TextsManager(locale_folder=Path("locale"))
+
+        txtmngr.load_texts(language_code="EN")["injected"] = "oops"
+
+        self.assertNotIn("injected", txtmngr.load_texts(language_code="EN"))
+
 
 # #############################################################################
 # ##### Main #######################
