@@ -116,15 +116,28 @@ keep new GDAL-dependent imports deferred the same way. See
 
 PyQt6 is likewise an optional dependency (the `gui` extra) — `dicogis-cli`
 does not import anything from `dicogis/ui`, so it works fully without it.
-`dicogis-gui` (`dicogis/ui/main.py::dicogis_gui()`) imports `PyQt6.QtWidgets`
+`dicogis-gui` (`dicogis/ui/main.py::dicogis_gui()`) imports `QtWidgets`
 lazily and exits with a clear message if it's missing; `dicogis/ui/__init__.py`
 is kept empty so importing `dicogis.ui`/`dicogis.ui.main` doesn't pull in PyQt6
 before that guard runs (see `tests/test_ui_optional_pyqt6.py`).
 
+### Qt binding: always through `dicogis.ui.qt_compat`
+
+The GUI is meant to be reusable as a QGIS (>= 4.4, Qt >= 6.8) plugin, where Qt
+must be reached through `qgis.PyQt`. GUI modules therefore never import `PyQt6`
+(or any other binding) directly, but the matching submodule of
+`dicogis/ui/qt_compat/`, which mirrors the `qgis.PyQt` layout:
+`from dicogis.ui.qt_compat.QtWidgets import QWidget`,
+`from dicogis.ui.qt_compat import uic`. The binding is picked once, at first
+import, from `DICOGIS_QT_API` (`auto`: `qgis.PyQt` if QGIS is already loaded,
+PyQt6 otherwise; `qgis`/`pyqt6` force it). Add a submodule there when a new Qt
+module is needed. `tests/test_ui_qt_compat.py` fails on any direct binding
+import under `dicogis/ui`. Don't use Qt APIs newer than 6.8.
+
 ### GUI widgets: `.ui` files + naming convention
 
 GUI widgets are defined as Qt Designer `.ui` files, loaded dynamically at
-runtime with `PyQt6.uic.loadUi()` — not built up imperatively in Python. Each
+runtime with `uic.loadUi()` (from `dicogis.ui.qt_compat`) — not built up imperatively in Python. Each
 widget/dialog module has a matching `.ui` file of the same stem
 (`dicogis/ui/wdg_tab_files.py` + `dicogis/ui/wdg_tab_files.ui`), loaded via
 `Utilities().resolve_internal_path()` (so it resolves both from source and

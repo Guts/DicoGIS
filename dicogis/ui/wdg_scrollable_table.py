@@ -2,9 +2,8 @@
 
 from pathlib import Path
 
-from PyQt6 import uic
-from PyQt6.QtWidgets import QTableWidgetItem, QWidget
-
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtWidgets import QTableWidgetItem, QWidget
 from dicogis.utils.utils import Utilities
 
 

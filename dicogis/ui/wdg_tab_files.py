@@ -16,13 +16,11 @@ Author:       Julien Moura (@geojulien)
 import logging
 from pathlib import Path
 
-# GUI
-from PyQt6 import uic
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QFileDialog, QMessageBox, QWidget
-
 # project
 from dicogis.constants import FormatsRaster
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtCore import pyqtSignal
+from dicogis.ui.qt_compat.QtWidgets import QFileDialog, QMessageBox, QWidget
 from dicogis.utils.check_path import check_path
 from dicogis.utils.environment import (
     get_available_gdal_drivers,
@@ -236,7 +234,7 @@ if __name__ == "__main__":
     """To test"""
     import sys
 
-    from PyQt6.QtWidgets import QApplication
+    from dicogis.ui.qt_compat.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     widget = TabFiles()

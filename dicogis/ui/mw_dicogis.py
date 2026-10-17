@@ -26,12 +26,6 @@ from typing import TYPE_CHECKING
 # 3rd party
 from osgeo import gdal
 
-# GUI
-from PyQt6 import uic
-from PyQt6.QtCore import QThread, QTranslator, QUrl
-from PyQt6.QtGui import QDesktopServices, QIcon
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
-
 # Project
 from dicogis import __about__
 from dicogis.constants import AvailableLocales, OutputFormats
@@ -40,6 +34,15 @@ from dicogis.export.output_path import determine_output_path
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.publishing.udata import PublishReport
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtCore import QThread, QTranslator, QUrl
+from dicogis.ui.qt_compat.QtGui import QDesktopServices, QIcon
+from dicogis.ui.qt_compat.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QMessageBox,
+    QWidget,
+)
 from dicogis.ui.wdg_misc_buttons import MiscButtons
 from dicogis.ui.wdg_tab_credits import TabCredits
 from dicogis.ui.wdg_tab_database import TabDatabaseServer

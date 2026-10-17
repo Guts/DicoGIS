@@ -18,12 +18,10 @@ import logging
 from os import getenv
 from pathlib import Path
 
-# GUI
-from PyQt6 import uic
-from PyQt6.QtWidgets import QFileDialog, QLineEdit, QWidget
-
 # project
 from dicogis.publishing.udata import PublishReport
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtWidgets import QFileDialog, QLineEdit, QWidget
 from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.check_path import check_path
 from dicogis.utils.utils import Utilities
@@ -217,7 +215,7 @@ if __name__ == "__main__":
     """To test"""
     import sys
 
-    from PyQt6.QtWidgets import QApplication
+    from dicogis.ui.qt_compat.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     widget = TabPublish()

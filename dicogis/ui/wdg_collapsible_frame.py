@@ -16,12 +16,10 @@ Author:       Julien Moura (@geojulien)
 import logging
 from pathlib import Path
 
-# 3rd party
-from PyQt6 import uic
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget
-
 # project
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtCore import Qt
+from dicogis.ui.qt_compat.QtWidgets import QWidget
 from dicogis.utils.utils import Utilities
 
 
@@ -93,7 +91,7 @@ class ToggledFrame(QWidget):
 if __name__ == "__main__":
     import sys
 
-    from PyQt6.QtWidgets import QApplication, QPushButton, QVBoxLayout
+    from dicogis.ui.qt_compat.QtWidgets import QApplication, QPushButton, QVBoxLayout
 
     app = QApplication(sys.argv)
 

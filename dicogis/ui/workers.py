@@ -18,15 +18,13 @@ import logging
 import threading
 from pathlib import Path
 
-# 3rd party
-from PyQt6.QtCore import QObject, pyqtSignal
-
 # project
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
 from dicogis.publishing.udata import PublishReport, publish_metadata_folder
+from dicogis.ui.qt_compat.QtCore import QObject, pyqtSignal
 from dicogis.utils.progress import OperationCanceled, ProgressReporter
 
 
