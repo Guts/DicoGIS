@@ -52,6 +52,7 @@ Python size the pool from the CPU count. In the GUI, the equivalent spinbox uses
 | Variable name      | Description                                                               | Default value |
 | :----------------- | :------------------------------------------------------------------------ | :-----------: |
 | `DICOGIS_UI_STYLE` | UI style. Can be any Qt style available on the running platform (e.g. `Fusion`, `Windows`) | unset (uses the Qt platform default) |
+| `DICOGIS_QT_API` | Qt binding used by the GUI: `auto` uses `qgis.PyQt` when running inside QGIS and PyQt6 otherwise, `qgis` or `pyqt6` force one. Only useful for development and troubleshooting. | `auto` |
 
 ### CLI only — `inventory` subcommand
 
