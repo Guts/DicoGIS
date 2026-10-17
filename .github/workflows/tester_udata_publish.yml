@@ -51,10 +51,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # udata_extra_requirements: extra pip requirements for that udata
+          # release, typically caps on dependencies it no longer supports.
+          # Flask-Security 5.9.0 (2026-09-24) removed
+          # flask_security.utils.get_within_delta, still imported at startup
+          # by udata 16.6.1 (its range: flask-security>=5.1.2,<6.0.0), while
+          # udata 17.14.0 requires flask-security>=5.9.0
           - udata_label: "17.x (current major)"
-            udata_version: "17.6.0"
+            udata_version: "17.14.0"
           - udata_label: "16.x (previous major)"
             udata_version: "16.6.1"
+            udata_extra_requirements: "flask-security<5.9"
 
     env:
       # every `docker compose` invocation re-interpolates the compose file,
@@ -103,6 +110,7 @@ jobs:
         run: |
           docker build \
             --build-arg UDATA_VERSION="${{ matrix.udata_version }}" \
+            --build-arg UDATA_EXTRA_REQUIREMENTS="${{ matrix.udata_extra_requirements }}" \
             -t "dicogis-udata-pinned:${{ matrix.udata_version }}" \
             tests/container/udata-pinned
 
