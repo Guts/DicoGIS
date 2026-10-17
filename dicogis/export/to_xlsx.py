@@ -668,7 +668,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         # dependencies
         worksheet[f"N{row_index}"].style = "wrap"
         worksheet[f"N{row_index}"] = " |\n ".join(
-            str(f.resolve()) for f in metadataset.files_dependencies
+            str(f.resolve()) for f in metadataset.files_dependencies or []
         )
         # total size
         worksheet[f"O{row_index}"] = self.format_size(
@@ -757,7 +757,7 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         # Dependencies
         worksheet[f"T{row_index}"].style = "wrap"
         worksheet[f"T{row_index}"] = " |\n ".join(
-            str(f.resolve()) for f in metadataset.files_dependencies
+            str(f.resolve()) for f in metadataset.files_dependencies or []
         )
 
         # total size of file and its dependencies
