@@ -23,6 +23,19 @@ from dicogis.ui.wdg_tab_files import CHECKBOX_TO_FORMAT, RASTER_FORMATS, TabFile
 # ##################################
 
 
+def test_every_format_is_checked_on_first_launch(qtbot):
+    """Without an options.ini to restore the filters from, every format is
+    analyzed, as the CLI does by default, instead of none ("Any format
+    selected" error on the very first run)."""
+    with patch(
+        "dicogis.ui.wdg_tab_files.is_format_supported_by_gdal", return_value=True
+    ):
+        widget = TabFiles()
+    qtbot.addWidget(widget)
+
+    assert all(widget.get_filters_state().values()), widget.get_filters_state()
+
+
 def test_formats_supported_by_the_installed_gdal_stay_enabled(qtbot):
     """With every format reported as supported, no checkbox is touched."""
     with patch(
