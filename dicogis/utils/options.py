@@ -233,7 +233,7 @@ class OptionsManager:
 
         # Writing the configuration file
         Path(self.confile).parent.mkdir(parents=True, exist_ok=True)
-        with open(file=self.confile, mode="w", encoding="UTF-8") as configfile:
+        with Path(self.confile).open(mode="w", encoding="UTF-8") as configfile:
             try:
                 self.config.write(configfile)
                 logging.info(f"Options saved to {self.confile}")
