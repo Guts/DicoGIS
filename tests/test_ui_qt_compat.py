@@ -18,6 +18,7 @@ Usage from the repo root folder:
 # ##################################
 
 # standard library
+import ast
 import os
 import subprocess
 import sys
@@ -33,6 +34,11 @@ from dicogis.ui.qt_compat import QT_API_ENV_VAR, resolve_qt_api
 # ##############################################################################
 # ########## Globals ###############
 # ##################################
+
+UI_FOLDER = Path(__file__).parent.parent / "dicogis" / "ui"
+# the only GUI modules allowed to name a binding: the compat layer itself
+QT_COMPAT_FOLDER = UI_FOLDER / "qt_compat"
+QT_BINDINGS = ("PyQt6", "PyQt5", "PySide6", "qgis")
 
 # a stand-in for QGIS's qgis.PyQt shim, re-exporting PyQt6 like the real one
 # does, plus a marker telling which binding a dicogis module ended up with
@@ -164,6 +170,31 @@ def test_submodules_follow_the_selected_binding(
 
     assert result.returncode == 0, result.stderr
     assert result.stdout.strip() == expected
+
+
+def test_gui_modules_import_qt_only_through_the_compat_layer() -> None:
+    """A direct `PyQt6` import would bypass the binding selected for QGIS."""
+    offenders: list[str] = []
+    for module_path in sorted(UI_FOLDER.rglob("*.py")):
+        if QT_COMPAT_FOLDER in module_path.parents:
+            continue
+        tree = ast.parse(module_path.read_text(encoding="UTF-8"), str(module_path))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                names = [node.module]
+            else:
+                continue
+            offenders.extend(
+                f"{module_path.relative_to(UI_FOLDER)}:{node.lineno} {name}"
+                for name in names
+                if name.split(".")[0] in QT_BINDINGS
+            )
+
+    assert not offenders, (
+        f"Import Qt from dicogis.ui.qt_compat instead of a binding: {offenders}"
+    )
 
 
 # ##############################################################################
