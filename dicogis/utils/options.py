@@ -75,7 +75,7 @@ class OptionsManager:
             self.config.get("basics", "def_rep")
         )
         parent.set_active_tab_index(int(self.config.get("basics", "def_tab")))
-        parent.tab_options.set_export_options(
+        parent.wdg_tab_settings.set_export_options(
             {
                 "export_prettify_size": self.config.get(
                     "basics", "export_prettify_size"
@@ -94,7 +94,7 @@ class OptionsManager:
         )
 
         # interface settings
-        parent.tab_options.set_ui_options(
+        parent.wdg_tab_settings.set_ui_options(
             {"style": self.config.get("ui", "style", fallback="")}
         )
 
@@ -129,7 +129,7 @@ class OptionsManager:
         )
 
         # proxy settings
-        parent.tab_options.set_proxy_settings(dict(self.config.items("proxy")))
+        parent.wdg_tab_settings.set_proxy_settings(dict(self.config.items("proxy")))
 
         # log
         logging.info("Last options loaded")
@@ -169,7 +169,7 @@ class OptionsManager:
             )
         self.config.set("basics", "def_tab", str(parent.get_active_tab_index()))
 
-        export_options = parent.tab_options.get_export_options()
+        export_options = parent.wdg_tab_settings.get_export_options()
         self.config.set(
             "basics",
             "export_prettify_size",
@@ -197,7 +197,7 @@ class OptionsManager:
         )
 
         # interface settings
-        ui_options = parent.tab_options.get_ui_options()
+        ui_options = parent.wdg_tab_settings.get_ui_options()
         self.config.set("ui", "style", ui_options["style"])
 
         # uData publication settings (the API key is never persisted, for security)
@@ -224,7 +224,7 @@ class OptionsManager:
         )
 
         # proxy settings
-        proxy_settings = parent.tab_options.get_proxy_settings()
+        proxy_settings = parent.wdg_tab_settings.get_proxy_settings()
         self.config.set("proxy", "proxy_needed", str(proxy_settings["proxy_needed"]))
         self.config.set("proxy", "proxy_type", str(proxy_settings["proxy_type"]))
         self.config.set("proxy", "proxy_server", proxy_settings["proxy_server"])

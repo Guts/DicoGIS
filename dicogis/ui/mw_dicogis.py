@@ -191,13 +191,13 @@ class DicoGIS(QMainWindow):
         # tabs
         self.wdg_tab_files = TabFiles(parent=self.tab_main)  # tab_id = 0
         self.wdg_tab_database = TabDatabaseServer(parent=self.tab_main)  # tab_id = 1
-        self.tab_options = TabSettings(parent=self.tab_main)  # tab_id = 2
+        self.wdg_tab_settings = TabSettings(parent=self.tab_main)  # tab_id = 2
         self.wdg_tab_publish = TabPublish(parent=self.tab_main)  # tab_id = 3
         self.wdg_tab_credits = TabCredits(parent=self.tab_main)  # tab_id = 4
 
         self.tab_main.addTab(self.wdg_tab_files, " Files ")
         self.tab_main.addTab(self.wdg_tab_database, " PostGIS ")
-        self.tab_main.addTab(self.tab_options, "Options")
+        self.tab_main.addTab(self.wdg_tab_settings, "Options")
         self.tab_main.addTab(self.wdg_tab_publish, "Publish")
         self.tab_main.addTab(self.wdg_tab_credits, "Credits")
 
@@ -262,7 +262,7 @@ class DicoGIS(QMainWindow):
 
         self.wdg_tab_files.retranslate_ui()
         self.wdg_tab_database.retranslate_ui()
-        self.tab_options.retranslate_ui()
+        self.wdg_tab_settings.retranslate_ui()
         self.wdg_tab_publish.retranslate_ui()
 
         self._apply_locale(new_lang)
@@ -370,7 +370,7 @@ class DicoGIS(QMainWindow):
         self._scan_worker = FolderScanWorker(
             target_folder,
             progress_reporter=self._progress_reporter,
-            **self.tab_options.get_listing_scan_kwargs(),
+            **self.wdg_tab_settings.get_listing_scan_kwargs(),
         )
         self._scan_worker.moveToThread(self._scan_thread)
         self._scan_thread.started.connect(self._scan_worker.run)
@@ -546,14 +546,12 @@ class DicoGIS(QMainWindow):
                 return
 
         # creating the output serializer
-        self.serializer: MetadatasetSerializerXlsx = (
-            MetadatasetSerializerBase.get_serializer_from_parameters(
-                format_or_serializer=OutputFormats.excel,
-                localized_strings=self.localized_strings,
-                output_path=None,
-                opt_prettify_size=self.tab_options.opt_export_size_prettify.isChecked(),
-                opt_raw_path=self.tab_options.opt_export_raw_path.isChecked(),
-            )
+        self.serializer: MetadatasetSerializerXlsx = MetadatasetSerializerBase.get_serializer_from_parameters(
+            format_or_serializer=OutputFormats.excel,
+            localized_strings=self.localized_strings,
+            output_path=None,
+            opt_prettify_size=self.wdg_tab_settings.cbx_export_size_prettify.isChecked(),
+            opt_raw_path=self.wdg_tab_settings.cbx_export_raw_path.isChecked(),
         )
 
         self.lbl_status.setStyleSheet("color: DodgerBlue;")
@@ -669,7 +667,7 @@ class DicoGIS(QMainWindow):
             # progress
             progress_reporter=self._progress_reporter,
             # misc
-            opt_quick_fail=self.tab_options.opt_quick_fail.isChecked(),
+            opt_quick_fail=self.wdg_tab_settings.cbx_quick_fail.isChecked(),
         )
 
         # sheets and progress bar
@@ -713,7 +711,7 @@ class DicoGIS(QMainWindow):
             notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files. "
             "\nOpen the application to save the workbook.",
-            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
+            notification_sound=self.wdg_tab_settings.cbx_end_process_notification_sound.isChecked(),
         )
         self._enable_processing_controls()
 
@@ -795,7 +793,7 @@ class DicoGIS(QMainWindow):
             notification_message="DicoGIS successfully processed "
             f"{total_layers} PostGIS tables. "
             "\nOpen the application to save the workbook.",
-            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
+            notification_sound=self.wdg_tab_settings.cbx_end_process_notification_sound.isChecked(),
         )
         self._enable_processing_controls()
 
@@ -857,7 +855,7 @@ class DicoGIS(QMainWindow):
             notification_message=f"{report.published} published, "
             f"{report.ignored} ignored,"
             f"{report.failed} failed.",
-            notification_sound=self.tab_options.opt_end_process_notification_sound.isChecked(),
+            notification_sound=self.wdg_tab_settings.cbx_end_process_notification_sound.isChecked(),
         )
         self._enable_processing_controls()
 
@@ -923,14 +921,14 @@ class DicoGIS(QMainWindow):
         # check if a proxy is needed
         # more information about the GDAL HTTP proxy options here:
         # http://trac.osgeo.org/gdal/wiki/ConfigOptions#GDALOGRHTTPoptions
-        if self.tab_options.FrOptProxy.isChecked():
+        if self.wdg_tab_settings.grp_proxy.isChecked():
             logger.info("Proxy configured.")
             gdal.SetConfigOption(
                 "GDAL_HTTP_PROXY",
-                f"{self.tab_options.prox_ent_host.text()}:"
-                f"{self.tab_options.prox_ent_port.value()}",
+                f"{self.wdg_tab_settings.lne_proxy_host.text()}:"
+                f"{self.wdg_tab_settings.sbx_proxy_port.value()}",
             )
-            if self.tab_options.opt_ntlm.isChecked():
+            if self.wdg_tab_settings.cbx_ntlm.isChecked():
                 # NTLM: GDAL negotiates credentials itself, so this is an
                 # intentionally empty "user:password" placeholder, not a
                 # real secret.

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>TabSettings</class>
- <widget class="QWidget" name="TabSettings">
+ <widget class="QWidget" name="wdg_tab_settings">
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="FrOptInterface">
+    <widget class="QGroupBox" name="grp_interface">
      <property name="title">
       <string>Interface</string>
      </property>
@@ -17,13 +17,13 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="opt_ui_style"/>
+       <widget class="QComboBox" name="cbb_ui_style"/>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="FrOptProxy">
+    <widget class="QGroupBox" name="grp_proxy">
      <property name="title">
       <string>Proxy settings</string>
      </property>
@@ -35,28 +35,28 @@
      </property>
      <layout class="QFormLayout" name="proxy_layout">
       <item row="0" column="0">
-       <widget class="QLabel" name="prox_lb_host">
+       <widget class="QLabel" name="lbl_proxy_host">
         <property name="text">
          <string>Host:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="prox_ent_host">
+       <widget class="QLineEdit" name="lne_proxy_host">
         <property name="text">
          <string>proxy.server.com</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="prox_lb_port">
+       <widget class="QLabel" name="lbl_proxy_port">
         <property name="text">
          <string>Port:</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QSpinBox" name="prox_ent_port">
+       <widget class="QSpinBox" name="sbx_proxy_port">
         <property name="minimum">
          <number>1</number>
         </property>
@@ -69,35 +69,35 @@
        </widget>
       </item>
       <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="opt_ntlm">
+       <widget class="QCheckBox" name="cbx_ntlm">
         <property name="text">
          <string>NTLM</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="prox_lb_user">
+       <widget class="QLabel" name="lbl_proxy_user">
         <property name="text">
          <string>User name:</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="prox_ent_user">
+       <widget class="QLineEdit" name="lne_proxy_user">
         <property name="text">
          <string>proxy_user</string>
         </property>
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="prox_lb_password">
+       <widget class="QLabel" name="lbl_proxy_password">
         <property name="text">
          <string>User password:</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QLineEdit" name="prox_ent_password">
+       <widget class="QLineEdit" name="lne_proxy_password">
         <property name="echoMode">
          <enum>QLineEdit::EchoMode::Password</enum>
         </property>
