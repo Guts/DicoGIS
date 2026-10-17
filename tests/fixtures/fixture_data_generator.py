@@ -80,7 +80,7 @@ def generate_random_dataset_vector(
     field_datetime = ogr.FieldDefn("DateTimeField", ogr.OFTDateTime)
     layer.CreateField(field_datetime)
 
-    # float (real)
+    # float field, stored as OFTReal
     field_real = ogr.FieldDefn("FloatField", ogr.OFTReal)
     field_real.SetPrecision(8)
     field_real.SetNullable(False)
