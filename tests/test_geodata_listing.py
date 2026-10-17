@@ -11,6 +11,7 @@ Usage from the repo root folder:
 """
 
 # standard library
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -228,6 +229,29 @@ class TestFindGeodataFiles(unittest.TestCase):
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.touch()
         return file_path
+
+    # -- start folder normalization ------------------------------------------
+
+    def test_relative_start_folder_is_normalized_the_same_in_both_modes(self):
+        """A "./folder/" string start gives the same paths as Path("folder"),
+        sequentially or in parallel: the start folder is normalized once,
+        before any path is built from it."""
+        (self.start_folder / "data" / "sub").mkdir(parents=True)
+        for name in ("parcels.shp", "parcels.dbf", "parcels.shx"):
+            self._touch("data", "sub", name)
+        cwd = Path.cwd()
+        os.chdir(self.start_folder)
+        self.addCleanup(os.chdir, cwd)
+
+        reference = _find_geodata_files(Path("data"))
+        for parallel_scan in (False, True):
+            with self.subTest(parallel_scan=parallel_scan):
+                result = _find_geodata_files("./data/", parallel_scan=parallel_scan)
+
+                self.assertEqual(result, reference)
+                self.assertEqual(
+                    result["shp"], (str(Path("data", "sub", "parcels.shp")),)
+                )
 
     # -- empty / irrelevant content ------------------------------------------
 

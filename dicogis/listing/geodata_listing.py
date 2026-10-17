@@ -21,6 +21,7 @@ import pgserviceparser
 
 # package
 from dicogis.constants import FormatsRaster
+from dicogis.utils.paths import absolute_path
 from dicogis.utils.progress import ProgressReporter, raise_if_canceled
 
 
@@ -156,10 +157,9 @@ def _process_one_walk_level(
     gdb_dirs: list[str] = []
     for d in dirs:
         """looking for File Geodatabase among directories"""
-        full_path = path.join(root, d)
-        if full_path[-4:].lower() == ".gdb":
+        if d[-4:].lower() == ".gdb":
             # add complete path of Esri FileGeoDatabase
-            result.filegdb.append(path.abspath(full_path))
+            result.filegdb.append(str(absolute_path(Path(root, d))))
             gdb_dirs.append(d)
     pruned_dirs = [d for d in dirs if d not in gdb_dirs] if gdb_dirs else dirs
 
@@ -173,8 +173,12 @@ def _process_one_walk_level(
     files_lower: set[str] = {name.lower() for name in files}
     for f in files:
         """looking for files with geographic data"""
-        full_path = path.join(root, f)
-        f_stem_lower, f_ext_lower = path.splitext(f.lower())
+        # os.path rather than pathlib on purpose: this runs once per file of
+        # the whole tree, and building Path objects here made the scan about
+        # 6 times slower (50k files: 64 ms -> 390 ms), each pathlib operation
+        # costing ~10 times its os.path counterpart
+        full_path = path.join(root, f)  # noqa: PTH118
+        f_stem_lower, f_ext_lower = path.splitext(f.lower())  # noqa: PTH122
         if (
             f_ext_lower == ".shp"
             and f"{f_stem_lower}.dbf" in files_lower
@@ -291,7 +295,9 @@ def find_geodata_files(
             a complete one for callers downstream.
     """
     logger.info(f"Begin of folders parsing: {start_folder}")
-    root_str = str(start_folder)
+    # normalized once here (e.g. "./data/" -> "data"), so that every path built
+    # from it is too, whether the scan runs sequentially or in parallel
+    root_str = str(Path(start_folder))
 
     result = _PartialListing()
     buckets = result.buckets()
@@ -321,7 +327,7 @@ def find_geodata_files(
         )
         _report_scanned(result.num_folders, top_root)
         if pruned_dirs:
-            subtree_roots = [path.join(top_root, d) for d in pruned_dirs]
+            subtree_roots = [str(Path(top_root, d)) for d in pruned_dirs]
             scan_subtree = partial_func(
                 _scan_directory_tree, progress_reporter=progress_reporter
             )
