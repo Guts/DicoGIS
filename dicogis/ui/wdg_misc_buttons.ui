@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MiscButtons</class>
- <widget class="QWidget" name="MiscButtons">
+ <widget class="QWidget" name="wdg_misc_buttons">
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" rowspan="1" colspan="2">
     <widget class="QLabel" name="lbl_logo">

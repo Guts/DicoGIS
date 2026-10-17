@@ -204,8 +204,8 @@ class DicoGIS(QMainWindow):
         self.tab_files.folder_selected.connect(self.on_folder_selected)
 
         # miscellaneous (left side panel)
-        self.misc_frame = MiscButtons(self, images_folder=self.dir_imgs)
-        self.main_layout.addWidget(self.misc_frame, 0, 0, 5, 1)
+        self.wdg_misc_buttons = MiscButtons(self, images_folder=self.dir_imgs)
+        self.main_layout.addWidget(self.wdg_misc_buttons, 0, 0, 5, 1)
 
         # language switcher
         li_lang = [v.value for v in AvailableLocales]
