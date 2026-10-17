@@ -96,11 +96,14 @@ core processing logic, check both entry points for how they call into it — the
 GUI additionally wires up progress bars/counters and runs long-running work in
 `QThread` workers (`dicogis/ui/workers.py`) that the CLI passes as `None`.
 
-`dicogis/cli` holds the Typer commands only: nothing outside it may import it
-(`tests/test_cli_isolation.py`), since the GUI must also run inside QGIS, where
-Typer and Rich aren't available. Logic needed by both entry points goes in a core
-package (e.g. `dicogis/export/output_path.py::determine_output_path()`,
-`dicogis/publishing/udata.py::publish_metadata_folder()`).
+`dicogis/cli` holds the Typer commands only: nothing outside it may import it,
+nor `typer`, `rich` or `click` (`tests/test_cli_isolation.py`), since the GUI
+must also run inside QGIS, where Typer and Rich aren't available. Logic needed by
+both entry points goes in a core package (e.g.
+`dicogis/export/output_path.py::determine_output_path()`,
+`dicogis/publishing/udata.py::publish_metadata_folder()`); in the GUI, use the
+standard library or Qt instead (`dicogis/utils/app_dir.py::get_app_dir()` for
+the settings/logs folder, `QDesktopServices.openUrl()` to open a file).
 
 GDAL is an optional extra (`pip install dicogis[gdal]`), so `dicogis-cli`/
 `dicogis-gui` must stay importable without it (e.g. installed via `pipx` on a
@@ -227,7 +230,8 @@ is involved:
 ### Cross-cutting utilities (`dicogis/utils/`)
 
 - `journalizer.py::LogManager` — sets up console + rotating file logging under the
-  platform app dir (`typer.get_app_dir`).
+  per-user app dir (`app_dir.py::get_app_dir()`: `%APPDATA%\DicoGIS` on Windows,
+  `~/.dicogis` elsewhere, where `options.ini` lives too).
 - `options.py` / `db_conf_reader.py` — read/write the `options.ini` config
   (template: `options_TPL.ini`) and `pg_service.conf` entries.
 - `formatters.py`, `slugger.py`, `check_path.py`, `str2bound.py`,

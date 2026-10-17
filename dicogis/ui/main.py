@@ -21,11 +21,9 @@ from configparser import ConfigParser
 from os import getenv
 from pathlib import Path
 
-# 3rd party
-from typer import get_app_dir
-
 # Project
-from dicogis.__about__ import __package_name__, __title__
+from dicogis.__about__ import __package_name__
+from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.environment import GDAL_IS_AVAILABLE
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.options import DEFAULT_OPTIONS_FILEPATH
@@ -42,7 +40,7 @@ from dicogis.utils.str2bool import str2bool
 # ############ Globals ############
 # #################################
 
-app_dir = get_app_dir(app_name=__title__, force_posix=True)
+app_dir = get_app_dir()
 logger = logging.getLogger(__name__)
 
 # ##############################################################################

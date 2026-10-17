@@ -28,10 +28,9 @@ from osgeo import gdal
 
 # GUI
 from PyQt6 import uic
-from PyQt6.QtCore import QThread, QTranslator
-from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import QThread, QTranslator, QUrl
+from PyQt6.QtGui import QDesktopServices, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
-from typer import launch
 
 # Project
 from dicogis import __about__
@@ -693,13 +692,20 @@ class DicoGIS(QMainWindow):
         self._proc_thread.finished.connect(self._clear_proc_thread_ref)
         self._proc_thread.start()
 
+    def _open_output(self) -> None:
+        """Open the inventory output (Excel file or JSON folder) with the
+        desktop's default application."""
+        output_path = self.serializer.output_path.resolve()
+        if not QDesktopServices.openUrl(QUrl.fromLocalFile(str(output_path))):
+            logger.warning(f"Opening {output_path} failed.")
+
     def _on_files_processing_finished(self, total_files: int) -> None:
         """React to a successful files processing run.
 
         Args:
             total_files: number of files processed.
         """
-        launch(url=f"{self.serializer.output_path.resolve()}")
+        self._open_output()
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files. "
@@ -780,7 +786,7 @@ class DicoGIS(QMainWindow):
         Args:
             total_layers: number of PostGIS tables processed.
         """
-        launch(url=f"{self.serializer.output_path.resolve()}")
+        self._open_output()
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "

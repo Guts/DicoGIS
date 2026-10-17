@@ -15,11 +15,12 @@ import typer
 from rich import print
 
 # project
-from dicogis.__about__ import __package_name__, __title__
+from dicogis.__about__ import __package_name__
 from dicogis.constants import SUPPORTED_FORMATS, AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.output_path import determine_output_path
 from dicogis.listing.geodata_listing import check_usable_pg_services, find_geodata_files
+from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.environment import (
     GDAL_IS_AVAILABLE,
     get_available_gdal_drivers,
@@ -218,7 +219,7 @@ def inventory(
             Defaults to None.
         verbose: enable verbose mode. Defaults to False.
     """
-    app_dir = typer.get_app_dir(app_name=__title__, force_posix=True)
+    app_dir = get_app_dir()
     # start logging
     if verbose:
         state["verbose"] = True

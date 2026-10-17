@@ -34,13 +34,23 @@ import pytest
 
 PACKAGE_FOLDER = Path(__file__).parent.parent / "dicogis"
 CLI_FOLDER = PACKAGE_FOLDER / "cli"
+# CLI-only libraries: not installed in QGIS's Python environment
+CLI_LIBRARIES = ("typer", "rich", "click")
 
 # ##############################################################################
-# ########## Tests ##################
+# ########## Functions #############
 # ##################################
 
 
-def test_only_the_cli_imports_the_cli() -> None:
+def _imports_outside_cli(packages: tuple[str, ...]) -> list[str]:
+    """List the imports of given packages made by modules outside dicogis/cli.
+
+    Args:
+        packages: top-level or dotted package names to look for
+
+    Returns:
+        "<module path>:<line> <imported name>" for each offending import
+    """
     offenders: list[str] = []
     for module_path in sorted(PACKAGE_FOLDER.rglob("*.py")):
         if CLI_FOLDER in module_path.parents:
@@ -56,11 +66,31 @@ def test_only_the_cli_imports_the_cli() -> None:
             offenders.extend(
                 f"{module_path.relative_to(PACKAGE_FOLDER)}:{node.lineno} {name}"
                 for name in names
-                if name == "dicogis.cli" or name.startswith("dicogis.cli.")
+                if any(name == pkg or name.startswith(f"{pkg}.") for pkg in packages)
             )
+    return offenders
+
+
+# ##############################################################################
+# ########## Tests ##################
+# ##################################
+
+
+def test_only_the_cli_imports_the_cli() -> None:
+    offenders = _imports_outside_cli(("dicogis.cli",))
 
     assert not offenders, (
         f"Move the shared logic out of dicogis.cli instead of importing it: {offenders}"
+    )
+
+
+def test_only_the_cli_imports_cli_libraries() -> None:
+    """The GUI and the core must load in QGIS, which has no Typer nor Rich."""
+    offenders = _imports_outside_cli(CLI_LIBRARIES)
+
+    assert not offenders, (
+        f"{', '.join(CLI_LIBRARIES)} are for dicogis/cli only, use the standard "
+        f"library or Qt instead: {offenders}"
     )
 
 
