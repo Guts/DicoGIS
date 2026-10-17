@@ -198,7 +198,13 @@ def inventory(
             help="Force language to use. If not set, the current default locale is used.",
         ),
     ] = None,
-    verbose: bool = False,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_DEBUG",
+            help="Increase verbosity to show debug logs.",
+        ),
+    ] = False,
 ):
     """List, extract metadata from geospatial datasets (files or database) and store it
     as files.
