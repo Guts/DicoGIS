@@ -15,9 +15,10 @@ from rich.console import Console
 from rich.progress import Progress
 
 # project
-from dicogis.__about__ import __package_name__, __title__
+from dicogis.__about__ import __package_name__
 from dicogis.constants import SUPPORTED_FORMATS
 from dicogis.publishing.udata import publish_metadata_folder
+from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 
@@ -93,7 +94,7 @@ def publish(
     verbose: bool = False,
 ):
     """Publish metadata (previously exported as JSON files) to a catalog."""
-    app_dir = typer.get_app_dir(app_name=__title__, force_posix=True)
+    app_dir = get_app_dir()
     # start logging
     if verbose:
         state["verbose"] = True
