@@ -22,11 +22,11 @@ from pathlib import Path
 from PyQt6.QtCore import QObject, pyqtSignal
 
 # project
-from dicogis.cli.cmd_publish import PublishReport, publish_metadata_folder
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
+from dicogis.publishing.udata import PublishReport, publish_metadata_folder
 from dicogis.utils.progress import OperationCanceled, ProgressReporter
 
 

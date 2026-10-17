@@ -5,22 +5,19 @@
 # ##################################
 
 # standard lib
-import json
 import logging
-from collections.abc import Callable
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Annotated
 
 # 3rd party
 import typer
-from requests import Session
 from rich.console import Console
 from rich.progress import Progress
 
 # project
 from dicogis.__about__ import __package_name__, __title__
 from dicogis.constants import SUPPORTED_FORMATS
+from dicogis.publishing.udata import publish_metadata_folder
 from dicogis.utils.journalizer import LogManager
 from dicogis.utils.notifier import send_system_notify
 
@@ -36,232 +33,8 @@ logger = logging.getLogger(__name__)
 state = {"verbose": False}
 
 # ############################################################################
-# ########## Classes ###############
-# ##################################
-
-
-@dataclass
-class PublishReport:
-    """Outcome of a publish_metadata_folder() run."""
-
-    published: int = 0
-    ignored: int = 0
-    failed: int = 0
-    errors: list[str] = field(default_factory=list)
-
-    @property
-    def total(self) -> int:
-        """Total number of JSON files examined."""
-        return self.published + self.ignored + self.failed
-
-
-# ############################################################################
 # ########## Functions #############
 # ##################################
-
-
-def _dicogis_extras(dataset_payload: object) -> dict:
-    """Return the "extras" mapping of a uData dataset payload.
-
-    Both the JSON files found on disk and the datasets returned by the catalog
-    go through here, and neither is guaranteed to carry an "extras" object: a
-    hand-written JSON file, or any dataset in the catalog not published by
-    DicoGIS, simply has none.
-
-    Args:
-        dataset_payload: decoded JSON of a uData dataset, of any shape
-
-    Returns:
-        the "extras" mapping, or an empty one when absent or not a mapping
-    """
-    if not isinstance(dataset_payload, dict):
-        return {}
-    extras = dataset_payload.get("extras")
-    return extras if isinstance(extras, dict) else {}
-
-
-def _fetch_already_published(
-    req_session: Session,
-    udata_api_url_base: str,
-    udata_api_version: str,
-    udata_organization_id: str | None,
-) -> tuple[tuple, tuple]:
-    """Retrieve slugs and DicoGIS signatures already published to the target
-    catalog, to avoid publishing duplicates.
-
-    Args:
-        req_session: pre-configured HTTP session (with auth headers set).
-        udata_api_url_base: base API URL of the uData instance.
-        udata_api_version: API version of the uData instance.
-        udata_organization_id: if set, look at this organization's datasets
-            instead of the API-key owner's ones.
-
-    Returns:
-        already published slugs, already published DicoGIS signatures.
-    """
-    if udata_organization_id:
-        response = req_session.get(
-            url=f"{udata_api_url_base}{udata_api_version}/organizations/"
-            f"{udata_organization_id}/datasets/?page_size=100",
-            allow_redirects=True,
-        )
-        response.raise_for_status()
-        # be careful: this route stores the list in a 'data' attribute key
-        already_published_datasets = response.json().get("data")
-    else:
-        response = req_session.get(
-            url=f"{udata_api_url_base}{udata_api_version}/me/datasets/?page_size=100",
-            allow_redirects=True,
-        )
-        response.raise_for_status()
-        already_published_datasets = response.json()
-
-    # empty values are dropped: kept in, a missing slug/signature on the catalog
-    # side would compare equal to a missing one on ours and wrongly mark the
-    # file as already published
-    already_published_slugs: list[str] = []
-    already_published_signatures: list[str] = []
-    for published_dataset in already_published_datasets or []:
-        if slug := (
-            published_dataset.get("slug")
-            if isinstance(published_dataset, dict)
-            else None
-        ):
-            already_published_slugs.append(slug)
-        if signature := _dicogis_extras(published_dataset).get("dicogis_signature"):
-            already_published_signatures.append(signature)
-
-    return tuple(already_published_slugs), tuple(already_published_signatures)
-
-
-def publish_metadata_folder(
-    input_folder: Path,
-    udata_api_key: str,
-    udata_api_url_base: str = "https://demo.data.gouv.fr/api/",
-    udata_api_version: str = "1",
-    udata_organization_id: str | None = None,
-    progress_callback: Callable[[int, int, Path], None] | None = None,
-    verbose: bool = False,
-) -> PublishReport:
-    """Publish every DicoGIS metadata JSON file within a folder to a uData catalog.
-
-    This is the core, UI-agnostic logic shared by the `dicogis-cli publish` command
-    and the GUI's "Publish" tab.
-
-    Args:
-        input_folder: folder where metadata JSON files (udata flavor) are stored.
-        udata_api_key: API key of the account on the uData instance.
-        udata_api_url_base: API URL of the uData instance.
-        udata_api_version: API version of the uData instance.
-        udata_organization_id: organization ID in the uData instance. If set,
-            datasets are added to the organization instead of the user
-            authenticated with the API key.
-        progress_callback: called after each JSON file has been examined, with
-            (files_done, files_total, current_json_file).
-        verbose: log ignored files (not DicoGIS or already published) at info level.
-
-    Raises:
-        FileNotFoundError: if input_folder contains no JSON file.
-        ValueError: if udata_api_key is empty.
-
-    Returns:
-        counters and per-file error messages for the run.
-    """
-    li_json_files = list(input_folder.glob("*.json"))
-    if not len(li_json_files):
-        raise FileNotFoundError(f"No JSON files found into {input_folder.resolve()}")
-
-    if not udata_api_key:
-        raise ValueError("No API key defined for uData.")
-
-    # prepare http session
-    req_session = Session()
-    req_session.headers = {
-        "Content-Type": "application/json",
-        "X-API-KEY": udata_api_key,
-    }
-
-    # retrieve already published datasets to avoid duplicated publication
-    already_published_slugs, already_published_signature = _fetch_already_published(
-        req_session=req_session,
-        udata_api_url_base=udata_api_url_base,
-        udata_api_version=udata_api_version,
-        udata_organization_id=udata_organization_id,
-    )
-
-    report = PublishReport()
-    files_total = len(li_json_files)
-
-    for files_done, json_file in enumerate(li_json_files, start=1):
-        # open it securely
-        try:
-            with json_file.open(mode="r", encoding="UTF-8") as f:
-                data = json.load(f)
-
-            if isinstance(data, dict) and udata_organization_id:
-                data["organization"] = {"id": udata_organization_id}
-
-        except Exception as err:
-            err_msg = f"Impossible to load {json_file}. Trace: {err}"
-            logger.error(err_msg)
-            report.failed += 1
-            report.errors.append(err_msg)
-            if progress_callback:
-                progress_callback(files_done, files_total, json_file)
-            continue
-
-        # filter out JSON files not related to DicoGIS
-        metadataset_extras = _dicogis_extras(data)
-        if not metadataset_extras.get("dicogis_version"):
-            if verbose:
-                logger.info(
-                    f"Looks like this file is not a metadataset from DicoGIS: {json_file}"
-                )
-            report.ignored += 1
-            if progress_callback:
-                progress_callback(files_done, files_total, json_file)
-            continue
-
-        # check if the metadata has been already published. Reaching this point
-        # means data is a mapping: _dicogis_extras() returned something for it.
-        dataset_slug = data.get("slug")
-        dataset_signature = metadataset_extras.get("dicogis_signature")
-        if (dataset_slug and dataset_slug in already_published_slugs) or (
-            dataset_signature and dataset_signature in already_published_signature
-        ):
-            if verbose:
-                logger.info(
-                    f"JSON file {json_file} has the same slug or the same signature "
-                    "compared with an already published dataset. It's not gonna be "
-                    "published."
-                )
-            report.ignored += 1
-            if progress_callback:
-                progress_callback(files_done, files_total, json_file)
-            continue
-
-        # publish
-        try:
-            req_response = req_session.post(
-                url=f"{udata_api_url_base}{udata_api_version}/datasets", json=data
-            )
-            req_response.raise_for_status()
-        except Exception as err:
-            err_msg = (
-                f"Publish {json_file} to {udata_api_url_base} failed. Trace: {err}"
-            )
-            logger.error(err_msg)
-            report.failed += 1
-            report.errors.append(err_msg)
-            if progress_callback:
-                progress_callback(files_done, files_total, json_file)
-            continue
-
-        report.published += 1
-        if progress_callback:
-            progress_callback(files_done, files_total, json_file)
-
-    return report
 
 
 def publish(
