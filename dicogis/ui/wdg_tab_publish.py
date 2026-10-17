@@ -76,7 +76,7 @@ class TabPublish(QWidget):
         )
 
         self.tab_publish_errors = ScrollableTable(self.FrReport)
-        self.tab_publish_errors.table.setHorizontalHeaderLabels(
+        self.tab_publish_errors.tbw_content.setHorizontalHeaderLabels(
             [
                 self.tr("File"),
                 self.tr("Error"),
@@ -122,7 +122,7 @@ class TabPublish(QWidget):
     def clear_report(self) -> None:
         """Reset the publication report (summary + errors table)."""
         self.lbl_publish_summary.setText("")
-        self.tab_publish_errors.table.setRowCount(0)
+        self.tab_publish_errors.tbw_content.setRowCount(0)
 
     def show_report(self, report: PublishReport) -> None:
         """Display a publish_metadata_folder() report in the tab.
@@ -199,7 +199,7 @@ class TabPublish(QWidget):
         self.lb_udata_api_key.setText(self.tr("API key:"))
         self.lb_udata_organization_id.setText(self.tr("Organization ID (optional):"))
         self.FrReport.setTitle(self.tr("Publication report"))
-        self.tab_publish_errors.table.setHorizontalHeaderLabels(
+        self.tab_publish_errors.tbw_content.setHorizontalHeaderLabels(
             [
                 self.tr("File"),
                 self.tr("Error"),

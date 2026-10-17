@@ -85,9 +85,9 @@ def test_tab_publish_show_report_and_clear_report(qtbot):
     widget.show_report(report)
 
     assert widget.lbl_publish_summary.text()
-    assert widget.tab_publish_errors.table.rowCount() == 1
+    assert widget.tab_publish_errors.tbw_content.rowCount() == 1
 
     widget.clear_report()
 
     assert widget.lbl_publish_summary.text() == ""
-    assert widget.tab_publish_errors.table.rowCount() == 0
+    assert widget.tab_publish_errors.tbw_content.rowCount() == 0
