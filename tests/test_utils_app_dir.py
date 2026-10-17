@@ -25,6 +25,17 @@ from dicogis.utils.app_dir import get_app_dir
 
 
 # ##############################################################################
+# ########## Functions #############
+# ##################################
+
+
+def _set_home(monkeypatch: pytest.MonkeyPatch, home: str) -> None:
+    """Fix the home folder whatever the OS: on Windows, Path.home() reads
+    USERPROFILE and ignores HOME, so setting HOME alone isn't enough."""
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: cls(home)))
+
+
+# ##############################################################################
 # ########## Tests ##################
 # ##################################
 
@@ -40,7 +51,7 @@ def test_same_folder_as_typer_on_this_platform(app_name: str) -> None:
 
 def test_default_app_name_is_dicogis(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "platform", "linux")
-    monkeypatch.setenv("HOME", "/home/someone")
+    _set_home(monkeypatch, "/home/someone")
 
     assert get_app_dir() == Path("/home/someone/.dicogis")
 
@@ -49,7 +60,7 @@ def test_posix_name_is_lowercase_and_hyphenated(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(sys, "platform", "darwin")
-    monkeypatch.setenv("HOME", "/Users/someone")
+    _set_home(monkeypatch, "/Users/someone")
 
     assert get_app_dir("Foo  Bar") == Path("/Users/someone/.foo-bar")
 
@@ -66,7 +77,7 @@ def test_windows_falls_back_to_home_without_appdata(
 ) -> None:
     monkeypatch.setattr(sys, "platform", "win32")
     monkeypatch.delenv("APPDATA", raising=False)
-    monkeypatch.setenv("HOME", "/home/someone")
+    _set_home(monkeypatch, "/home/someone")
 
     assert get_app_dir("DicoGIS") == Path("/home/someone", "DicoGIS")
 

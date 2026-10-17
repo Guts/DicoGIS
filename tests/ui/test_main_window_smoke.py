@@ -12,6 +12,7 @@ Usage from the repo root folder:
 # ##################################
 
 # standard library
+from pathlib import Path
 from unittest.mock import MagicMock
 
 # package
@@ -231,7 +232,8 @@ def test_main_window_opens_the_output_with_the_desktop(
 
     window._open_output()
 
-    assert [url.toLocalFile() for url in opened_urls] == [
-        str((tmp_path / "out.xlsx").resolve())
+    # compared as paths: QUrl.toLocalFile() uses "/" even on Windows
+    assert [Path(url.toLocalFile()) for url in opened_urls] == [
+        (tmp_path / "out.xlsx").resolve()
     ]
     assert "Opening" in caplog.text
