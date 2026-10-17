@@ -23,7 +23,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog, QLineEdit, QWidget
 
 # project
-from dicogis.cli.cmd_publish import PublishReport
+from dicogis.publishing.udata import PublishReport
 from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.check_path import check_path
 from dicogis.utils.utils import Utilities

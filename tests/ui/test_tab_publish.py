@@ -12,7 +12,7 @@ Usage from the repo root folder:
 # ##################################
 
 # package
-from dicogis.cli.cmd_publish import PublishReport
+from dicogis.publishing.udata import PublishReport
 from dicogis.ui.wdg_tab_publish import TabPublish
 
 
