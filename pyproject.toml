@@ -180,6 +180,7 @@ convention = "google"
     "A001",
     "ANN001",
     "ANN2",
+    "ERA001", # commented-out defaults kept from the sphinx-quickstart template
     "S101",
     "T20",
 ] # Ignore rules in Sphinx config
