@@ -31,7 +31,7 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
     qtbot.addWidget(window)
     window.settings = OptionsManager(str(ini_path))
 
-    window.ddl_lang.setCurrentText("FR")
+    window.cbb_lang.setCurrentText("FR")
     window.tab_files.set_target_path(str(tmp_path))
     window.tab_files.set_filters_state({"opt_shp": "1", "opt_tab": "0"})
     window.tab_options.set_proxy_settings(

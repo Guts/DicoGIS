@@ -29,7 +29,7 @@ def test_main_window_constructs(qtbot):
     window = DicoGIS()
     qtbot.addWidget(window)
 
-    assert window.nb.count() == 5
+    assert window.tab_main.count() == 5
 
 
 def test_main_window_retranslate_ui_all_languages(qtbot):
@@ -37,10 +37,10 @@ def test_main_window_retranslate_ui_all_languages(qtbot):
     qtbot.addWidget(window)
 
     for language_code in ("EN", "FR", "ES", "EN"):
-        window.ddl_lang.setCurrentText(language_code)
+        window.cbb_lang.setCurrentText(language_code)
         window.retranslate_ui()
 
-        assert window.welcome.text()
+        assert window.lbl_welcome.text()
         assert window.get_selected_language() == language_code
 
 
@@ -204,7 +204,7 @@ def test_main_window_folder_selected_sets_default_output_name(qtbot):
 
     window.on_folder_selected("/tmp/some_folder")
 
-    assert window.ent_outxl_filename.text().startswith("DicoGIS_some_folder_")
+    assert window.lne_outxl_filename.text().startswith("DicoGIS_some_folder_")
     assert window._scan_thread is not None
 
     with qtbot.waitSignal(window._scan_thread.finished, timeout=5000):
