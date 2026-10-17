@@ -19,7 +19,13 @@ ARG UDATA_VERSION
 
 RUN test -n "${UDATA_VERSION}" || (echo "UDATA_VERSION build-arg is required" >&2 && exit 1)
 
-RUN pip install --no-cache-dir "udata==${UDATA_VERSION}"
+# udata only pins its own release: its dependencies resolve to whatever is
+# newest within the ranges it declares. Flask-Security 5.9.0 (2026-09-24)
+# removed flask_security.utils.get_within_delta, which udata 16.6.1 and 17.6.0
+# still import (their range: flask-security>=5.1.2,<6.0.0), so the app crashes
+# at startup. udata 17.14.0 no longer needs it: drop this cap when the tested
+# versions are bumped past it.
+RUN pip install --no-cache-dir "udata==${UDATA_VERSION}" "flask-security<5.9"
 
 RUN mkdir -p /udata/fs
 COPY udata.cfg /udata/udata.cfg
