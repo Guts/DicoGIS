@@ -323,6 +323,10 @@ class ProcessingFiles:
             logger.debug(f"Exporting metadata of {dataset_to_process.file_path}: OK")
             dataset_to_process.exported = True
         except Exception as err:
+            self.update_progress(
+                message_to_display="Exporting metadata of "
+                f"{dataset_to_process.file_name}: FAIL"
+            )
             dataset_to_process.exported = False
             dataset_to_process.export_error = err
             logger.error(
