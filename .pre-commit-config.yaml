@@ -38,6 +38,17 @@ repos:
           - python
         args:
           - --fix-only
+      # the hook above only applies fixes: this one fails on any os.path (and
+      # other os/open) usage pathlib can replace. Deliberate exceptions carry
+      # a `# noqa: PTHxxx` comment saying why.
+      - id: ruff-check
+        name: ruff check (pathlib only)
+        alias: ruff-pathlib
+        types_or:
+          - pyi
+          - python
+        args:
+          - --select=PTH
       - id: ruff-format
         types_or:
           - pyi
