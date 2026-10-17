@@ -100,12 +100,17 @@ def dicogis_gui():
     # eagerly would break every dicogis-gui invocation when they aren't installed
     try:
         from dicogis.ui.qt_compat.QtWidgets import QApplication
-    except ImportError:
+    except ImportError as err:
         logger.critical(
-            "PyQt6 is required to run DicoGIS GUI but is not installed. Install "
-            "DicoGIS with the `gui` extra, e.g. `pip install dicogis[gui]`. See "
-            "https://guts.github.io/DicoGIS/usage/installation.html for details."
+            f"Qt bindings could not be imported ({err}). PyQt6 is required to run "
+            "DicoGIS GUI: install DicoGIS with the `gui` extra, e.g. "
+            "`pip install dicogis[gui]`, and leave DICOGIS_QT_API unset outside "
+            "QGIS. See https://guts.github.io/DicoGIS/usage/installation.html "
+            "for details."
         )
+        sys.exit(1)
+    except ValueError as err:
+        logger.critical(err)
         sys.exit(1)
 
     from dicogis.ui.mw_dicogis import DicoGIS
