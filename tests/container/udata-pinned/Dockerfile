@@ -16,16 +16,18 @@ ARG PYTHON_BASE_TAG=py3.11
 FROM udata/system:${PYTHON_BASE_TAG}
 
 ARG UDATA_VERSION
+# extra pip requirements for this udata version, space-separated, typically
+# caps on dependencies whose newer releases it no longer supports. udata only
+# pins its own release: its dependencies resolve to the newest versions its
+# ranges allow, which can break an older udata release. Set per version in the
+# workflow matrix (see .github/workflows/tester_udata_publish.yml).
+ARG UDATA_EXTRA_REQUIREMENTS=""
 
 RUN test -n "${UDATA_VERSION}" || (echo "UDATA_VERSION build-arg is required" >&2 && exit 1)
 
-# udata only pins its own release: its dependencies resolve to whatever is
-# newest within the ranges it declares. Flask-Security 5.9.0 (2026-09-24)
-# removed flask_security.utils.get_within_delta, which udata 16.6.1 and 17.6.0
-# still import (their range: flask-security>=5.1.2,<6.0.0), so the app crashes
-# at startup. udata 17.14.0 no longer needs it: drop this cap when the tested
-# versions are bumped past it.
-RUN pip install --no-cache-dir "udata==${UDATA_VERSION}" "flask-security<5.9"
+# left unquoted on purpose so that several requirements split into separate
+# arguments; operators such as "<" in an expanded variable are not redirections
+RUN pip install --no-cache-dir "udata==${UDATA_VERSION}" ${UDATA_EXTRA_REQUIREMENTS}
 
 RUN mkdir -p /udata/fs
 COPY udata.cfg /udata/udata.cfg
