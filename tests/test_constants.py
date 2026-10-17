@@ -12,6 +12,8 @@ import unittest
 from dicogis.constants import (
     FORMAT_TO_GDAL_DRIVERS,
     SUPPORTED_FORMATS,
+    AvailableLocales,
+    ExtendedEnum,
     FormatsRaster,
     FormatsVector,
 )
@@ -95,6 +97,24 @@ class TestSupportedFormats(unittest.TestCase):
         for drivers in FORMAT_TO_GDAL_DRIVERS.values():
             self.assertIsInstance(drivers, tuple)
             self.assertTrue(len(drivers))
+
+
+class TestExtendedEnumLookups(unittest.TestCase):
+    """Key/value lookups of the format and locale enums (formerly checked by
+    hand in a standalone block of dicogis/constants.py)."""
+
+    def test_supported_formats_are_extended_enum_members(self):
+        self.assertIsInstance(SUPPORTED_FORMATS, list)
+        self.assertTrue(all(isinstance(f, ExtendedEnum) for f in SUPPORTED_FORMATS))
+
+    def test_has_key(self):
+        self.assertTrue(FormatsRaster.has_key("ecw"))
+        self.assertTrue(FormatsRaster.has_key("geotiff"))
+        self.assertFalse(FormatsRaster.has_key("fake_raster_format"))
+
+    def test_has_value(self):
+        self.assertTrue(FormatsRaster.has_value(".geotiff"))
+        self.assertTrue(AvailableLocales.has_value("EN"))
 
 
 class TestCliDefaultFormats(unittest.TestCase):
