@@ -7,7 +7,6 @@
 # Standard library
 import logging
 from collections.abc import Iterable
-from functools import lru_cache
 from pathlib import Path
 
 # 3rd party library
@@ -352,16 +351,6 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
             sheet.column_dimensions["A"].auto_size = True
             sheet.column_dimensions["B"].auto_size = True
 
-            # dims = {}
-            # for row in sheet.rows:
-            #     for cell in row:
-            #         if cell.value:
-            #             val = cell.value
-            #             dims[cell.column] = max((dims.get(cell.column, 0), len(val)))
-            # for col, value in dims.items():
-            #     sheet.column_dimensions[col].width = value
-
-    @lru_cache
     def is_style_registered(self, style_name: str) -> bool:
         """Function to check if a named style already exists/
 
@@ -373,8 +362,8 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
         """
         return style_name in self.workbook.named_styles
 
-    @lru_cache(maxsize=128, typed=True)
-    def format_as_hyperlink(self, target: str | Path, label: str) -> str:
+    @staticmethod
+    def format_as_hyperlink(target: str | Path, label: str) -> str:
         """Format a cell hyperlink with a target and a label.
 
         Args:
@@ -389,8 +378,8 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
         return f'=HYPERLINK("{target}", "{label}")'
 
-    @lru_cache(maxsize=128, typed=True)
-    def format_bbox(self, bbox: tuple[float, float, float, float] | None) -> str:
+    @staticmethod
+    def format_bbox(bbox: tuple[float, float, float, float] | None) -> str:
         """Format bounding-box tuple to fit Excel constraints.
 
         Args:
@@ -452,7 +441,6 @@ class MetadatasetSerializerXlsx(MetadatasetSerializerBase):
 
         return out_attributes_str
 
-    @lru_cache
     def format_size(self, in_size_in_octets: int | None = 0) -> str:
         """Format size in octets accordingly to the option.
 

@@ -53,11 +53,11 @@ class MetadatasetSerializerBase:
         self.opt_raw_path = opt_raw_path
         self.opt_size_prettify = opt_size_prettify
 
-    def pre_serializing(self, **kwargs):
+    def pre_serializing(self, **kwargs: object) -> None:
         """Operations to run before serialization."""
         pass
 
-    def post_serializing(self, **kwargs):
+    def post_serializing(self, **kwargs: object) -> None:
         """Operations to run after serialization."""
         pass
 

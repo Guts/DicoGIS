@@ -61,7 +61,6 @@ class TextsManager:
         self.locale_folder = locale_folder
         self.language_code: str | None = None
 
-    @lru_cache
     def load_texts(self, language_code: str | tuple = "EN") -> dict[str, str]:
         """Load texts according to the specified language code.
 
@@ -75,8 +74,6 @@ class TextsManager:
         Returns:
             dict: dictonary filled by methods
         """
-        translated_texts: dict[str] = {}
-
         # handle locale.getlocale()
         if isinstance(language_code, tuple):
             language_code = language_code[0]
@@ -109,15 +106,32 @@ class TextsManager:
             )
             return self.load_texts(language_code="EN")
 
-        # open xml cursor
-        xml = ET.parse(lang_file)
+        # a copy, so that callers can't alter the cached texts
+        return dict(_parse_language_file(lang_file))
 
-        # Looping and gathering texts from the xml file
-        for elem in xml.getroot().iter():
-            translated_texts[elem.tag] = elem.text
 
-        # end of fonction
-        return translated_texts
+# #############################################################################
+# ########## Functions #############
+# ##################################
+
+
+@lru_cache
+def _parse_language_file(lang_file: Path) -> dict[str, str]:
+    """Read a language file once per process.
+
+    Cached here rather than on TextsManager.load_texts(): a method cache keeps
+    every instance alive and skips the method body on a hit, so switching back
+    to a language left TextsManager.language_code stale.
+
+    Args:
+        lang_file: path to a lang_XX.xml file shipped with the package
+
+    Returns:
+        text key -> translated text. Callers must copy it before changing it.
+    """
+    # the parsed file is the package's own locale data, not untrusted input
+    xml = ET.parse(lang_file)  # noqa: S314
+    return {elem.tag: elem.text for elem in xml.getroot().iter()}
 
 
 # #############################################################################

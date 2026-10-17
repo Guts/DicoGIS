@@ -126,6 +126,88 @@ def _fetch_already_published(
     return tuple(already_published_slugs), tuple(already_published_signatures)
 
 
+def _publish_json_file(
+    json_file: Path,
+    report: PublishReport,
+    req_session: Session,
+    udata_api_url_base: str,
+    udata_api_version: str,
+    udata_organization_id: str | None,
+    already_published_slugs: tuple,
+    already_published_signatures: tuple,
+    verbose: bool,
+) -> None:
+    """Publish one metadata JSON file, unless it isn't DicoGIS' or is already
+    published, and count the outcome into the report.
+
+    Args:
+        json_file: metadata JSON file (udata flavor) to publish.
+        report: run report, updated with this file's outcome.
+        req_session: pre-configured HTTP session (with auth headers set).
+        udata_api_url_base: API URL of the uData instance.
+        udata_api_version: API version of the uData instance.
+        udata_organization_id: if set, the dataset is added to this organization.
+        already_published_slugs: slugs already in the catalog.
+        already_published_signatures: DicoGIS signatures already in the catalog.
+        verbose: log ignored files at info level.
+    """
+    # open it securely
+    try:
+        with json_file.open(mode="r", encoding="UTF-8") as f:
+            data = json.load(f)
+
+        if isinstance(data, dict) and udata_organization_id:
+            data["organization"] = {"id": udata_organization_id}
+
+    except Exception as err:
+        err_msg = f"Impossible to load {json_file}. Trace: {err}"
+        logger.error(err_msg)
+        report.failed += 1
+        report.errors.append(err_msg)
+        return
+
+    # filter out JSON files not related to DicoGIS
+    metadataset_extras = _dicogis_extras(data)
+    if not metadataset_extras.get("dicogis_version"):
+        if verbose:
+            logger.info(
+                f"Looks like this file is not a metadataset from DicoGIS: {json_file}"
+            )
+        report.ignored += 1
+        return
+
+    # check if the metadata has been already published. Reaching this point
+    # means data is a mapping: _dicogis_extras() returned something for it.
+    dataset_slug = data.get("slug")
+    dataset_signature = metadataset_extras.get("dicogis_signature")
+    if (dataset_slug and dataset_slug in already_published_slugs) or (
+        dataset_signature and dataset_signature in already_published_signatures
+    ):
+        if verbose:
+            logger.info(
+                f"JSON file {json_file} has the same slug or the same signature "
+                "compared with an already published dataset. It's not gonna be "
+                "published."
+            )
+        report.ignored += 1
+        return
+
+    # publish
+    try:
+        req_response = req_session.post(
+            url=f"{udata_api_url_base}{udata_api_version}/datasets", json=data
+        )
+        req_response.raise_for_status()
+    except Exception as err:
+        err_msg = f"Publish {json_file} to {udata_api_url_base} failed. Trace: {err}"
+        logger.error(err_msg)
+        report.failed += 1
+        report.errors.append(err_msg)
+        return
+
+    report.published += 1
+
+
 def publish_metadata_folder(
     input_folder: Path,
     udata_api_key: str,
@@ -185,71 +267,17 @@ def publish_metadata_folder(
     files_total = len(li_json_files)
 
     for files_done, json_file in enumerate(li_json_files, start=1):
-        # open it securely
-        try:
-            with json_file.open(mode="r", encoding="UTF-8") as f:
-                data = json.load(f)
-
-            if isinstance(data, dict) and udata_organization_id:
-                data["organization"] = {"id": udata_organization_id}
-
-        except Exception as err:
-            err_msg = f"Impossible to load {json_file}. Trace: {err}"
-            logger.error(err_msg)
-            report.failed += 1
-            report.errors.append(err_msg)
-            if progress_callback:
-                progress_callback(files_done, files_total, json_file)
-            continue
-
-        # filter out JSON files not related to DicoGIS
-        metadataset_extras = _dicogis_extras(data)
-        if not metadataset_extras.get("dicogis_version"):
-            if verbose:
-                logger.info(
-                    f"Looks like this file is not a metadataset from DicoGIS: {json_file}"
-                )
-            report.ignored += 1
-            if progress_callback:
-                progress_callback(files_done, files_total, json_file)
-            continue
-
-        # check if the metadata has been already published. Reaching this point
-        # means data is a mapping: _dicogis_extras() returned something for it.
-        dataset_slug = data.get("slug")
-        dataset_signature = metadataset_extras.get("dicogis_signature")
-        if (dataset_slug and dataset_slug in already_published_slugs) or (
-            dataset_signature and dataset_signature in already_published_signature
-        ):
-            if verbose:
-                logger.info(
-                    f"JSON file {json_file} has the same slug or the same signature "
-                    "compared with an already published dataset. It's not gonna be "
-                    "published."
-                )
-            report.ignored += 1
-            if progress_callback:
-                progress_callback(files_done, files_total, json_file)
-            continue
-
-        # publish
-        try:
-            req_response = req_session.post(
-                url=f"{udata_api_url_base}{udata_api_version}/datasets", json=data
-            )
-            req_response.raise_for_status()
-        except Exception as err:
-            err_msg = (
-                f"Publish {json_file} to {udata_api_url_base} failed. Trace: {err}"
-            )
-            logger.error(err_msg)
-            report.failed += 1
-            report.errors.append(err_msg)
-            if progress_callback:
-                progress_callback(files_done, files_total, json_file)
-            continue
-
-        report.published += 1
+        _publish_json_file(
+            json_file=json_file,
+            report=report,
+            req_session=req_session,
+            udata_api_url_base=udata_api_url_base,
+            udata_api_version=udata_api_version,
+            udata_organization_id=udata_organization_id,
+            already_published_slugs=already_published_slugs,
+            already_published_signatures=already_published_signature,
+            verbose=verbose,
+        )
         if progress_callback:
             progress_callback(files_done, files_total, json_file)
 

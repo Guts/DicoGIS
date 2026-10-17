@@ -17,15 +17,22 @@ import configparser
 import logging
 import platform
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.check_path import check_path
 from dicogis.utils.str2bool import str2bool
 
 
+if TYPE_CHECKING:
+    from dicogis.ui.mw_dicogis import DicoGIS
+
+
 # #############################################################################
 # ########## Globals ###############
 # ##################################
+
+logger = logging.getLogger(__name__)
 
 # default location: the per-user application folder (%APPDATA%\DicoGIS on
 # Windows, ~/.dicogis elsewhere), instead of a hardcoded relative path
@@ -57,17 +64,17 @@ class OptionsManager:
             must_be_readable=True,
             raise_error=False,
         ):
-            logging.info("No options.ini file found. First use: welcome!")
+            logger.info("No options.ini file found. First use: welcome!")
             self.first_use = 1
         else:
-            logging.info("Options.ini file found. ")
+            logger.info("Options.ini file found. ")
             self.first_use = 0
 
         # using safe parser
         self.config = configparser.ConfigParser()
         self.config.read(self.confile)
 
-    def load_settings(self, parent) -> None:
+    def load_settings(self, parent: "DicoGIS") -> None:
         """load settings from last execution"""
         # basics
         parent.set_selected_language(self.config.get("basics", "def_codelang"))
@@ -132,9 +139,9 @@ class OptionsManager:
         parent.wdg_tab_settings.set_proxy_settings(dict(self.config.items("proxy")))
 
         # log
-        logging.info("Last options loaded")
+        logger.info("Last options loaded")
 
-    def save_settings(self, parent) -> bool:
+    def save_settings(self, parent: "DicoGIS") -> bool:
         """save last options in order to make the next excution more easy"""
 
         # add sections (guard against re-running save_settings within the same
@@ -236,8 +243,8 @@ class OptionsManager:
         with Path(self.confile).open(mode="w", encoding="UTF-8") as configfile:
             try:
                 self.config.write(configfile)
-                logging.info(f"Options saved to {self.confile}")
+                logger.info(f"Options saved to {self.confile}")
                 return True
             except Exception as err:
-                logging.error(f"Options couldn't be saved because of: {err}")
+                logger.error(f"Options couldn't be saved because of: {err}")
                 return False

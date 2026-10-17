@@ -43,7 +43,7 @@ class ToggledFrame(QWidget):
         parent: QWidget | None = None,
         in_text: str = "",
         start_opened: bool = True,
-        **kwargs,
+        **kwargs: object,
     ):
         """Initializes a collapsible frame.
 

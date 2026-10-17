@@ -76,7 +76,11 @@ not part of the suite). PostGIS-related tests expect
 ### Lint / format
 
 Formatting/linting is enforced through pre-commit (ruff check, ruff-format and
-pyupgrade). Run everything pre-commit would run:
+pyupgrade). `ruff check` runs with `--fix`, not `--fix-only`: whatever it can't
+fix fails the hook, so the rules of `[tool.ruff]` in `pyproject.toml` must hold
+on every commit — fix the code, or add a `# noqa: <rule>` with the reason when
+the rule is deliberately bypassed (tests have their own `per-file-ignores`).
+Run everything pre-commit would run:
 
 ```sh
 pre-commit run --all-files
@@ -311,8 +315,8 @@ Full guidelines: `CONTRIBUTING.md`. What matters most for changes made here:
 
 ## Conventions
 
-- Paths: `pathlib`, not `os.path`; the `ruff-pathlib` pre-commit hook fails on
-  ruff's `PTH` rules. To make a path absolute, use
+- Paths: `pathlib`, not `os.path` (ruff's `PTH` rules, enforced like the
+  others). To make a path absolute, use
   `dicogis/utils/paths.py::absolute_path()` (abspath semantics), not
   `Path.resolve()`, which follows symlinks and expands Windows 8.3 short names.
   The listing's per-file loop keeps `os.path` on purpose (performance, see the

@@ -180,10 +180,25 @@ convention = "google"
     "A001",
     "ANN001",
     "ANN2",
+    "ERA001", # commented-out defaults kept from the sphinx-quickstart template
     "S101",
     "T20",
 ] # Ignore rules in Sphinx config
-"tests/test_*.py" = ["ANN001", "ANN2", "S101", "T20"] # Ignore rules in tests
+# Ignore rules in tests, subfolders included: asserts, annotations, random
+# test data, fake credentials, literal "/tmp" paths never written to,
+# subprocess calls to the running interpreter, unittest-style assertXxx helpers
+"tests/**/*.py" = [
+    "ANN001",
+    "ANN003",
+    "ANN2",
+    "N802",
+    "S101",
+    "S106",
+    "S108",
+    "S311",
+    "S603",
+    "T20",
+]
 
 
 [tool.setuptools.dynamic]

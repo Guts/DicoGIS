@@ -105,7 +105,7 @@ def check_var_can_be_path(
 
         error_message += " Attempt 2/2. Game over."
         if raise_error:
-            raise TypeError(error_message)
+            raise TypeError(error_message) from exc
         else:
             logger.error(error_message)
             return False

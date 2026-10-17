@@ -9,6 +9,7 @@
 # standard library
 import logging
 import re
+import shutil
 import subprocess
 from os import getenv
 
@@ -16,12 +17,19 @@ from os import getenv
 from dicogis.constants import FORMAT_TO_GDAL_DRIVERS
 
 
+# ############################################################################
+# ########### Globals ##############
+# ##################################
+
+# defined before the optional imports below, which log when they fail
+logger = logging.getLogger(__name__)
+
 try:
     from osgeo import gdal, osr
 
     GDAL_IS_AVAILABLE: bool = True
 except ImportError:
-    logging.info("GDAL (ou ses bindings Python) n'est pas installé.")
+    logger.info("GDAL (ou ses bindings Python) n'est pas installé.")
     gdal = osr = None
     GDAL_IS_AVAILABLE: bool = False
 
@@ -30,20 +38,39 @@ try:
 
     PYPROJ_IS_AVAILABLE: bool = True
 except ImportError:
-    logging.info("PyProj n'est pas installé.")
+    logger.info("PyProj n'est pas installé.")
     pyproj = None
     PYPROJ_IS_AVAILABLE: bool = False
 
 # ############################################################################
-# ########### Globals ##############
-# ##################################
-
-# logs
-logger = logging.getLogger(__name__)
-
-# ############################################################################
 # ########### Functions ############
 # ##################################
+
+
+def _command_output(*command: str, merge_stderr: bool = False) -> str | None:
+    """Run a command-line tool found on the PATH and return its output.
+
+    Args:
+        command: executable name, then its arguments
+        merge_stderr: also capture what the tool writes to standard error
+
+    Returns:
+        output, stripped, or None if the tool is missing or fails
+    """
+    executable = shutil.which(command[0])
+    if executable is None:
+        logger.debug(f"{command[0]} not found on the PATH.")
+        return None
+    try:
+        # fixed arguments and an absolute executable path: no untrusted input
+        return subprocess.check_output(  # noqa: S603
+            [executable, *command[1:]],
+            stderr=subprocess.STDOUT if merge_stderr else None,
+            text=True,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError) as err:
+        logger.debug(f"Running {' '.join(command)} failed. Trace: {err}")
+        return None
 
 
 def get_available_gdal_drivers() -> frozenset[str]:
@@ -108,35 +135,23 @@ def get_gdal_version() -> str:
         return gdal.__version__
 
     # try to get it from gdalinfo (installed with gdal)
-    try:
-        returned_output: bytes = subprocess.check_output(
-            "gdalinfo --version", shell=True
-        )
-        logger.debug(
-            f"GDAL version retrieved from gdalinfo: {returned_output.decode('utf-8')}"
-        )
-        return returned_output[5:10].decode("utf-8")
-    except Exception:
-        pass
+    if gdalinfo_output := _command_output("gdalinfo", "--version"):
+        logger.debug(f"GDAL version retrieved from gdalinfo: {gdalinfo_output}")
+        # e.g. "GDAL 3.10.1, released 2025/01/08"
+        if version_match := re.search(r"GDAL (\d+\.\d+\.\d+)", gdalinfo_output):
+            return version_match.group(1)
 
     # try to get it from gdal-config (installed with gdaldev)
-    try:
-        returned_output: bytes = subprocess.check_output(
-            "gdal-config --version", shell=True
-        )
-        logger.debug(
-            f"GDAL version retrieved from gdal-config: {returned_output.decode('utf-8')}"
-        )
-        return returned_output.decode("utf-8")
-    except Exception:
-        pass
+    if gdal_config_output := _command_output("gdal-config", "--version"):
+        logger.debug(f"GDAL version retrieved from gdal-config: {gdal_config_output}")
+        return gdal_config_output
 
     # first check environment variable
     gdal_version = getenv("GDAL_VERSION")
     if gdal_version:
         return gdal_version
 
-    logging.warning(
+    logger.warning(
         "Unable to retrieve GDAL version from command-line or environment var. "
         f"Using default version: {gdal_fallback_version}"
     )
@@ -164,8 +179,8 @@ def get_proj_version() -> str | None:
                 f"Version de PROJ obtenue depuis les bindings Python de GDAL : {proj_version}"
             )
             return proj_version
-        except Exception:
-            pass
+        except Exception as err:
+            logger.debug(f"PROJ version not available from GDAL bindings: {err}")
 
     # from PyProj
     if pyproj is not None and PYPROJ_IS_AVAILABLE:
@@ -173,35 +188,26 @@ def get_proj_version() -> str | None:
             proj_version = pyproj.__proj_version__
             logger.debug(f"Version de PROJ obtenue depuis PyProj : {proj_version}")
             return proj_version
-        except Exception:
-            pass
+        except Exception as err:
+            logger.debug(f"PROJ version not available from PyProj: {err}")
 
-    # from PROJ command-line
-    try:
-        # Exécute la commande "proj" en utilisant subprocess
-        result = subprocess.check_output(["proj"], stderr=subprocess.STDOUT, text=True)
-
-        # Recherche de la version dans la sortie à l'aide d'une expression régulière
-        if version_match := re.search(r"Rel\. ([0-9.]+)", result):
+    # from PROJ command-line, which prints its version with its usage message
+    if proj_output := _command_output("proj", merge_stderr=True):
+        if version_match := re.search(r"Rel\. ([0-9.]+)", proj_output):
             proj_version = version_match.group(1)
             logger.debug(
                 f"Version de PROJ obtenue depuis le binaire proj : {proj_version}"
             )
             return proj_version
-        else:
-            logger.error(
-                "PROJ est bien installé mais impossible de trouver la version en regex."
-            )
-    except FileNotFoundError as err:
-        logger.info(f"Proj n'est pas installé. Trace : {err}")
-    except subprocess.CalledProcessError as e:
-        logger.info(f"Erreur lors de l'exécution de la commande : {e}")
+        logger.error(
+            "PROJ est bien installé mais impossible de trouver la version en regex."
+        )
 
     # from environment variable
     if proj_version := getenv("PROJ_VERSION"):
         return proj_version
 
-    logging.warning(
+    logger.warning(
         "Impossible de déterminer la version de PROJ depuis les bindings GDAL, PyProj, "
         "les binaires proj ou la variable d'environnement PROJ_VERSION. "
     )

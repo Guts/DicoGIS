@@ -8,7 +8,6 @@
 
 # Standard library
 import logging
-from functools import lru_cache
 
 # 3rd party libraries
 from osgeo import gdal, ogr
@@ -67,6 +66,8 @@ class ReadPostGIS(GeoReaderBase):
         # Creating variables
         self.conn: ogr.DataSource | None = None
         self.counter_alerts = 0
+        # filled on first use by get_relations_comments(), queried once per reader
+        self._relations_comments: dict[str, str] | None = None
         self.views_included = views_included
 
         # connection infos as attributes
@@ -120,7 +121,6 @@ class ReadPostGIS(GeoReaderBase):
             logger.error(f"Connection failed. Check settings. Trace: {err}")
             return None
 
-    @lru_cache
     def get_postgis_version(self) -> str | None:
         """Returns the version of PostGIS extension.
 
@@ -139,7 +139,6 @@ class ReadPostGIS(GeoReaderBase):
             logger.error(f"Trying to retrieve PostGIS versions failed. Trace: {err}")
             return None
 
-    @lru_cache
     def get_schemas(self) -> set[str]:
         """Return unique set of schemas names accessible by the logged user.
 
@@ -150,7 +149,6 @@ class ReadPostGIS(GeoReaderBase):
         pg_schemas: ogr.Layer = self.conn.ExecuteSQL(sql_schemas)
         return {feature["nspname"] for feature in pg_schemas}
 
-    @lru_cache
     def get_relations_comments(self) -> dict[str, str]:
         """Return comments (COMMENT ON TABLE/VIEW) set on tables and views, keyed by
         their schema-qualified name.
@@ -168,9 +166,12 @@ class ReadPostGIS(GeoReaderBase):
             "ON d.objoid = c.oid AND d.objsubid = 0 "
             "WHERE c.relkind IN ('r', 'v', 'm', 'p', 'f');"
         )
+        if self._relations_comments is not None:
+            return self._relations_comments
+
         try:
             pg_relations: ogr.Layer = self.conn.ExecuteSQL(sql_comments)
-            return {
+            self._relations_comments = {
                 f"{feature['schema_name']}.{feature['relation_name']}": feature[
                     "relation_comment"
                 ]
@@ -179,7 +180,8 @@ class ReadPostGIS(GeoReaderBase):
             }
         except Exception as err:
             logger.error(f"Unable to retrieve PostgreSQL relations comments: {err}")
-            return {}
+            self._relations_comments = {}
+        return self._relations_comments
 
     def infos_dataset(
         self,

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Annotated
 
 # 3rd party
 import typer
-from rich import print
+from rich import print as rich_print
 
 # project
 from dicogis.__about__ import __package_name__
@@ -241,14 +241,14 @@ def inventory(
     # check minimal parameters
     # note: pg_services defaults to [] not to None
     if input_folder is None and not pg_services:
-        print(
+        rich_print(
             "[bold red]Error: You must provide at least one of the options: "
             "input_folder or pg_services[/bold red]"
         )
         raise typer.Exit(code=1)
 
     if not GDAL_IS_AVAILABLE:
-        print(
+        rich_print(
             "[bold red]Error: GDAL (and its Python bindings) is required to run an "
             "inventory but is not installed.[/bold red]\n"
             "See https://guts.github.io/DicoGIS/usage/installation.html for how to "
@@ -273,7 +273,7 @@ def inventory(
         if not is_format_supported_by_gdal(fmt, available_gdal_drivers)
     ]
     if unsupported_formats:
-        print(
+        rich_print(
             "[bold yellow]Warning: the installed GDAL build does not support the "
             f"following requested format(s), they will be ignored: "
             f"{', '.join(unsupported_formats)}[/bold yellow]"
@@ -330,7 +330,7 @@ def inventory(
             max_workers=listing_max_workers,
         )
 
-        print(
+        rich_print(
             "Found: "
             f"{len(li_shapefiles)} shapefiles - "
             f"{len(li_mapinfo_tab)} tables (MapInfo) - "
@@ -401,7 +401,7 @@ def inventory(
 
         # sheets and progress bar
         total_files = geofiles_processor.count_files_to_process()
-        print(f"Start analyzing {total_files} files...")
+        rich_print(f"Start analyzing {total_files} files...")
 
         geofiles_processor.process_datasets_in_queue()
 
@@ -435,7 +435,7 @@ def inventory(
             opt_raw_path=opt_raw_path,
         )
 
-        print("Start looking for geographic table in PostGIS...")
+        rich_print("Start looking for geographic table in PostGIS...")
         # configure output workbook
         output_serializer.pre_serializing(has_sgbd=True)
 
@@ -444,7 +444,7 @@ def inventory(
         failed_pg_services: list[str] = []
 
         for pg_service in pg_services:
-            print(f"Start processing using PostgreSQL service: {pg_service}")
+            rich_print(f"Start processing using PostgreSQL service: {pg_service}")
 
             # testing connection settings
             sgbd_reader = ReadPostGIS(service=pg_service)
@@ -458,7 +458,7 @@ def inventory(
                 )
                 # the CLI installs no console log handler, so a failed service
                 # would otherwise only show up in the log file
-                print(
+                rich_print(
                     "[bold yellow]Warning: connection failed using PostgreSQL service "
                     f"{pg_service}, it is skipped. Trace: {fail_reason}[/bold yellow]"
                 )
@@ -477,7 +477,7 @@ def inventory(
                 "Connection failed for every requested PostgreSQL service: "
                 f"{', '.join(failed_pg_services)}."
             )
-            print(
+            rich_print(
                 "[bold red]Error: connection failed for every requested PostgreSQL "
                 f"service ({', '.join(failed_pg_services)}). No output written."
                 "[/bold red]"

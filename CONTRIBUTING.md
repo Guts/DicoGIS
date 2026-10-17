@@ -20,8 +20,8 @@ See the relevant configuration file: `.pre-commit-config.yaml`.
 Make sure your code *roughly* follows [PEP-8](https://www.python.org/dev/peps/pep-0008/) and keeps things consistent with the rest of the code:
 
 - docstrings: [google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) is used to write technical documentation right into the code.
-- formatting, imports and static analisis: [ruff](https://docs.astral.sh/ruff/) is used to automatically format the code without debate, sort imports and run a bunch of flake8 lint checks
-- file system paths: use [`pathlib`](https://docs.python.org/3/library/pathlib.html), not `os.path` (nor `open()`, `os.chmod()`, etc. where pathlib has a method). A pre-commit hook fails on such usages (ruff's `PTH` rules). The rare deliberate exceptions carry a `# noqa: PTHxxx` comment saying why: `dicogis.utils.paths.absolute_path()`, since pathlib has no exact `os.path.abspath()` equivalent, and the per-file loop of the folder listing, where pathlib was measured about 6 times slower.
+- formatting, imports and static analisis: [ruff](https://docs.astral.sh/ruff/) is used to automatically format the code without debate, sort imports and run a bunch of flake8 lint checks. The rules are set in `pyproject.toml` (`[tool.ruff]`) and enforced: the pre-commit hook applies safe fixes, then fails on any violation left, locally and on pull requests. When a rule must be bypassed on purpose, add a `# noqa: <rule>` comment on the line with the reason; rules that only make noise in tests are exempted there through `per-file-ignores`.
+- file system paths: use [`pathlib`](https://docs.python.org/3/library/pathlib.html), not `os.path` (nor `open()`, `os.chmod()`, etc. where pathlib has a method). Ruff's `PTH` rules enforce it. The rare deliberate exceptions carry a `# noqa: PTHxxx` comment saying why: `dicogis.utils.paths.absolute_path()`, since pathlib has no exact `os.path.abspath()` equivalent, and the per-file loop of the folder listing, where pathlib was measured about 6 times slower.
 
 ### Graphical interface
 

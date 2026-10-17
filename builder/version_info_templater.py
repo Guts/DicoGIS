@@ -110,7 +110,7 @@ def run():
         # log user
         print(f"Version info written to: {out_version_file.resolve()}")
     except KeyboardInterrupt:
-        raise SystemExit("Aborted by user request.")
+        raise SystemExit("Aborted by user request.") from None
 
 
 # Stand alone execution

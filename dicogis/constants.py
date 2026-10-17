@@ -111,23 +111,3 @@ FORMAT_TO_GDAL_DRIVERS: dict[str, tuple[str, ...]] = {
     "geotiff": ("GTiff",),
     "jpeg": ("JPEG",),
 }
-
-# ############################################################################
-# #### Stand alone program ########
-# #################################
-if __name__ == "__main__":
-    """standalone execution"""
-    assert isinstance(SUPPORTED_FORMATS, list)
-    assert all([isinstance(i, ExtendedEnum) for i in SUPPORTED_FORMATS]), type(
-        SUPPORTED_FORMATS[0]
-    )
-    assert FormatsRaster.has_key("ecw")
-    assert FormatsRaster.has_key("geotiff")
-    assert FormatsRaster.has_value(".geotiff")
-    assert FormatsRaster.has_key("fake_raster_format") is False
-
-    for f in SUPPORTED_FORMATS:
-        print(f.name)
-
-    print([v.value for v in AvailableLocales])
-    print("EN" in AvailableLocales)

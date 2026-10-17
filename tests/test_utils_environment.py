@@ -11,6 +11,7 @@ Usage from the repo root folder:
 """
 
 # standard
+import sys
 import unittest
 from unittest.mock import patch
 
@@ -19,6 +20,7 @@ from packaging.version import parse
 
 # project
 from dicogis.utils.environment import (
+    _command_output,
     get_available_gdal_drivers,
     get_gdal_version,
     get_proj_version,
@@ -29,6 +31,64 @@ from dicogis.utils.environment import (
 # ############################################################################
 # ########## Classes #############
 # ################################
+
+
+class TestCommandOutput(unittest.TestCase):
+    """Test the helper running command-line tools."""
+
+    def test_missing_tool_returns_none(self):
+        self.assertIsNone(_command_output("definitely-not-an-installed-tool"))
+
+    def test_output_is_stripped(self):
+        with patch(
+            "dicogis.utils.environment.shutil.which", return_value=sys.executable
+        ):
+            output = _command_output("python", "-c", "print('  3.8.4  ')")
+
+        self.assertEqual(output, "3.8.4")
+
+    def test_stderr_only_when_asked(self):
+        """proj prints its version on standard error."""
+        script = "import sys; sys.stderr.write('Rel. 9.4.0')"
+        with patch(
+            "dicogis.utils.environment.shutil.which", return_value=sys.executable
+        ):
+            self.assertEqual(_command_output("python", "-c", script), "")
+            self.assertEqual(
+                _command_output("python", "-c", script, merge_stderr=True),
+                "Rel. 9.4.0",
+            )
+
+    def test_failing_tool_returns_none(self):
+        with patch(
+            "dicogis.utils.environment.shutil.which", return_value=sys.executable
+        ):
+            self.assertIsNone(_command_output("python", "-c", "raise SystemExit(1)"))
+
+
+class TestGdalVersionFromCommandLine(unittest.TestCase):
+    """Test get_gdal_version() when the GDAL Python bindings are missing."""
+
+    def _version_from(self, gdalinfo_output: str | None) -> str:
+        with (
+            patch("dicogis.utils.environment.GDAL_IS_AVAILABLE", False),
+            patch(
+                "dicogis.utils.environment._command_output",
+                side_effect=lambda *args, **kwargs: (
+                    gdalinfo_output if args[0] == "gdalinfo" else None
+                ),
+            ),
+        ):
+            return get_gdal_version()
+
+    def test_two_digits_minor_version(self):
+        """A fixed slice of the output used to return "3.10." here."""
+        self.assertEqual(
+            self._version_from("GDAL 3.10.1, released 2025/01/08"), "3.10.1"
+        )
+
+    def test_one_digit_minor_version(self):
+        self.assertEqual(self._version_from("GDAL 3.8.4, released 2024/02/08"), "3.8.4")
 
 
 class TestUtilsEnvironment(unittest.TestCase):
