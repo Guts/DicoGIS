@@ -248,35 +248,32 @@ class ProcessingFiles:
         """
         metadataset = None
 
+        self.update_progress(
+            message_to_display=f"Reading {dataset_to_process.file_name}..."
+        )
         if self.opt_quick_fail:
-            self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}..."
-            )
             metadataset = dataset_to_process.georeader().infos_dataset(
                 source_path=path.abspath(dataset_to_process.file_path),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: OK"
+                message_to_display=f"Reading {dataset_to_process.file_name}: OK"
             )
             dataset_to_process.processed = True
             return dataset_to_process, metadataset
 
         try:
-            self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}..."
-            )
             metadataset = dataset_to_process.georeader().infos_dataset(
                 source_path=path.abspath(dataset_to_process.file_path),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: OK"
+                message_to_display=f"Reading {dataset_to_process.file_name}: OK"
             )
             dataset_to_process.processed = True
         except Exception as err:
             self.update_progress(
-                message_to_display=f"Reading {dataset_to_process.file_path}: FAIL"
+                message_to_display=f"Reading {dataset_to_process.file_name}: FAIL"
             )
             logger.error(
                 f"Reading {dataset_to_process.file_path} "
