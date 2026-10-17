@@ -99,7 +99,7 @@ def dicogis_gui():
     # dependencies (see pyproject.toml `gui` and `gdal` extras), so importing them
     # eagerly would break every dicogis-gui invocation when they aren't installed
     try:
-        from PyQt6.QtWidgets import QApplication
+        from dicogis.ui.qt_compat.QtWidgets import QApplication
     except ImportError:
         logger.critical(
             "PyQt6 is required to run DicoGIS GUI but is not installed. Install "

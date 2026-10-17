@@ -18,9 +18,10 @@ from os import environ, getenv
 from pathlib import Path
 from webbrowser import open_new_tab
 
-# 3rd party
-from PyQt6 import uic
-from PyQt6.QtWidgets import (
+# project
+from dicogis.__about__ import __uri_homepage__
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtWidgets import (
     QApplication,
     QCheckBox,
     QHBoxLayout,
@@ -31,9 +32,6 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-# project
-from dicogis.__about__ import __uri_homepage__
 from dicogis.ui.wdg_collapsible_frame import ToggledFrame
 from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.str2bool import str2bool
@@ -347,7 +345,7 @@ if __name__ == "__main__":
     """To test"""
     import sys
 
-    from PyQt6.QtWidgets import QApplication
+    from dicogis.ui.qt_compat.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     widget = TabSettings()

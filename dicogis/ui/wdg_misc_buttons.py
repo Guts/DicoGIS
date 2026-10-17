@@ -16,12 +16,6 @@ import logging
 from pathlib import Path
 from webbrowser import open_new_tab
 
-# 3rd party
-from PyQt6 import uic
-from PyQt6.QtCore import QUrl
-from PyQt6.QtGui import QDesktopServices, QPixmap
-from PyQt6.QtWidgets import QWidget
-
 # package
 from dicogis.__about__ import (
     __copyright__,
@@ -30,6 +24,10 @@ from dicogis.__about__ import (
     __uri__,
     __uri_homepage__,
 )
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtCore import QUrl
+from dicogis.ui.qt_compat.QtGui import QDesktopServices, QPixmap
+from dicogis.ui.qt_compat.QtWidgets import QWidget
 from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.utils import Utilities
 
@@ -118,7 +116,7 @@ if __name__ == "__main__":
     """To test"""
     import sys
 
-    from PyQt6.QtWidgets import QApplication
+    from dicogis.ui.qt_compat.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     widget = MiscButtons()

@@ -21,11 +21,11 @@ from pathlib import Path
 from lxml import __version__ as lxml_version
 from numpy import __version__ as numpy_version
 from openpyxl import __version__ as openpyxl_version
-from PyQt6 import uic
-from PyQt6.QtCore import PYQT_VERSION_STR, qVersion
-from PyQt6.QtWidgets import QLabel, QWidget
 
 # project
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtCore import PYQT_VERSION_STR, qVersion
+from dicogis.ui.qt_compat.QtWidgets import QLabel, QWidget
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.utils import Utilities
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     """To test"""
     import sys
 
-    from PyQt6.QtWidgets import QApplication
+    from dicogis.ui.qt_compat.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     widget = TabCredits()

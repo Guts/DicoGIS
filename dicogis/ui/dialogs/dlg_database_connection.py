@@ -16,12 +16,10 @@ Author:       Julien Moura (@geojulien)
 import logging
 from pathlib import Path
 
-# 3rd party
-from PyQt6 import uic
-from PyQt6.QtWidgets import QDialog, QWidget
-
 # project
 from dicogis.models.database_connection import DatabaseConnection
+from dicogis.ui.qt_compat import uic
+from dicogis.ui.qt_compat.QtWidgets import QDialog, QWidget
 from dicogis.utils.utils import Utilities
 
 
@@ -95,7 +93,7 @@ if __name__ == "__main__":
     """To test"""
     import sys
 
-    from PyQt6.QtWidgets import QApplication
+    from dicogis.ui.qt_compat.QtWidgets import QApplication
 
     logging.basicConfig(level=logging.DEBUG)
 
