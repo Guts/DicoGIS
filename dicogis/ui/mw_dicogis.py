@@ -651,7 +651,6 @@ class DicoGIS(QMainWindow):
             li_shapefiles=self.li_shapefiles,
             li_mapinfo_tab=self.li_mapinfo_tab,
             li_geojson=self.li_geojson,
-            li_geotiff=self.li_geotiff,
             # options
             opt_analyze_cdao=self.wdg_tab_files.cbx_dxf.isChecked(),
             opt_analyze_esri_filegdb=self.wdg_tab_files.cbx_egdb.isChecked(),

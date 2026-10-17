@@ -13,6 +13,7 @@ Usage from the repo root folder:
 # standard library
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock
 
 # project
@@ -25,6 +26,7 @@ from dicogis.georeaders.process_files import (
     ProcessingFiles,
     ProgressReporter,
 )
+from dicogis.listing.geodata_listing import find_geodata_files
 from dicogis.models.metadataset import MetaDataset
 from dicogis.utils.progress import (
     OperationCanceled,
@@ -84,7 +86,6 @@ def _make_processor(serializer: MetadatasetSerializerBase | None = None, **overr
         li_flat_geodatabase_geopackage=[],
         li_flat_geodatabase_spatialite=[],
         li_geojson=[],
-        li_geotiff=[],
         li_gxt=[],
         li_gml=[],
         li_kml=[],
@@ -619,6 +620,18 @@ class TestCountFilesToProcess(unittest.TestCase):
             processor.li_files_to_process[0].georeader,
             ProcessingFiles.MATRIX_FORMAT_GEOREADER["raster"],
         )
+
+    def test_geotiff_found_by_the_listing_is_queued_once(self):
+        """find_geodata_files() already merges GeoTIFFs into its raster list:
+        fed with it, as both entry points do, a GeoTIFF is processed once."""
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            Path(tmpdirname, "ortho.tif").touch()
+            listing = find_geodata_files(start_folder=tmpdirname)
+        li_raster = listing[8]
+
+        total = _make_processor(li_rasters=li_raster).count_files_to_process()
+
+        self.assertEqual(total, 1)
 
     def test_cdao_files_are_queued_with_dxf_georeader(self):
         """CAD/DAO files are queued with the "dxf" format, which resolves to

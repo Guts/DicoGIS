@@ -375,7 +375,6 @@ def inventory(
             li_flat_geodatabase_spatialite=li_file_database_spatialite,
             li_flat_geodatabase_geopackage=li_file_database_geopackage,
             li_geojson=li_geojson,
-            li_geotiff=li_geotiff,
             li_gml=li_gml,
             li_gxt=li_gxt,
             li_kml=li_kml,

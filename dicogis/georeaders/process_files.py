@@ -104,7 +104,6 @@ class ProcessingFiles:
         li_flat_geodatabase_geopackage: Iterable | None,
         li_flat_geodatabase_spatialite: Iterable | None,
         li_geojson: Iterable | None,
-        li_geotiff: Iterable | None,
         li_gxt: Iterable | None,
         li_gml: Iterable | None,
         li_kml: Iterable | None,
@@ -117,7 +116,6 @@ class ProcessingFiles:
         opt_analyze_esri_filegdb: bool = True,
         opt_analyze_geojson: bool = True,
         opt_analyze_geopackage: bool = True,
-        opt_analyze_geotiff: bool = True,
         opt_analyze_gml: bool = True,
         opt_analyze_gxt: bool = True,
         opt_analyze_kml: bool = True,
@@ -139,7 +137,6 @@ class ProcessingFiles:
         self.li_flat_geodatabase_geopackage = li_flat_geodatabase_geopackage
         self.li_flat_geodatabase_spatialite = li_flat_geodatabase_spatialite
         self.li_geojson = li_geojson
-        self.li_geotiff = li_geotiff
         self.li_gxt = li_gxt
         self.li_gml = li_gml
         self.li_kml = li_kml
@@ -165,7 +162,6 @@ class ProcessingFiles:
         self.opt_analyze_spatialite = opt_analyze_spatialite
         self.opt_analyze_esri_filegdb = opt_analyze_esri_filegdb
         self.opt_analyze_geojson = opt_analyze_geojson
-        self.opt_analyze_geotiff = opt_analyze_geotiff
         self.opt_analyze_gml = opt_analyze_gml
         self.opt_analyze_gxt = opt_analyze_gxt
         self.opt_analyze_kml = opt_analyze_kml
@@ -408,13 +404,6 @@ class ProcessingFiles:
                 list_of_datasets=self.li_geojson, dataset_format="geojson"
             )
 
-        if self.opt_analyze_geotiff and len(self.li_geotiff):
-            total_files += len(self.li_geotiff)
-            self.serializer.pre_serializing(has_raster=1)
-            self.add_files_to_process_queue(
-                list_of_datasets=self.li_geotiff, dataset_format="geotiff"
-            )
-
         if self.opt_analyze_gxt and len(self.li_gxt):
             total_files += len(self.li_gxt)
             self.serializer.pre_serializing(has_vector=1)
@@ -422,6 +411,7 @@ class ProcessingFiles:
                 list_of_datasets=self.li_gxt, dataset_format="gxt"
             )
 
+        # GeoTIFFs included: the listing already merges them into the rasters
         if self.opt_analyze_raster and len(self.li_rasters):
             total_files += len(self.li_rasters)
             self.serializer.pre_serializing(has_raster=1)
