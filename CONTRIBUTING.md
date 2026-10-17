@@ -22,6 +22,13 @@ Make sure your code *roughly* follows [PEP-8](https://www.python.org/dev/peps/pe
 - docstrings: [google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) is used to write technical documentation right into the code.
 - formatting, imports and static analisis: [ruff](https://docs.astral.sh/ruff/) is used to automatically format the code without debate, sort imports and run a bunch of flake8 lint checks
 
+### Graphical interface
+
+The GUI is designed to run both standalone and as a QGIS plugin (QGIS >= 4.4, so Qt >= 6.8: don't use newer Qt APIs).
+
+- **Qt binding**: never import `PyQt6` (or any other binding) in `dicogis/ui`. Import from `dicogis.ui.qt_compat` instead, which mirrors the `qgis.PyQt` layout and resolves to `qgis.PyQt` inside QGIS and to PyQt6 otherwise: `from dicogis.ui.qt_compat.QtWidgets import QWidget`, `from dicogis.ui.qt_compat import uic`. If you need a Qt module it doesn't provide yet, add the matching submodule there. The `DICOGIS_QT_API` environment variable (`auto`, `qgis`, `pyqt6`) forces the binding for troubleshooting. A test fails on any direct binding import.
+- **Interfaces**: widgets and dialogs are designed in [Qt Designer](https://doc.qt.io/qt-6/qtdesigner-manual.html) `.ui` files, loaded at runtime with `uic.loadUi()` from the Python module of the same name (`wdg_tab_files.py` loads `wdg_tab_files.ui`). Don't compile them with `pyuic`, and don't build widgets in Python when they can live in the `.ui` file.
+
 ## Commit messages
 
 We follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`, e.g. `feat(gui): add Publish tab for uData catalog publication`. The scope is optional.
