@@ -183,7 +183,7 @@ convention = "google"
     "S101",
     "T20",
 ] # Ignore rules in Sphinx config
-"tests/test_*.py" = ["ANN001", "ANN2", "S101", "T20"] # Ignore rules in tests
+"tests/**/*.py" = ["ANN001", "ANN2", "S101", "T20"] # Ignore rules in tests, subfolders included
 
 
 [tool.setuptools.dynamic]
