@@ -55,10 +55,10 @@ jobs:
           # release, typically caps on dependencies it no longer supports.
           # Flask-Security 5.9.0 (2026-09-24) removed
           # flask_security.utils.get_within_delta, still imported at startup
-          # by udata < 17.14 (their range: flask-security>=5.1.2,<6.0.0)
+          # by udata 16.6.1 (its range: flask-security>=5.1.2,<6.0.0), while
+          # udata 17.14.0 requires flask-security>=5.9.0
           - udata_label: "17.x (current major)"
-            udata_version: "17.6.0"
-            udata_extra_requirements: "flask-security<5.9"
+            udata_version: "17.14.0"
           - udata_label: "16.x (previous major)"
             udata_version: "16.6.1"
             udata_extra_requirements: "flask-security<5.9"
