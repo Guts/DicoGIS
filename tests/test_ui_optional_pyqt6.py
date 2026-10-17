@@ -28,6 +28,7 @@ Usage from the repo root folder:
 # standard library
 import subprocess
 import sys
+from os import environ
 
 
 # ##############################################################################
@@ -63,3 +64,24 @@ def test_dicogis_ui_package_imports_without_pyqt6():
 def test_dicogis_ui_main_imports_without_pyqt6():
     result = _run_import_without_pyqt6("dicogis.ui.main")
     assert result.returncode == 0, result.stderr
+
+
+def test_dicogis_gui_without_pyqt6_explains_why_on_stderr(tmp_path):
+    """Launched from a terminal (e.g. after a pipx install without the gui
+    extra), dicogis-gui must say why it exits, not only in its log file."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            _SIMULATE_MISSING_PYQT6.format(module="dicogis.ui.main")
+            + "; dicogis.ui.main.dicogis_gui()",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        # keeps the run's logs and settings out of the user's real app folder
+        env={**environ, "HOME": str(tmp_path), "APPDATA": str(tmp_path)},
+    )
+
+    assert result.returncode == 1
+    assert "PyQt6 is required" in result.stderr
