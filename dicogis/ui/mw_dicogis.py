@@ -18,11 +18,9 @@ Julien Moura (@geojulien)
 import getpass
 import locale
 import logging
-from datetime import date
 from os import getenv
 from pathlib import Path
 from sys import platform as opersys
-from typing import TYPE_CHECKING
 
 # 3rd party
 from osgeo import gdal
@@ -31,7 +29,10 @@ from osgeo import gdal
 from dicogis import __about__
 from dicogis.constants import AvailableLocales, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
-from dicogis.export.output_path import determine_output_path
+from dicogis.export.output_path import (
+    determine_output_path,
+    match_output_path_to_format,
+)
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.publishing.udata import PublishReport
@@ -62,10 +63,6 @@ from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.options import OptionsManager
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
-
-
-if TYPE_CHECKING:
-    from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 
 
 # ##############################################################################
@@ -220,6 +217,9 @@ class DicoGIS(QMainWindow):
         self.set_selected_output_format(
             getenv("DICOGIS_OUTPUT_FORMAT", OutputFormats.excel.value)
         )
+        self.cbb_output_format.currentIndexChanged.connect(
+            self._on_output_format_changed
+        )
 
         # Basic buttons
         self.btn_process.setEnabled(True)
@@ -364,9 +364,28 @@ class DicoGIS(QMainWindow):
             foldername: selected folder path.
         """
         self.lne_outxl_filename.setText(
-            f"DicoGIS_{Path(foldername).name}_{date.today()}.xlsx"
+            str(
+                determine_output_path(
+                    output_path=None,
+                    output_format=self.get_selected_output_format(),
+                    input_folder=Path(foldername),
+                )
+            )
         )
         self._start_folder_scan(foldername)
+
+    def _on_output_format_changed(self) -> None:
+        """Keep the output name consistent with the selected format: a .xlsx
+        file for an Excel workbook, a folder for JSON files."""
+        if output_name := self.lne_outxl_filename.text():
+            self.lne_outxl_filename.setText(
+                str(
+                    match_output_path_to_format(
+                        output_path=Path(output_name),
+                        output_format=self.get_selected_output_format(),
+                    )
+                )
+            )
 
     def _start_folder_scan(self, target_folder: str) -> None:
         """Start a background worker listing geodata files under target_folder.
@@ -566,17 +585,7 @@ class DicoGIS(QMainWindow):
                 self._on_check_failed()
                 return
 
-        # creating the output serializer
-        self.serializer: MetadatasetSerializerXlsx = MetadatasetSerializerBase.get_serializer_from_parameters(
-            format_or_serializer=OutputFormats.excel,
-            localized_strings=self.localized_strings,
-            output_path=None,
-            opt_prettify_size=self.wdg_tab_settings.cbx_export_size_prettify.isChecked(),
-            opt_raw_path=self.wdg_tab_settings.cbx_export_raw_path.isChecked(),
-        )
-
         self.lbl_status.setStyleSheet("color: DodgerBlue;")
-        self.set_status_message("Excel worbook object instanciated")
 
         # process files or PostGIS database
         if self.typo == 0:
@@ -585,11 +594,33 @@ class DicoGIS(QMainWindow):
             self.process_files()
         elif self.typo == 1:
             self.tab_main.setCurrentIndex(1)
-            self.serializer.pre_serializing(has_sgbd=1)
             logger.info("PROCESS LAUNCHED: SGBD")
             self.process_db(sgbd_reader=pg_reader)
         else:
             logger.critical("Unrecognized data type to process. Report it!")
+
+    def _build_serializer(self, output_path: Path) -> None:
+        """Create the serializer of the selected output format.
+
+        Called once the output path is known, not earlier: the JSON serializer
+        creates its output folder as soon as it's instanciated.
+
+        Args:
+            output_path: output path, adapted to the selected output format.
+        """
+        output_format = self.get_selected_output_format()
+        self.serializer = MetadatasetSerializerBase.get_serializer_from_parameters(
+            format_or_serializer=output_format,
+            localized_strings=self.localized_strings,
+            output_path=match_output_path_to_format(
+                output_path=output_path, output_format=output_format
+            ),
+            opt_prettify_size=self.wdg_tab_settings.cbx_export_size_prettify.isChecked(),
+            opt_raw_path=self.wdg_tab_settings.cbx_export_raw_path.isChecked(),
+        )
+        self.set_status_message(
+            f"{output_format.value} output: {self.serializer.output_path}"
+        )
 
     def _enable_processing_controls(self) -> None:
         """Re-enable the controls disabled while a process was running.
@@ -639,11 +670,19 @@ class DicoGIS(QMainWindow):
             self._enable_processing_controls()
             return
 
-        # set output path
-        if self.serializer.output_path is None:
-            self.serializer.output_path = Path(
-                self.wdg_tab_files.get_target_path()
-            ).joinpath(self.lne_outxl_filename.text())
+        # set output path (default name when left empty) and output serializer
+        target_folder = Path(self.wdg_tab_files.get_target_path())
+        if not self.lne_outxl_filename.text():
+            self.lne_outxl_filename.setText(
+                str(
+                    determine_output_path(
+                        output_path=None,
+                        output_format=self.get_selected_output_format(),
+                        input_folder=target_folder,
+                    )
+                )
+            )
+        self._build_serializer(target_folder / self.lne_outxl_filename.text())
 
         logger.info(f"Output path: {self.serializer.output_path.resolve()}")
 
@@ -763,12 +802,13 @@ class DicoGIS(QMainWindow):
             str(
                 determine_output_path(
                     output_path=None,
-                    output_format="excel",
+                    output_format=self.get_selected_output_format(),
                     pg_services=[pg_service_name],
                 )
             )
         )
-        self.serializer.output_path = Path(self.lne_outxl_filename.text())
+        self._build_serializer(Path(self.lne_outxl_filename.text()))
+        self.serializer.pre_serializing(has_sgbd=1)
 
         self._progress_reporter = QtProgressReporter(self)
         self._progress_reporter.message_changed.connect(self.set_status_message)
