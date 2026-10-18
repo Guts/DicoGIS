@@ -32,6 +32,7 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
     window.settings = OptionsManager(str(ini_path))
 
     window.cbb_lang.setCurrentText("FR")
+    window.set_selected_output_format("udata")
     window.wdg_tab_files.set_target_path(str(tmp_path))
     window.wdg_tab_files.set_filters_state({"opt_shp": "1", "opt_tab": "0"})
     window.wdg_tab_settings.set_proxy_settings(
@@ -63,6 +64,7 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
     other_window.settings.load_settings(other_window)
 
     assert other_window.get_selected_language() == "FR"
+    assert other_window.get_selected_output_format() == "udata"
     assert other_window.wdg_tab_files.get_filters_state()["opt_shp"] is True
     assert other_window.wdg_tab_files.get_filters_state()["opt_tab"] is False
     proxy_settings = other_window.wdg_tab_settings.get_proxy_settings()
@@ -111,10 +113,13 @@ def test_options_manager_load_settings_without_udata_section(qtbot, tmp_path):
     window = DicoGIS()
     qtbot.addWidget(window)
     window.settings = OptionsManager(str(ini_path))
+    window.set_selected_output_format("json")
 
     window.settings.load_settings(window)
 
     assert window.wdg_tab_publish.get_input_folder() == ""
+    # no output_format saved yet: the initial (environment/default) one is kept
+    assert window.get_selected_output_format() == "json"
 
 
 def test_options_manager_first_use(tmp_path):

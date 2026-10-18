@@ -82,6 +82,9 @@ class OptionsManager:
             self.config.get("basics", "def_rep")
         )
         parent.set_active_tab_index(int(self.config.get("basics", "def_tab")))
+        # backward compatibility: older options.ini files predate the output format
+        if output_format := self.config.get("basics", "output_format", fallback=""):
+            parent.set_selected_output_format(output_format)
         parent.wdg_tab_settings.set_export_options(
             {
                 "export_prettify_size": self.config.get(
@@ -175,6 +178,9 @@ class OptionsManager:
                 str(parent.wdg_tab_files.listing_initial_folder_path.resolve()),
             )
         self.config.set("basics", "def_tab", str(parent.get_active_tab_index()))
+        self.config.set(
+            "basics", "output_format", parent.get_selected_output_format().value
+        )
 
         export_options = parent.wdg_tab_settings.get_export_options()
         self.config.set(
