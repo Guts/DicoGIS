@@ -107,6 +107,129 @@
     </widget>
    </item>
    <item>
+    <widget class="QToolButton" name="btn_toggle_export">
+     <property name="text">
+      <string>Export</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
+     </property>
+     <property name="arrowType">
+      <enum>Qt::ArrowType::RightArrow</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frm_export">
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="export_layout">
+      <item>
+       <widget class="QCheckBox" name="cbx_export_size_prettify">
+        <property name="text">
+         <string>Export: prettify files size</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_export_raw_path">
+        <property name="text">
+         <string>Export: raw path</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_quick_fail">
+        <property name="text">
+         <string>Quick fail</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_end_process_notification_sound">
+        <property name="text">
+         <string>Play a notification sound when processing has finished.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_debug">
+        <property name="text">
+         <string>Enable verbose (debug) logging</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_parallel_scan">
+        <property name="text">
+         <string>Parallelize folder scan (recommended only for network-mounted / high-latency storage; can be slower on local/fast storage)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="max_workers_layout">
+        <item>
+         <widget class="QLabel" name="lbl_max_workers">
+          <property name="text">
+           <string>Parallel scan: max workers (0 = auto)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="sbx_max_workers">
+          <property name="specialValueText">
+           <string>Auto</string>
+          </property>
+          <property name="maximum">
+           <number>64</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="btn_toggle_env_vars">
+     <property name="text">
+      <string>Environment variables</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonStyle::ToolButtonTextBesideIcon</enum>
+     </property>
+     <property name="arrowType">
+      <enum>Qt::ArrowType::RightArrow</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frm_env_vars">
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="env_vars_layout">
+      <item>
+       <widget class="QPushButton" name="btn_doc_env_vars">
+        <property name="text">
+         <string>See supported variables</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ScrollableTable" name="wdg_env_vars"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Orientation::Vertical</enum>
@@ -121,6 +244,26 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ScrollableTable</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_scrollable_table</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn_toggle_export</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frm_export</receiver>
+   <slot>setVisible(bool)</slot>
+  </connection>
+  <connection>
+   <sender>btn_toggle_env_vars</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frm_env_vars</receiver>
+   <slot>setVisible(bool)</slot>
+  </connection>
+ </connections>
 </ui>
