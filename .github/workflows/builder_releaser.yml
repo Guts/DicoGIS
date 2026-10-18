@@ -22,7 +22,8 @@ on:
 # Globals
 env:
   PROJECT_FOLDER: "dicogis"
-  PYTHON_VERSION: "3.11"
+  # Python embedded in the executables, Linux and Windows alike
+  PYTHON_VERSION: "3.14"
   PYINSTALLER_LOG_LEVEL: "DEBUG"
   USE_PATH_FOR_GDAL_PYTHON: yes
 
@@ -133,8 +134,12 @@ jobs:
 
     env:
       export_output_folder: tests/ci/windows
-      GDAL_VERSION: "3.11.1"
-      PYTHON_VERSION: "3.11"
+      # geospatial-wheels release providing a GDAL wheel for PYTHON_VERSION:
+      # v2025.10.25 is the first one built after Python 3.14.0 final (earlier
+      # cp314 wheels target 3.14 pre-releases, before its ABI was frozen).
+      # Keep aligned with the Windows job of tester.yml.
+      GDAL_VERSION: "3.11.4"
+      GEOSPATIAL_WHEELS_RELEASE: "v2025.10.25"
 
     steps:
       - name: Get source code
@@ -150,9 +155,11 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install project requirements
+        shell: pwsh
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -U https://github.com/cgohlke/geospatial-wheels/releases/download/v2025.7.4/gdal-3.11.1-cp311-cp311-win_amd64.whl
+          $cpTag = "cp" + ($env:PYTHON_VERSION -replace '\.', '')
+          python -m pip install -U "https://github.com/cgohlke/geospatial-wheels/releases/download/${env:GEOSPATIAL_WHEELS_RELEASE}/gdal-${env:GDAL_VERSION}-$cpTag-$cpTag-win_amd64.whl"
 
       - name: Install project as a package
         run: python -m pip install .[gdal,gui,packaging]
