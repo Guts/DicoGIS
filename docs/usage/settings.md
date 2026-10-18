@@ -50,6 +50,13 @@ threads used when it's enabled (it is ignored otherwise); leave it unset to let
 Python size the pool from the CPU count. In the GUI, the equivalent spinbox uses
 `0` to mean "auto".
 
+#### About the end of processing notification
+
+At the end of a run, DicoGIS sends a system notification through [notify-py](https://github.com/ms7m/notify-py), with a sound unless `DICOGIS_ENABLE_NOTIFICATION_SOUND` (or the matching GUI checkbox) disables it.
+
+- On Linux, the sound is played with `aplay`: install `alsa-utils` (e.g. `sudo apt install alsa-utils`) if it's missing. Without it, DicoGIS logs a warning and shows the notification without sound.
+- When a notification fails, DicoGIS logs a warning but notify-py keeps the reason to itself: set the `notifypyEnableLogging` environment variable (e.g. to `1`) to have notify-py print its own trace to the console.
+
 ### GUI only
 
 | Variable name      | Description                                                               | Default value |
