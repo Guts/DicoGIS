@@ -7,7 +7,7 @@ Tested on:
 ## Requirements
 
 - GDAL >= 3.4.1
-- Python >= 3.10
+- Python >= 3.11
 - Network access to:
     - Python Package Index: <https://pypi.org/>
 

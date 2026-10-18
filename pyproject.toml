@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Create Excel spreadsheet describing geographical data from a PostGIS Database or a file tree structure."
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.10, <4"
+requires-python = ">=3.11, <4"
 authors = [{ name = "Julien Moura", email = "dev@ingeoveritas.com" }]
 keywords = ["GDAL", "GIS", "INSPIRE", "OGR", "data management", "metadata"]
 classifiers = [
@@ -21,7 +21,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -117,7 +116,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
 exclude = [".git", "__pycache__", "old", "build", "dist", "tests/dev", ".venv*"]
 
 [tool.ruff.format]
