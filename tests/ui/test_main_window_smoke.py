@@ -16,6 +16,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 # package
+from dicogis.constants import OutputFormats
 from dicogis.ui.mw_dicogis import DicoGIS
 from dicogis.ui.workers import QtProgressReporter
 
@@ -237,3 +238,45 @@ def test_main_window_opens_the_output_with_the_desktop(
         (tmp_path / "out.xlsx").resolve()
     ]
     assert "Opening" in caplog.text
+
+
+def test_main_window_output_format_defaults_to_excel(qtbot, monkeypatch):
+    monkeypatch.delenv("DICOGIS_OUTPUT_FORMAT", raising=False)
+    window = DicoGIS()
+    qtbot.addWidget(window)
+
+    assert window.cbb_output_format.count() == len(OutputFormats)
+    assert window.get_selected_output_format() == OutputFormats.excel
+
+
+def test_main_window_output_format_from_environment_variable(qtbot, monkeypatch):
+    """Same variable, same values as the CLI's --output-format."""
+    monkeypatch.setenv("DICOGIS_OUTPUT_FORMAT", "udata")
+    window = DicoGIS()
+    qtbot.addWidget(window)
+
+    assert window.get_selected_output_format() == OutputFormats.udata
+
+
+def test_main_window_unknown_output_format_is_ignored(qtbot, caplog):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.set_selected_output_format("json")
+
+    window.set_selected_output_format("csv")
+
+    assert window.get_selected_output_format() == OutputFormats.json
+    assert "Unsupported output format" in caplog.text
+
+
+def test_main_window_output_format_labels_are_translated(qtbot):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.set_selected_output_format("excel")
+
+    window.cbb_lang.setCurrentText("FR")
+    window.retranslate_ui()
+
+    assert window.cbb_output_format.currentText() == "Classeur Excel (.xlsx)"
+    # translating the labels leaves the underlying values untouched
+    assert window.get_selected_output_format() == OutputFormats.excel

@@ -19,6 +19,7 @@ import getpass
 import locale
 import logging
 from datetime import date
+from os import getenv
 from pathlib import Path
 from sys import platform as opersys
 from typing import TYPE_CHECKING
@@ -213,6 +214,13 @@ class DicoGIS(QMainWindow):
         self.cbb_lang.setCurrentText(self.def_lang)
         self.cbb_lang.activated.connect(lambda _index: self.retranslate_ui())
 
+        # output format switcher (item texts are set in retranslate_ui)
+        for output_format in OutputFormats:
+            self.cbb_output_format.addItem(output_format.value, output_format.value)
+        self.set_selected_output_format(
+            getenv("DICOGIS_OUTPUT_FORMAT", OutputFormats.excel.value)
+        )
+
         # Basic buttons
         self.btn_process.setEnabled(True)
         self.btn_process.clicked.connect(self.process)
@@ -253,6 +261,19 @@ class DicoGIS(QMainWindow):
         self.btn_process.setText(self.tr("Go!"))
         self.btn_cancel.setText(self.tr("Cancel"))
         self.lbl_outxl_filename.setText(self.tr("Name of output file: "))
+        self.lbl_output_format.setText(self.tr("Output format: "))
+        output_format_labels = {
+            OutputFormats.excel: self.tr("Excel workbook (.xlsx)"),
+            OutputFormats.json: self.tr("JSON files"),
+            OutputFormats.udata: self.tr("JSON files for uData"),
+        }
+        for index in range(self.cbb_output_format.count()):
+            self.cbb_output_format.setItemText(
+                index,
+                output_format_labels[
+                    OutputFormats(self.cbb_output_format.itemData(index))
+                ],
+            )
 
         self.tab_main.setTabText(0, self.tr(" Files "))
         self.tab_main.setTabText(1, self.tr(" Database "))
@@ -977,6 +998,25 @@ class DicoGIS(QMainWindow):
         """
         if AvailableLocales.has_value(language_code):
             self.cbb_lang.setCurrentText(language_code)
+
+    def get_selected_output_format(self) -> OutputFormats:
+        """Return the currently selected output format."""
+        return OutputFormats(self.cbb_output_format.currentData())
+
+    def set_selected_output_format(self, output_format: str) -> None:
+        """Select an output format. Unknown values are logged and ignored.
+
+        Args:
+            output_format: output format (see OutputFormats: excel, json, udata)
+        """
+        index = self.cbb_output_format.findData(output_format.strip().lower())
+        if index < 0:
+            logger.warning(
+                f"Unsupported output format: '{output_format}'. "
+                f"Supported: {', '.join(f.value for f in OutputFormats)}."
+            )
+            return
+        self.cbb_output_format.setCurrentIndex(index)
 
     def get_active_tab_index(self) -> int:
         """Return the currently active tab index."""
