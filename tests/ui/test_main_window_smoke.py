@@ -12,10 +12,14 @@ Usage from the repo root folder:
 # ##################################
 
 # standard library
+from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock
 
 # package
+from dicogis.constants import OutputFormats
+from dicogis.export.to_json import MetadatasetSerializerJson
+from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 from dicogis.ui.mw_dicogis import DicoGIS
 from dicogis.ui.workers import QtProgressReporter
 
@@ -237,3 +241,152 @@ def test_main_window_opens_the_output_with_the_desktop(
         (tmp_path / "out.xlsx").resolve()
     ]
     assert "Opening" in caplog.text
+
+
+def test_main_window_output_format_defaults_to_excel(qtbot, monkeypatch):
+    monkeypatch.delenv("DICOGIS_OUTPUT_FORMAT", raising=False)
+    window = DicoGIS()
+    qtbot.addWidget(window)
+
+    assert window.cbb_output_format.count() == len(OutputFormats)
+    assert window.get_selected_output_format() == OutputFormats.excel
+
+
+def test_main_window_output_format_from_environment_variable(qtbot, monkeypatch):
+    """Same variable, same values as the CLI's --output-format."""
+    monkeypatch.setenv("DICOGIS_OUTPUT_FORMAT", "udata")
+    window = DicoGIS()
+    qtbot.addWidget(window)
+
+    assert window.get_selected_output_format() == OutputFormats.udata
+
+
+def test_main_window_unknown_output_format_is_ignored(qtbot, caplog):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.set_selected_output_format("json")
+
+    window.set_selected_output_format("csv")
+
+    assert window.get_selected_output_format() == OutputFormats.json
+    assert "Unsupported output format" in caplog.text
+
+
+def test_main_window_output_format_labels_are_translated(qtbot):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.set_selected_output_format("excel")
+
+    window.cbb_lang.setCurrentText("FR")
+    window.retranslate_ui()
+
+    assert window.cbb_output_format.currentText() == "Classeur Excel (.xlsx)"
+    # translating the labels leaves the underlying values untouched
+    assert window.get_selected_output_format() == OutputFormats.excel
+
+
+def test_main_window_default_output_name_follows_the_format(qtbot):
+    """An Excel workbook is a .xlsx file, a JSON export a folder."""
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.set_selected_output_format("json")
+
+    window.on_folder_selected("/tmp/some_folder")
+    with qtbot.waitSignal(window._scan_thread.finished, timeout=5000):
+        pass
+
+    assert window.lne_outxl_filename.text() == f"DicoGIS_some_folder_{date.today()}"
+
+
+def test_main_window_output_name_is_adapted_on_format_change(qtbot):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.set_selected_output_format("excel")
+    window.lne_outxl_filename.setText("my_inventory.xlsx")
+
+    window.set_selected_output_format("udata")
+    assert window.lne_outxl_filename.text() == "my_inventory"
+
+    window.set_selected_output_format("excel")
+    assert window.lne_outxl_filename.text() == "my_inventory.xlsx"
+
+
+def test_main_window_builds_the_serializer_of_the_selected_format(qtbot, tmp_path):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+
+    window.set_selected_output_format("excel")
+    window._build_serializer(tmp_path / "inventory")
+    assert isinstance(window.serializer, MetadatasetSerializerXlsx)
+    assert window.serializer.output_path == tmp_path / "inventory.xlsx"
+
+    for output_format in ("json", "udata"):
+        window.set_selected_output_format(output_format)
+        window._build_serializer(tmp_path / "inventory.xlsx")
+        assert isinstance(window.serializer, MetadatasetSerializerJson)
+        assert window.serializer.flavor == (
+            "udata" if output_format == "udata" else "dicogis"
+        )
+        assert window.serializer.output_path == tmp_path / "inventory"
+        assert window.serializer.output_path.is_dir()
+
+
+def test_main_window_no_json_folder_without_geodata(qtbot, monkeypatch, tmp_path):
+    """The JSON serializer creates its folder when instanciated: it must not be
+    built before checking there's something to process."""
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(
+        "dicogis.ui.mw_dicogis.QMessageBox.critical",
+        staticmethod(lambda *args, **kwargs: None),
+    )
+    window.set_selected_output_format("json")
+    window.wdg_tab_files.set_target_path(str(tmp_path))
+    window.lne_outxl_filename.setText("inventory")
+
+    window.process_files()
+
+    assert not (tmp_path / "inventory").exists()
+
+
+def test_main_window_prefills_publish_folder_after_udata_export(
+    qtbot, monkeypatch, tmp_path
+):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window, "_open_output", lambda: None)
+    monkeypatch.setattr(
+        "dicogis.ui.mw_dicogis.send_system_notify", lambda **kwargs: None
+    )
+    window.serializer = MagicMock(flavor="udata", output_path=tmp_path / "out")
+
+    for end_of_run in (
+        lambda: window._on_files_processing_finished(total_files=1),
+        lambda: window._on_db_processing_finished(total_layers=1),
+    ):
+        window.wdg_tab_publish.set_input_folder("")
+
+        end_of_run()
+
+        assert window.wdg_tab_publish.get_input_folder() == str(tmp_path / "out")
+
+
+def test_main_window_keeps_publish_folder_after_other_exports(
+    qtbot, monkeypatch, tmp_path
+):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window, "_open_output", lambda: None)
+    monkeypatch.setattr(
+        "dicogis.ui.mw_dicogis.send_system_notify", lambda **kwargs: None
+    )
+    window.wdg_tab_publish.set_input_folder("previous")
+
+    for serializer in (
+        MagicMock(spec=["output_path"], output_path=tmp_path / "out.xlsx"),
+        MagicMock(flavor="dicogis", output_path=tmp_path / "out"),
+    ):
+        window.serializer = serializer
+        window._on_files_processing_finished(total_files=1)
+
+        assert window.wdg_tab_publish.get_input_folder() == "previous"

@@ -16,7 +16,10 @@ from datetime import date
 from pathlib import Path
 
 # project
-from dicogis.export.output_path import determine_output_path
+from dicogis.export.output_path import (
+    determine_output_path,
+    match_output_path_to_format,
+)
 
 
 # ############################################################################
@@ -105,6 +108,43 @@ class TestDetermineOutputPath(unittest.TestCase):
         )
 
         self.assertIsNone(result)
+
+
+class TestMatchOutputPathToFormat(unittest.TestCase):
+    """Test match_output_path_to_format()."""
+
+    def test_excel_adds_the_xlsx_extension(self):
+        result = match_output_path_to_format(Path("out/DicoGIS_folder"), "excel")
+
+        self.assertEqual(result, Path("out/DicoGIS_folder.xlsx"))
+
+    def test_excel_keeps_an_existing_xlsx_extension(self):
+        result = match_output_path_to_format(Path("out/inventory.XLSX"), "excel")
+
+        self.assertEqual(result, Path("out/inventory.XLSX"))
+
+    def test_json_and_udata_remove_the_xlsx_extension(self):
+        for output_format in ("json", "udata"):
+            with self.subTest(output_format=output_format):
+                result = match_output_path_to_format(
+                    Path("out/inventory.xlsx"), output_format
+                )
+
+                self.assertEqual(result, Path("out/inventory"))
+
+    def test_json_keeps_dots_of_a_folder_name(self):
+        result = match_output_path_to_format(Path("out/inventory.v2"), "json")
+
+        self.assertEqual(result, Path("out/inventory.v2"))
+
+    def test_excel_keeps_dots_of_a_file_name(self):
+        result = match_output_path_to_format(Path("out/inventory.v2"), "excel")
+
+        self.assertEqual(result, Path("out/inventory.v2.xlsx"))
+
+    def test_unsupported_format_raises_valueerror(self):
+        with self.assertRaises(ValueError):
+            match_output_path_to_format(Path("out/inventory"), "bogus")
 
 
 # ############################################################################
