@@ -121,6 +121,21 @@ class TestSendSystemNotify(unittest.TestCase):
                 notification_sound=False,
             )
 
+    def test_send_returning_false_is_logged(self):
+        """notify-py reports backend failures (missing aplay, D-Bus error...)
+        only through send()'s return value, which used to be ignored."""
+        with (
+            patch.object(Notify, "send", return_value=False),
+            self.assertLogs(notifier.logger, level="WARNING") as logs,
+        ):
+            notifier.send_system_notify(
+                notification_message="msg",
+                notification_title="title",
+                notification_sound=False,
+            )
+
+        self.assertIn("notifypyEnableLogging", logs.output[0])
+
 
 class TestSendSystemNotifyNoBackend(unittest.TestCase):
     """send_system_notify() must degrade to a no-op, not crash, when no

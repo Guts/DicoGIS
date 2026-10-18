@@ -86,8 +86,20 @@ def send_system_notify(
             ).resolve()
         )
 
+    logger.debug(
+        f"Sending notification: {notification_title=}: {notification_message=}, "
+        f"audio={notification.audio}"
+    )
     try:
-        notification.send()
+        # notify-py catches the backend errors itself (in its own thread, with its
+        # logging disabled): a failure mostly shows up as a False return value
+        sent = notification.send()
     except Exception as err:
         logger.warning(f"Sending a system notification failed. Trace: {err}")
-        logger.info(f"Notification was: {notification_title=}: {notification_message=}")
+        return
+    if not sent:
+        logger.warning(
+            "Sending a system notification failed. To get the reason, run again "
+            "with the notifypyEnableLogging environment variable set (e.g. to 1): "
+            "notify-py then prints its own trace to the console."
+        )
