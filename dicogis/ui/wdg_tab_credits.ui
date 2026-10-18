@@ -2,7 +2,78 @@
 <ui version="4.0">
  <class>TabCredits</class>
  <widget class="QWidget" name="wdg_tab_credits">
-  <layout class="QGridLayout" name="gridLayout"/>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="lbl_gdal">
+     <property name="text">
+      <string>GDAL</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLabel" name="lbl_gdal_version"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="lbl_proj">
+     <property name="text">
+      <string>PROJ</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="lbl_proj_version"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="lbl_lxml">
+     <property name="text">
+      <string>LXML</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="lbl_lxml_version"/>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="lbl_numpy">
+     <property name="text">
+      <string>Numpy</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="lbl_numpy_version"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="lbl_openpyxl">
+     <property name="text">
+      <string>OpenPyXL</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLabel" name="lbl_openpyxl_version"/>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="lbl_qt">
+     <property name="text">
+      <string>Qt (PyQt6)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLabel" name="lbl_qt_version"/>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="lbl_python">
+     <property name="text">
+      <string>Python</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLabel" name="lbl_python_version"/>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

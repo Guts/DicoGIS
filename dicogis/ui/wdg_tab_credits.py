@@ -25,7 +25,7 @@ from openpyxl import __version__ as openpyxl_version
 # project
 from dicogis.ui.qt_compat import uic
 from dicogis.ui.qt_compat.QtCore import PYQT_VERSION_STR, qVersion
-from dicogis.ui.qt_compat.QtWidgets import QLabel, QWidget
+from dicogis.ui.qt_compat.QtWidgets import QWidget
 from dicogis.utils.environment import get_gdal_version, get_proj_version
 from dicogis.utils.utils import Utilities
 
@@ -63,19 +63,13 @@ class TabCredits(QWidget):
             self,
         )
 
-        rows = [
-            ("GDAL", get_gdal_version()),
-            ("PROJ", get_proj_version()),
-            ("LXML", lxml_version),
-            ("Numpy", numpy_version),
-            ("OpenPyXL", openpyxl_version),
-            ("Qt (PyQt6)", f"{PYQT_VERSION_STR} (Qt {qVersion()})"),
-            ("Python", platform.python_version()),
-        ]
-
-        for row_index, (name, value) in enumerate(rows):
-            self.gridLayout.addWidget(QLabel(name, self), row_index, 0)
-            self.gridLayout.addWidget(QLabel(str(value), self), row_index, 1)
+        self.lbl_gdal_version.setText(str(get_gdal_version()))
+        self.lbl_proj_version.setText(str(get_proj_version()))
+        self.lbl_lxml_version.setText(lxml_version)
+        self.lbl_numpy_version.setText(numpy_version)
+        self.lbl_openpyxl_version.setText(openpyxl_version)
+        self.lbl_qt_version.setText(f"{PYQT_VERSION_STR} (Qt {qVersion()})")
+        self.lbl_python_version.setText(platform.python_version())
 
 
 # #############################################################################
