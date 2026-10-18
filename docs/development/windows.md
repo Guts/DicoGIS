@@ -30,7 +30,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 > letting pip pull one from the package index used in "Install project" below.
 
 1. Go to <https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal> or to <https://github.com/cgohlke/geospatial-wheels/releases/latest>
-1. Download the appropriate package for the Python environment (version, type...). For example: `gdal-3.11.1-cp311-cp311-win_amd64`
+1. Download the appropriate package for the Python environment (version, type...). For example: `gdal-3.11.4-cp311-cp311-win_amd64`
 1. Move downloaded wheel to the `lib` subfolder
 1. Make sure there is only one wheel of GDAL in the `lib` subfolder
 
