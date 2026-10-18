@@ -133,8 +133,9 @@ must be reached through `qgis.PyQt`. GUI modules therefore never import `PyQt6`
 `dicogis/ui/qt_compat/`, which mirrors the `qgis.PyQt` layout:
 `from dicogis.ui.qt_compat.QtWidgets import QWidget`,
 `from dicogis.ui.qt_compat import uic`. The binding is picked once, at first
-import, from `DICOGIS_QT_API` (`auto`: `qgis.PyQt` if QGIS is already loaded,
-PyQt6 otherwise; `qgis`/`pyqt6` force it). Add a submodule there when a new Qt
+import, from `DICOGIS_QT_API` (`auto`: `qgis.PyQt` if a `QgsApplication` is
+running — QGIS merely imported isn't enough, pgserviceparser >= 3 imports it on
+its own when installed —, PyQt6 otherwise; `qgis`/`pyqt6` force it). Add a submodule there when a new Qt
 module is needed. `tests/test_ui_qt_compat.py` fails on any direct binding
 import under `dicogis/ui`. Don't use Qt APIs newer than 6.8.
 

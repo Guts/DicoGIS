@@ -22,6 +22,7 @@ import ast
 import os
 import subprocess
 import sys
+import types
 from pathlib import Path
 
 # 3rd party
@@ -41,14 +42,33 @@ QT_COMPAT_FOLDER = UI_FOLDER / "qt_compat"
 QT_BINDINGS = ("PyQt6", "PyQt5", "PySide6", "qgis")
 
 # a stand-in for QGIS's qgis.PyQt shim, re-exporting PyQt6 like the real one
-# does, plus a marker telling which binding a dicogis module ended up with
+# does, plus a marker telling which binding a dicogis module ended up with, and
+# a qgis.core whose QgsApplication is running only once a test says so
 _FAKE_QGIS_PYQT = {
     "qgis/__init__.py": "",
+    "qgis/core.py": (
+        "class QgsApplication:\n"
+        "    running = None\n"
+        "    @classmethod\n"
+        "    def instance(cls):\n"
+        "        return cls.running\n"
+    ),
     "qgis/PyQt/__init__.py": "",
     "qgis/PyQt/QtCore.py": "from PyQt6.QtCore import *\nFROM_FAKE_QGIS = True\n",
     "qgis/PyQt/QtGui.py": "from PyQt6.QtGui import *\n",
     "qgis/PyQt/QtWidgets.py": "from PyQt6.QtWidgets import *\n",
     "qgis/PyQt/uic.py": "from PyQt6.uic import *\n",
+}
+
+# what each scenario runs before importing DicoGIS
+_PRELOADS = {
+    "standalone": "",
+    # what pgserviceparser >= 3 does on import when QGIS is installed
+    "qgis_imported": "import qgis.PyQt\nimport qgis.core\n",
+    "qgis_running": (
+        "import qgis.core\n"
+        "qgis.core.QgsApplication.running = qgis.core.QgsApplication()\n"
+    ),
 }
 
 _PROBE = (
@@ -81,14 +101,14 @@ def fake_qgis(tmp_path: Path) -> Path:
 
 
 def _probe(
-    qt_api: str | None, fake_qgis_folder: Path, preload_qgis: bool
+    qt_api: str | None, fake_qgis_folder: Path, scenario: str
 ) -> subprocess.CompletedProcess:
     """Import the compat layer in a fresh interpreter and report what it picked.
 
     Args:
         qt_api: value of DICOGIS_QT_API, or None to leave it unset
         fake_qgis_folder: folder holding the fake qgis package, put on PYTHONPATH
-        preload_qgis: import qgis before DicoGIS, like a plugin running in QGIS
+        scenario: key of _PRELOADS, the QGIS state before DicoGIS is imported
 
     Returns:
         the finished subprocess, its stdout being "<QT_API> <from fake qgis>
@@ -100,7 +120,7 @@ def _probe(
     env["PYTHONPATH"] = os.pathsep.join(
         [str(fake_qgis_folder), str(Path(__file__).parent.parent)]
     )
-    code = _PROBE.format(preload="import qgis.PyQt\n" if preload_qgis else "")
+    code = _PROBE.format(preload=_PRELOADS[scenario])
     # the command is this interpreter running a constant snippet: no untrusted input
     return subprocess.run(  # noqa: S603
         [sys.executable, "-c", code],
@@ -116,26 +136,66 @@ def _probe(
 # ##################################
 
 
+def _set_qgis_state(monkeypatch: pytest.MonkeyPatch, qgis_state: str) -> None:
+    """Fake the QGIS state of the process, in sys.modules.
+
+    Args:
+        monkeypatch: pytest fixture
+        qgis_state: "absent", "imported" (qgis.core loaded, no QgsApplication,
+            as pgserviceparser >= 3 causes), "other_app" (a plain Qt application
+            runs) or "running" (inside QGIS)
+    """
+    if qgis_state == "absent":
+        monkeypatch.delitem(sys.modules, "qgis.core", raising=False)
+        return
+
+    class QgsApplication:
+        running = None
+
+        @classmethod
+        def instance(cls) -> object:
+            return cls.running
+
+    if qgis_state == "running":
+        QgsApplication.running = QgsApplication()
+    elif qgis_state == "other_app":
+        QgsApplication.running = object()
+    qgis_core = types.ModuleType("qgis.core")
+    qgis_core.QgsApplication = QgsApplication
+    monkeypatch.setitem(sys.modules, "qgis.core", qgis_core)
+
+
 @pytest.mark.parametrize(
-    ("requested", "qgis_loaded", "expected"),
+    ("requested", "qgis_state", "expected"),
     [
-        ("auto", False, "pyqt6"),
-        ("auto", True, "qgis"),
-        ("  AUTO ", False, "pyqt6"),
-        ("qgis", False, "qgis"),
-        ("pyqt6", True, "pyqt6"),
-        ("PyQt6", False, "pyqt6"),
+        ("auto", "absent", "pyqt6"),
+        ("auto", "imported", "pyqt6"),
+        ("auto", "other_app", "pyqt6"),
+        ("auto", "running", "qgis"),
+        ("  AUTO ", "absent", "pyqt6"),
+        ("qgis", "absent", "qgis"),
+        ("pyqt6", "running", "pyqt6"),
+        ("PyQt6", "absent", "pyqt6"),
     ],
 )
 def test_resolve_qt_api(
-    monkeypatch: pytest.MonkeyPatch, requested: str, qgis_loaded: bool, expected: str
+    monkeypatch: pytest.MonkeyPatch, requested: str, qgis_state: str, expected: str
 ) -> None:
-    if qgis_loaded:
-        monkeypatch.setitem(sys.modules, "qgis", object())
-    else:
-        monkeypatch.delitem(sys.modules, "qgis", raising=False)
+    _set_qgis_state(monkeypatch, qgis_state)
 
     assert resolve_qt_api(requested) == expected
+
+
+def test_resolve_qt_api_survives_a_failing_qgis_check(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    qgis_core = types.ModuleType("qgis.core")
+    qgis_core.QgsApplication = type(
+        "QgsApplication", (), {"instance": staticmethod(lambda: 1 / 0)}
+    )
+    monkeypatch.setitem(sys.modules, "qgis.core", qgis_core)
+
+    assert resolve_qt_api("auto") == "pyqt6"
 
 
 def test_resolve_qt_api_reads_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -143,7 +203,7 @@ def test_resolve_qt_api_reads_the_environment(monkeypatch: pytest.MonkeyPatch) -
     assert resolve_qt_api() == "qgis"
 
     monkeypatch.setenv(QT_API_ENV_VAR, "")
-    monkeypatch.delitem(sys.modules, "qgis", raising=False)
+    _set_qgis_state(monkeypatch, "absent")
     assert resolve_qt_api() == "pyqt6"
 
 
@@ -153,20 +213,22 @@ def test_resolve_qt_api_rejects_unknown_value() -> None:
 
 
 @pytest.mark.parametrize(
-    ("qt_api", "preload_qgis", "expected"),
+    ("qt_api", "scenario", "expected"),
     [
-        (None, False, "pyqt6 False True True"),
-        (None, True, "qgis True True True"),
-        ("qgis", False, "qgis True True True"),
-        ("pyqt6", True, "pyqt6 False True True"),
+        (None, "standalone", "pyqt6 False True True"),
+        # QGIS installed and imported by a library, but not running: standalone
+        (None, "qgis_imported", "pyqt6 False True True"),
+        (None, "qgis_running", "qgis True True True"),
+        ("qgis", "standalone", "qgis True True True"),
+        ("pyqt6", "qgis_running", "pyqt6 False True True"),
     ],
 )
 def test_submodules_follow_the_selected_binding(
-    fake_qgis: Path, qt_api: str | None, preload_qgis: bool, expected: str
+    fake_qgis: Path, qt_api: str | None, scenario: str, expected: str
 ) -> None:
     pytest.importorskip("PyQt6.QtWidgets", reason="PyQt6 (gui extra) required")
 
-    result = _probe(qt_api, fake_qgis, preload_qgis)
+    result = _probe(qt_api, fake_qgis, scenario)
 
     assert result.returncode == 0, result.stderr
     assert result.stdout.strip() == expected
