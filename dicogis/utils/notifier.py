@@ -25,37 +25,51 @@ from dicogis.utils.utils import Utilities
 # LOG
 logger = logging.getLogger(__name__)
 
-# common notification information
 dicogis_utils = Utilities()
-try:
-    notification = Notify(
-        default_notification_application_name=__title__,
-        default_notification_icon=dicogis_utils.resolve_internal_path(
-            internal_path=__icon_path__
-        ),
-    )
-except Exception as err:
-    # e.g. notify-py raises UnsupportedPlatform on Windows releases it doesn't
-    # recognize (Windows Server editions): degrade to a no-op rather than
-    # taking down every import of this module.
-    logger.warning(
-        f"System notifications are unavailable on this platform. Trace: {err}"
-    )
-    notification = None
 
 
 # ##############################################################################
 # ############ Functions ##########
 # #################################
+
+
+def build_notification() -> Notify | None:
+    """Build a notify-py notification with DicoGIS defaults (name, icon).
+
+    A new one per notification, rather than a module-level one: options such as
+    the sound would otherwise carry over from one notification to the next.
+
+    Returns:
+        notification, or None if no notification backend is available
+    """
+    try:
+        return Notify(
+            default_notification_application_name=__title__,
+            default_notification_icon=dicogis_utils.resolve_internal_path(
+                internal_path=__icon_path__
+            ),
+        )
+    except Exception as err:
+        # e.g. notify-py raises UnsupportedPlatform on Windows releases it doesn't
+        # recognize (Windows Server editions): degrade to a no-op rather than
+        # crashing at the end of a run.
+        logger.warning(
+            f"System notifications are unavailable on this platform. Trace: {err}"
+        )
+        return None
+
+
 def send_system_notify(
     notification_message: str, notification_title: str, notification_sound: bool = True
-):
+) -> None:
     """Send a notification to the system.
 
     Args:
-        notification_message (str): notification message
-        notification_title (str): notification title
+        notification_message: notification message
+        notification_title: notification title
+        notification_sound: play the DicoGIS notification sound. Defaults to True.
     """
+    notification = build_notification()
     if notification is None:
         logger.info(
             "Notification skipped (unavailable on this platform): "
