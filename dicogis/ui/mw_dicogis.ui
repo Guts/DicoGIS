@@ -34,6 +34,9 @@
       </item>
      </layout>
     </item>
+    <item row="0" column="0" rowspan="5">
+     <widget class="MiscButtons" name="wdg_misc_buttons"/>
+    </item>
     <item row="1" column="1">
      <widget class="QTabWidget" name="tab_main">
       <widget class="TabFiles" name="wdg_tab_files">
@@ -156,6 +159,11 @@
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>MiscButtons</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_misc_buttons</header>
+  </customwidget>
   <customwidget>
    <class>TabFiles</class>
    <extends>QWidget</extends>
