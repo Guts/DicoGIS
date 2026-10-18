@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 dicogis_utils = Utilities()
 try:
     notification = Notify(
-        default_application_name=__title__,
+        default_notification_application_name=__title__,
         default_notification_icon=dicogis_utils.resolve_internal_path(
             internal_path=__icon_path__
         ),

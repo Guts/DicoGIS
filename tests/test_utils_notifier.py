@@ -37,6 +37,11 @@ class TestSendSystemNotify(unittest.TestCase):
     rather than assuming any particular starting point.
     """
 
+    def test_application_name_is_dicogis(self):
+        """notify-py swallows unknown keyword arguments: a misspelled one left
+        notifications under its default "Python Application (notify.py)"."""
+        self.assertEqual(notifier.notification.application_name, "DicoGIS")
+
     def test_message_is_set(self):
         with patch.object(notifier.notification, "send"):
             notifier.send_system_notify(
