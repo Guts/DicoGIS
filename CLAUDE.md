@@ -156,7 +156,7 @@ File naming follows a prefix convention:
 
 - `dlg_` — `QDialog` subclasses (`dicogis/ui/dialogs/dlg_database_connection.py`)
 - `wdg_` — `QWidget` subclasses, including notebook tab pages
-  (`wdg_tab_files.py`, `wdg_collapsible_frame.py`, `wdg_scrollable_table.py`, …)
+  (`wdg_tab_files.py`, `wdg_misc_buttons.py`, `wdg_scrollable_table.py`, …)
 - `mw_` — the `QMainWindow` (`dicogis/ui/mw_dicogis.py`)
 
 Plain, unprefixed modules (`workers.py`, `main.py`) hold non-widget code
