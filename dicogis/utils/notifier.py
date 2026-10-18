@@ -8,6 +8,8 @@
 
 # standard library
 import logging
+import platform
+from shutil import which
 
 # 3rd party
 from notifypy import Notify
@@ -59,6 +61,21 @@ def build_notification() -> Notify | None:
         return None
 
 
+def sound_player_is_available() -> bool:
+    """Tell if notify-py can play a sound on this system.
+
+    notify-py relies on the system to play sounds on Windows and macOS, but on
+    `aplay` (ALSA utilities) anywhere else, and fails the whole notification,
+    not only its sound, when it's missing.
+
+    Returns:
+        True if notify-py has what it needs to play a sound
+    """
+    if platform.system() in ("Darwin", "Windows"):
+        return True
+    return which("aplay") is not None
+
+
 def send_system_notify(
     notification_message: str, notification_title: str, notification_sound: bool = True
 ) -> None:
@@ -79,7 +96,12 @@ def send_system_notify(
 
     notification.title = notification_title
     notification.message = notification_message
-    if notification_sound:
+    if notification_sound and not sound_player_is_available():
+        logger.warning(
+            "Notification sound skipped: notify-py plays it with 'aplay', which "
+            "isn't installed (package 'alsa-utils' on most Linux distributions)."
+        )
+    elif notification_sound:
         notification.audio = str(
             dicogis_utils.resolve_internal_path(
                 internal_path=__notification_sound_path__

@@ -88,11 +88,12 @@ class TestSendSystemNotify(unittest.TestCase):
         self.assertEqual(notification.message, "Hello there")
 
     def test_sound_enabled_sets_audio_path(self):
-        notification = send_and_capture(
-            notification_message="msg",
-            notification_title="title",
-            notification_sound=True,
-        )
+        with patch.object(notifier, "sound_player_is_available", return_value=True):
+            notification = send_and_capture(
+                notification_message="msg",
+                notification_title="title",
+                notification_sound=True,
+            )
 
         self.assertTrue(Path(notification.audio).is_file())
 
@@ -100,14 +101,34 @@ class TestSendSystemNotify(unittest.TestCase):
         """Regression: a module-level notification kept the audio set by a
         previous call, so unticking the sound option had no effect until the
         application was restarted."""
-        send_and_capture(notification_message="msg", notification_title="title")
-        notification = send_and_capture(
-            notification_message="msg",
-            notification_title="title",
-            notification_sound=False,
-        )
+        with patch.object(notifier, "sound_player_is_available", return_value=True):
+            with_sound = send_and_capture(
+                notification_message="msg", notification_title="title"
+            )
+            without_sound = send_and_capture(
+                notification_message="msg",
+                notification_title="title",
+                notification_sound=False,
+            )
+
+        self.assertIsNotNone(with_sound.audio)
+        self.assertIsNone(without_sound.audio)
+
+    def test_sound_skipped_without_sound_player(self):
+        """Without aplay, notify-py failed the whole notification: the sound is
+        dropped, with a warning, so the notification itself still shows."""
+        with (
+            patch.object(notifier, "sound_player_is_available", return_value=False),
+            self.assertLogs(notifier.logger, level="WARNING") as logs,
+        ):
+            notification = send_and_capture(
+                notification_message="msg",
+                notification_title="title",
+                notification_sound=True,
+            )
 
         self.assertIsNone(notification.audio)
+        self.assertIn("aplay", logs.output[0])
 
     def test_send_failure_is_caught_and_logged(self):
         with (
@@ -135,6 +156,26 @@ class TestSendSystemNotify(unittest.TestCase):
             )
 
         self.assertIn("notifypyEnableLogging", logs.output[0])
+
+
+class TestSoundPlayerIsAvailable(unittest.TestCase):
+    """Test sound_player_is_available()."""
+
+    def test_windows_and_macos_need_nothing_more(self):
+        for system in ("Windows", "Darwin"):
+            with (
+                self.subTest(system=system),
+                patch.object(notifier.platform, "system", return_value=system),
+                patch.object(notifier, "which", return_value=None),
+            ):
+                self.assertTrue(notifier.sound_player_is_available())
+
+    def test_linux_needs_aplay(self):
+        with patch.object(notifier.platform, "system", return_value="Linux"):
+            with patch.object(notifier, "which", return_value="/usr/bin/aplay"):
+                self.assertTrue(notifier.sound_player_is_available())
+            with patch.object(notifier, "which", return_value=None):
+                self.assertFalse(notifier.sound_player_is_available())
 
 
 class TestSendSystemNotifyNoBackend(unittest.TestCase):
