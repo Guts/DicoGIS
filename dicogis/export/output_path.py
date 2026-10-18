@@ -68,3 +68,33 @@ def determine_output_path(
         final_output_path = output_path
 
     return final_output_path
+
+
+def match_output_path_to_format(output_path: Path, output_format: str) -> Path:
+    """Adapt an output path to an output format: an Excel workbook is a `.xlsx`
+    file, a JSON export a folder.
+
+    Only the `.xlsx` extension is added or removed, so a name the user typed is
+    otherwise kept as is (including dots in a folder name).
+
+    Args:
+        output_path: output path to adapt
+        output_format: output format (see `dicogis.constants.OutputFormats`)
+
+    Raises:
+        ValueError: if output format is not supported
+
+    Returns:
+        output path matching the output format
+    """
+    is_xlsx = output_path.suffix.lower() == ".xlsx"
+    if output_format == "excel":
+        return (
+            output_path
+            if is_xlsx
+            else output_path.with_name(f"{output_path.name}.xlsx")
+        )
+    if output_format in ("json", "udata"):
+        return output_path.with_suffix("") if is_xlsx else output_path
+
+    raise ValueError(f"Unsupported output format: {output_format}.")
