@@ -22,7 +22,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ### Requirements
 
-- Python 3.10+ installed with the Windows MSI installer (version from the Windows store is not working)
+- Python 3.11+ installed with the Windows MSI installer (version from the Windows store is not working)
 
 ### Download GDAL wheel
 
@@ -30,7 +30,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 > letting pip pull one from the package index used in "Install project" below.
 
 1. Go to <https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal> or to <https://github.com/cgohlke/geospatial-wheels/releases/latest>
-1. Download the appropriate package for the Python environment (version, type...). For example: `GDAL-3.8.4-cp310-cp310-win_amd64`
+1. Download the appropriate package for the Python environment (version, type...). For example: `gdal-3.11.1-cp311-cp311-win_amd64`
 1. Move downloaded wheel to the `lib` subfolder
 1. Make sure there is only one wheel of GDAL in the `lib` subfolder
 
@@ -40,7 +40,7 @@ Typically, you can run these commands:
 
 ```powershell
 # create a virtual env - change with your Python version
-py -3.10 -m venv .venv
+py -3.11 -m venv .venv
 
 # enable virtual env
 .\.venv\Scripts\activate

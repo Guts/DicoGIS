@@ -34,7 +34,7 @@ concurrency:
 
 env:
   GDAL_VERSION: 3.*
-  PYTHON_VERSION: "3.10"
+  PYTHON_VERSION: "3.11"
 
 jobs:
   build-docs:
