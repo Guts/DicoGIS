@@ -164,9 +164,6 @@ jobs:
       - name: Install project as a package
         run: python -m pip install .[gdal,gui,packaging]
 
-      - name: Generates MS Version Info
-        run: python .\builder\version_info_templater.py
-
       - name: Generates executable for command-line version
         run: |
           python -O ./builder/pyinstaller_build_windows_cli.py
