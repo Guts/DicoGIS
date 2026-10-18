@@ -13,8 +13,11 @@ mirror the `qgis.PyQt` layout:
 The binding is picked once, at first import, from the `DICOGIS_QT_API`
 environment variable:
 
-- `auto` (default): `qgis.PyQt` when QGIS is already loaded in the process,
-  PyQt6 otherwise. Standalone runs never import QGIS, even if installed.
+- `auto` (default): `qgis.PyQt` when running inside QGIS, i.e. a
+  `QgsApplication` is running, PyQt6 otherwise. QGIS merely being imported is
+  not enough: some libraries import `qgis.PyQt` on their own when QGIS is
+  installed (pgserviceparser >= 3 does), which loads `qgis.core` in a
+  standalone process too.
 - `qgis`: always `qgis.PyQt`.
 - `pyqt6`: always PyQt6.
 
@@ -43,6 +46,24 @@ QT_APIS: tuple[str, ...] = ("auto", "qgis", "pyqt6")
 # ##################################
 
 
+def _qgis_application_is_running() -> bool:
+    """Tell whether this process runs inside QGIS (desktop, plugin, qgis_process).
+
+    Never imports QGIS itself: only looks at a `qgis.core` already loaded.
+
+    Returns:
+        True if the running Qt application is a QgsApplication
+    """
+    qgis_core = sys.modules.get("qgis.core")
+    qgs_application = getattr(qgis_core, "QgsApplication", None)
+    if qgs_application is None:
+        return False
+    try:
+        return isinstance(qgs_application.instance(), qgs_application)
+    except Exception:
+        return False
+
+
 def resolve_qt_api(requested: str | None = None) -> str:
     """Determine which Qt binding the GUI must use.
 
@@ -67,7 +88,7 @@ def resolve_qt_api(requested: str | None = None) -> str:
         )
 
     if requested == "auto":
-        return "qgis" if sys.modules.get("qgis") is not None else "pyqt6"
+        return "qgis" if _qgis_application_is_running() else "pyqt6"
     return requested
 
 
