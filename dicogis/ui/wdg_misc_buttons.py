@@ -96,7 +96,7 @@ class MiscButtons(QWidget):
         self.btn_doc.clicked.connect(lambda: open_new_tab(__uri_homepage__))
 
         # sponsor
-        self.btn_support.setText(self.tr("Fund & Support"))
+        self.btn_support.setText(self.tr("Fund, support"))
         self.btn_support.clicked.connect(
             lambda: open_new_tab(f"{__uri_homepage__}misc/funding.html")
         )
