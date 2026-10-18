@@ -27,9 +27,13 @@ logger = logging.getLogger(__name__)
 class ReadCadDxf(ReadVectorFlatDataset):
     """Reader for geographic dataset stored as flat database files or folders."""
 
-    def __init__(self):
-        """Class constructor."""
-        super().__init__(dataset_type="flat_cad")
+    def __init__(self, localized_strings: dict | None = None) -> None:
+        """Class constructor.
+
+        Args:
+            localized_strings: translated strings. Defaults to the system locale's.
+        """
+        super().__init__(dataset_type="flat_cad", localized_strings=localized_strings)
 
 
 # ###########################################################################

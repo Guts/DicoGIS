@@ -190,6 +190,25 @@ class TestSerializeMetadataset(unittest.TestCase):
 
             self.assertEqual(output_file.name, "parcelles-communales.json")
 
+    def test_homonym_datasets_do_not_overwrite_each_other(self):
+        """Datasets sharing a name (e.g. lines.shp in two folders) get one
+        file each instead of the last one silently overwriting the others."""
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            serializer = _make_serializer(output_path=Path(tmpdirname))
+
+            output_files = [
+                serializer.serialize_metadaset(
+                    metadataset=MetaDataset(name="lines", parent_folder_name=folder)
+                )
+                for folder in ("roads", "rivers", "rails")
+            ]
+
+            self.assertEqual(
+                [output_file.name for output_file in output_files],
+                ["lines.json", "lines-2.json", "lines-3.json"],
+            )
+            self.assertEqual(len(list(Path(tmpdirname).glob("*.json"))), 3)
+
     def test_dates_are_isoformatted(self):
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
             serializer = _make_serializer(output_path=Path(tmpdirname))

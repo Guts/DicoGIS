@@ -45,7 +45,8 @@ class ReadPostGIS(GeoReaderBase):
         password: str | None = None,
         service: str | None = None,
         views_included: bool = True,
-    ):
+        localized_strings: dict | None = None,
+    ) -> None:
         """Uses OGR to extract basic informations about geodata stored into a PostGIS
             database.
 
@@ -61,6 +62,7 @@ class ReadPostGIS(GeoReaderBase):
                 the database. If defined, other connection parameters are ignored. \
                 Defaults to None.
             views_included (bool, optional): option to include views. Defaults to True.
+            localized_strings: translated strings. Defaults to the system locale's.
         """
 
         # Creating variables
@@ -82,7 +84,9 @@ class ReadPostGIS(GeoReaderBase):
             is_postgis=True,
         )
 
-        super().__init__(dataset_type="sgbd_postgis")
+        super().__init__(
+            dataset_type="sgbd_postgis", localized_strings=localized_strings
+        )
 
     def get_connection(self) -> ogr.DataSource | None:
         """Open a connection to the PostgreSQL database using GDAL.

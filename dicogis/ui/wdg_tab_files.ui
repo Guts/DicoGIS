@@ -40,12 +40,18 @@
         <property name="text">
          <string>.shp</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="1">
        <widget class="QCheckBox" name="cbx_tab">
         <property name="text">
          <string>.tab</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -54,12 +60,18 @@
         <property name="text">
          <string>.kml</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="3">
        <widget class="QCheckBox" name="cbx_gml">
         <property name="text">
          <string>.gml</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -68,12 +80,18 @@
         <property name="text">
          <string>.geojson</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="5">
        <widget class="QCheckBox" name="cbx_gxt">
         <property name="text">
          <string>.gxt</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -82,12 +100,18 @@
         <property name="text">
          <string>rasters</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="1" column="2">
        <widget class="QCheckBox" name="cbx_dxf">
         <property name="text">
          <string>DXF</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -96,6 +120,9 @@
         <property name="text">
          <string>Esri FileGDB</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="2" column="2" rowspan="1" colspan="2">
@@ -103,12 +130,18 @@
         <property name="text">
          <string>GeoPackage</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="2" column="4" rowspan="1" colspan="2">
        <widget class="QCheckBox" name="cbx_spadb">
         <property name="text">
          <string>Spatialite</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

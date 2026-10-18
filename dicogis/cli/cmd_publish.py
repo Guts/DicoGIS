@@ -87,11 +87,16 @@ def publish(
         bool,
         typer.Option(
             envvar="DICOGIS_ENABLE_NOTIFICATION_SOUND",
-            is_flag=True,
             help="Enable/disable notification's sound at the end of processing.",
         ),
     ] = True,
-    verbose: bool = False,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_DEBUG",
+            help="Increase verbosity to show debug logs.",
+        ),
+    ] = False,
 ):
     """Publish metadata (previously exported as JSON files) to a catalog."""
     app_dir = get_app_dir()

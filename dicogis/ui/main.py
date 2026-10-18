@@ -20,6 +20,7 @@ import sys
 from configparser import ConfigParser
 from os import getenv
 from pathlib import Path
+from typing import NoReturn
 
 # Project
 from dicogis.__about__ import __package_name__
@@ -72,6 +73,20 @@ def _get_persisted_option(section: str, option: str) -> str | None:
     return config.get(section, option, fallback=None) or None
 
 
+def _exit_with_critical_error(message: str) -> NoReturn:
+    """Log a startup error, show it on stderr too, and exit.
+
+    The GUI installs no console log handler: launched from a terminal (e.g. after
+    a pipx install missing an extra), it would otherwise exit without a word.
+
+    Args:
+        message: what went wrong and how to fix it
+    """
+    logger.critical(message)
+    sys.stderr.write(f"{message}\n")
+    sys.exit(1)
+
+
 def dicogis_gui():
     """Launch DicoGIS GUI."""
     debug_enabled = str2bool(
@@ -88,12 +103,11 @@ def dicogis_gui():
     logmngr.headers()
 
     if not GDAL_IS_AVAILABLE:
-        logger.critical(
+        _exit_with_critical_error(
             "GDAL (and its Python bindings) is required to run DicoGIS but is not "
             "installed. See https://guts.github.io/DicoGIS/usage/installation.html "
             "for how to install it, including with pipx."
         )
-        sys.exit(1)
 
     # imported here rather than at module level: PyQt6 and GDAL are optional
     # dependencies (see pyproject.toml `gui` and `gdal` extras), so importing them
@@ -101,17 +115,15 @@ def dicogis_gui():
     try:
         from dicogis.ui.qt_compat.QtWidgets import QApplication
     except ImportError as err:
-        logger.critical(
+        _exit_with_critical_error(
             f"Qt bindings could not be imported ({err}). PyQt6 is required to run "
             "DicoGIS GUI: install DicoGIS with the `gui` extra, e.g. "
             "`pip install dicogis[gui]`, and leave DICOGIS_QT_API unset outside "
             "QGIS. See https://guts.github.io/DicoGIS/usage/installation.html "
             "for details."
         )
-        sys.exit(1)
     except ValueError as err:
-        logger.critical(err)
-        sys.exit(1)
+        _exit_with_critical_error(str(err))
 
     from dicogis.ui.mw_dicogis import DicoGIS
 

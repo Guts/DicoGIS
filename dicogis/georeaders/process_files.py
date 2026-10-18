@@ -19,7 +19,12 @@ from dicogis.georeaders.read_dxf import ReadCadDxf
 from dicogis.georeaders.read_raster import ReadRasters
 from dicogis.georeaders.read_vector_flat_dataset import ReadVectorFlatDataset
 from dicogis.georeaders.read_vector_flat_geodatabase import ReadFlatDatabase
-from dicogis.models.metadataset import MetaDataset
+from dicogis.models.metadataset import (
+    MetaDatabaseFlat,
+    MetaDataset,
+    MetaRasterDataset,
+    MetaVectorDataset,
+)
 from dicogis.utils.paths import absolute_path
 
 # ProgressReporter used to be defined here; it now lives in a GDAL-free module
@@ -93,6 +98,15 @@ class ProcessingFiles:
         "raster": ReadRasters,
     }
 
+    # metadataset model matching each georeader's dataset_type, to describe a
+    # dataset whose reading failed (see read_dataset())
+    MATRIX_DATASET_TYPE_METADATASET: dict[str, type[MetaDataset]] = {
+        "flat_cad": MetaVectorDataset,
+        "flat_database": MetaDatabaseFlat,
+        "flat_raster": MetaRasterDataset,
+        "flat_vector": MetaVectorDataset,
+    }
+
     def __init__(
         self,
         serializer: MetadatasetSerializerBase,
@@ -104,7 +118,6 @@ class ProcessingFiles:
         li_flat_geodatabase_geopackage: Iterable | None,
         li_flat_geodatabase_spatialite: Iterable | None,
         li_geojson: Iterable | None,
-        li_geotiff: Iterable | None,
         li_gxt: Iterable | None,
         li_gml: Iterable | None,
         li_kml: Iterable | None,
@@ -117,7 +130,6 @@ class ProcessingFiles:
         opt_analyze_esri_filegdb: bool = True,
         opt_analyze_geojson: bool = True,
         opt_analyze_geopackage: bool = True,
-        opt_analyze_geotiff: bool = True,
         opt_analyze_gml: bool = True,
         opt_analyze_gxt: bool = True,
         opt_analyze_kml: bool = True,
@@ -139,7 +151,6 @@ class ProcessingFiles:
         self.li_flat_geodatabase_geopackage = li_flat_geodatabase_geopackage
         self.li_flat_geodatabase_spatialite = li_flat_geodatabase_spatialite
         self.li_geojson = li_geojson
-        self.li_geotiff = li_geotiff
         self.li_gxt = li_gxt
         self.li_gml = li_gml
         self.li_kml = li_kml
@@ -165,7 +176,6 @@ class ProcessingFiles:
         self.opt_analyze_spatialite = opt_analyze_spatialite
         self.opt_analyze_esri_filegdb = opt_analyze_esri_filegdb
         self.opt_analyze_geojson = opt_analyze_geojson
-        self.opt_analyze_geotiff = opt_analyze_geotiff
         self.opt_analyze_gml = opt_analyze_gml
         self.opt_analyze_gxt = opt_analyze_gxt
         self.opt_analyze_kml = opt_analyze_kml
@@ -244,7 +254,8 @@ class ProcessingFiles:
             dataset_to_process: dataset path or URI to read
 
         Returns:
-            dataset and metadataset, None if an error occurs
+            dataset and metadataset, flagged as failed (processing_succeeded is
+            False) if reading raised
         """
         metadataset = None
 
@@ -252,7 +263,9 @@ class ProcessingFiles:
             message_to_display=f"Reading {dataset_to_process.file_name}..."
         )
         if self.opt_quick_fail:
-            metadataset = dataset_to_process.georeader().infos_dataset(
+            metadataset = dataset_to_process.georeader(
+                localized_strings=self.localized_strings
+            ).infos_dataset(
                 source_path=str(absolute_path(dataset_to_process.file_path)),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
@@ -262,8 +275,12 @@ class ProcessingFiles:
             dataset_to_process.processed = True
             return dataset_to_process, metadataset
 
+        georeader = None
         try:
-            metadataset = dataset_to_process.georeader().infos_dataset(
+            georeader = dataset_to_process.georeader(
+                localized_strings=self.localized_strings
+            )
+            metadataset = georeader.infos_dataset(
                 source_path=str(absolute_path(dataset_to_process.file_path)),
             )
             logger.debug(f"Reading {dataset_to_process} succeeded.")
@@ -281,8 +298,46 @@ class ProcessingFiles:
             )
             dataset_to_process.processed = True
             dataset_to_process.process_error = err
+            # still described in the output, flagged as failed, rather than
+            # silently missing from it
+            metadataset = self.failed_metadataset(
+                dataset_to_process=dataset_to_process,
+                dataset_type=getattr(georeader, "dataset_type", None),
+                error=err,
+            )
 
         return dataset_to_process, metadataset
+
+    def failed_metadataset(
+        self,
+        dataset_to_process: DatasetToProcess,
+        dataset_type: str | None,
+        error: Exception,
+    ) -> MetaDataset:
+        """Describe a dataset whose reading raised, so that it can be serialized
+        as an error (e.g. a highlighted row in its Excel sheet).
+
+        Args:
+            dataset_to_process: dataset which failed to be read
+            dataset_type: dataset_type of the georeader used, picking the model
+            error: exception raised while reading
+
+        Returns:
+            metadataset with name, path and error filled, processing_succeeded False
+        """
+        dataset_path = absolute_path(dataset_to_process.file_path)
+        metadataset_model = self.MATRIX_DATASET_TYPE_METADATASET.get(
+            dataset_type, MetaDataset
+        )
+        return metadataset_model(
+            name=dataset_path.stem,
+            path=dataset_path,
+            parent_folder_name=dataset_path.parent.name,
+            dataset_type=dataset_type,
+            processing_succeeded=False,
+            processing_error_type=type(error).__name__,
+            processing_error_msg=str(error),
+        )
 
     def export_metadataset(
         self,
@@ -408,13 +463,6 @@ class ProcessingFiles:
                 list_of_datasets=self.li_geojson, dataset_format="geojson"
             )
 
-        if self.opt_analyze_geotiff and len(self.li_geotiff):
-            total_files += len(self.li_geotiff)
-            self.serializer.pre_serializing(has_raster=1)
-            self.add_files_to_process_queue(
-                list_of_datasets=self.li_geotiff, dataset_format="geotiff"
-            )
-
         if self.opt_analyze_gxt and len(self.li_gxt):
             total_files += len(self.li_gxt)
             self.serializer.pre_serializing(has_vector=1)
@@ -422,6 +470,7 @@ class ProcessingFiles:
                 list_of_datasets=self.li_gxt, dataset_format="gxt"
             )
 
+        # GeoTIFFs included: the listing already merges them into the rasters
         if self.opt_analyze_raster and len(self.li_rasters):
             total_files += len(self.li_rasters)
             self.serializer.pre_serializing(has_raster=1)

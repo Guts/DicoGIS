@@ -13,10 +13,12 @@ Usage from the repo root folder:
 # standard library
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock
 
 # project
 from dicogis.export.base_serializer import MetadatasetSerializerBase
+from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 
 # ProgressReporter now lives in dicogis.utils.progress but must stay importable
 # from here: it was part of this module's public surface (see test below).
@@ -25,11 +27,13 @@ from dicogis.georeaders.process_files import (
     ProcessingFiles,
     ProgressReporter,
 )
-from dicogis.models.metadataset import MetaDataset
+from dicogis.listing.geodata_listing import find_geodata_files
+from dicogis.models.metadataset import MetaDataset, MetaVectorDataset
 from dicogis.utils.progress import (
     OperationCanceled,
     ProgressReporter as ProgressReporterCanonical,
 )
+from dicogis.utils.texts import TextsManager
 
 
 # ############################################################################
@@ -62,6 +66,9 @@ class FakeSerializer(MetadatasetSerializerBase):
 class SucceedingGeoReader:
     """Fake georeader returning a canned MetaDataset."""
 
+    def __init__(self, localized_strings: dict | None = None) -> None:
+        self.localized_strings = localized_strings
+
     def infos_dataset(self, source_path: str) -> MetaDataset:
         return MetaDataset(name=source_path)
 
@@ -69,8 +76,19 @@ class SucceedingGeoReader:
 class FailingGeoReader:
     """Fake georeader that always raises while reading."""
 
+    dataset_type = "flat_vector"
+
+    def __init__(self, localized_strings: dict | None = None) -> None:
+        self.localized_strings = localized_strings
+
     def infos_dataset(self, source_path: str) -> MetaDataset:
         raise RuntimeError("boom reading dataset")
+
+
+class FailingRasterGeoReader(FailingGeoReader):
+    """Fake raster georeader that always raises while reading."""
+
+    dataset_type = "flat_raster"
 
 
 def _make_processor(serializer: MetadatasetSerializerBase | None = None, **overrides):
@@ -84,7 +102,6 @@ def _make_processor(serializer: MetadatasetSerializerBase | None = None, **overr
         li_flat_geodatabase_geopackage=[],
         li_flat_geodatabase_spatialite=[],
         li_geojson=[],
-        li_geotiff=[],
         li_gxt=[],
         li_gml=[],
         li_kml=[],
@@ -144,6 +161,26 @@ class TestReadDataset(unittest.TestCase):
         self.assertIsNone(result_dataset.process_error)
         self.assertIsInstance(metadataset, MetaDataset)
 
+    def test_georeader_gets_the_run_localized_strings(self):
+        """Readers write their error messages in the run's language (--language
+        or the GUI's), not in the system locale's."""
+        for quick_fail in (True, False):
+            with self.subTest(quick_fail=quick_fail):
+                localized_strings = {"err_corrupt": "Fichier corrompu"}
+                processor = _make_processor(
+                    localized_strings=localized_strings, opt_quick_fail=quick_fail
+                )
+                georeader = MagicMock()
+                dataset = DatasetToProcess(
+                    file_path="parcels.shp",
+                    file_format="esri_shapefile",
+                    georeader=georeader,
+                )
+
+                processor.read_dataset(dataset_to_process=dataset)
+
+                georeader.assert_called_once_with(localized_strings=localized_strings)
+
     def test_failure_is_caught_and_recorded_when_not_quick_fail(self):
         """A reading error is swallowed: dataset is marked processed with an error."""
         processor = _make_processor(opt_quick_fail=False)
@@ -157,7 +194,14 @@ class TestReadDataset(unittest.TestCase):
 
         self.assertTrue(result_dataset.processed)
         self.assertIsNotNone(result_dataset.process_error)
-        self.assertIsNone(metadataset)
+        # described as a failed dataset, rather than dropped from the output
+        self.assertIsInstance(metadataset, MetaVectorDataset)
+        self.assertEqual(metadataset.dataset_type, "flat_vector")
+        self.assertEqual(metadataset.name, "broken")
+        self.assertEqual(metadataset.parent_folder_name, Path.cwd().name)
+        self.assertIs(metadataset.processing_succeeded, False)
+        self.assertEqual(metadataset.processing_error_type, "RuntimeError")
+        self.assertEqual(metadataset.processing_error_msg, "boom reading dataset")
 
     def test_quick_fail_propagates_exception(self):
         """With opt_quick_fail, a reading error is not caught."""
@@ -365,8 +409,9 @@ class TestProcessDatasetsInQueue(unittest.TestCase):
         self.assertEqual(serializer.serialize_calls, [])
         self.assertEqual(serializer.post_serializing_call_count, 1)
 
-    def test_dataset_that_fails_to_read_is_not_exported(self):
-        """When reading fails, the dataset is never handed to the serializer."""
+    def test_dataset_that_fails_to_read_is_exported_as_an_error(self):
+        """When reading fails, the dataset still reaches the output, flagged
+        as failed, instead of silently disappearing from it."""
         serializer = FakeSerializer()
         processor = _make_processor(serializer=serializer)
         dataset = DatasetToProcess(
@@ -378,8 +423,30 @@ class TestProcessDatasetsInQueue(unittest.TestCase):
 
         processor.process_datasets_in_queue()
 
-        self.assertEqual(serializer.serialize_calls, [])
-        self.assertFalse(dataset.exported)
+        self.assertEqual(len(serializer.serialize_calls), 1)
+        self.assertIs(serializer.serialize_calls[0].processing_succeeded, False)
+        self.assertTrue(dataset.exported)
+
+    def test_raster_that_fails_to_read_gets_an_error_row_in_its_sheet(self):
+        """End to end with the real xlsx serializer: the failed raster lands in
+        the raster sheet, highlighted, with the error message."""
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            serializer = MetadatasetSerializerXlsx(
+                localized_strings=TextsManager().load_texts(language_code="EN"),
+                output_path=Path(tmpdirname, "inventory.xlsx"),
+            )
+            processor = _make_processor(
+                serializer=serializer, li_rasters=["broken.tif"]
+            )
+            processor.count_files_to_process()
+            processor.li_files_to_process[0].georeader = FailingRasterGeoReader
+
+            processor.process_datasets_in_queue()
+
+        sheet = serializer.sheet_raster_files
+        self.assertEqual(sheet["A2"].value, "broken")
+        self.assertEqual(sheet["A2"].style, "Warning Text")
+        self.assertEqual(sheet["C2"].value, "boom reading dataset")
 
     def test_successful_dataset_is_read_and_exported(self):
         """A dataset that reads successfully is serialized."""
@@ -457,8 +524,9 @@ class TestProcessDatasetsInQueue(unittest.TestCase):
         processor.process_datasets_in_queue()
 
         self.assertEqual(reporter.increment.call_count, total_files)
-        # only the two readable, not-yet-processed datasets reach the output
-        self.assertEqual(len(serializer.serialize_calls), 2)
+        # the already processed one is skipped, the unreadable one is exported
+        # as an error
+        self.assertEqual(len(serializer.serialize_calls), 3)
 
     def test_post_serializing_called_even_with_empty_queue(self):
         """post_serializing() runs even when there is nothing to process."""
@@ -619,6 +687,18 @@ class TestCountFilesToProcess(unittest.TestCase):
             processor.li_files_to_process[0].georeader,
             ProcessingFiles.MATRIX_FORMAT_GEOREADER["raster"],
         )
+
+    def test_geotiff_found_by_the_listing_is_queued_once(self):
+        """find_geodata_files() already merges GeoTIFFs into its raster list:
+        fed with it, as both entry points do, a GeoTIFF is processed once."""
+        with TemporaryDirectory(ignore_cleanup_errors=True) as tmpdirname:
+            Path(tmpdirname, "ortho.tif").touch()
+            listing = find_geodata_files(start_folder=tmpdirname)
+        li_raster = listing[8]
+
+        total = _make_processor(li_rasters=li_raster).count_files_to_process()
+
+        self.assertEqual(total, 1)
 
     def test_cdao_files_are_queued_with_dxf_georeader(self):
         """CAD/DAO files are queued with the "dxf" format, which resolves to

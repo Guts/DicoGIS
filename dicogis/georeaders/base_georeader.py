@@ -268,13 +268,17 @@ class GeoReaderBase:
                 "srs_nr",
             )
 
-        layer_spatial_ref.AutoIdentifyEPSG()
-        srs_code = layer_spatial_ref.GetAuthorityCode(None)
-        if not srs_code:
-            if layer_spatial_ref.GetAttrValue("AUTHORITY", 1):
-                srs_code = layer_spatial_ref.GetAttrValue("AUTHORITY", 1)
-            else:
-                srs_code = "srs_no_epsg"
+        # with GDAL exceptions enabled, a CRS without EPSG equivalent (custom
+        # projection, ESRI WKT...) raises instead of returning an error code
+        try:
+            layer_spatial_ref.AutoIdentifyEPSG()
+        except RuntimeError as err:
+            logger.debug(
+                f"No EPSG code identified for '{layer_spatial_ref.GetName()}': {err}"
+            )
+        # only the root node's authority identifies the CRS: GetAttrValue("AUTHORITY")
+        # would return the first one found, e.g. its datum's or ellipsoid's code
+        srs_code = layer_spatial_ref.GetAuthorityCode(None) or "srs_no_epsg"
 
         # registry
         srs_registry = layer_spatial_ref.GetAuthorityName(None)

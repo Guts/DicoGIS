@@ -85,7 +85,7 @@ def inventory(
             envvar="DICOGIS_START_FOLDER",
             file_okay=False,
             help="Starting folder for listing files. "
-            "The folder must exist and be readable."
+            "The folder must exist and be readable. "
             "If None, files listing is ignored. Defaults to None.",
             readable=True,
             resolve_path=True,
@@ -114,8 +114,9 @@ def inventory(
             dir_okay=True,
             envvar="DICOGIS_OUTPUT_FILEPATH",
             file_okay=True,
-            help="If not set, the file is created in the current working directory "
-            "(cwd) and the filename is a concatenation of various informations.",
+            help="Output file (excel) or folder (json, udata). If not set, it's "
+            "created in the current working directory (cwd), named after the input "
+            "folder or PostgreSQL services and the date.",
             resolve_path=True,
             writable=True,
         ),
@@ -125,15 +126,15 @@ def inventory(
         typer.Option(
             case_sensitive=False,
             envvar="DICOGIS_OUTPUT_FORMAT",
-            help="Output format. For now, only Excel (Microsoft Excel .xlsx) is "
-            "supported. Here for the future!",
+            help="Output format: excel for a Microsoft Excel workbook (.xlsx), json "
+            "for one JSON file per dataset, udata for JSON files shaped for a uData "
+            "catalog (see the publish command).",
         ),
     ] = "excel",
     opt_notify_sound: Annotated[
         bool,
         typer.Option(
             envvar="DICOGIS_ENABLE_NOTIFICATION_SOUND",
-            is_flag=True,
             help="Enable/disable notification's sound at the end of processing.",
         ),
     ] = True,
@@ -141,7 +142,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_OPEN_OUTPUT",
-            is_flag=True,
             help="Enable/disable auto opening output file when processing has finished.",
         ),
     ] = True,
@@ -149,7 +149,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_EXPORT_SIZE_PRETTIFY",
-            is_flag=True,
             help="Enable prettified files size in output. "
             "Example: 1 ko instead of 1024.",
         ),
@@ -158,7 +157,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_QUICK_FAIL",
-            is_flag=True,
             help="Enable quick fail instead of passing errors. Useful for debug.",
         ),
     ] = False,
@@ -166,7 +164,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_EXPORT_RAW_PATH",
-            is_flag=True,
             help="Enable raw path instead of hyperlink in formats which support it.",
         ),
     ] = False,
@@ -174,7 +171,6 @@ def inventory(
         bool,
         typer.Option(
             envvar="DICOGIS_LISTING_PARALLEL_SCAN",
-            is_flag=True,
             help="Scan top-level subfolders in parallel worker threads instead of "
             "a single sequential walk. Only beneficial on high-latency storage "
             "(e.g. network-mounted shares) with a deep folder tree - can be slower "
@@ -198,7 +194,13 @@ def inventory(
             help="Force language to use. If not set, the current default locale is used.",
         ),
     ] = None,
-    verbose: bool = False,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_DEBUG",
+            help="Increase verbosity to show debug logs.",
+        ),
+    ] = False,
 ):
     """List, extract metadata from geospatial datasets (files or database) and store it
     as files.
@@ -206,13 +208,11 @@ def inventory(
     Make an inventory of geodata files starting from a folder and/or
     databases using connection listed in pg_service.conf and store everything in an
     output file.
-
+    \f
     Args:
         input_folder: starting folder for files. Defaults to None.
         formats: List of files extensions to include into listing. Defaults to every
             supported formats.
-        pg_services: name(s) of PostgreSQL services to use. Repeatable. If None,
-            database listing is ignored. Defaults to None.
         pg_services: name(s) of PostgreSQL services to use. Repeatable. If None,
             database listing is ignored. Defaults to None.
         language: language code to use. If not set, the current default locale is used.
@@ -351,7 +351,6 @@ def inventory(
         li_vectors.extend(li_gml)
         li_vectors.extend(li_geojson)
         li_vectors.extend(li_gxt)
-        li_raster.extend(li_geotiff)
 
         # check if there are some layers into the folder structure
         if not (
@@ -375,7 +374,6 @@ def inventory(
             li_flat_geodatabase_spatialite=li_file_database_spatialite,
             li_flat_geodatabase_geopackage=li_file_database_geopackage,
             li_geojson=li_geojson,
-            li_geotiff=li_geotiff,
             li_gml=li_gml,
             li_gxt=li_gxt,
             li_kml=li_kml,
@@ -447,7 +445,9 @@ def inventory(
             rich_print(f"Start processing using PostgreSQL service: {pg_service}")
 
             # testing connection settings
-            sgbd_reader = ReadPostGIS(service=pg_service)
+            sgbd_reader = ReadPostGIS(
+                service=pg_service, localized_strings=localized_strings
+            )
             sgbd_reader.get_connection()
 
             # check connection state

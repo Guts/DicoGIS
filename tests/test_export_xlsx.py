@@ -650,6 +650,39 @@ class TestPostSerializingAndTunningWorkbook(unittest.TestCase):
             self.assertEqual(sheet["A1"].style, "Headline 2")
 
 
+class TestSerializeFailedMetadataset(unittest.TestCase):
+    """A dataset which couldn't be read carries little more than its name, path
+    and error: it must still get its error row instead of making the export
+    raise."""
+
+    def test_bare_failed_metadataset_gets_its_error_row(self):
+        cases = (
+            ("sheet_vector_files", MetaVectorDataset, "flat_vector", "broken.shp"),
+            ("sheet_cad_files", MetaVectorDataset, "flat_cad", "broken.dxf"),
+            ("sheet_raster_files", MetaRasterDataset, "flat_raster", "broken.tif"),
+        )
+        for sheet_attribute, model, dataset_type, file_name in cases:
+            with self.subTest(dataset_type=dataset_type):
+                serializer = _make_serializer()
+                serializer.pre_serializing(
+                    has_vector=True, has_cad=True, has_raster=True
+                )
+                metadataset = model(
+                    name=Path(file_name).stem,
+                    path=Path(file_name),
+                    dataset_type=dataset_type,
+                    processing_succeeded=False,
+                    processing_error_type="err_corrupt",
+                    processing_error_msg="unreadable",
+                )
+
+                serializer.serialize_metadaset(metadataset=metadataset)
+
+                sheet = getattr(serializer, sheet_attribute)
+                self.assertEqual(sheet["A2"].style, "Warning Text")
+                self.assertEqual(sheet["C2"].value.strip(), "Corrupt file")
+
+
 # ############################################################################
 # ####### Stand-alone run ########
 # ################################

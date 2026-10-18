@@ -50,7 +50,6 @@ def main(
     verbose: Annotated[
         bool,
         typer.Option(
-            is_flag=True,
             help="Increase verbosity to show debug logs.",
             envvar="DICOGIS_DEBUG",
         ),
@@ -66,14 +65,14 @@ def main(
     ] = None,
 ):
     """Common options to commands or option only applicable to the main command.
-
+    \f
     Args:
         verbose: enable verbose mode. Defaults to False.
         version: show version and exit. Defaults to version_callback.
     """
     if verbose:
         state["verbose"] = True
-        logger.setLevel = logging.DEBUG
+        logger.setLevel(logging.DEBUG)
 
     if version:
         typer.echo(f"{__title__} {__version__}")
