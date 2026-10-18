@@ -6,10 +6,12 @@ Options are accessible through the `Settings` tab:
 
 ![DicoGIS GUI settings tags](../static/img/dicogis_gui_settings.webp)
 
+The output format is picked in the `Output file` group, under the tabs: an Excel workbook (`.xlsx` file), JSON files, or JSON files for uData (a folder of JSON files in both cases). Switching format adapts the output name accordingly.
+
 Publishing previously exported metadata (JSON files) to a uData catalog is done
 through the `Publish` tab: pick the folder containing the JSON files, fill in the
 uData catalog connection (API URL, version, key, and optionally an organization ID),
-then use the `Launch` button.
+then use the `Launch` button. After an export with the "JSON files for uData" format, the tab's folder is set to the exported one.
 
 ## Using environment variables
 
@@ -28,6 +30,7 @@ and the choice persists across runs in `options.ini`.
 | `DICOGIS_EXPORT_SIZE_PRETTIFY`      | `--opt-prettify-size` / `--no-opt-prettify-size` | `false`       |
 | `DICOGIS_LISTING_MAX_WORKERS`       | `--listing-max-workers`                          | unset (auto, based on CPU count) |
 | `DICOGIS_LISTING_PARALLEL_SCAN`     | `--opt-parallel-scan` / `--no-opt-parallel-scan` | `false`       |
+| `DICOGIS_OUTPUT_FORMAT`             | `--output-format` (`excel`, `json` or `udata`)   | `excel`       |
 | `DICOGIS_QUICK_FAIL`                | `--opt-quick-fail`                               | `false`       |
 
 #### About the parallel folder scan
@@ -62,7 +65,6 @@ Python size the pool from the CPU count. In the GUI, the equivalent spinbox uses
 | `DICOGIS_FORMATS_LIST`              | `--formats`                                      | `dxf,esri_shapefile,geojson,gml,kml,mapinfo_tab,sqlite,ecw,geotiff,jpeg` |
 | `DICOGIS_OPEN_OUTPUT`               | `--opt-open-output` / `--no-opt-open-output`     | `true`             |
 | `DICOGIS_OUTPUT_FILEPATH`           | `--output-path`                                  | `None`             |
-| `DICOGIS_OUTPUT_FORMAT`             | `--output-format`                                | `excel`            |
 | `DICOGIS_POSTGRES_SERVICES`         | `--pg-services`                                  | `None`             |
 | `DICOGIS_START_FOLDER`              | `--input-folder`                                 | `None`             |
 
