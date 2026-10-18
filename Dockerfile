@@ -43,7 +43,7 @@ RUN python3 -m pip install --no-cache-dir \
         notify-py==0.3.43 \
         numpy==2.5.2 \
         openpyxl==3.1.5 \
-        pgserviceparser==2.5.0 \
+        pgserviceparser==3.0.3 \
         pygments==2.21.0 \
         requests==2.34.2 \
         rich==15.0.0 \
