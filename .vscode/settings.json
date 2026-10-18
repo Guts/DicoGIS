@@ -1,6 +1,11 @@
 {
     // Editor
     "editor.bracketPairColorization.enabled": true,
+        "files.associations": {
+        "dicogis/ui/i18n/*.ts": "xml",
+        "dicogis/ui/*.ui": "xml",
+        "docs/_templates/layout.html": "jinja-html"
+    },
     "editor.guides.bracketPairs": "active",
     // JSON
     "[json]": {
