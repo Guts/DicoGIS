@@ -21,19 +21,8 @@ from webbrowser import open_new_tab
 # project
 from dicogis.__about__ import __uri_homepage__
 from dicogis.ui.qt_compat import uic
-from dicogis.ui.qt_compat.QtWidgets import (
-    QApplication,
-    QCheckBox,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QSpinBox,
-    QStyleFactory,
-    QVBoxLayout,
-    QWidget,
-)
-from dicogis.ui.wdg_collapsible_frame import ToggledFrame
-from dicogis.ui.wdg_scrollable_table import ScrollableTable
+from dicogis.ui.qt_compat.QtCore import Qt
+from dicogis.ui.qt_compat.QtWidgets import QApplication, QStyleFactory, QWidget
 from dicogis.utils.str2bool import str2bool
 from dicogis.utils.utils import Utilities
 
@@ -98,108 +87,39 @@ class TabSettings(QWidget):
         self.cbb_ui_style.currentTextChanged.connect(self.apply_ui_style)
 
     def _init_export_options(self) -> None:
-        """Create the export/general options collapsible frame."""
-        self.wdg_frame_export = ToggledFrame(
-            self,
-            in_text=self.tr("Export"),
-            start_opened=False,
-        )
-        export_layout = QVBoxLayout()
+        """Seed the export/general options from environment variables."""
+        self.btn_toggle_export.toggled.connect(self._update_toggle_arrows)
 
-        self.cbx_export_size_prettify = QCheckBox(
-            self.tr("Export: prettify files size"),
-            self.wdg_frame_export.frm_sub,
-        )
         self.cbx_export_size_prettify.setChecked(
             str2bool(getenv("DICOGIS_EXPORT_SIZE_PRETTIFY", "True"))
-        )
-        export_layout.addWidget(self.cbx_export_size_prettify)
-
-        self.cbx_export_raw_path = QCheckBox(
-            self.tr("Export: raw path"),
-            self.wdg_frame_export.frm_sub,
         )
         self.cbx_export_raw_path.setChecked(
             str2bool(getenv("DICOGIS_EXPORT_RAW_PATH", "False"))
         )
-        export_layout.addWidget(self.cbx_export_raw_path)
-
-        self.cbx_quick_fail = QCheckBox(
-            self.tr("Quick fail"),
-            self.wdg_frame_export.frm_sub,
-        )
         self.cbx_quick_fail.setChecked(str2bool(getenv("DICOGIS_QUICK_FAIL", "False")))
-        export_layout.addWidget(self.cbx_quick_fail)
-
-        self.cbx_end_process_notification_sound = QCheckBox(
-            self.tr("Play a notification sound when processing has finished."),
-            self.wdg_frame_export.frm_sub,
-        )
         self.cbx_end_process_notification_sound.setChecked(
             str2bool(getenv("DICOGIS_ENABLE_NOTIFICATION_SOUND", "True"))
         )
-        export_layout.addWidget(self.cbx_end_process_notification_sound)
-
-        self.cbx_debug = QCheckBox(
-            self.tr("Enable verbose (debug) logging"),
-            self.wdg_frame_export.frm_sub,
-        )
         self.cbx_debug.setChecked(str2bool(getenv("DICOGIS_DEBUG", "False")))
         self.cbx_debug.toggled.connect(self.apply_debug_logging)
-        export_layout.addWidget(self.cbx_debug)
-
-        self.cbx_parallel_scan = QCheckBox(
-            self.tr(
-                "Parallelize folder scan (recommended only for network-mounted / "
-                "high-latency storage; can be slower on local/fast storage)"
-            ),
-            self.wdg_frame_export.frm_sub,
-        )
         self.cbx_parallel_scan.setChecked(
             str2bool(getenv("DICOGIS_LISTING_PARALLEL_SCAN", "False"))
         )
-        export_layout.addWidget(self.cbx_parallel_scan)
-
-        max_workers_row = QHBoxLayout()
-        self.lbl_max_workers = QLabel(
-            self.tr("Parallel scan: max workers (0 = auto)"),
-            self.wdg_frame_export.frm_sub,
-        )
-        self.sbx_max_workers = QSpinBox(self.wdg_frame_export.frm_sub)
-        self.sbx_max_workers.setRange(0, 64)
-        self.sbx_max_workers.setSpecialValueText(self.tr("Auto"))
         env_max_workers = getenv("DICOGIS_LISTING_MAX_WORKERS", "")
         self.sbx_max_workers.setValue(
             int(env_max_workers) if env_max_workers.isdigit() else 0
         )
-        max_workers_row.addWidget(self.lbl_max_workers)
-        max_workers_row.addWidget(self.sbx_max_workers)
-        export_layout.addLayout(max_workers_row)
-
-        self.wdg_frame_export.frm_sub.setLayout(export_layout)
-
-        self.verticalLayout.insertWidget(2, self.wdg_frame_export)
 
     def _init_env_vars(self) -> None:
-        """Create the environment variables collapsible frame."""
-        self.wdg_frame_env = ToggledFrame(
-            self,
-            in_text=self.tr("Environment variables"),
-            start_opened=False,
-        )
-        env_layout = QVBoxLayout()
+        """List the DicoGIS environment variables and link to their documentation."""
+        self.btn_toggle_env_vars.toggled.connect(self._update_toggle_arrows)
 
-        self.btn_doc_env_vars = QPushButton(
-            self.tr("See supported variables"),
-            self.wdg_frame_env.frm_sub,
-        )
         self.btn_doc_env_vars.clicked.connect(
             lambda: open_new_tab(
                 f"{__uri_homepage__}usage/settings.html#using-environment-variables"
             )
         )
 
-        self.wdg_env_vars = ScrollableTable(self.wdg_frame_env.frm_sub)
         dicogis_env_vars = {
             env_var: value
             for env_var, value in environ.items()
@@ -213,11 +133,18 @@ class TabSettings(QWidget):
                 logger.debug(f"{var_name}={var_value}")
                 self.wdg_env_vars.add_row(var_name, var_value)
 
-        env_layout.addWidget(self.btn_doc_env_vars)
-        env_layout.addWidget(self.wdg_env_vars)
-        self.wdg_frame_env.frm_sub.setLayout(env_layout)
+    def _update_toggle_arrows(self) -> None:
+        """Point the arrow of each collapsible section button down when expanded.
 
-        self.verticalLayout.insertWidget(3, self.wdg_frame_env)
+        Showing/hiding the sections is connected in the .ui file: the arrow type
+        isn't a slot, so it can't be.
+        """
+        for btn_toggle in (self.btn_toggle_export, self.btn_toggle_env_vars):
+            btn_toggle.setArrowType(
+                Qt.ArrowType.DownArrow
+                if btn_toggle.isChecked()
+                else Qt.ArrowType.RightArrow
+            )
 
     # -- Live-apply handlers ---------------------------------------------------------
 
@@ -327,14 +254,29 @@ class TabSettings(QWidget):
         """Update widgets texts for the currently active language."""
         self.grp_interface.setTitle(self.tr("Interface"))
         self.lbl_ui_style.setText(self.tr("Interface style:"))
-        self.cbx_debug.setText(self.tr("Enable verbose (debug) logging"))
         self.grp_proxy.setTitle(self.tr("Proxy settings"))
         self.lbl_proxy_host.setText(self.tr("Server: "))
         self.lbl_proxy_port.setText(self.tr("Port: "))
         self.lbl_proxy_user.setText(self.tr("User: "))
         self.lbl_proxy_password.setText(self.tr("Password: "))
-        self.wdg_frame_export.btn_toggle.setText(self.tr("Export"))
-        self.wdg_frame_env.btn_toggle.setText(self.tr("Environment variables"))
+        self.btn_toggle_export.setText(self.tr("Export"))
+        self.cbx_export_size_prettify.setText(self.tr("Export: prettify files size"))
+        self.cbx_export_raw_path.setText(self.tr("Export: raw path"))
+        self.cbx_quick_fail.setText(self.tr("Quick fail"))
+        self.cbx_end_process_notification_sound.setText(
+            self.tr("Play a notification sound when processing has finished.")
+        )
+        self.cbx_debug.setText(self.tr("Enable verbose (debug) logging"))
+        self.cbx_parallel_scan.setText(
+            self.tr(
+                "Parallelize folder scan (recommended only for network-mounted / "
+                "high-latency storage; can be slower on local/fast storage)"
+            )
+        )
+        self.lbl_max_workers.setText(self.tr("Parallel scan: max workers (0 = auto)"))
+        self.sbx_max_workers.setSpecialValueText(self.tr("Auto"))
+        self.btn_toggle_env_vars.setText(self.tr("Environment variables"))
+        self.btn_doc_env_vars.setText(self.tr("See supported variables"))
 
 
 # #############################################################################

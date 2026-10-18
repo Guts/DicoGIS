@@ -213,3 +213,4 @@ arcpy.pth
 # packaging
 !bundle_executable_cli.spec
 .~lock*
+dicogis/ui/*.db

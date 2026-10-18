@@ -34,8 +34,37 @@
       </item>
      </layout>
     </item>
+    <item row="0" column="0" rowspan="5">
+     <widget class="MiscButtons" name="wdg_misc_buttons"/>
+    </item>
     <item row="1" column="1">
-     <widget class="QTabWidget" name="tab_main"/>
+     <widget class="QTabWidget" name="tab_main">
+      <widget class="TabFiles" name="wdg_tab_files">
+       <attribute name="title">
+        <string> Files </string>
+       </attribute>
+      </widget>
+      <widget class="TabDatabaseServer" name="wdg_tab_database">
+       <attribute name="title">
+        <string> PostGIS </string>
+       </attribute>
+      </widget>
+      <widget class="TabSettings" name="wdg_tab_settings">
+       <attribute name="title">
+        <string>Options</string>
+       </attribute>
+      </widget>
+      <widget class="TabPublish" name="wdg_tab_publish">
+       <attribute name="title">
+        <string>Publish</string>
+       </attribute>
+      </widget>
+      <widget class="TabCredits" name="wdg_tab_credits">
+       <attribute name="title">
+        <string>Credits</string>
+       </attribute>
+      </widget>
+     </widget>
     </item>
     <item row="2" column="1">
      <widget class="QGroupBox" name="grp_progress">
@@ -129,6 +158,38 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MiscButtons</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_misc_buttons</header>
+  </customwidget>
+  <customwidget>
+   <class>TabFiles</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_tab_files</header>
+  </customwidget>
+  <customwidget>
+   <class>TabDatabaseServer</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_tab_database</header>
+  </customwidget>
+  <customwidget>
+   <class>TabSettings</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_tab_settings</header>
+  </customwidget>
+  <customwidget>
+   <class>TabPublish</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_tab_publish</header>
+  </customwidget>
+  <customwidget>
+   <class>TabCredits</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_tab_credits</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

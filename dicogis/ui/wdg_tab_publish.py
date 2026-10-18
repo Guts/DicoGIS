@@ -22,7 +22,6 @@ from pathlib import Path
 from dicogis.publishing.udata import PublishReport
 from dicogis.ui.qt_compat import uic
 from dicogis.ui.qt_compat.QtWidgets import QFileDialog, QLineEdit, QWidget
-from dicogis.ui.wdg_scrollable_table import ScrollableTable
 from dicogis.utils.check_path import check_path
 from dicogis.utils.utils import Utilities
 
@@ -74,15 +73,6 @@ class TabPublish(QWidget):
         self.lne_udata_organization_id.setText(
             getenv("DICOGIS_UDATA_ORGANIZATION_ID", "")
         )
-
-        self.wdg_publish_errors = ScrollableTable(self.grp_report)
-        self.wdg_publish_errors.tbw_content.setHorizontalHeaderLabels(
-            [
-                self.tr("File"),
-                self.tr("Error"),
-            ]
-        )
-        self.grp_report.layout().addWidget(self.wdg_publish_errors)
 
         self.retranslate_ui()
 

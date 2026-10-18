@@ -95,11 +95,21 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="ScrollableTable" name="wdg_publish_errors"/>
+      </item>
      </layout>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ScrollableTable</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_scrollable_table</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

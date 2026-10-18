@@ -38,8 +38,6 @@ class ScrollableTable(QWidget):
                 self.tr("Value"),
             ]
         )
-        self.tbw_content.verticalHeader().setVisible(False)
-        self.tbw_content.horizontalHeader().setStretchLastSection(True)
 
     def add_row(self, key: str, value: str) -> None:
         """Append a key/value row to the table.

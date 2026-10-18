@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TabSettings</class>
+ <class>wdg_tab_settings</class>
  <widget class="QWidget" name="wdg_tab_settings">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>293</width>
+    <height>411</height>
+   </rect>
+  </property>
+  <property name="toolTip">
+   <string>Recommended only for network-mounted / high-latency storage; can be slower on local/fast storage</string>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="grp_interface">
@@ -99,7 +113,7 @@
       <item row="4" column="1">
        <widget class="QLineEdit" name="lne_proxy_password">
         <property name="echoMode">
-         <enum>QLineEdit::EchoMode::Password</enum>
+         <enum>QLineEdit::Password</enum>
         </property>
        </widget>
       </item>
@@ -107,9 +121,132 @@
     </widget>
    </item>
    <item>
+    <widget class="QToolButton" name="btn_toggle_export">
+     <property name="text">
+      <string>Export</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
+     </property>
+     <property name="arrowType">
+      <enum>Qt::RightArrow</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frm_export">
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="export_layout">
+      <item>
+       <widget class="QCheckBox" name="cbx_export_size_prettify">
+        <property name="text">
+         <string>Export: prettify files size</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_export_raw_path">
+        <property name="text">
+         <string>Export: raw path</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_quick_fail">
+        <property name="text">
+         <string>Quick fail</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_end_process_notification_sound">
+        <property name="text">
+         <string>Play a notification sound when processing has finished.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_debug">
+        <property name="text">
+         <string>Enable verbose (debug) logging</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbx_parallel_scan">
+        <property name="text">
+         <string>Parallelize folder scan</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="max_workers_layout">
+        <item>
+         <widget class="QLabel" name="lbl_max_workers">
+          <property name="text">
+           <string>Parallel scan: max workers (0 = auto)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="sbx_max_workers">
+          <property name="specialValueText">
+           <string>Auto</string>
+          </property>
+          <property name="maximum">
+           <number>64</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="btn_toggle_env_vars">
+     <property name="text">
+      <string>Environment variables</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
+     </property>
+     <property name="arrowType">
+      <enum>Qt::RightArrow</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frm_env_vars">
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="env_vars_layout">
+      <item>
+       <widget class="QPushButton" name="btn_doc_env_vars">
+        <property name="text">
+         <string>See supported variables</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ScrollableTable" name="wdg_env_vars" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Orientation::Vertical</enum>
+      <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -121,6 +258,46 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ScrollableTable</class>
+   <extends>QWidget</extends>
+   <header>dicogis.ui.wdg_scrollable_table</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn_toggle_export</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frm_export</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_toggle_env_vars</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frm_env_vars</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

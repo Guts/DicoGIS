@@ -149,14 +149,19 @@ widget/dialog module has a matching `.ui` file of the same stem
 from a frozen PyInstaller build) rather than `Path(__file__).parent`. Widgets
 named in the `.ui` file (`objectName`) become attributes on `self` after
 `loadUi()` — dynamic content (translated strings, values only known at
-runtime, nested custom widgets) is still applied/composed in Python after the
-load call.
+runtime, table rows) is still applied in Python after the load call. The
+project's own widgets (tab pages, `MiscButtons`, `ScrollableTable`) are placed
+in the `.ui` files by promotion too (`<customwidgets>`, header = Python module
+path such as `dicogis.ui.wdg_scrollable_table`), never instantiated and added
+to a layout in Python: `tests/test_ui_widgets_in_ui_files.py` fails on any Qt
+widget/layout or `dicogis.ui.wdg_*` class instantiated under `dicogis/ui`
+(dialogs opened at runtime and `__main__` blocks aside).
 
 File naming follows a prefix convention:
 
 - `dlg_` — `QDialog` subclasses (`dicogis/ui/dialogs/dlg_database_connection.py`)
 - `wdg_` — `QWidget` subclasses, including notebook tab pages
-  (`wdg_tab_files.py`, `wdg_collapsible_frame.py`, `wdg_scrollable_table.py`, …)
+  (`wdg_tab_files.py`, `wdg_misc_buttons.py`, `wdg_scrollable_table.py`, …)
 - `mw_` — the `QMainWindow` (`dicogis/ui/mw_dicogis.py`)
 
 Plain, unprefixed modules (`workers.py`, `main.py`) hold non-widget code

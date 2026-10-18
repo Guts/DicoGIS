@@ -45,12 +45,6 @@ from dicogis.ui.qt_compat.QtWidgets import (
     QMessageBox,
     QWidget,
 )
-from dicogis.ui.wdg_misc_buttons import MiscButtons
-from dicogis.ui.wdg_tab_credits import TabCredits
-from dicogis.ui.wdg_tab_database import TabDatabaseServer
-from dicogis.ui.wdg_tab_files import TabFiles
-from dicogis.ui.wdg_tab_publish import TabPublish
-from dicogis.ui.wdg_tab_settings import TabSettings
 from dicogis.ui.workers import (
     FolderScanWorker,
     PostgisProcessingWorker,
@@ -187,24 +181,8 @@ class DicoGIS(QMainWindow):
             language_code=self.def_lang
         )
 
-        # tabs
-        self.wdg_tab_files = TabFiles(parent=self.tab_main)  # tab_id = 0
-        self.wdg_tab_database = TabDatabaseServer(parent=self.tab_main)  # tab_id = 1
-        self.wdg_tab_settings = TabSettings(parent=self.tab_main)  # tab_id = 2
-        self.wdg_tab_publish = TabPublish(parent=self.tab_main)  # tab_id = 3
-        self.wdg_tab_credits = TabCredits(parent=self.tab_main)  # tab_id = 4
-
-        self.tab_main.addTab(self.wdg_tab_files, " Files ")
-        self.tab_main.addTab(self.wdg_tab_database, " PostGIS ")
-        self.tab_main.addTab(self.wdg_tab_settings, "Options")
-        self.tab_main.addTab(self.wdg_tab_publish, "Publish")
-        self.tab_main.addTab(self.wdg_tab_credits, "Credits")
-
+        # tabs (declared in the .ui file): files, database, settings, publish, credits
         self.wdg_tab_files.folder_selected.connect(self.on_folder_selected)
-
-        # miscellaneous (left side panel)
-        self.wdg_misc_buttons = MiscButtons(self, images_folder=self.dir_imgs)
-        self.main_layout.addWidget(self.wdg_misc_buttons, 0, 0, 5, 1)
 
         # language switcher
         li_lang = [v.value for v in AvailableLocales]
