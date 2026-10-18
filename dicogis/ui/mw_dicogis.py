@@ -27,7 +27,7 @@ from osgeo import gdal
 
 # Project
 from dicogis import __about__
-from dicogis.constants import AvailableLocales, OutputFormats
+from dicogis.constants import AvailableLocales, JsonFlavors, OutputFormats
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.output_path import (
     determine_output_path,
@@ -61,6 +61,7 @@ from dicogis.ui.workers import (
 from dicogis.utils.checknorris import CheckNorris
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.options import OptionsManager
+from dicogis.utils.paths import absolute_path
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -759,6 +760,14 @@ class DicoGIS(QMainWindow):
         if not QDesktopServices.openUrl(QUrl.fromLocalFile(str(output_path))):
             logger.warning(f"Opening {output_path} failed.")
 
+    def _prefill_publish_input_folder(self) -> None:
+        """Point the Publish tab to the output of a uData-flavored JSON export, the
+        input it expects, so publishing it is the next step."""
+        if getattr(self.serializer, "flavor", None) == JsonFlavors.udata:
+            self.wdg_tab_publish.set_input_folder(
+                str(absolute_path(self.serializer.output_path))
+            )
+
     def _on_files_processing_finished(self, total_files: int) -> None:
         """React to a successful files processing run.
 
@@ -766,6 +775,7 @@ class DicoGIS(QMainWindow):
             total_files: number of files processed.
         """
         self._open_output()
+        self._prefill_publish_input_folder()
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message=f"DicoGIS successfully processed {total_files} files. "
@@ -848,6 +858,7 @@ class DicoGIS(QMainWindow):
             total_layers: number of PostGIS tables processed.
         """
         self._open_output()
+        self._prefill_publish_input_folder()
         send_system_notify(
             notification_title="DicoGIS analysis ended",
             notification_message="DicoGIS successfully processed "

@@ -347,3 +347,46 @@ def test_main_window_no_json_folder_without_geodata(qtbot, monkeypatch, tmp_path
     window.process_files()
 
     assert not (tmp_path / "inventory").exists()
+
+
+def test_main_window_prefills_publish_folder_after_udata_export(
+    qtbot, monkeypatch, tmp_path
+):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window, "_open_output", lambda: None)
+    monkeypatch.setattr(
+        "dicogis.ui.mw_dicogis.send_system_notify", lambda **kwargs: None
+    )
+    window.serializer = MagicMock(flavor="udata", output_path=tmp_path / "out")
+
+    for end_of_run in (
+        lambda: window._on_files_processing_finished(total_files=1),
+        lambda: window._on_db_processing_finished(total_layers=1),
+    ):
+        window.wdg_tab_publish.set_input_folder("")
+
+        end_of_run()
+
+        assert window.wdg_tab_publish.get_input_folder() == str(tmp_path / "out")
+
+
+def test_main_window_keeps_publish_folder_after_other_exports(
+    qtbot, monkeypatch, tmp_path
+):
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window, "_open_output", lambda: None)
+    monkeypatch.setattr(
+        "dicogis.ui.mw_dicogis.send_system_notify", lambda **kwargs: None
+    )
+    window.wdg_tab_publish.set_input_folder("previous")
+
+    for serializer in (
+        MagicMock(spec=["output_path"], output_path=tmp_path / "out.xlsx"),
+        MagicMock(flavor="dicogis", output_path=tmp_path / "out"),
+    ):
+        window.serializer = serializer
+        window._on_files_processing_finished(total_files=1)
+
+        assert window.wdg_tab_publish.get_input_folder() == "previous"
