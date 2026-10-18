@@ -212,5 +212,4 @@ arcpy.pth
 
 # packaging
 !bundle_executable_cli.spec
-version_info.txt
 .~lock*
