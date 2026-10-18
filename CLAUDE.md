@@ -271,7 +271,9 @@ is involved:
 ### Packaging
 
 `builder/` contains the PyInstaller specs/scripts for Windows and Ubuntu, for
-both the CLI and GUI executables, plus a Windows version-info templater. CI's
+both the CLI and GUI executables. The Windows scripts embed a version resource
+(file properties: version, author, description…) built from `dicogis/__about__.py`
+by `builder/win_version_info.py`. CI's
 `builder_releaser.yml` workflow builds and publishes these. Version is
 single-sourced from `dicogis/__about__.py::__version__` (`pyproject.toml` reads
 it via `[tool.setuptools.dynamic]`).

@@ -9,15 +9,14 @@ The output binary and all embedded dependencies is located into a subfolder name
 > Comply with [development requirements](windows) before to run.
 
 ```powershell
-# Generates MS Version Info
-python .\builder\version_info_templater.py
-
 # Generates MS Executable for CLI
 python -O .\builder\pyinstaller_build_windows_cli.py
 
 # Generates MS Executable for GUI
 python -O .\builder\pyinstaller_build_windows_gui.py
 ```
+
+Both scripts embed a version resource in the executable (its file properties in Windows: version, author, description…), built from `dicogis/__about__.py` by `builder/win_version_info.py`.
 
 To run it, double-click on the executable file (*.exe).
 
