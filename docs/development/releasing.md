@@ -5,9 +5,11 @@
 1. Apply a git tag with the relevant version: `git tag -a 0.3.0 {git commit hash} -m "New awesome feature"`
 1. Push commit and tag to main branch: `git push --tags`
 
-Pushing the tag triggers the CI/CD workflows. Among them, `pypi_publisher.yml` builds the source and wheel distributions, runs `twine check --strict` and checks that the tag matches the version declared in `__about__.py` (compared as [PEP 440](https://peps.python.org/pep-0440/) versions: `4.0.0-beta9` and `4.0.0b9` are the same version), then publishes them to [PyPI](https://pypi.org/project/dicogis/).
+Pushing the tag triggers the `builder_releaser.yml` workflow. It builds the executables and the Python package (source and wheel distributions), creates the GitHub release with all of them attached, then publishes the Python package to [PyPI](https://pypi.org/project/dicogis/).
 
-The workflow can also be started manually from the _Actions_ tab to build and check the distributions without publishing anything.
+Before building, the workflow runs `twine check --strict` on the distributions and checks that the tag matches the version declared in `__about__.py` (compared as [PEP 440](https://peps.python.org/pep-0440/) versions: `4.0.0-beta9` and `4.0.0b9` are the same version).
+
+On a pull request touching `pyproject.toml`, `MANIFEST.in` or the workflow itself, the Python package is built and checked without publishing anything.
 
 ## PyPI publication
 
@@ -15,7 +17,7 @@ The publication relies on [PyPI Trusted Publishing](https://docs.pypi.org/truste
 
 One-time setup, before the first release:
 
-1. On PyPI, in the account's [publishing settings](https://pypi.org/manage/account/publishing/), add a _pending publisher_ with the project name `dicogis`, the owner `Guts`, the repository `DicoGIS`, the workflow `pypi_publisher.yml` and the environment `pypi`
+1. On PyPI, in the account's [publishing settings](https://pypi.org/manage/account/publishing/), add a _pending publisher_ with the project name `dicogis`, the owner `Guts`, the repository `DicoGIS`, the workflow `builder_releaser.yml` and the environment `pypi`
 1. On GitHub, in the repository settings, create an environment named `pypi` (optionally with required reviewers, to confirm each publication)
 
 The first successful publication turns the pending publisher into a regular one.
