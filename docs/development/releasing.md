@@ -5,6 +5,25 @@
 1. Apply a git tag with the relevant version: `git tag -a 0.3.0 {git commit hash} -m "New awesome feature"`
 1. Push commit and tag to main branch: `git push --tags`
 
+Pushing the tag triggers the `builder_releaser.yml` workflow. It builds the executables and the Python package (source and wheel distributions), creates the GitHub release with all of them attached, then publishes the Python package to [PyPI](https://pypi.org/project/dicogis/).
+
+Before building, the workflow runs `twine check --strict` on the distributions and checks that the tag matches the version declared in `__about__.py` (compared as [PEP 440](https://peps.python.org/pep-0440/) versions: `4.0.0-beta9` and `4.0.0b9` are the same version).
+
+On a pull request touching `pyproject.toml`, `MANIFEST.in` or the workflow itself, the Python package is built and checked without publishing anything.
+
+## PyPI publication
+
+The publication relies on [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (OpenID Connect): no API token is stored in the repository.
+
+One-time setup, before the first release:
+
+1. On PyPI, in the account's [publishing settings](https://pypi.org/manage/account/publishing/), add a _pending publisher_ with the project name `dicogis`, the owner `Guts`, the repository `DicoGIS`, the workflow `builder_releaser.yml` and the environment `pypi`
+1. On GitHub, in the repository settings, create an environment named `pypi` (optionally with required reviewers, to confirm each publication)
+
+The first successful publication turns the pending publisher into a regular one.
+
+> A version can be published only once on PyPI: even deleted, a file can't be uploaded again under the same name, so moving the tag and re-running the workflow doesn't fix a faulty release. [Yank it](https://pypi.org/help/#yanked) and publish a new version.
+
 ## Unpublish a tag
 
 ```sh
@@ -22,20 +41,20 @@ If the CI/CD fails for any reason, here comes the manual procedure:
 1. Install required packages:
 
     ```sh
-    python -m pip install -U build twine wheel
+    python -m pip install -U build twine
     ```
 
-1. Install package in editable mode:
-
-    ```sh
-    python -m pip install -e .
-    ```
-
-1. Clean previous builds and build package artifacts:
+1. Clean previous builds and build package artifacts (source and wheel distributions, in `dist/`):
 
     ```sh
     rm -rf dist/
-    python -m build --no-isolation --sdist --wheel --outdir dist/ .
+    python -m build
+    ```
+
+1. Check built artifacts:
+
+    ```sh
+    twine check --strict dist/*
     ```
 
 1. Upload built artifacts to PyPi:
