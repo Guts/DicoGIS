@@ -283,12 +283,14 @@ by `builder/win_version_info.py`. CI's
 single-sourced from `dicogis/__about__.py::__version__` (`pyproject.toml` reads
 it via `[tool.setuptools.dynamic]`).
 
-The package itself is published to PyPI by `.github/workflows/pypi_publisher.yml`
-on every tag (Trusted Publishing, `pypi` GitHub environment, no API token): it
-builds the sdist and the wheel, runs `twine check --strict` and refuses a tag
-that doesn't match `__version__`. `tests/test_packaging.py` fails when a `.ui`
-or `.qm` file isn't covered by `[tool.setuptools.package-data]`: add the pattern
-there when introducing a new UI subfolder or kind of data file. Don't add
+The same workflow publishes the package to PyPI: its `build-python-package` job
+builds the sdist and the wheel, runs `twine check --strict` and, on a tag,
+refuses a tag that doesn't match `__version__`; its `release-pypi` job (Trusted
+Publishing, `pypi` GitHub environment, no API token) then uploads them, and the
+`release` job attaches them to the GitHub release. `tests/test_packaging.py`
+fails when a `.ui` or `.qm` file isn't covered by
+`[tool.setuptools.package-data]`: add the pattern there when introducing a new
+UI subfolder or kind of data file. Don't add
 `setuptools-scm` to `build-system.requires`: it is not configured here, but as
 a build-time file finder it would make the sdist ship every git-tracked file
 (docs, images…) and the wheel the `.ts` translation sources. The release
