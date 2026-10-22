@@ -52,6 +52,8 @@ PyInstaller.__main__.run(
         "--add-data=LICENSE;.",
         "--add-data=README.md;.",
         "--collect-data=PyQt6",
+        # promoted widgets are only named in .ui files, imported at runtime by uic
+        "--collect-submodules=dicogis.ui",
         "--icon={}".format((package_folder / "bin/img/DicoGIS.ico").resolve()),
         "--log-level={}".format(getenv("PYINSTALLER_LOG_LEVEL", "WARN")),
         "--manifest={}".format((package_folder / "../builder/manifest.xml").resolve()),
