@@ -22,11 +22,15 @@ Usage from the repo root folder:
 
 # standard library
 import ast
+from os import getenv
 from pathlib import Path
 from xml.etree import ElementTree
 
 # 3rd party
 import pytest
+
+# project
+from dicogis.utils.str2bool import str2bool
 
 
 # ##############################################################################
@@ -38,6 +42,16 @@ I18N_FOLDER = UI_FOLDER / "i18n"
 # English is the source language: its .ts is a reference, never compiled nor
 # loaded at runtime, so untranslated entries there are expected
 TRANSLATED_LOCALES = ("fr", "es")
+
+# Missing translations are expected while features are under development, so the
+# completeness check is only enforced when explicitly enabled: the CI does it on
+# tags and `release/*` branches, a contributor can do it locally with
+# `DICOGIS_I18N_STRICT=1 pytest tests/test_ui_i18n.py`
+I18N_STRICT_ENV_VAR = "DICOGIS_I18N_STRICT"
+requires_i18n_strict = pytest.mark.skipif(
+    not str2bool(getenv(I18N_STRICT_ENV_VAR, "False")),
+    reason=f"translations completeness only checked if {I18N_STRICT_ENV_VAR} is true",
+)
 
 
 # ##############################################################################
@@ -108,6 +122,7 @@ def test_translatable_sources_are_found() -> None:
     assert len(_translatable_sources()) > 50
 
 
+@requires_i18n_strict
 @pytest.mark.parametrize("locale", TRANSLATED_LOCALES)
 def test_every_widget_string_is_translated(locale: str) -> None:
     """Every `self.tr()` string must have a translation in each shipped locale.
