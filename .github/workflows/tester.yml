@@ -4,9 +4,14 @@ on:
   push:
     branches:
         - master
+        - release/*
+    # path filters are not evaluated for pushes of tags
+    tags:
+      - "*"
     paths:
       - ".github/workflows/tester.yml"
       - "**/*.py"
+      - "dicogis/ui/i18n/*"
       - pyproject.toml
 
   pull_request:
@@ -24,6 +29,9 @@ permissions:
 env:
   GDAL_VERSION: 3.*
   PROJECT_FOLDER: "dicogis"
+  # check translations completeness (tests/test_ui_i18n.py) only on tags and
+  # release/* branches. head_ref is the source branch of a pull request, empty on push
+  DICOGIS_I18N_STRICT: ${{ (startsWith(github.ref, 'refs/tags/') || startsWith(github.ref_name, 'release/') || startsWith(github.head_ref, 'release/')) && 'true' || 'false' }}
 
 jobs:
   test-ubuntu:
