@@ -56,7 +56,7 @@ doc = [
     "sphinxext-opengraph>=0.9",
 ]
 gdal = ["gdal[numpy]>=3.5.0,<4"]
-gui = ["PyQt6>=6.11,<6.12"]
+gui = ["PyQt6>=6.11,<6.13"]
 packaging = [
     "pyinstaller>=6.8.0,<6.23",
     "pypiwin32==223 ; sys_platform == 'win32'",
