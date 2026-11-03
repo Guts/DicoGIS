@@ -40,7 +40,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pre-commit>=4.5,<5",
-    "ruff>=0.15.20,<0.17.0",
+    "ruff>=0.15.20,<0.18.0",
 ]
 doc = [
     "furo>=2024",
