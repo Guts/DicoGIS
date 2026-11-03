@@ -73,10 +73,12 @@ Ubuntu installs those binaries in `/usr/lib/qt6/bin/`, which is not on the `PATH
 1. Check your work:
 
     ```sh
-    pytest tests/test_ui_i18n.py
+    DICOGIS_I18N_STRICT=1 pytest tests/test_ui_i18n.py
     ```
 
     That suite fails, naming the offending strings, when a `self.tr()` string has no translation in a shipped locale, or when a `.qm` is out of date with its `.ts`.
+
+    The completeness check (every `self.tr()` string translated) is skipped unless the `DICOGIS_I18N_STRICT` environment variable is true, because translations are legitimately incomplete while a feature is under development. The CI enables it only on tags and on `release/*` branches (including pull requests opened from one), so a release cannot ship an untranslated interface. The `.qm` freshness check always runs.
 
 ### English is the source language
 
