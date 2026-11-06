@@ -217,6 +217,16 @@ def run_apidoc(_):
     main(["-e", "-f", "-M", "-o", str(output_path), str(modules)] + exclusions)
 
 
+def drop_pyqt_signal_docstring(app, what, name, obj, options, lines):
+    """Remove the generic docstring PyQt gives to signals without their own.
+
+    It contains `*types`, which docutils reads as an unfinished emphasis.
+    """
+    if lines and lines[0].endswith("-> PYQT_SIGNAL"):
+        lines.clear()
+
+
 # launch setup
 def setup(app):
     app.connect("builder-inited", run_apidoc)
+    app.connect("autodoc-process-docstring", drop_pyqt_signal_docstring)
