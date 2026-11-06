@@ -29,6 +29,8 @@ permissions:
 env:
   GDAL_VERSION: 3.*
   PROJECT_FOLDER: "dicogis"
+  # pytest-qt would pick PySide6 on Windows, where pyside6-essentials is installed for lrelease
+  PYTEST_QT_API: pyqt6
   # check translations completeness (tests/test_ui_i18n.py) only on tags and
   # release/* branches. head_ref is the source branch of a pull request, empty on push
   DICOGIS_I18N_STRICT: ${{ (startsWith(github.ref, 'refs/tags/') || startsWith(github.ref_name, 'release/') || startsWith(github.head_ref, 'release/')) && 'true' || 'false' }}
