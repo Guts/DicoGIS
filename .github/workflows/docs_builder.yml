@@ -32,13 +32,14 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
-env:
-  GDAL_VERSION: 3.*
-  PYTHON_VERSION: "3.11"
-
 jobs:
   build-docs:
     runs-on: ubuntu-24.04
+    # official GDAL image: libgdal and its Python bindings are already installed and
+    # version-matched, so no apt/PPA step and no GDAL compilation.
+    # Keep the tag aligned with GDAL_VERSION in the root Dockerfile.
+    container:
+      image: ghcr.io/osgeo/gdal:ubuntu-small-3.11.0
 
     steps:
       - name: Get source code
@@ -46,31 +47,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
-          cache-dependency-path: pyproject.toml
-
-      - name: Install GDAL binaries
+      - name: Install Python tooling and Tk
         run: |
-          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable && sudo apt-get update
-          sudo apt install gdal-bin=${{ env.GDAL_VERSION }}
-          sudo apt install libgdal-dev=${{ env.GDAL_VERSION }}
-          export CPLUS_INCLUDE_PATH=/usr/include/gdal
-          export C_INCLUDE_PATH=/usr/include/gdal
+          apt-get update
+          apt-get install -y --no-install-recommends python3-pip python3-venv python3-tk
           gdal-config --version
 
-      - name: Install complementary tools
+      # --system-site-packages lets the venv see the image's pre-built osgeo bindings
+      - name: Create virtual environment
         run: |
-          sudo apt install python3-tk
+          python3 -m venv --system-site-packages /opt/venv
+          echo "/opt/venv/bin" >> "$GITHUB_PATH"
 
-      - name: Install project requirements
-        run: |
-          python -m pip install -U pip setuptools wheel
-          # Install GDAL first
-          python -m pip install GDAL=="`gdal-config --version`.*"
+      - name: Upgrade packaging tools
+        run: python -m pip install -U pip setuptools wheel
 
       # this job must run before installing other dependencies to avoid listing everything
       - name: Generates dependencies graph page with pipdetree
