@@ -28,7 +28,7 @@ def read_db_conf(dbconf_path: Path) -> list | dict:
     """Read databases configuration files and return parameters as list of dictionaries.
 
     Args:
-        dbconf_path (Path): filepath to *.dbconf file
+        dbconf_path (Path): filepath to ``*.dbconf`` file
 
     Raises:
         TypeError: if input filepath is not an instance of pathlib.Path

@@ -2,11 +2,10 @@
 
 
 """
-Name:         TabPublish
-Purpose:      Tab to publish previously exported metadata (JSON files) to a
-              uData catalog, from DicoGIS Notebook.
-
-Author:       Julien Moura (@geojulien)
+:Name: TabPublish
+:Purpose: Tab to publish previously exported metadata (JSON files) to a
+    uData catalog, from DicoGIS Notebook.
+:Author: Julien Moura (@geojulien)
 """
 
 # ##############################################################################

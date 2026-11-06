@@ -2,11 +2,10 @@
 
 
 """
-Name:         Progress
-Purpose:      Toolkit-agnostic contract used by the processing pipeline to
-              report progress and to be told to stop.
-
-Author:       Julien Moura (@geojulien)
+:Name: Progress
+:Purpose: Toolkit-agnostic contract used by the processing pipeline to
+    report progress and to be told to stop.
+:Author: Julien Moura (@geojulien)
 """
 
 # ##############################################################################

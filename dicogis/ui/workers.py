@@ -2,11 +2,10 @@
 
 
 """
-Name:         Workers
-Purpose:      QThread-based workers running long tasks off the GUI thread, plus a
-              Qt-signal-based implementation of the ProgressReporter protocol.
-
-Author:       Julien Moura (@geojulien)
+:Name: Workers
+:Purpose: QThread-based workers running long tasks off the GUI thread, plus a
+    Qt-signal-based implementation of the ProgressReporter protocol.
+:Author: Julien Moura (@geojulien)
 """
 
 # ##############################################################################
