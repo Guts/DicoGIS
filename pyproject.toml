@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools-scm>8"]
+# setuptools>=77 is needed for the SPDX `license` expression (PEP 639)
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
