@@ -216,3 +216,6 @@ arcpy.pth
 !bundle_executable_cli.spec
 .~lock*
 dicogis/ui/*.db
+
+# compiled Qt translations: generated from the .ts files by lrelease in the CI
+dicogis/ui/i18n/*.qm
