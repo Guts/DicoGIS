@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DicoGIS</class>
+ <class>mw_dicogis</class>
  <widget class="QMainWindow" name="mw_dicogis">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>336</width>
+    <height>354</height>
+   </rect>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
   <widget class="QWidget" name="wdg_central">
    <layout class="QGridLayout" name="main_layout">
     <item row="0" column="1">
@@ -19,7 +30,7 @@
       <item>
        <spacer name="top_bar_spacer">
         <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -35,10 +46,13 @@
      </layout>
     </item>
     <item row="0" column="0" rowspan="5">
-     <widget class="MiscButtons" name="wdg_misc_buttons"/>
+     <widget class="MiscButtons" name="wdg_misc_buttons" native="true"/>
     </item>
     <item row="1" column="1">
      <widget class="QTabWidget" name="tab_main">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
       <widget class="TabFiles" name="wdg_tab_files">
        <attribute name="title">
         <string> Files </string>
@@ -46,7 +60,7 @@
       </widget>
       <widget class="TabDatabaseServer" name="wdg_tab_database">
        <attribute name="title">
-        <string> PostGIS </string>
+        <string notr="true"> PostGIS </string>
        </attribute>
       </widget>
       <widget class="TabSettings" name="wdg_tab_settings">
