@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MiscButtons</class>
+ <class>wdg_misc_buttons</class>
  <widget class="QWidget" name="wdg_misc_buttons">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>241</width>
+    <height>168</height>
+   </rect>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="1" colspan="2">
+   <item row="0" column="0" colspan="2">
     <widget class="QLabel" name="lbl_logo">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="1" column="0" rowspan="1" colspan="2">
+   <item row="1" column="0" colspan="2">
     <widget class="QPushButton" name="btn_credits"/>
    </item>
    <item row="2" column="0">
@@ -36,12 +47,15 @@
    </item>
    <item row="3" column="1">
     <widget class="QPushButton" name="btn_support">
+     <property name="locale">
+      <locale language="English" country="UnitedStates"/>
+     </property>
      <property name="text">
-      <string>Fund &amp; Support</string>
+      <string>Fund, support</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0" rowspan="1" colspan="2">
+   <item row="4" column="0" colspan="2">
     <widget class="QPushButton" name="btn_app_dir">
      <property name="text">
       <string>Application folder</string>

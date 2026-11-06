@@ -238,26 +238,25 @@ is involved:
   through this mechanism rather than being hardcoded.
 - **GUI widget text** (`dicogis/ui/*`, including dialogs): plain Qt native
   i18n — `self.tr("English source text")` calls, extracted into
-  `dicogis/ui/i18n/dicogis_{en,fr,es}.ts` with `pylupdate6`, translated in Qt
+  `dicogis/ui/i18n/dicogis_{fr,es}.ts` with `pylupdate6`, translated in Qt
   Linguist (or by hand), compiled to `.qm` with `lrelease`, and loaded via a
   `QTranslator` installed on the `QApplication` (`DicoGIS._install_qt_translator()`
   in `mw_dicogis.py`, called from `retranslate_ui()` before any `self.tr()` call,
   including the one done at startup and on every language-dropdown change). New
   widget-visible text should use `self.tr(...)` — never `TextsManager` — and the
-  `.ts` files regenerated with:
+  `.ts` files regenerated with (`pylupdate6` reads the `.py` and `.ui` files of the package):
 
   ```sh
-  pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_en.ts
-  # repeat for _fr.ts / _es.ts, fill in <translation> entries, then compile:
-  lrelease dicogis/ui/i18n/dicogis_fr.ts -qm dicogis/ui/i18n/dicogis_fr.qm
-  lrelease dicogis/ui/i18n/dicogis_es.ts -qm dicogis/ui/i18n/dicogis_es.qm
+  for lang in fr es; do pylupdate6 dicogis --ts dicogis/ui/i18n/dicogis_$lang.ts; done
+  # then fill in <translation> entries, and compile (.qm are not versioned):
+  for lang in fr es; do lrelease dicogis/ui/i18n/dicogis_$lang.ts -qm dicogis/ui/i18n/dicogis_$lang.qm; done
   ```
 
-  `dicogis_en.ts` is kept as the source-of-truth reference (never compiled/loaded
-  at runtime: English is the source language, so untranslated `self.tr()` calls
-  already return it with no `.qm` installed). Only `.qm` files ship with the
-  package/frozen executables (`pyproject.toml` package-data, PyInstaller GUI
-  builder scripts' `--add-data`), not the `.ts` sources.
+  There is no English `.ts`: English is the source language, so untranslated
+  `self.tr()` calls already return the English text with no `.qm` installed. The `.qm` files are not
+  versioned: CI compiles them from the `.ts` before tests and packaging
+  (see the `Compile translations` steps of the workflows), and they ship in the package/frozen
+  executables (`pyproject.toml` package-data), not the `.ts` sources.
 
 ### Cross-cutting utilities (`dicogis/utils/`)
 

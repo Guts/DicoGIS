@@ -51,6 +51,18 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - name: Install Qt translation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt6-l10n-tools
+
+      - name: Compile translations
+        run: |
+          export PATH="/usr/lib/qt6/bin:$PATH"
+          for lang in fr es; do
+            lrelease dicogis/ui/i18n/dicogis_$lang.ts -qm dicogis/ui/i18n/dicogis_$lang.qm
+          done
+
       - name: Install build tools
         run: python -m pip install -U build twine
 
@@ -135,6 +147,18 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install gdal=="`gdal-config --version`.*"
           python -m pip install .[gdal,gui,packaging]
+
+      - name: Install Qt translation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt6-l10n-tools
+
+      - name: Compile translations
+        run: |
+          export PATH="/usr/lib/qt6/bin:$PATH"
+          for lang in fr es; do
+            lrelease dicogis/ui/i18n/dicogis_$lang.ts -qm dicogis/ui/i18n/dicogis_$lang.qm
+          done
 
       - name: Generates executable for command-line version
         run: |
@@ -227,6 +251,16 @@ jobs:
 
       - name: Install project as a package
         run: python -m pip install .[gdal,gui,packaging]
+
+      - name: Install Qt translation tools
+        run: python -m pip install pyside6-essentials
+
+      - name: Compile translations
+        shell: bash
+        run: |
+          for lang in fr es; do
+            pyside6-lrelease dicogis/ui/i18n/dicogis_$lang.ts -qm dicogis/ui/i18n/dicogis_$lang.qm
+          done
 
       - name: Generates executable for command-line version
         run: |

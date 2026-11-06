@@ -4,7 +4,7 @@ DicoGIS is shipped in English (source language), French and Spanish. Two separat
 
 | What you are translating | Mechanism | Files |
 | :--- | :--- | :--- |
-| Widget text: buttons, labels, tabs, tooltips, message boxes | Qt native translations | `dicogis/ui/i18n/dicogis_{en,fr,es}.ts` → `.qm` |
+| Widget text: buttons, labels, tabs, tooltips, message boxes | Qt native translations | `dicogis/ui/i18n/dicogis_{fr,es}.ts` ---> `.qm` |
 | Report and CLI output: Excel sheet names, column headers, error messages | `TextsManager` | `dicogis/locale/lang_{EN,FR,ES}.xml` |
 
 The rule of thumb: anything under `dicogis/ui/` uses `self.tr("...")`, anything reachable from `dicogis-cli` uses `TextsManager`. The command-line interface must keep working without the `gui` extra installed, which is precisely why the processing pipeline does not depend on Qt's translation machinery.
@@ -39,12 +39,12 @@ Ubuntu installs those binaries in `/usr/lib/qt6/bin/`, which is not on the `PATH
     self.btn_cancel.setText(self.tr("Cancel"))
     ```
 
-1. Update the `.ts` files, once per language. `pylupdate6` merges: existing translations are preserved, new strings are added as untranslated entries.
+1. Update the `.ts` files, once per language. `pylupdate6` reads the whole `dicogis` package (Python modules and Qt Designer forms) and merges: existing translations are preserved, new strings are added as untranslated entries.
 
     ```sh
-    pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_en.ts
-    pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_fr.ts
-    pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_es.ts
+    for lang in fr es; do
+        pylupdate6 dicogis --ts dicogis/ui/i18n/dicogis_$lang.ts
+    done
     ```
 
 1. Translate the new entries, either with Qt Linguist:
@@ -63,12 +63,15 @@ Ubuntu installs those binaries in `/usr/lib/qt6/bin/`, which is not on the `PATH
     </message>
     ```
 
-1. Compile the `.qm` files actually loaded at runtime:
+1. Compile the `.qm` files loaded at runtime. They are not versioned, so compile them locally to see your translations in the application:
 
     ```sh
-    lrelease dicogis/ui/i18n/dicogis_fr.ts -qm dicogis/ui/i18n/dicogis_fr.qm
-    lrelease dicogis/ui/i18n/dicogis_es.ts -qm dicogis/ui/i18n/dicogis_es.qm
+    for lang in fr es; do
+        lrelease dicogis/ui/i18n/dicogis_$lang.ts -qm dicogis/ui/i18n/dicogis_$lang.qm
+    done
     ```
+
+    `lrelease` comes from `qt6-l10n-tools` (Ubuntu) or from `pyside6-essentials` (`python -m pip install pyside6-essentials`, where the command is `pyside6-lrelease`). Without compiled files, the interface stays in English.
 
 1. Check your work:
 
@@ -76,15 +79,13 @@ Ubuntu installs those binaries in `/usr/lib/qt6/bin/`, which is not on the `PATH
     DICOGIS_I18N_STRICT=1 pytest tests/test_ui_i18n.py
     ```
 
-    That suite fails, naming the offending strings, when a `self.tr()` string has no translation in a shipped locale, or when a `.qm` is out of date with its `.ts`.
+    That suite fails, naming the offending strings, when a `self.tr()` string has no translation in a shipped locale.
 
-    The completeness check (every `self.tr()` string translated) is skipped unless the `DICOGIS_I18N_STRICT` environment variable is true, because translations are legitimately incomplete while a feature is under development. The CI enables it only on tags and on `release/*` branches (including pull requests opened from one), so a release cannot ship an untranslated interface. The `.qm` freshness check always runs.
+    The completeness check (every `self.tr()` string translated) is skipped unless the `DICOGIS_I18N_STRICT` environment variable is true, because translations are legitimately incomplete while a feature is under development. The CI enables it only on tags and on `release/*` branches (including pull requests opened from one), so a release cannot ship an untranslated interface.
 
 ### English is the source language
 
-`dicogis_en.ts` is kept as a reference of the extracted strings and is regenerated like the others, but it is **never translated, compiled nor loaded**: with no translator installed, Qt returns the source string, which is already English. `DicoGIS._install_qt_translator()` accordingly removes any installed translator and returns early for `EN`.
-
-This is why `dicogis_en.ts` legitimately shows every entry as unfinished, and why there is no `dicogis_en.qm`.
+There is no English `.ts` file: the strings of `self.tr()` calls are already English, so with no translator installed Qt returns them as they are. `DicoGIS._install_qt_translator()` accordingly removes any installed translator and returns early for `EN`.
 
 ## Report and CLI text (`TextsManager`)
 
@@ -105,6 +106,6 @@ Strings written to the output file or printed by the command line live in `dicog
 
 ## Notes
 
-- Unlike some Qt projects, the compiled `.qm` files **are** tracked in this repository. They are declared as package data in `pyproject.toml` and passed to PyInstaller with `--add-data` by the GUI builder scripts, so an outdated `.qm` ships an outdated interface. Commit them alongside the `.ts` files.
+- The compiled `.qm` files are **not** tracked. The CI test jobs and the release builds compile them from the `.ts` files before tests and packaging, so a shipped `.qm` cannot be outdated. They are declared as package data in `pyproject.toml`.
 - `.ts` files record the source line of every string, so re-running `pylupdate6` after unrelated edits produces `<location>` churn in the diff. That is expected.
 - Qt matches translations on the exact source string, context included, so rewording an existing `self.tr()` string orphans its translation: it comes back as a new untranslated entry, and the old one is marked `vanished`.

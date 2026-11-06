@@ -5,12 +5,13 @@
 Guards against the GUI translations drifting away from the source strings.
 
 Widget text goes through Qt's own i18n: `self.tr("...")` calls, extracted into
-dicogis/ui/i18n/dicogis_{en,fr,es}.ts with pylupdate6 and compiled to .qm with
-lrelease (see docs/development/translation.md). Nothing enforced that pipeline being re-run, so
-strings added by a PR stayed English forever in the FR and ES interfaces.
+dicogis/ui/i18n/dicogis_{fr,es}.ts with pylupdate6 (see docs/development/translation.md).
+Nothing enforced that pipeline being re-run, so strings added by a PR stayed English
+forever in the FR and ES interfaces. The .qm files are not versioned: they are compiled
+from the .ts at build time by the CI, so they cannot drift.
 
 Reads the sources with `ast` rather than importing them, so this needs neither
-PyQt6 nor GDAL. The .qm freshness check does need PyQt6 and skips without it.
+PyQt6 nor GDAL.
 
 Usage from the repo root folder:
     pytest tests/test_ui_i18n.py
@@ -39,8 +40,8 @@ from dicogis.utils.str2bool import str2bool
 
 UI_FOLDER = Path(__file__).parent.parent / "dicogis" / "ui"
 I18N_FOLDER = UI_FOLDER / "i18n"
-# English is the source language: its .ts is a reference, never compiled nor
-# loaded at runtime, so untranslated entries there are expected
+# English is the source language and has no .ts: the strings of self.tr() calls
+# are already English
 TRANSLATED_LOCALES = ("fr", "es")
 
 # Missing translations are expected while features are under development, so the
@@ -143,31 +144,6 @@ def test_every_widget_string_is_translated(locale: str) -> None:
         "Re-run pylupdate6 (see docs/development/translation.md), fill the new "
         "<translation> entries "
         f"and recompile the .qm: {untranslated}"
-    )
-
-
-@pytest.mark.parametrize("locale", TRANSLATED_LOCALES)
-def test_compiled_qm_matches_the_ts(locale: str) -> None:
-    """The shipped .qm must carry what the .ts says.
-
-    Only the .qm is loaded at runtime, so a .ts updated without running
-    lrelease again changes nothing for the end user.
-    """
-    qtcore = pytest.importorskip("PyQt6.QtCore", reason="PyQt6 (gui extra) required")
-
-    translator = qtcore.QTranslator()
-    assert translator.load(str(I18N_FOLDER / f"dicogis_{locale}.qm"))
-
-    missing_from_qm = sorted(
-        f"[{context}] {source}"
-        for (context, source), expected in _finished_translations(locale).items()
-        if translator.translate(context, source) != expected
-    )
-
-    assert not missing_from_qm, (
-        f"dicogis_{locale}.qm is out of date with dicogis_{locale}.ts: recompile "
-        "it with lrelease (see docs/development/translation.md). "
-        f"Missing: {missing_from_qm}"
     )
 
 
