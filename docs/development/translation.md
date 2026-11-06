@@ -42,7 +42,7 @@ Ubuntu installs those binaries in `/usr/lib/qt6/bin/`, which is not on the `PATH
 1. Update the `.ts` files, once per language. `pylupdate6` reads the whole `dicogis/` folder (Python modules and Qt Designer forms) and merges: existing translations are preserved, new strings are added as untranslated entries.
 
     ```sh
-    for lang in en fr es; do
+    for lang in fr es; do
         pylupdate6 dicogis/ui --ts dicogis/ui/i18n/dicogis_$lang.ts
     done
     ```
