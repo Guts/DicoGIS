@@ -4,8 +4,8 @@
 """
 DicoGIS
 Automatize the creation of a dictionnary of geographic data
-            contained in a folders structures.
-            It produces an Excel output file (.xlsx)
+contained in a folders structures.
+It produces an Excel output file (.xlsx)
 
 Julien Moura (@geojulien)
 """
