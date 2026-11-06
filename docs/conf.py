@@ -47,8 +47,11 @@ extensions = [
     "sphinx.ext.napoleon",
     # 3rd party
     "myst_parser",
-    "sphinx_autodoc_typehints",
+    # must stay before sphinx_autodoc_typehints: once the latter is imported,
+    # "from sphinx.ext.autodoc import mock" gives sphinx_click the module and not the
+    # function (https://github.com/sphinx-doc/sphinx/issues/14333)
     "sphinx_click",
+    "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxcontrib.mermaid",
