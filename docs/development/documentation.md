@@ -7,8 +7,8 @@ Project uses Sphinx to generate documentation from docstrings (documentation in-
 To build it:
 
 ```sh
-# install aditionnal dependencies
-python -m pip install .[doc]
+# install aditionnal dependencies (gui: PyQt6, needed to document dicogis.ui)
+python -m pip install .[doc,gui]
 # build it
 sphinx-build -b html docs docs/_build/html
 # optimized (quiet, multiprocessing, doctrees separated)
