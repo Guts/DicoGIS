@@ -39,12 +39,12 @@ Ubuntu installs those binaries in `/usr/lib/qt6/bin/`, which is not on the `PATH
     self.btn_cancel.setText(self.tr("Cancel"))
     ```
 
-1. Update the `.ts` files, once per language. `pylupdate6` merges: existing translations are preserved, new strings are added as untranslated entries.
+1. Update the `.ts` files, once per language. `pylupdate6` reads the whole `dicogis/` folder (Python modules and Qt Designer forms) and merges: existing translations are preserved, new strings are added as untranslated entries.
 
     ```sh
-    pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_en.ts
-    pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_fr.ts
-    pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_es.ts
+    for lang in en fr es; do
+        pylupdate6 dicogis/ui --ts dicogis/ui/i18n/dicogis_$lang.ts
+    done
     ```
 
 1. Translate the new entries, either with Qt Linguist:

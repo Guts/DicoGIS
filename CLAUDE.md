@@ -244,11 +244,11 @@ is involved:
   in `mw_dicogis.py`, called from `retranslate_ui()` before any `self.tr()` call,
   including the one done at startup and on every language-dropdown change). New
   widget-visible text should use `self.tr(...)` — never `TextsManager` — and the
-  `.ts` files regenerated with:
+  `.ts` files regenerated with (`pylupdate6` reads the `.py` and `.ui` files of the folder):
 
   ```sh
-  pylupdate6 dicogis/ui/*.py dicogis/ui/dialogs/*.py --ts dicogis/ui/i18n/dicogis_en.ts
-  # repeat for _fr.ts / _es.ts, fill in <translation> entries, then compile:
+  for lang in en fr es; do pylupdate6 dicogis/ --ts dicogis/ui/i18n/dicogis_$lang.ts; done
+  # then fill in <translation> entries, and compile:
   lrelease dicogis/ui/i18n/dicogis_fr.ts -qm dicogis/ui/i18n/dicogis_fr.qm
   lrelease dicogis/ui/i18n/dicogis_es.ts -qm dicogis/ui/i18n/dicogis_es.qm
   ```
