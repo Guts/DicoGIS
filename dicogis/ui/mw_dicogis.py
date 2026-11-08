@@ -18,6 +18,7 @@ Julien Moura (@geojulien)
 import getpass
 import locale
 import logging
+from functools import partial
 from os import getenv
 from pathlib import Path
 from sys import platform as opersys
@@ -35,6 +36,7 @@ from dicogis.export.output_path import (
 )
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
+from dicogis.publishing import udata
 from dicogis.publishing.report import PublishReport
 from dicogis.ui.qt_compat import uic
 from dicogis.ui.qt_compat.QtCore import QThread, QTranslator, QUrl
@@ -861,12 +863,16 @@ class DicoGIS(QMainWindow):
 
         self._proc_thread = QThread(self)
         self._proc_worker = PublishWorker(
-            input_folder=Path(self.wdg_tab_publish.get_input_folder()),
-            udata_api_key=self.wdg_tab_publish.get_udata_api_key(),
-            udata_api_url_base=self.wdg_tab_publish.get_udata_api_url_base(),
-            udata_api_version=self.wdg_tab_publish.get_udata_api_version(),
-            udata_organization_id=self.wdg_tab_publish.get_udata_organization_id(),
-            progress_reporter=self._progress_reporter,
+            publish_function=partial(
+                udata.publish_metadata_folder,
+                input_folder=Path(self.wdg_tab_publish.get_input_folder()),
+                udata_api_key=self.wdg_tab_publish.get_udata_api_key(),
+                udata_api_url_base=self.wdg_tab_publish.get_udata_api_url_base(),
+                udata_api_version=self.wdg_tab_publish.get_udata_api_version(),
+                udata_organization_id=self.wdg_tab_publish.get_udata_organization_id(),
+                progress_reporter=self._progress_reporter,
+                verbose=True,
+            )
         )
         self._proc_worker.moveToThread(self._proc_thread)
         self._proc_thread.started.connect(self._proc_worker.run)
