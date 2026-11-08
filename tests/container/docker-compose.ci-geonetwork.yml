@@ -48,14 +48,17 @@ services:
         -Des.password=
     healthcheck:
       test:
-        ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/geonetwork/srv/api/site"]
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "--show-error",
+          "http://localhost:8080/geonetwork/srv/api/site",
+        ]
       interval: 10s
       timeout: 5s
       retries: 30
       start_period: 60s
     ports:
       - "8080:8080"
-
-networks:
-  default:
-    name: dicogis-ci-geonetwork-testing

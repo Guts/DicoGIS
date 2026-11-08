@@ -220,7 +220,7 @@ in `ProcessingFiles.MATRIX_FORMAT_GEOREADER`, and reuse or extend an existing
 
 The GUI binds a publication to its form in `_prepare_publication()`, in the GUI thread, then runs it in a `QThread` (`PublishWorker`), or in a `QgsTask` inside QGIS (`dicogis/publishing/qgis_task.py`, out of `dicogis/ui` since it imports `qgis.core` and GUI modules can't import a binding, even lazily). Both report and cancel through `ProgressReporter`; canceling ends the run between two files and still returns a report.
 
-`tests/integration/` runs against a real GeoNetwork, skipped unless `DICOGIS_TEST_GEONETWORK_URL` is set (see `.github/workflows/tester_geonetwork_publish.yml`, the only place where the QGIS backend meets the real QGIS).
+`tests/integration/` runs against a real GeoNetwork, skipped unless `DICOGIS_TEST_GEONETWORK_URL` is set (see `.github/workflows/tester_geonetwork_publish.yml`), with the `requests` backend. The QGIS backend and the `QgsTask` are only tested with fakes: nothing runs them in a real QGIS.
 
 ### PostGIS path
 

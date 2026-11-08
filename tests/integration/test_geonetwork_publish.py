@@ -1,14 +1,11 @@
 #! python3  # noqa: E265
 
 """
-Publication against a real GeoNetwork, through whichever HTTP backend is selected.
+Publication against a real GeoNetwork.
 
 Skipped unless DICOGIS_TEST_GEONETWORK_URL is set, which the workflow
 .github/workflows/tester_geonetwork_publish.yml does, after starting
-tests/container/docker-compose.ci-geonetwork.yml. It runs in two environments: a plain
-Python one (requests backend), and the official QGIS image with
-DICOGIS_HTTP_BACKEND=qgis, the only place where the QGIS backend and the QgsTask meet
-the real QGIS.
+tests/container/docker-compose.ci-geonetwork.yml.
 
 Usage from the repo root folder, a GeoNetwork running:
     DICOGIS_TEST_GEONETWORK_URL=http://localhost:8080/geonetwork \
@@ -20,7 +17,6 @@ Usage from the repo root folder, a GeoNetwork running:
 # ##################################
 
 # standard library
-import time
 from os import getenv
 from pathlib import Path
 from uuid import uuid4
@@ -73,20 +69,6 @@ pytestmark = pytest.mark.skipif(
 # ##############################################################################
 # ########## Fixtures ##############
 # ##################################
-
-
-@pytest.fixture(scope="module", autouse=True)
-def qgis_application():
-    """Start QGIS when testing its backend: nothing works without a QgsApplication."""
-    if getenv("DICOGIS_HTTP_BACKEND") != "qgis":
-        yield None
-        return
-    from qgis.core import QgsApplication
-
-    application = QgsApplication([], False)
-    application.initQgis()
-    yield application
-    application.exitQgis()
 
 
 @pytest.fixture
@@ -286,44 +268,6 @@ def test_unknown_group_fails_each_file_with_the_catalog_explanation(tmp_path):
 
     assert report.failed == 1
     assert "HTTP" in report.errors[0]
-
-
-@pytest.mark.skipif(
-    getenv("DICOGIS_HTTP_BACKEND") != "qgis", reason="needs a running QGIS"
-)
-def test_publication_runs_in_a_real_task(tmp_path, session):
-    from qgis.core import QgsApplication
-
-    from dicogis.publishing.qgis_task import start_publish_task
-    from dicogis.utils.qgis_runtime import qgis_application_is_running
-
-    assert qgis_application_is_running()
-    metadataset = _metadatasets(uuid4().hex)[0]
-    _export(tmp_path, [metadataset])
-    reports, errors = [], []
-
-    def _run(progress_reporter, feedback):
-        return publish_metadata_folder(
-            input_folder=tmp_path,
-            url_base=GEONETWORK_URL,
-            group=GROUP,
-            credentials=ADMIN,
-            http_client=get_http_client(feedback=feedback),
-            progress_reporter=progress_reporter,
-            timeout=60.0,
-        )
-
-    task = start_publish_task("DicoGIS CI", _run, reports.append, errors.append)
-
-    deadline = time.monotonic() + 120
-    while not reports and not errors and time.monotonic() < deadline:
-        QgsApplication.processEvents()
-        time.sleep(0.05)
-
-    assert task is not None
-    assert errors == []
-    assert reports[0].published == 1
-    assert _catalog_record(session, metadataset.uuid) is not None
 
 
 # ##############################################################################

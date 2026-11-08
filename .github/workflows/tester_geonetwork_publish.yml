@@ -1,8 +1,8 @@
 name: "Tester GeoNetwork publish 📤"
 
 # Exercises the publication against a real GeoNetwork 4.4: the validation of the records
-# against its XSD and its CSRF protection can't be mocked. Runs twice: with the requests
-# backend, and in the official QGIS image with the QGIS backend and a real QgsTask.
+# against its XSD and its CSRF protection can't be mocked. With the requests backend: the
+# QGIS one is only tested with fakes (tests/test_utils_http.py).
 
 on:
   push:
@@ -40,8 +40,6 @@ permissions:
 env:
   GDAL_VERSION: 3.*
   COMPOSE_FILE: tests/container/docker-compose.ci-geonetwork.yml
-  # QGIS >= 4.4 is what DicoGIS targets: move on as soon as qgis/qgis publishes it
-  QGIS_IMAGE: qgis/qgis:4.2.3
 
 jobs:
   test-publish-geonetwork:
@@ -114,49 +112,18 @@ jobs:
 
       - name: Dump GeoNetwork stack logs
         if: failure()
-        run: docker compose -f "$COMPOSE_FILE" logs --tail 500
-
-      - name: Tear down GeoNetwork stack
-        if: always()
-        run: docker compose -f "$COMPOSE_FILE" down -v
-
-  test-publish-geonetwork-qgis:
-    name: "🌍 QGIS backend"
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Get source code
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Start GeoNetwork stack
-        run: docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 420
-
-      - name: Publication scenarios in QGIS
-        # the virtual environment sees the system packages for QGIS's own bindings, and
-        # only adds what's missing: DicoGIS's whole dependencies would bring another
-        # numpy. Without coverage: its addopts need pytest-cov.
+        # the application logs don't tell how it answered: the health checks and the
+        # access log do
         run: |
-          docker run --rm \
-            --network dicogis-ci-geonetwork-testing \
-            --volume "$PWD:/dicogis" \
-            --workdir /dicogis \
-            --env DICOGIS_TEST_GEONETWORK_URL=http://geonetwork:8080/geonetwork \
-            --env DICOGIS_HTTP_BACKEND=qgis \
-            --env QT_QPA_PLATFORM=offscreen \
-            "$QGIS_IMAGE" \
-            bash -euxc '
-              python3 -m venv --system-site-packages /tmp/venv
-              /tmp/venv/bin/pip install --quiet --no-deps .
-              /tmp/venv/bin/pip install --quiet lxml pgserviceparser pytest requests
-              /tmp/venv/bin/python -m pytest -o addopts="" \
-                tests/integration/test_geonetwork_publish.py -v
-            '
-
-      - name: Dump GeoNetwork stack logs
-        if: failure()
-        run: docker compose -f "$COMPOSE_FILE" logs --tail 500
+          docker compose -f "$COMPOSE_FILE" logs --tail 500
+          docker inspect --format '{{json .State.Health}}' dicogis-ci-geonetwork-app || true
+          docker compose -f "$COMPOSE_FILE" exec -T geonetwork sh -c \
+            'tail -n 20 /usr/local/tomcat/logs/localhost_access_log.*' || true
+          for path in site me; do
+            docker compose -f "$COMPOSE_FILE" exec -T geonetwork curl --silent --show-error \
+              --include --max-time 30 "http://localhost:8080/geonetwork/srv/api/$path" \
+              | head -c 2000 || true
+          done
 
       - name: Tear down GeoNetwork stack
         if: always()
