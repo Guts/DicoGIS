@@ -1,0 +1,163 @@
+name: "Tester GeoNetwork publish 📤"
+
+# Exercises the publication against a real GeoNetwork 4.4: the validation of the records
+# against its XSD and its CSRF protection can't be mocked. Runs twice: with the requests
+# backend, and in the official QGIS image with the QGIS backend and a real QgsTask.
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/tester_geonetwork_publish.yml"
+      - "dicogis/cli/cmd_publish.py"
+      - "dicogis/export/catalog_record.py"
+      - "dicogis/export/to_iso19139.py"
+      - "dicogis/publishing/**"
+      - "dicogis/utils/http/**"
+      - "tests/container/docker-compose.ci-geonetwork.yml"
+      - "tests/integration/**"
+      - "pyproject.toml"
+
+  pull_request:
+    branches:
+      - master
+      - feature/*
+    paths:
+      - ".github/workflows/tester_geonetwork_publish.yml"
+      - "dicogis/cli/cmd_publish.py"
+      - "dicogis/export/catalog_record.py"
+      - "dicogis/export/to_iso19139.py"
+      - "dicogis/publishing/**"
+      - "dicogis/utils/http/**"
+      - "tests/container/docker-compose.ci-geonetwork.yml"
+      - "tests/integration/**"
+      - "pyproject.toml"
+
+permissions:
+  contents: read
+
+env:
+  GDAL_VERSION: 3.*
+  COMPOSE_FILE: tests/container/docker-compose.ci-geonetwork.yml
+  # QGIS >= 4.4 is what DicoGIS targets: move on as soon as qgis/qgis publishes it
+  QGIS_IMAGE: qgis/qgis:4.2.3
+
+jobs:
+  test-publish-geonetwork:
+    name: "🐍 requests backend"
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install GDAL binaries
+        run: |
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable && sudo apt update
+          sudo apt install gdal-bin=${{ env.GDAL_VERSION }}
+          sudo apt install libgdal-dev=${{ env.GDAL_VERSION }}
+          export CPLUS_INCLUDE_PATH=/usr/include/gdal
+          export C_INCLUDE_PATH=/usr/include/gdal
+          gdal-config --version
+
+      - name: Install project requirements
+        run: |
+          python -m pip install "pip==26.2.1" "setuptools==84.0.0" "wheel==0.48.0"
+          python -m pip install GDAL=="`gdal-config --version`.*"
+
+      - name: Install project as a package
+        # installs the local checkout (this PR's own code), not a
+        # third-party dependency, so there's no separate version to pin here
+        run: python -m pip install .[test]
+
+      - name: Install tests fixtures
+        run: python -m pip install "gisdata==0.5.4" -t ./tests/fixtures
+
+      - name: Start GeoNetwork stack
+        run: docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 420
+
+      - name: Publication scenarios
+        env:
+          DICOGIS_TEST_GEONETWORK_URL: http://localhost:8080/geonetwork
+        run: pytest -o addopts="" tests/integration/test_geonetwork_publish.py -v
+
+      - name: Generate ISO 19139 metadata from test fixtures
+        run: |
+          dicogis-cli inventory --input-folder ./tests/fixtures/gisdata/data/good \
+            --language FR --output-format iso19139 \
+            --output-path ./tests/ci/geonetwork-publish \
+            --no-opt-open-output --no-opt-notify-sound --verbose
+
+      - name: Publish them with the CLI, rejecting invalid ones
+        id: publish
+        run: |
+          dicogis-cli publish --target geonetwork \
+            --input-folder ./tests/ci/geonetwork-publish \
+            --geonetwork-url-base http://localhost:8080/geonetwork \
+            --geonetwork-username admin \
+            --geonetwork-password admin \
+            --geonetwork-group 2 \
+            --geonetwork-reject-if-invalid \
+            --no-opt-notify-sound --verbose | tee /tmp/publish_report.txt
+          grep -E "files failed" /tmp/publish_report.txt
+          ! grep -E "[1-9][0-9]* files failed" /tmp/publish_report.txt
+
+      - name: Dump GeoNetwork stack logs
+        if: failure()
+        run: docker compose -f "$COMPOSE_FILE" logs --tail 500
+
+      - name: Tear down GeoNetwork stack
+        if: always()
+        run: docker compose -f "$COMPOSE_FILE" down -v
+
+  test-publish-geonetwork-qgis:
+    name: "🌍 QGIS backend"
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Get source code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Start GeoNetwork stack
+        run: docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 420
+
+      - name: Publication scenarios in QGIS
+        # the virtual environment sees the system packages for QGIS's own bindings, and
+        # only adds what's missing: DicoGIS's whole dependencies would bring another
+        # numpy. Without coverage: its addopts need pytest-cov.
+        run: |
+          docker run --rm \
+            --network dicogis-ci-geonetwork-testing \
+            --volume "$PWD:/dicogis" \
+            --workdir /dicogis \
+            --env DICOGIS_TEST_GEONETWORK_URL=http://geonetwork:8080/geonetwork \
+            --env DICOGIS_HTTP_BACKEND=qgis \
+            --env QT_QPA_PLATFORM=offscreen \
+            "$QGIS_IMAGE" \
+            bash -euxc '
+              python3 -m venv --system-site-packages /tmp/venv
+              /tmp/venv/bin/pip install --quiet --no-deps .
+              /tmp/venv/bin/pip install --quiet lxml pgserviceparser pytest requests
+              /tmp/venv/bin/python -m pytest -o addopts="" \
+                tests/integration/test_geonetwork_publish.py -v
+            '
+
+      - name: Dump GeoNetwork stack logs
+        if: failure()
+        run: docker compose -f "$COMPOSE_FILE" logs --tail 500
+
+      - name: Tear down GeoNetwork stack
+        if: always()
+        run: docker compose -f "$COMPOSE_FILE" down -v
