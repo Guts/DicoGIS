@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 
 # project
 from dicogis.constants import OutputFormats
+from dicogis.utils.slugger import sluggy
 from dicogis.utils.texts import TextsManager
 
 
@@ -53,6 +54,30 @@ class MetadatasetSerializerBase:
         self.opt_raw_path = opt_raw_path
         self.opt_size_prettify = opt_size_prettify
 
+        # file names written during this run, to tell homonym datasets apart
+        self.written_filenames: set[str] = set()
+
+    def unique_output_filename(self, dataset_name: str, extension: str) -> str:
+        """Pick the name of a per-dataset output file, unique within this run.
+
+        Datasets are often homonyms (lines.shp in several folders): suffixed with a
+        counter rather than overwriting the one written before.
+
+        Args:
+            dataset_name: name of the dataset, slugified to build the file name
+            extension: file extension, with its leading dot
+
+        Returns:
+            file name, not used yet during this run and now reserved
+        """
+        file_stem = sluggy(dataset_name)
+        filename, counter = f"{file_stem}{extension}", 1
+        while filename in self.written_filenames:
+            counter += 1
+            filename = f"{file_stem}-{counter}{extension}"
+        self.written_filenames.add(filename)
+        return filename
+
     def pre_serializing(self, **kwargs: object) -> None:
         """Operations to run before serialization."""
         pass
@@ -69,12 +94,15 @@ class MetadatasetSerializerBase:
             | OutputFormats.excel
             | OutputFormats.json
             | OutputFormats.udata
+            | OutputFormats.iso19139
             | MetadatasetSerializerBase
         ),
         output_path: Path | None = None,
         opt_raw_path: bool = False,
         opt_prettify_size: bool = True,
         localized_strings: dict | None = None,
+        language: str | tuple | None = None,
+        opt_include_original_path: bool | None = None,
     ) -> MetadatasetSerializerBase:
         """Initiate the adequat serializer depending on parameters.
 
@@ -85,11 +113,18 @@ class MetadatasetSerializerBase:
             opt_prettify_size: option to prettify size in octets (typically: 1 ko instead
                 of 1024 octects)
             localized_strings: localized texts. Defaults to None.
+            language: language of the metadata records (iso19139). Defaults to None,
+                which means English.
+            opt_include_original_path: publish the location of the datasets in the
+                metadata records (iso19139). Defaults to the
+                DICOGIS_ISO_INCLUDE_ORIGINAL_PATH environment variable.
 
         Returns:
             serializer already initialized
         """
         # import only now to avoid circular imports
+        from dicogis.export.catalog_record import CatalogRecordSettings
+        from dicogis.export.to_iso19139 import MetadatasetSerializerIso19139
         from dicogis.export.to_json import MetadatasetSerializerJson
         from dicogis.export.to_xlsx import MetadatasetSerializerXlsx
 
@@ -116,6 +151,16 @@ class MetadatasetSerializerBase:
         elif format_or_serializer == OutputFormats.udata:
             output_serializer = MetadatasetSerializerJson(
                 flavor="udata",
+                localized_strings=localized_strings,
+                opt_size_prettify=opt_prettify_size,
+                output_path=output_path,
+            )
+        elif format_or_serializer == OutputFormats.iso19139:
+            output_serializer = MetadatasetSerializerIso19139(
+                settings=CatalogRecordSettings.from_environment(
+                    language=language,
+                    include_original_path=opt_include_original_path,
+                ),
                 localized_strings=localized_strings,
                 opt_size_prettify=opt_prettify_size,
                 output_path=output_path,

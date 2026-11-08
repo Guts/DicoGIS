@@ -15,6 +15,13 @@ from dicogis.utils.slugger import sluggy
 
 
 # ############################################################################
+# ########## Globals ###############
+# ##################################
+
+# formats writing one file per dataset, hence a folder as their output
+FOLDER_OUTPUT_FORMATS: tuple[str, ...] = ("json", "udata", "iso19139")
+
+# ############################################################################
 # ########## Functions #############
 # ##################################
 
@@ -37,7 +44,7 @@ def determine_output_path(
         ValueError: if output format is not supported
 
     Returns:
-        output path to use. A folder if output_format=='json',
+        output path to use. A folder for a format writing one file per dataset,
             a file if output_format=='excel'
     """
     final_output_path = None
@@ -57,7 +64,7 @@ def determine_output_path(
                 final_output_path = Path(
                     f"DicoGIS_PostGIS_{pg_srv_names}_{date.today()}.xlsx"
                 )
-        elif output_format in ("json", "udata"):
+        elif output_format in FOLDER_OUTPUT_FORMATS:
             if isinstance(input_folder, Path):
                 final_output_path = Path(f"DicoGIS_{input_folder.name}_{date.today()}")
             elif isinstance(pg_services, list):
@@ -72,7 +79,7 @@ def determine_output_path(
 
 def match_output_path_to_format(output_path: Path, output_format: str) -> Path:
     """Adapt an output path to an output format: an Excel workbook is a `.xlsx`
-    file, a JSON export a folder.
+    file, the formats writing one file per dataset a folder.
 
     Only the `.xlsx` extension is added or removed, so a name the user typed is
     otherwise kept as is (including dots in a folder name).
@@ -94,7 +101,7 @@ def match_output_path_to_format(output_path: Path, output_format: str) -> Path:
             if is_xlsx
             else output_path.with_name(f"{output_path.name}.xlsx")
         )
-    if output_format in ("json", "udata"):
+    if output_format in FOLDER_OUTPUT_FORMATS:
         return output_path.with_suffix("") if is_xlsx else output_path
 
     raise ValueError(f"Unsupported output format: {output_format}.")

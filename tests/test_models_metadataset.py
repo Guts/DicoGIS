@@ -32,6 +32,73 @@ from dicogis.models.metadataset import (
 # ################################
 
 
+class TestUuid(unittest.TestCase):
+    """Test MetaDataset.uuid."""
+
+    def _table(self, name: str, **connection_overrides) -> MetaDatabaseTable:
+        connection = dict(
+            database_name="db",
+            host="h",
+            port=5432,
+            user_name="alice",
+            service_name=None,
+        )
+        connection.update(connection_overrides)
+        return MetaDatabaseTable(
+            name=name, database_connection=DatabaseConnection(**connection)
+        )
+
+    def test_same_dataset_keeps_its_uuid_when_its_content_changes(self):
+        before = MetaVectorDataset(
+            path=Path("data/parcels.shp"), features_objects_count=1, bbox=(0, 0, 1, 1)
+        )
+        after = MetaVectorDataset(
+            path=Path("data/parcels.shp"), features_objects_count=2, bbox=(0, 0, 2, 2)
+        )
+
+        self.assertEqual(before.uuid, after.uuid)
+        self.assertNotEqual(before.signature(), after.signature())
+
+    def test_homonyms_in_different_folders_differ(self):
+        self.assertNotEqual(
+            MetaDataset(path=Path("a/parcels.shp")).uuid,
+            MetaDataset(path=Path("b/parcels.shp")).uuid,
+        )
+
+    def test_value_is_frozen(self):
+        """Changing it would duplicate every record already published."""
+        table = self._table("public.roads")
+
+        self.assertEqual(table.uuid, "6a4e5ba7-e7dd-533a-a57c-42632717ecfe")
+
+    def test_tables_of_a_database_differ(self):
+        self.assertNotEqual(
+            self._table("public.roads").uuid, self._table("public.rivers").uuid
+        )
+
+    def test_same_table_name_in_two_schemas_differs(self):
+        self.assertNotEqual(self._table("a.roads").uuid, self._table("b.roads").uuid)
+
+    def test_unqualified_table_name_uses_the_schema(self):
+        self.assertEqual(self._table("roads").uuid, self._table("public.roads").uuid)
+
+    def test_table_uuid_does_not_depend_on_the_user(self):
+        self.assertEqual(
+            self._table("public.roads", user_name="alice").uuid,
+            self._table("public.roads", user_name="bob").uuid,
+        )
+
+    def test_table_through_a_service(self):
+        self.assertNotEqual(
+            self._table("public.roads", service_name="a").uuid,
+            self._table("public.roads", service_name="b").uuid,
+        )
+
+    def test_no_location_means_no_uuid(self):
+        self.assertIsNone(MetaVectorDataset(name="layer_of_a_gpkg").uuid)
+        self.assertIsNone(MetaDatabaseTable(name="public.roads").uuid)
+
+
 class TestPathAsStr(unittest.TestCase):
     """Test MetaDataset.path_as_str."""
 

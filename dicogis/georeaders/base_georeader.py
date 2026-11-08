@@ -8,6 +8,7 @@
 # Standard library
 import logging
 from locale import getlocale
+from math import isfinite
 from pathlib import Path
 from typing import Literal
 
@@ -168,6 +169,80 @@ class GeoReaderBase:
             return (gt[0], gt[3] - (ysize * yr), gt[0] + (xsize * xr), gt[3])
         else:
             return (None, None, None, None)
+
+    def get_extent_wgs84(
+        self, dataset_or_layer: ogr.Layer | gdal.Dataset
+    ) -> tuple[float, float, float, float] | None:
+        """Get the spatial extent as WGS84 longitudes and latitudes.
+
+        Computed from the source extent rather than from
+        get_extent_as_tuple(), which rounds it and whose coordinates order depends on
+        the object and on the GDAL version. The edges are densified since, once
+        reprojected, a straight edge bulges: its corners alone underestimate the extent.
+
+        Args:
+            dataset_or_layer: input OGR layer or raster dataset
+
+        Returns:
+            (west, south, east, north), or None if the dataset has no CRS, or no extent
+            that can be reprojected. West is greater than east across the antimeridian.
+        """
+        try:
+            source_srs = dataset_or_layer.GetSpatialRef()
+            if not source_srs:
+                return None
+
+            if isinstance(dataset_or_layer, ogr.Layer):
+                xmin, xmax, ymin, ymax = dataset_or_layer.GetExtent()
+            else:
+                xmin, ymin, xmax, ymax = self._raster_extent(dataset_or_layer)
+
+            target_srs = osr.SpatialReference()
+            target_srs.ImportFromEPSG(4326)
+            target_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+            # the source keeps its own axis mapping: it's the one its coordinates use
+            transformation = osr.CoordinateTransformation(source_srs, target_srs)
+            west, south, east, north = transformation.TransformBounds(
+                xmin, ymin, xmax, ymax, 21
+            )
+        except Exception as err:
+            logger.info(f"Unable to compute the extent in WGS84. Trace: {err}")
+            return None
+
+        if not all(isfinite(value) for value in (west, south, east, north)):
+            logger.info("Extent in WGS84 is out of bounds of the source CRS.")
+            return None
+
+        return (
+            round(west, 6),
+            round(max(south, -90.0), 6),
+            round(east, 6),
+            round(min(north, 90.0), 6),
+        )
+
+    @staticmethod
+    def _raster_extent(dataset: gdal.Dataset) -> tuple[float, float, float, float]:
+        """Compute the extent of a raster from its geotransform, rotation included.
+
+        Args:
+            dataset: input raster dataset
+
+        Returns:
+            (xmin, ymin, xmax, ymax), in the CRS of the dataset
+        """
+        origin_x, pixel_x, skew_x, origin_y, skew_y, pixel_y = dataset.GetGeoTransform()
+        columns, rows = dataset.RasterXSize, dataset.RasterYSize
+        xs = [
+            origin_x + col * pixel_x + row * skew_x
+            for col in (0, columns)
+            for row in (0, rows)
+        ]
+        ys = [
+            origin_y + col * skew_y + row * pixel_y
+            for col in (0, columns)
+            for row in (0, rows)
+        ]
+        return min(xs), min(ys), max(xs), max(ys)
 
     def get_fields_details(
         self, ogr_layer_definition: ogr.FeatureDefn

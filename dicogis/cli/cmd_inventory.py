@@ -114,7 +114,7 @@ def inventory(
             dir_okay=True,
             envvar="DICOGIS_OUTPUT_FILEPATH",
             file_okay=True,
-            help="Output file (excel) or folder (json, udata). If not set, it's "
+            help="Output file (excel) or folder (json, udata, iso19139). If not set, it's "
             "created in the current working directory (cwd), named after the input "
             "folder or PostgreSQL services and the date.",
             resolve_path=True,
@@ -128,9 +128,18 @@ def inventory(
             envvar="DICOGIS_OUTPUT_FORMAT",
             help="Output format: excel for a Microsoft Excel workbook (.xlsx), json "
             "for one JSON file per dataset, udata for JSON files shaped for a uData "
-            "catalog (see the publish command).",
+            "catalog (see the publish command), iso19139 for one ISO 19139 XML "
+            "metadata file per dataset.",
         ),
     ] = "excel",
+    opt_include_original_path: Annotated[
+        bool,
+        typer.Option(
+            envvar="DICOGIS_ISO_INCLUDE_ORIGINAL_PATH",
+            help="Include the location of the datasets in iso19139 metadata files. "
+            "Disabled by default: these files are meant to be published.",
+        ),
+    ] = False,
     opt_notify_sound: Annotated[
         bool,
         typer.Option(
@@ -303,6 +312,8 @@ def inventory(
             output_path=output_path,
             opt_prettify_size=opt_prettify_size,
             opt_raw_path=opt_raw_path,
+            language=language,
+            opt_include_original_path=opt_include_original_path,
         )
 
         li_vectors = []
@@ -431,6 +442,8 @@ def inventory(
             output_path=output_path,
             opt_prettify_size=opt_prettify_size,
             opt_raw_path=opt_raw_path,
+            language=language,
+            opt_include_original_path=opt_include_original_path,
         )
 
         rich_print("Start looking for geographic table in PostGIS...")

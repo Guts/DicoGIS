@@ -59,6 +59,15 @@ class TestDetermineOutputPath(unittest.TestCase):
             result, Path(f"DicoGIS_PostGIS_srv_a__srv_b_{date.today()}.xlsx")
         )
 
+    def test_iso19139_default_name_is_a_folder_without_extension(self):
+        result = determine_output_path(
+            output_path=None,
+            output_format="iso19139",
+            input_folder=Path("some/folder"),
+        )
+
+        self.assertEqual(result, Path(f"DicoGIS_folder_{date.today()}"))
+
     def test_json_default_name_is_a_folder_without_extension(self):
         result = determine_output_path(
             output_path=None,
@@ -124,7 +133,7 @@ class TestMatchOutputPathToFormat(unittest.TestCase):
         self.assertEqual(result, Path("out/inventory.XLSX"))
 
     def test_json_and_udata_remove_the_xlsx_extension(self):
-        for output_format in ("json", "udata"):
+        for output_format in ("json", "udata", "iso19139"):
             with self.subTest(output_format=output_format):
                 result = match_output_path_to_format(
                     Path("out/inventory.xlsx"), output_format

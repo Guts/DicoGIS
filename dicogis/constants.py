@@ -4,7 +4,13 @@
 
 # standard library
 from enum import Enum
+from uuid import UUID
 
+
+# namespace of the UUIDs identifying datasets (see MetaDataset.uuid), derived once
+# from uuid5(NAMESPACE_URL, "https://github.com/Guts/DicoGIS"). Must never change:
+# published metadata records are updated through these identifiers.
+DICOGIS_UUID_NAMESPACE: UUID = UUID("4153fd9e-10a6-51f2-bed8-004e872b02c5")
 
 GDAL_POSTGIS_OPEN_OPTIONS: list[str] = []
 
@@ -62,6 +68,7 @@ class OutputFormats(str, ExtendedEnum):
     excel = "excel"
     json = "json"
     udata = "udata"
+    iso19139 = "iso19139"
 
 
 class FormatsVector(ExtendedEnum):
