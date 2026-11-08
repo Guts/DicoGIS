@@ -17,11 +17,9 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
-# 3rd party
-from requests import Session
-
 # project
 from dicogis.publishing.settings import get_publish_timeout
+from dicogis.utils.http import HttpClient, get_http_client
 
 
 # ############################################################################
@@ -50,6 +48,38 @@ class PublishReport:
         return self.published + self.ignored + self.failed
 
 
+@dataclass
+class _UdataApi:
+    """How to reach a uData instance."""
+
+    http_client: HttpClient
+    api_key: str
+    url_base: str
+    version: str
+    organization_id: str | None
+    timeout: float
+
+    def url(self, path: str) -> str:
+        """Build the URL of an API route.
+
+        Args:
+            path: path of the route, from the API version
+
+        Returns:
+            full URL
+        """
+        return f"{self.url_base}{self.version}/{path}"
+
+    @property
+    def headers(self) -> dict[str, str]:
+        """Headers of the requests.
+
+        Returns:
+            content type and API key
+        """
+        return {"Content-Type": "application/json", "X-API-KEY": self.api_key}
+
+
 # ############################################################################
 # ########## Functions #############
 # ##################################
@@ -75,44 +105,34 @@ def _dicogis_extras(dataset_payload: object) -> dict:
     return extras if isinstance(extras, dict) else {}
 
 
-def _fetch_already_published(
-    req_session: Session,
-    udata_api_url_base: str,
-    udata_api_version: str,
-    udata_organization_id: str | None,
-    timeout: float,
-) -> tuple[tuple, tuple]:
+def _fetch_already_published(api: _UdataApi) -> tuple[tuple, tuple]:
     """Retrieve slugs and DicoGIS signatures already published to the target
     catalog, to avoid publishing duplicates.
 
     Args:
-        req_session: pre-configured HTTP session (with auth headers set).
-        udata_api_url_base: base API URL of the uData instance.
-        udata_api_version: API version of the uData instance.
-        udata_organization_id: if set, look at this organization's datasets
-            instead of the API-key owner's ones.
-        timeout: seconds to wait for the catalog.
+        api: uData instance, whose organization, if set, is looked at instead of the
+            API-key owner.
 
     Returns:
         already published slugs, already published DicoGIS signatures.
     """
-    if udata_organization_id:
-        response = req_session.get(
-            url=f"{udata_api_url_base}{udata_api_version}/organizations/"
-            f"{udata_organization_id}/datasets/?page_size=100",
-            allow_redirects=True,
-            timeout=timeout,
-        )
-        response.raise_for_status()
+    route = (
+        f"organizations/{api.organization_id}/datasets/"
+        if api.organization_id
+        else "me/datasets/"
+    )
+    response = api.http_client.request(
+        "GET",
+        api.url(route),
+        params={"page_size": "100"},
+        headers=api.headers,
+        timeout=api.timeout,
+    )
+    response.raise_for_status()
+    if api.organization_id:
         # be careful: this route stores the list in a 'data' attribute key
         already_published_datasets = response.json().get("data")
     else:
-        response = req_session.get(
-            url=f"{udata_api_url_base}{udata_api_version}/me/datasets/?page_size=100",
-            allow_redirects=True,
-            timeout=timeout,
-        )
-        response.raise_for_status()
         already_published_datasets = response.json()
 
     # empty values are dropped: kept in, a missing slug/signature on the catalog
@@ -136,14 +156,10 @@ def _fetch_already_published(
 def _publish_json_file(
     json_file: Path,
     report: PublishReport,
-    req_session: Session,
-    udata_api_url_base: str,
-    udata_api_version: str,
-    udata_organization_id: str | None,
+    api: _UdataApi,
     already_published_slugs: tuple,
     already_published_signatures: tuple,
     verbose: bool,
-    timeout: float,
 ) -> None:
     """Publish one metadata JSON file, unless it isn't DicoGIS' or is already
     published, and count the outcome into the report.
@@ -151,22 +167,18 @@ def _publish_json_file(
     Args:
         json_file: metadata JSON file (udata flavor) to publish.
         report: run report, updated with this file's outcome.
-        req_session: pre-configured HTTP session (with auth headers set).
-        udata_api_url_base: API URL of the uData instance.
-        udata_api_version: API version of the uData instance.
-        udata_organization_id: if set, the dataset is added to this organization.
+        api: uData instance. If it has an organization, the dataset is added to it.
         already_published_slugs: slugs already in the catalog.
         already_published_signatures: DicoGIS signatures already in the catalog.
         verbose: log ignored files at info level.
-        timeout: seconds to wait for the catalog.
     """
     # open it securely
     try:
         with json_file.open(mode="r", encoding="UTF-8") as f:
             data = json.load(f)
 
-        if isinstance(data, dict) and udata_organization_id:
-            data["organization"] = {"id": udata_organization_id}
+        if isinstance(data, dict) and api.organization_id:
+            data["organization"] = {"id": api.organization_id}
 
     except Exception as err:
         err_msg = f"Impossible to load {json_file}. Trace: {err}"
@@ -203,14 +215,16 @@ def _publish_json_file(
 
     # publish
     try:
-        req_response = req_session.post(
-            url=f"{udata_api_url_base}{udata_api_version}/datasets",
-            json=data,
-            timeout=timeout,
+        req_response = api.http_client.request(
+            "POST",
+            api.url("datasets"),
+            headers=api.headers,
+            data=json.dumps(data).encode("UTF-8"),
+            timeout=api.timeout,
         )
         req_response.raise_for_status()
     except Exception as err:
-        err_msg = f"Publish {json_file} to {udata_api_url_base} failed. Trace: {err}"
+        err_msg = f"Publish {json_file} to {api.url_base} failed. Trace: {err}"
         logger.error(err_msg)
         report.failed += 1
         report.errors.append(err_msg)
@@ -228,6 +242,7 @@ def publish_metadata_folder(
     progress_callback: Callable[[int, int, Path], None] | None = None,
     verbose: bool = False,
     timeout: float | None = None,
+    http_client: HttpClient | None = None,
 ) -> PublishReport:
     """Publish every DicoGIS metadata JSON file within a folder to a uData catalog.
 
@@ -247,6 +262,7 @@ def publish_metadata_folder(
         verbose: log ignored files (not DicoGIS or already published) at info level.
         timeout: seconds to wait for the catalog. Defaults to the
             DICOGIS_PUBLISH_TIMEOUT environment variable, or 30 seconds.
+        http_client: HTTP client. Defaults to the one of the running environment.
 
     Raises:
         FileNotFoundError: if input_folder contains no JSON file.
@@ -262,24 +278,17 @@ def publish_metadata_folder(
     if not udata_api_key:
         raise ValueError("No API key defined for uData.")
 
-    if timeout is None:
-        timeout = get_publish_timeout()
-
-    # prepare http session
-    req_session = Session()
-    req_session.headers = {
-        "Content-Type": "application/json",
-        "X-API-KEY": udata_api_key,
-    }
+    api = _UdataApi(
+        http_client=http_client or get_http_client(),
+        api_key=udata_api_key,
+        url_base=udata_api_url_base,
+        version=udata_api_version,
+        organization_id=udata_organization_id,
+        timeout=get_publish_timeout() if timeout is None else timeout,
+    )
 
     # retrieve already published datasets to avoid duplicated publication
-    already_published_slugs, already_published_signature = _fetch_already_published(
-        req_session=req_session,
-        udata_api_url_base=udata_api_url_base,
-        udata_api_version=udata_api_version,
-        udata_organization_id=udata_organization_id,
-        timeout=timeout,
-    )
+    already_published_slugs, already_published_signature = _fetch_already_published(api)
 
     report = PublishReport()
     files_total = len(li_json_files)
@@ -288,14 +297,10 @@ def publish_metadata_folder(
         _publish_json_file(
             json_file=json_file,
             report=report,
-            req_session=req_session,
-            udata_api_url_base=udata_api_url_base,
-            udata_api_version=udata_api_version,
-            udata_organization_id=udata_organization_id,
+            api=api,
             already_published_slugs=already_published_slugs,
             already_published_signatures=already_published_signature,
             verbose=verbose,
-            timeout=timeout,
         )
         if progress_callback:
             progress_callback(files_done, files_total, json_file)
