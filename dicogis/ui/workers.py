@@ -22,7 +22,7 @@ from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
-from dicogis.publishing.udata import PublishReport, publish_metadata_folder
+from dicogis.publishing.udata import publish_metadata_folder
 from dicogis.ui.qt_compat.QtCore import QObject, pyqtSignal
 from dicogis.utils.progress import OperationCanceled, ProgressReporter
 
@@ -280,7 +280,7 @@ class PublishWorker(QObject):
     def run(self) -> None:
         """Run the publication and emit the resulting report."""
         try:
-            report: PublishReport = publish_metadata_folder(
+            report = publish_metadata_folder(
                 input_folder=self.input_folder,
                 udata_api_key=self.udata_api_key,
                 udata_api_url_base=self.udata_api_url_base,

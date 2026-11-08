@@ -18,7 +18,7 @@ from os import getenv
 from pathlib import Path
 
 # project
-from dicogis.publishing.udata import PublishReport
+from dicogis.publishing.report import PublishReport
 from dicogis.ui.qt_compat import uic
 from dicogis.ui.qt_compat.QtWidgets import QFileDialog, QLineEdit, QWidget
 from dicogis.utils.check_path import check_path

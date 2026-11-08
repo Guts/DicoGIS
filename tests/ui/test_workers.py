@@ -14,7 +14,7 @@ Usage from the repo root folder:
 # package
 from typing import NoReturn
 
-from dicogis.publishing.udata import PublishReport
+from dicogis.publishing.report import PublishReport
 from dicogis.ui.workers import FolderScanWorker, PublishWorker, QtProgressReporter
 from dicogis.utils.progress import OperationCanceled, ProgressReporter
 

@@ -35,7 +35,7 @@ from dicogis.export.output_path import (
 )
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
-from dicogis.publishing.udata import PublishReport
+from dicogis.publishing.report import PublishReport
 from dicogis.ui.qt_compat import uic
 from dicogis.ui.qt_compat.QtCore import QThread, QTranslator, QUrl
 from dicogis.ui.qt_compat.QtGui import QCloseEvent, QDesktopServices, QIcon

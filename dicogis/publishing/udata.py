@@ -13,10 +13,11 @@ UI-agnostic core shared by the `dicogis-cli publish` command and the GUI's
 # standard lib
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 # project
+from dicogis.publishing.report import PublishReport
 from dicogis.publishing.settings import get_publish_timeout
 from dicogis.utils.http import HttpClient, get_http_client
 from dicogis.utils.progress import ProgressReporter
@@ -31,22 +32,6 @@ logger = logging.getLogger(__name__)
 # ############################################################################
 # ########## Classes ###############
 # ##################################
-
-
-@dataclass
-class PublishReport:
-    """Outcome of a publish_metadata_folder() run."""
-
-    published: int = 0
-    ignored: int = 0
-    failed: int = 0
-    errors: list[str] = field(default_factory=list)
-    canceled: bool = False
-
-    @property
-    def total(self) -> int:
-        """Total number of JSON files examined."""
-        return self.published + self.ignored + self.failed
 
 
 @dataclass
