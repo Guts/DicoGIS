@@ -86,6 +86,7 @@ caption: Usage
 usage/installation
 usage/cli
 usage/settings
+usage/publish_geonetwork
 ```
 
 ```{toctree}

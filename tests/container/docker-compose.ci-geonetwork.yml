@@ -1,0 +1,68 @@
+# GeoNetwork 4.4 with its Elasticsearch and its embedded H2 database: enough for testing
+# the publication, not for anything else. Based on the compose file of the official image:
+# https://github.com/geonetwork/docker-geonetwork
+services:
+  elasticsearch:
+    image: elasticsearch:8.19.13
+    container_name: dicogis-ci-geonetwork-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.security.enrollment.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    expose:
+      - "9200"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:9200"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  geonetwork:
+    image: geonetwork:4.4.12
+    container_name: dicogis-ci-geonetwork-app
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      WEBAPP_CONTEXT_PATH: /geonetwork
+      DATA_DIR: /catalogue-data
+      JAVA_OPTS: >-
+        --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+        -Djava.security.egd=file:/dev/./urandom -Djava.awt.headless=true
+        -Xms512M -Xss512M -Xmx2G -XX:+UseConcMarkSweepGC
+      # since GeoNetwork 4.4.0, instead of ES_HOST
+      GN_CONFIG_PROPERTIES: >-
+        -Dgeonetwork.dir=/catalogue-data
+        -Dgeonetwork.formatter.dir=/catalogue-data/data/formatter
+        -Dgeonetwork.schema.dir=/opt/geonetwork/WEB-INF/data/config/schema_plugins
+        -Dgeonetwork.indexConfig.dir=/opt/geonetwork/WEB-INF/data/config/index
+        -Dgeonetwork.schemapublication.dir=/opt/geonetwork/WEB-INF/data/resources/schemapublication
+        -Dgeonetwork.htmlcache.dir=/opt/geonetwork/WEB-INF/data/resources/htmlcache
+        -Des.host=elasticsearch
+        -Des.protocol=http
+        -Des.port=9200
+        -Des.url=http://elasticsearch:9200
+        -Des.username=
+        -Des.password=
+    healthcheck:
+      # without this Accept, Spring falls back on application/xml here: the route doesn't
+      # match and the old dispatcher answers 500, "Service not found"
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "--silent",
+          "--show-error",
+          "--header",
+          "Accept: application/json",
+          "http://localhost:8080/geonetwork/srv/api/site",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    ports:
+      - "8080:8080"

@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DicoGIS scans a folder tree (and/or PostGIS databases via `pg_service.conf`) for
 geospatial datasets, extracts their metadata (CRS, geometry type, fields, extent,
-size, etc.) using GDAL/OGR, and exports the result as an Excel workbook (`.xlsx`)
-or JSON (optionally in "udata" flavor for publishing to a uData catalog). It ships
+size, etc.) using GDAL/OGR, and exports the result as an Excel workbook (`.xlsx`),
+JSON (optionally in "udata" flavor for publishing to a uData catalog) or ISO 19139
+XML (for publishing to a GeoNetwork 4.4 catalog). It ships
 both a PyQt6 desktop GUI (`dicogis-gui`) and a Typer-based CLI (`dicogis-cli`),
 distributed as PyInstaller executables for Windows/Linux.
 
@@ -199,15 +200,27 @@ rename them, saved settings depend on them.
    (`base_serializer.py`) defines `pre_serializing()` / `serialize_metadaset()` /
    `post_serializing()` and a factory,
    `get_serializer_from_parameters()`, that picks `MetadatasetSerializerXlsx`
-   (`to_xlsx.py`) or `MetadatasetSerializerJson` (`to_json.py`, with a `flavor`
-   of `"dicogis"` or `"udata"`) based on `OutputFormats`. Add a new output format
-   here plus in `dicogis/constants.py::OutputFormats`.
+   (`to_xlsx.py`), `MetadatasetSerializerJson` (`to_json.py`, with a `flavor`
+   of `"dicogis"` or `"udata"`) or `MetadatasetSerializerIso19139`
+   (`to_iso19139.py`) based on `OutputFormats`. Add a new output format here plus
+   in `dicogis/constants.py::OutputFormats` and, if it writes one file per dataset,
+   in `dicogis/export/output_path.py::FOLDER_OUTPUT_FORMATS`.
 
 Adding a new file format means: add it to `dicogis/constants.py`
 (`FormatsVector`/`FormatsRaster`/`SUPPORTED_FORMATS`), extend
 `find_geodata_files()` to detect it, register it (and its `opt_analyze_*` flag)
 in `ProcessingFiles.MATRIX_FORMAT_GEOREADER`, and reuse or extend an existing
 `GeoReaderBase` subclass.
+
+### Catalog records and publication
+
+`dicogis/export/catalog_record.py::CatalogRecord` is the pivot between a `MetaDataset` and the catalog formats, and the single list of the fields managed by DicoGIS. It never holds an absolute path unless asked to: don't build it from `MetaDataset.as_markdown_description`, which lists them. `dicogis/export/to_iso19139.py` serializes it and declares `ISO19139_FIELDS` / `ISO19139_SEQUENCES`, which `complete_record()` relies on to fill the empty fields of a catalog record at the place the XSD expects them. A record is identified by `MetaDataset.uuid`, derived from `stable_location`: changing either changes the identifier of what's already published.
+
+`dicogis/publishing/` holds one module per catalog (`udata.py`, `geonetwork.py`), each with a `publish_metadata_folder()` returning a `PublishReport` (`report.py`) and depending on neither Typer nor Qt. They reach the network through `dicogis/utils/http/`, never `requests` directly: `HttpClient` is a Protocol implemented by `RequestsHttpClient` (CLI, standalone GUI) and `QgisHttpClient` (`QgsBlockingNetworkRequest`), `get_http_client()` picking one at runtime from `DICOGIS_HTTP_BACKEND`, on the model of `DICOGIS_QT_API`. Clients are stateless, cookies included: each backend's cookie jar otherwise overrides the `Cookie` header given by the caller, which is why `GeonetworkSession` handles the CSRF token explicitly.
+
+The GUI binds a publication to its form in `_prepare_publication()`, in the GUI thread, then runs it in a `QThread` (`PublishWorker`), or in a `QgsTask` inside QGIS (`dicogis/publishing/qgis_task.py`, out of `dicogis/ui` since it imports `qgis.core` and GUI modules can't import a binding, even lazily). Both report and cancel through `ProgressReporter`; canceling ends the run between two files and still returns a report.
+
+`tests/integration/` runs against a real GeoNetwork, skipped unless `DICOGIS_TEST_GEONETWORK_URL` is set (see `.github/workflows/tester_geonetwork_publish.yml`), with the `requests` backend. The QGIS backend and the `QgsTask` are only tested with fakes: nothing runs them in a real QGIS.
 
 ### PostGIS path
 

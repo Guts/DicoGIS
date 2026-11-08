@@ -12,7 +12,7 @@
 
 ![GitHub all releases](https://img.shields.io/github/downloads/guts/dicogis/total)
 
-Automatize the creation of a dictionnary of geographic data in a folders structure. The output dictionary is an Excel file (.xlsx).
+Automatize the creation of a dictionnary of geographic data in a folders structure. The output dictionary is an Excel file (.xlsx), JSON or ISO 19139 XML files, which can be published to a [uData](https://github.com/opendatateam/udata) or a [GeoNetwork](https://guts.github.io/DicoGIS/usage/publish_geonetwork.html) catalog.
 
 For further information, see [the documentation](https://guts.github.io/DicoGIS/).
 
