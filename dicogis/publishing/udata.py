@@ -20,6 +20,9 @@ from pathlib import Path
 # 3rd party
 from requests import Session
 
+# project
+from dicogis.publishing.settings import get_publish_timeout
+
 
 # ############################################################################
 # ########## Globals ###############
@@ -77,6 +80,7 @@ def _fetch_already_published(
     udata_api_url_base: str,
     udata_api_version: str,
     udata_organization_id: str | None,
+    timeout: float,
 ) -> tuple[tuple, tuple]:
     """Retrieve slugs and DicoGIS signatures already published to the target
     catalog, to avoid publishing duplicates.
@@ -87,6 +91,7 @@ def _fetch_already_published(
         udata_api_version: API version of the uData instance.
         udata_organization_id: if set, look at this organization's datasets
             instead of the API-key owner's ones.
+        timeout: seconds to wait for the catalog.
 
     Returns:
         already published slugs, already published DicoGIS signatures.
@@ -96,6 +101,7 @@ def _fetch_already_published(
             url=f"{udata_api_url_base}{udata_api_version}/organizations/"
             f"{udata_organization_id}/datasets/?page_size=100",
             allow_redirects=True,
+            timeout=timeout,
         )
         response.raise_for_status()
         # be careful: this route stores the list in a 'data' attribute key
@@ -104,6 +110,7 @@ def _fetch_already_published(
         response = req_session.get(
             url=f"{udata_api_url_base}{udata_api_version}/me/datasets/?page_size=100",
             allow_redirects=True,
+            timeout=timeout,
         )
         response.raise_for_status()
         already_published_datasets = response.json()
@@ -136,6 +143,7 @@ def _publish_json_file(
     already_published_slugs: tuple,
     already_published_signatures: tuple,
     verbose: bool,
+    timeout: float,
 ) -> None:
     """Publish one metadata JSON file, unless it isn't DicoGIS' or is already
     published, and count the outcome into the report.
@@ -150,6 +158,7 @@ def _publish_json_file(
         already_published_slugs: slugs already in the catalog.
         already_published_signatures: DicoGIS signatures already in the catalog.
         verbose: log ignored files at info level.
+        timeout: seconds to wait for the catalog.
     """
     # open it securely
     try:
@@ -195,7 +204,9 @@ def _publish_json_file(
     # publish
     try:
         req_response = req_session.post(
-            url=f"{udata_api_url_base}{udata_api_version}/datasets", json=data
+            url=f"{udata_api_url_base}{udata_api_version}/datasets",
+            json=data,
+            timeout=timeout,
         )
         req_response.raise_for_status()
     except Exception as err:
@@ -216,6 +227,7 @@ def publish_metadata_folder(
     udata_organization_id: str | None = None,
     progress_callback: Callable[[int, int, Path], None] | None = None,
     verbose: bool = False,
+    timeout: float | None = None,
 ) -> PublishReport:
     """Publish every DicoGIS metadata JSON file within a folder to a uData catalog.
 
@@ -233,6 +245,8 @@ def publish_metadata_folder(
         progress_callback: called after each JSON file has been examined, with
             (files_done, files_total, current_json_file).
         verbose: log ignored files (not DicoGIS or already published) at info level.
+        timeout: seconds to wait for the catalog. Defaults to the
+            DICOGIS_PUBLISH_TIMEOUT environment variable, or 30 seconds.
 
     Raises:
         FileNotFoundError: if input_folder contains no JSON file.
@@ -248,6 +262,9 @@ def publish_metadata_folder(
     if not udata_api_key:
         raise ValueError("No API key defined for uData.")
 
+    if timeout is None:
+        timeout = get_publish_timeout()
+
     # prepare http session
     req_session = Session()
     req_session.headers = {
@@ -261,6 +278,7 @@ def publish_metadata_folder(
         udata_api_url_base=udata_api_url_base,
         udata_api_version=udata_api_version,
         udata_organization_id=udata_organization_id,
+        timeout=timeout,
     )
 
     report = PublishReport()
@@ -277,6 +295,7 @@ def publish_metadata_folder(
             already_published_slugs=already_published_slugs,
             already_published_signatures=already_published_signature,
             verbose=verbose,
+            timeout=timeout,
         )
         if progress_callback:
             progress_callback(files_done, files_total, json_file)

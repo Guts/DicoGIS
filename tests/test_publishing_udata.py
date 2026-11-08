@@ -21,8 +21,10 @@ from pathlib import Path
 # 3rd party
 import pytest
 import responses
+from responses import matchers
 
 # project
+from dicogis.publishing.settings import DEFAULT_PUBLISH_TIMEOUT
 from dicogis.publishing.udata import publish_metadata_folder
 
 
@@ -95,6 +97,51 @@ def test_each_file_is_counted_and_reported_once(tmp_path: Path) -> None:
         "d_new.json",
     }
     assert all(total == 4 for _, total, _ in progress_calls)
+
+
+@responses.activate
+@pytest.mark.parametrize(
+    ("timeout", "env_value", "expected"),
+    [
+        (None, None, DEFAULT_PUBLISH_TIMEOUT),
+        (None, "12.5", 12.5),
+        (None, "not_a_number", DEFAULT_PUBLISH_TIMEOUT),
+        (None, "-1", DEFAULT_PUBLISH_TIMEOUT),
+        (3.0, "12.5", 3.0),
+    ],
+)
+def test_every_request_has_a_timeout(
+    tmp_path: Path, monkeypatch, timeout, env_value, expected
+) -> None:
+    """Without one, an unresponsive catalog would block forever, thread included."""
+    _write_json(tmp_path, "new.json", _dicogis_metadata("brand-new"))
+    if env_value is None:
+        monkeypatch.delenv("DICOGIS_PUBLISH_TIMEOUT", raising=False)
+    else:
+        monkeypatch.setenv("DICOGIS_PUBLISH_TIMEOUT", env_value)
+    has_timeout = matchers.request_kwargs_matcher({"timeout": expected})
+    responses.get(
+        f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/me/datasets/",
+        json=[],
+        status=200,
+        match=[has_timeout],
+    )
+    responses.post(
+        f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/datasets",
+        json={},
+        status=201,
+        match=[has_timeout],
+    )
+
+    report = publish_metadata_folder(
+        input_folder=tmp_path,
+        udata_api_key="fake-api-key",
+        udata_api_url_base=UDATA_API_URL_BASE,
+        udata_api_version=UDATA_API_VERSION,
+        timeout=timeout,
+    )
+
+    assert report.published == 1
 
 
 @responses.activate

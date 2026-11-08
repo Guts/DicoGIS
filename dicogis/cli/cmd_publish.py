@@ -17,6 +17,7 @@ from rich.progress import Progress
 # project
 from dicogis.__about__ import __package_name__
 from dicogis.constants import SUPPORTED_FORMATS
+from dicogis.publishing.settings import DEFAULT_PUBLISH_TIMEOUT
 from dicogis.publishing.udata import publish_metadata_folder
 from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.journalizer import LogManager
@@ -83,6 +84,14 @@ def publish(
             "the organization instead of the user authenticated with the API key.",
         ),
     ] = None,
+    timeout: Annotated[
+        float,
+        typer.Option(
+            envvar="DICOGIS_PUBLISH_TIMEOUT",
+            help="Seconds to wait for the catalog before giving up on a request.",
+            min=1,
+        ),
+    ] = DEFAULT_PUBLISH_TIMEOUT,
     opt_notify_sound: Annotated[
         bool,
         typer.Option(
@@ -142,6 +151,7 @@ def publish(
                 udata_organization_id=udata_organization_id,
                 progress_callback=_on_progress,
                 verbose=verbose,
+                timeout=timeout,
             )
     except FileNotFoundError as err:
         console_err.print(f":boom: [bold red]Error![/bold red] {err}")
