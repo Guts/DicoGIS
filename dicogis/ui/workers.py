@@ -22,7 +22,7 @@ from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
-from dicogis.publishing.udata import PublishReport, publish_metadata_folder
+from dicogis.publishing.udata import publish_metadata_folder
 from dicogis.ui.qt_compat.QtCore import QObject, pyqtSignal
 from dicogis.utils.progress import OperationCanceled, ProgressReporter
 
@@ -244,7 +244,6 @@ class PublishWorker(QObject):
     GUI thread.
     """
 
-    progress_changed = pyqtSignal(int, int)
     finished = pyqtSignal(object)  # PublishReport
     error = pyqtSignal(str)
 
@@ -255,6 +254,7 @@ class PublishWorker(QObject):
         udata_api_url_base: str,
         udata_api_version: str,
         udata_organization_id: str | None = None,
+        progress_reporter: ProgressReporter | None = None,
         parent: QObject | None = None,
     ) -> None:
         """Initialize the worker.
@@ -266,9 +266,11 @@ class PublishWorker(QObject):
             udata_api_version: API version of the uData instance.
             udata_organization_id: organization ID in the uData instance. Defaults
                 to None.
+            progress_reporter: told about the progress, and able to stop the run.
             parent: Qt parent object.
         """
         super().__init__(parent)
+        self.progress_reporter = progress_reporter
         self.input_folder = input_folder
         self.udata_api_key = udata_api_key
         self.udata_api_url_base = udata_api_url_base
@@ -278,15 +280,13 @@ class PublishWorker(QObject):
     def run(self) -> None:
         """Run the publication and emit the resulting report."""
         try:
-            report: PublishReport = publish_metadata_folder(
+            report = publish_metadata_folder(
                 input_folder=self.input_folder,
                 udata_api_key=self.udata_api_key,
                 udata_api_url_base=self.udata_api_url_base,
                 udata_api_version=self.udata_api_version,
                 udata_organization_id=self.udata_organization_id,
-                progress_callback=lambda done, total, _current_file: (
-                    self.progress_changed.emit(done, total)
-                ),
+                progress_reporter=self.progress_reporter,
                 verbose=True,
             )
             self.finished.emit(report)

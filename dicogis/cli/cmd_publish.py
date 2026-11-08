@@ -17,6 +17,7 @@ from rich.progress import Progress
 # project
 from dicogis.__about__ import __package_name__
 from dicogis.constants import SUPPORTED_FORMATS
+from dicogis.publishing.settings import DEFAULT_PUBLISH_TIMEOUT
 from dicogis.publishing.udata import publish_metadata_folder
 from dicogis.utils.app_dir import get_app_dir
 from dicogis.utils.journalizer import LogManager
@@ -32,6 +33,41 @@ console_err = Console(stderr=True)
 default_formats = ",".join([f.name for f in SUPPORTED_FORMATS])
 logger = logging.getLogger(__name__)
 state = {"verbose": False}
+
+# ############################################################################
+# ########## Classes ###############
+# ##################################
+
+
+class RichProgressReporter:
+    """ProgressReporter on top of a Rich progress bar. Nothing cancels it: Ctrl+C
+    interrupts the command."""
+
+    def __init__(self, progress: Progress) -> None:
+        """Add a task to a progress bar.
+
+        Args:
+            progress: running Rich progress bar
+        """
+        self.progress = progress
+        self.task_id = progress.add_task("Processing...", total=None)
+
+    def set_message(self, message: str) -> None:
+        """Update the description of the task."""
+        self.progress.update(self.task_id, description=message)
+
+    def increment(self, amount: int = 1) -> None:
+        """Increment the progress counter."""
+        self.progress.advance(self.task_id, amount)
+
+    def set_total(self, total: int) -> None:
+        """Set the total value of the progress counter."""
+        self.progress.update(self.task_id, total=total)
+
+    def is_canceled(self) -> bool:
+        """Tell the operation has not been asked to stop."""
+        return False
+
 
 # ############################################################################
 # ########## Functions #############
@@ -83,6 +119,14 @@ def publish(
             "the organization instead of the user authenticated with the API key.",
         ),
     ] = None,
+    timeout: Annotated[
+        float,
+        typer.Option(
+            envvar="DICOGIS_PUBLISH_TIMEOUT",
+            help="Seconds to wait for the catalog before giving up on a request.",
+            min=1,
+        ),
+    ] = DEFAULT_PUBLISH_TIMEOUT,
     opt_notify_sound: Annotated[
         bool,
         typer.Option(
@@ -127,21 +171,15 @@ def publish(
 
     try:
         with Progress(console=console_out) as progress:
-            task_id = progress.add_task("Processing...", total=None)
-
-            def _on_progress(
-                files_done: int, files_total: int, current_file: Path
-            ) -> None:
-                progress.update(task_id, total=files_total, completed=files_done)
-
             report = publish_metadata_folder(
                 input_folder=input_folder,
                 udata_api_key=udata_api_key,
                 udata_api_url_base=udata_api_url_base,
                 udata_api_version=udata_api_version,
                 udata_organization_id=udata_organization_id,
-                progress_callback=_on_progress,
+                progress_reporter=RichProgressReporter(progress),
                 verbose=verbose,
+                timeout=timeout,
             )
     except FileNotFoundError as err:
         console_err.print(f":boom: [bold red]Error![/bold red] {err}")
