@@ -68,6 +68,7 @@ class OutputFormats(str, ExtendedEnum):
     excel = "excel"
     json = "json"
     udata = "udata"
+    iso19139 = "iso19139"
 
 
 class FormatsVector(ExtendedEnum):

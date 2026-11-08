@@ -82,6 +82,7 @@ def test_output_format_help_describes_every_format():
 
     assert "only Excel" not in help_page
     assert "JSON" in help_page
+    assert "ISO 19139" in help_page
 
 
 def test_top_level_verbose_keeps_the_logger_usable():

@@ -23,8 +23,11 @@ from pathlib import Path
 # 3rd party
 import pytest
 from lxml import etree
+from typer.testing import CliRunner
 
 # project
+from dicogis.cli.main import dicogis_cli
+from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.catalog_record import CatalogRecord, CatalogRecordSettings
 from dicogis.export.to_iso19139 import (
     GCO_NS,
@@ -326,6 +329,60 @@ def test_fields_table_points_at_what_is_generated():
 # ##############################################################################
 # ########## Serializer tests #######
 # ##################################
+
+
+def test_factory_builds_the_serializer_from_its_parameters(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("DICOGIS_ISO_CONTACT_EMAIL", "a@example.org")
+
+    serializer = MetadatasetSerializerBase.get_serializer_from_parameters(
+        format_or_serializer="iso19139",
+        localized_strings={},
+        output_path=tmp_path,
+        language="FR",
+        opt_include_original_path=True,
+    )
+
+    assert isinstance(serializer, MetadatasetSerializerIso19139)
+    assert serializer.settings.language == "fre"
+    assert serializer.settings.include_original_path is True
+    assert serializer.settings.contact_email == "a@example.org"
+
+
+def test_cli_inventory_writes_iso19139_files(tmp_path: Path):
+    source_folder = tmp_path / "private_folder"
+    source_folder.mkdir()
+    for extension in ("shp", "shx", "dbf", "prj"):
+        name = f"san_andres_y_providencia_coastline.{extension}"
+        (source_folder / name).write_bytes((GISDATA / "vector" / name).read_bytes())
+    output_folder = tmp_path / "output"
+
+    result = CliRunner().invoke(
+        dicogis_cli,
+        [
+            "inventory",
+            "--input-folder",
+            str(source_folder),
+            "--formats",
+            "esri_shapefile",
+            "--output-format",
+            "iso19139",
+            "--output-path",
+            str(output_folder),
+            "--language",
+            "FR",
+            "--no-opt-open-output",
+            "--no-opt-notify-sound",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    output_files = list(output_folder.glob("*.xml"))
+    assert [output_file.name for output_file in output_files] == [
+        "san_andres_y_providencia_coastline.xml"
+    ]
+    root = etree.parse(str(output_files[0])).getroot()
+    assert _text(root, "gmd:language/gmd:LanguageCode") == "fre"
+    assert str(source_folder.name) not in etree.tostring(root, encoding="unicode")
 
 
 def test_output_path_is_required():

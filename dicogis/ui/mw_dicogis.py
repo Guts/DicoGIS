@@ -245,6 +245,7 @@ class DicoGIS(QMainWindow):
             OutputFormats.excel: self.tr("Excel workbook (.xlsx)"),
             OutputFormats.json: self.tr("JSON files"),
             OutputFormats.udata: self.tr("JSON files for uData"),
+            OutputFormats.iso19139: self.tr("ISO 19139 XML files"),
         }
         for index in range(self.cbb_output_format.count()):
             self.cbb_output_format.setItemText(
@@ -596,6 +597,7 @@ class DicoGIS(QMainWindow):
             ),
             opt_prettify_size=self.wdg_tab_settings.cbx_export_size_prettify.isChecked(),
             opt_raw_path=self.wdg_tab_settings.cbx_export_raw_path.isChecked(),
+            language=self.get_selected_language(),
         )
         self.set_status_message(
             f"{output_format.value} output: {self.serializer.output_path}"
