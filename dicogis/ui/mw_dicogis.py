@@ -28,15 +28,21 @@ from osgeo import gdal
 
 # Project
 from dicogis import __about__
-from dicogis.constants import AvailableLocales, JsonFlavors, OutputFormats
+from dicogis.constants import (
+    AvailableLocales,
+    JsonFlavors,
+    OutputFormats,
+    PublishTargets,
+)
 from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.export.output_path import (
     determine_output_path,
     match_output_path_to_format,
 )
+from dicogis.export.to_iso19139 import MetadatasetSerializerIso19139
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
-from dicogis.publishing import udata
+from dicogis.publishing import geonetwork, udata
 from dicogis.publishing.report import PublishReport
 from dicogis.ui.qt_compat import uic
 from dicogis.ui.qt_compat.QtCore import QThread, QTranslator, QUrl
@@ -55,9 +61,12 @@ from dicogis.ui.workers import (
     QtProgressReporter,
 )
 from dicogis.utils.checknorris import CheckNorris
+from dicogis.utils.http import get_http_client
 from dicogis.utils.notifier import send_system_notify
 from dicogis.utils.options import OptionsManager
 from dicogis.utils.paths import absolute_path
+from dicogis.utils.progress import ProgressReporter
+from dicogis.utils.qgis_runtime import qgis_application_is_running
 from dicogis.utils.texts import TextsManager
 from dicogis.utils.utils import Utilities
 
@@ -171,6 +180,8 @@ class DicoGIS(QMainWindow):
         self._scan_thread: QThread | None = None
         self._scan_worker: FolderScanWorker | None = None
         self._proc_thread: QThread | None = None
+        # the running QgsTask, inside QGIS: nothing else keeps it alive on Python's side
+        self._publish_task: object | None = None
         self._proc_worker: object | None = None
         self._progress_reporter: QtProgressReporter | None = None
 
@@ -613,6 +624,11 @@ class DicoGIS(QMainWindow):
         in each handler, where the PostGIS one had been forgotten.
         """
         self._enable_cancel_button(False)
+        if self._publish_task is not None:
+            # QGIS deletes a task once finished: nothing must call it anymore, closing
+            # the window asks the current progress reporter to stop
+            self._publish_task = None
+            self._progress_reporter = None
         self.btn_process.setEnabled(True)
         self.tab_main.setTabEnabled(0, True)
         self.tab_main.setTabEnabled(1, True)
@@ -743,12 +759,17 @@ class DicoGIS(QMainWindow):
             logger.warning(f"Opening {output_path} failed.")
 
     def _prefill_publish_input_folder(self) -> None:
-        """Point the Publish tab to the output of a uData-flavored JSON export, the
-        input it expects, so publishing it is the next step."""
+        """Point the Publish tab to the output of an export it can publish, so that
+        publishing it is the next step."""
         if getattr(self.serializer, "flavor", None) == JsonFlavors.udata:
-            self.wdg_tab_publish.set_input_folder(
-                str(absolute_path(self.serializer.output_path))
-            )
+            self.wdg_tab_publish.set_publish_target(PublishTargets.udata.value)
+        elif isinstance(self.serializer, MetadatasetSerializerIso19139):
+            self.wdg_tab_publish.set_publish_target(PublishTargets.geonetwork.value)
+        else:
+            return
+        self.wdg_tab_publish.set_input_folder(
+            str(absolute_path(self.serializer.output_path))
+        )
 
     def _on_files_processing_finished(self, total_files: int) -> None:
         """React to a successful files processing run.
@@ -850,28 +871,115 @@ class DicoGIS(QMainWindow):
         )
         self._enable_processing_controls()
 
-    def process_publish(self) -> None:
-        """Launch uData publication of metadata JSON files in a background worker."""
-        self.prg_layers.setRange(0, 0)  # indeterminate mode while fetching the catalog
-        self.set_status_message("Publishing to uData...")
-        self.wdg_tab_publish.clear_report()
+    def _prepare_publication(self) -> partial:
+        """Bind the publication to what's in the form: widgets can only be read here,
+        in the GUI thread.
 
+        Returns:
+            publication function of the selected catalog, still waiting for its
+            progress_reporter and http_client arguments
+        """
+        tab = self.wdg_tab_publish
+        input_folder = Path(tab.get_input_folder())
+        if tab.get_publish_target() == PublishTargets.geonetwork:
+            return partial(
+                geonetwork.publish_metadata_folder,
+                input_folder=input_folder,
+                url_base=tab.get_geonetwork_url_base(),
+                group=tab.get_geonetwork_group(),
+                # the authentication configuration of QGIS replaces them
+                credentials=(
+                    None
+                    if tab.get_geonetwork_authcfg()
+                    else geonetwork.GeonetworkCredentials(
+                        tab.get_geonetwork_username(), tab.get_geonetwork_password()
+                    )
+                ),
+                portal=tab.get_geonetwork_portal(),
+                categories=tab.get_geonetwork_categories(),
+                update_mode=tab.get_geonetwork_update_mode(),
+                publish_to_all=tab.cbx_geonetwork_publish_to_all.isChecked(),
+                reject_if_invalid=tab.cbx_geonetwork_reject_if_invalid.isChecked(),
+            )
+        return partial(
+            udata.publish_metadata_folder,
+            input_folder=input_folder,
+            udata_api_key=tab.get_udata_api_key(),
+            udata_api_url_base=tab.get_udata_api_url_base(),
+            udata_api_version=tab.get_udata_api_version(),
+            udata_organization_id=tab.get_udata_organization_id(),
+            verbose=True,
+        )
+
+    def process_publish(self) -> None:
+        """Launch the publication in the background: in a QgsTask inside QGIS, the way
+        it expects long operations to run, in a worker thread otherwise."""
+        self.prg_layers.setRange(0, 0)  # indeterminate mode while fetching the catalog
+        self.set_status_message(self.tr("Publishing..."))
+        self.wdg_tab_publish.clear_report()
+        self._enable_cancel_button(True)
+
+        publication = self._prepare_publication()
+        if qgis_application_is_running():
+            self._start_publish_task(publication)
+        else:
+            self._start_publish_worker(publication)
+
+    def _start_publish_task(self, publication: partial) -> None:
+        """Hand the publication over to the task manager of QGIS.
+
+        Args:
+            publication: see _prepare_publication()
+        """
+        # needs QGIS: can't be imported any earlier
+        from dicogis.publishing.qgis_task import start_publish_task
+
+        authcfg = (
+            self.wdg_tab_publish.get_geonetwork_authcfg()
+            if self.wdg_tab_publish.get_publish_target() == PublishTargets.geonetwork
+            else None
+        )
+
+        def _run(
+            progress_reporter: ProgressReporter, feedback: object
+        ) -> PublishReport:
+            return publication(
+                progress_reporter=progress_reporter,
+                http_client=get_http_client(authcfg=authcfg, feedback=feedback),
+            )
+
+        self._publish_task = start_publish_task(
+            self.tr("Publishing DicoGIS metadata"),
+            _run,
+            self._on_publish_finished,
+            self._on_processing_error,
+        )
+        self._progress_reporter = self._publish_task.progress_reporter
+        self._publish_task.progressChanged.connect(self._on_publish_task_progress)
+
+    def _on_publish_task_progress(self, percentage: float) -> None:
+        """React to the progress of the QgsTask.
+
+        Args:
+            percentage: progress of the task
+        """
+        self.prg_layers.setRange(0, 100)
+        self.prg_layers.setValue(int(percentage))
+
+    def _start_publish_worker(self, publication: partial) -> None:
+        """Run the publication in a worker thread.
+
+        Args:
+            publication: see _prepare_publication()
+        """
         self._progress_reporter = QtProgressReporter(self)
         self._progress_reporter.total_changed.connect(self._on_publish_total_known)
         self._progress_reporter.progress_incremented.connect(self._on_publish_progress)
-        self._enable_cancel_button(True)
 
         self._proc_thread = QThread(self)
         self._proc_worker = PublishWorker(
             publish_function=partial(
-                udata.publish_metadata_folder,
-                input_folder=Path(self.wdg_tab_publish.get_input_folder()),
-                udata_api_key=self.wdg_tab_publish.get_udata_api_key(),
-                udata_api_url_base=self.wdg_tab_publish.get_udata_api_url_base(),
-                udata_api_version=self.wdg_tab_publish.get_udata_api_version(),
-                udata_organization_id=self.wdg_tab_publish.get_udata_organization_id(),
-                progress_reporter=self._progress_reporter,
-                verbose=True,
+                publication, progress_reporter=self._progress_reporter
             )
         )
         self._proc_worker.moveToThread(self._proc_thread)
@@ -904,7 +1012,7 @@ class DicoGIS(QMainWindow):
         self.set_status_message(f"Publishing: {files_done}/{self.prg_layers.maximum()}")
 
     def _on_publish_finished(self, report: PublishReport) -> None:
-        """React to a successful uData publication run.
+        """React to a successful publication run.
 
         Args:
             report: outcome of the publication run.
@@ -915,6 +1023,8 @@ class DicoGIS(QMainWindow):
             f"{report.published} published, {report.ignored} ignored, "
             f"{report.failed} failed."
         )
+        if report.up_to_date:
+            summary += f" {report.up_to_date} already complete."
         self.set_status_message(
             self.tr("Publication canceled: {summary}").format(summary=summary)
             if report.canceled
@@ -929,6 +1039,35 @@ class DicoGIS(QMainWindow):
             notification_sound=self.wdg_tab_settings.cbx_end_process_notification_sound.isChecked(),
         )
         self._enable_processing_controls()
+
+    def _missing_publish_field(self) -> str | None:
+        """Look for what prevents from publishing to the selected catalog.
+
+        Returns:
+            message telling what's wrong, None if the form is complete
+        """
+        tab = self.wdg_tab_publish
+        if not tab.get_input_folder():
+            return self.tr("Any folder selected")
+
+        if tab.get_publish_target() == PublishTargets.udata:
+            if not tab.get_udata_api_key():
+                return self.tr("A uData API key is required to publish.")
+            return None
+
+        if not tab.get_geonetwork_url_base():
+            return self.tr("A GeoNetwork URL is required to publish.")
+        if not tab.get_geonetwork_group().isdigit():
+            return self.tr(
+                "GeoNetwork requires the numeric identifier of a group to publish."
+            )
+        if not tab.get_geonetwork_authcfg() and not (
+            tab.get_geonetwork_username() and tab.get_geonetwork_password()
+        ):
+            return self.tr(
+                "A GeoNetwork username and password are required to publish."
+            )
+        return None
 
     def check_fields(self, tab_data_type: int) -> bool:
         """Check if required form fields are not empty.
@@ -965,17 +1104,9 @@ class DicoGIS(QMainWindow):
                 return False
 
         elif tab_data_type == 3:
-            if not self.wdg_tab_publish.get_input_folder():
-                QMessageBox.critical(
-                    self, "DicoGIS - User error", self.tr("Any folder selected")
-                )
-                return False
-            if not self.wdg_tab_publish.get_udata_api_key():
-                QMessageBox.critical(
-                    self,
-                    "DicoGIS - User error",
-                    self.tr("A uData API key is required to publish."),
-                )
+            missing_field = self._missing_publish_field()
+            if missing_field:
+                QMessageBox.critical(self, "DicoGIS - User error", missing_field)
                 return False
 
         # no error detected: let's test connection
