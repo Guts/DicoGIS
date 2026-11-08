@@ -13,11 +13,14 @@ from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
 from typing import Literal
+from uuid import uuid5
 
 # package
+from dicogis.constants import DICOGIS_UUID_NAMESPACE
 from dicogis.models.database_connection import DatabaseConnection
 from dicogis.models.feature_attributes import AttributeField
 from dicogis.utils.formatters import convert_octets
+from dicogis.utils.paths import absolute_path
 from dicogis.utils.slugger import sluggy
 
 
@@ -185,6 +188,37 @@ class MetaDataset:
 
         return sluggy(to_slug)
 
+    @property
+    def stable_location(self) -> str | None:
+        """Where the dataset lives, in a form that survives its content changing.
+
+        Basis of `uuid`: anything added here changes the identifier of every dataset,
+        hence the catalog records already published.
+
+        Returns:
+            absolute path of the dataset, or None if it has no path of its own (e.g.
+            a layer of a flat database)
+        """
+        if isinstance(self.path, Path):
+            return absolute_path(self.path).as_posix()
+        return None
+
+    @property
+    def uuid(self) -> str | None:
+        """Identifier of the dataset, stable across inventories.
+
+        Derived from its location rather than from `signature()`, which changes with
+        the content (objects count, extent...): a catalog record must keep the same
+        identifier when its dataset is updated.
+
+        Returns:
+            UUID, or None if the dataset has no location to derive it from
+        """
+        location = self.stable_location
+        if location is None:
+            return None
+        return str(uuid5(DICOGIS_UUID_NAMESPACE, location))
+
     def signature(
         self,
         hashable_attributes: tuple = (
@@ -335,6 +369,28 @@ class MetaDatabaseTable(MetaVectorDataset):
 
     database_connection: DatabaseConnection | None = None
     schema_name: str = "public"
+
+    @property
+    def stable_location(self) -> str | None:
+        """Where the table lives: server, database, schema and table.
+
+        Unlike `path_as_str`, it names the table, without which all the tables of a
+        database would share one identifier, and leaves the user out, without which
+        each account would get its own one.
+
+        Returns:
+            location of the table, or None if its connection or name is unknown
+        """
+        connection = self.database_connection
+        if not isinstance(connection, DatabaseConnection) or not self.name:
+            return None
+        server = (
+            f"service={connection.service_name}"
+            if connection.service_name
+            else f"{connection.host}:{connection.port}/{connection.database_name}"
+        )
+        relation = self.name if "." in self.name else f"{self.schema_name}.{self.name}"
+        return f"postgresql://{server}/{relation}"
 
 
 @dataclass
