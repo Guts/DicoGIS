@@ -121,7 +121,8 @@ jobs:
             'tail -n 20 /usr/local/tomcat/logs/localhost_access_log.*' || true
           for path in site me; do
             docker compose -f "$COMPOSE_FILE" exec -T geonetwork curl --silent --show-error \
-              --include --max-time 30 "http://localhost:8080/geonetwork/srv/api/$path" \
+              --include --max-time 30 --header "Accept: application/json" \
+              "http://localhost:8080/geonetwork/srv/api/$path" \
               | head -c 2000 || true
           done
 

@@ -18,7 +18,7 @@ The contact of the records comes from `DICOGIS_ISO_CONTACT_ORGANISATION` and `DI
 
 ## Publish them
 
-The account needs at least the `Editor` profile. The group is mandatory and given by its numeric identifier, listed by `GET /srv/api/groups` on the instance:
+The account needs at least the `Editor` profile. The group is mandatory and given by its numeric identifier, listed by `GET /srv/api/groups` on the instance, with an `Accept: application/json` header (without it, GeoNetwork answers `500 Service not found`):
 
 ```sh
 dicogis-cli publish --target geonetwork --input-folder ./my_records --geonetwork-url-base https://catalogue.example/geonetwork --geonetwork-group 2

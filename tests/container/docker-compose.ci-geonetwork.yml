@@ -47,6 +47,8 @@ services:
         -Des.username=
         -Des.password=
     healthcheck:
+      # without this Accept, Spring falls back on application/xml here: the route doesn't
+      # match and the old dispatcher answers 500, "Service not found"
       test:
         [
           "CMD",
@@ -54,6 +56,8 @@ services:
           "--fail",
           "--silent",
           "--show-error",
+          "--header",
+          "Accept: application/json",
           "http://localhost:8080/geonetwork/srv/api/site",
         ]
       interval: 10s
