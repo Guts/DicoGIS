@@ -82,6 +82,52 @@ def test_options_manager_save_and_load_round_trip(qtbot, tmp_path):
     assert other_window.wdg_tab_publish.get_udata_api_key() == ""
 
 
+def test_options_manager_geonetwork_round_trip(qtbot, tmp_path):
+    ini_path = tmp_path / "options.ini"
+
+    window = DicoGIS()
+    qtbot.addWidget(window)
+    window.settings = OptionsManager(str(ini_path))
+    tab = window.wdg_tab_publish
+    tab.set_publish_target("geonetwork")
+    tab.lne_geonetwork_url_base.setText("https://catalogue.example/geonetwork?a=%20")
+    tab.lne_geonetwork_portal.setText("inspire")
+    tab.lne_geonetwork_username.setText("editor")
+    tab.lne_geonetwork_password.setText("super-secret-password")
+    tab.lne_geonetwork_authcfg.setText("abc1234")
+    tab.lne_geonetwork_group.setText("2")
+    tab.lne_geonetwork_categories.setText("1, 3")
+    tab._set_geonetwork_update_mode("complete")
+    tab.cbx_geonetwork_publish_to_all.setChecked(True)
+    tab.cbx_geonetwork_reject_if_invalid.setChecked(True)
+
+    assert window.settings.save_settings(window) is True
+    saved_options = ini_path.read_text(encoding="UTF-8")
+    assert "super-secret-password" not in saved_options
+    assert "abc1234" in saved_options
+
+    other_window = DicoGIS()
+    qtbot.addWidget(other_window)
+    other_window.settings = OptionsManager(str(ini_path))
+    other_window.settings.load_settings(other_window)
+
+    other_tab = other_window.wdg_tab_publish
+    assert other_tab.get_publish_target() == "geonetwork"
+    assert other_tab.stk_publish_target.currentWidget() is other_tab.wdg_page_geonetwork
+    assert other_tab.get_geonetwork_url_base() == (
+        "https://catalogue.example/geonetwork?a=%20"
+    )
+    assert other_tab.get_geonetwork_portal() == "inspire"
+    assert other_tab.get_geonetwork_username() == "editor"
+    assert other_tab.get_geonetwork_password() == ""
+    assert other_tab.lne_geonetwork_authcfg.text() == "abc1234"
+    assert other_tab.get_geonetwork_group() == "2"
+    assert other_tab.get_geonetwork_categories() == ["1", "3"]
+    assert other_tab.get_geonetwork_update_mode() == "complete"
+    assert other_tab.cbx_geonetwork_publish_to_all.isChecked() is True
+    assert other_tab.cbx_geonetwork_reject_if_invalid.isChecked() is True
+
+
 def test_options_manager_load_settings_without_udata_section(qtbot, tmp_path):
     """Older options.ini files predating the "udata" section must still load fine."""
     ini_path = tmp_path / "options.ini"
@@ -118,6 +164,8 @@ def test_options_manager_load_settings_without_udata_section(qtbot, tmp_path):
     window.settings.load_settings(window)
 
     assert window.wdg_tab_publish.get_input_folder() == ""
+    # no publication target saved yet: uData stays the default one
+    assert window.wdg_tab_publish.get_publish_target() == "udata"
     # no output_format saved yet: the initial (environment/default) one is kept
     assert window.get_selected_output_format() == "json"
 

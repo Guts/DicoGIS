@@ -15,6 +15,7 @@
 # Standard library
 import logging
 import threading
+from collections.abc import Callable
 from pathlib import Path
 
 # project
@@ -22,7 +23,6 @@ from dicogis.export.base_serializer import MetadatasetSerializerBase
 from dicogis.georeaders.process_files import ProcessingFiles
 from dicogis.georeaders.read_postgis import ReadPostGIS
 from dicogis.listing.geodata_listing import find_geodata_files
-from dicogis.publishing.udata import publish_metadata_folder
 from dicogis.ui.qt_compat.QtCore import QObject, pyqtSignal
 from dicogis.utils.progress import OperationCanceled, ProgressReporter
 
@@ -240,56 +240,29 @@ class PostgisProcessingWorker(QObject):
 
 
 class PublishWorker(QObject):
-    """Worker publishing DicoGIS metadata JSON files to a uData catalog, off the
-    GUI thread.
-    """
+    """Worker running a publication off the GUI thread, whatever the catalog."""
 
     finished = pyqtSignal(object)  # PublishReport
     error = pyqtSignal(str)
 
     def __init__(
         self,
-        input_folder: Path,
-        udata_api_key: str,
-        udata_api_url_base: str,
-        udata_api_version: str,
-        udata_organization_id: str | None = None,
-        progress_reporter: ProgressReporter | None = None,
+        publish_function: Callable[[], object],
         parent: QObject | None = None,
     ) -> None:
         """Initialize the worker.
 
         Args:
-            input_folder: folder where metadata JSON files (udata flavor) are stored.
-            udata_api_key: API key of the account on the uData instance.
-            udata_api_url_base: API URL of the uData instance.
-            udata_api_version: API version of the uData instance.
-            udata_organization_id: organization ID in the uData instance. Defaults
-                to None.
-            progress_reporter: told about the progress, and able to stop the run.
+            publish_function: runs the publication and returns its PublishReport.
             parent: Qt parent object.
         """
         super().__init__(parent)
-        self.progress_reporter = progress_reporter
-        self.input_folder = input_folder
-        self.udata_api_key = udata_api_key
-        self.udata_api_url_base = udata_api_url_base
-        self.udata_api_version = udata_api_version
-        self.udata_organization_id = udata_organization_id
+        self.publish_function = publish_function
 
     def run(self) -> None:
         """Run the publication and emit the resulting report."""
         try:
-            report = publish_metadata_folder(
-                input_folder=self.input_folder,
-                udata_api_key=self.udata_api_key,
-                udata_api_url_base=self.udata_api_url_base,
-                udata_api_version=self.udata_api_version,
-                udata_organization_id=self.udata_organization_id,
-                progress_reporter=self.progress_reporter,
-                verbose=True,
-            )
-            self.finished.emit(report)
+            self.finished.emit(self.publish_function())
         except Exception as err:
-            logger.error(f"uData publication failed. Trace: {err}")
+            logger.error(f"Publication failed. Trace: {err}")
             self.error.emit(str(err))

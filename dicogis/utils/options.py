@@ -128,6 +128,18 @@ class OptionsManager:
                 }
             )
 
+        # GeoNetwork publication settings (same backward compatibility)
+        if self.config.has_section("geonetwork"):
+            parent.wdg_tab_publish.set_publish_options(
+                {
+                    f"geonetwork_{key}": value
+                    for key, value in self.config.items("geonetwork")
+                }
+            )
+        parent.wdg_tab_publish.set_publish_options(
+            {"publish_target": self.config.get("basics", "publish_target", fallback="")}
+        )
+
         # filters
         parent.wdg_tab_files.set_filters_state(dict(self.config.items("filters")))
 
@@ -158,6 +170,7 @@ class OptionsManager:
             "proxy",
             "ui",
             "udata",
+            "geonetwork",
         ):
             if not self.config.has_section(section_name):
                 self.config.add_section(section_name)
@@ -221,6 +234,17 @@ class OptionsManager:
         self.config.set(
             "udata", "organization_id", publish_options["udata_organization_id"]
         )
+
+        # GeoNetwork publication settings (the password is never persisted, for
+        # security). "%" would be read as an interpolation by the config parser.
+        self.config.set("basics", "publish_target", publish_options["publish_target"])
+        for option_name, value in publish_options.items():
+            if option_name.startswith("geonetwork_"):
+                self.config.set(
+                    "geonetwork",
+                    option_name.removeprefix("geonetwork_"),
+                    str(value).replace("%", "%%"),
+                )
 
         # filters
         for key, value in parent.wdg_tab_files.get_filters_state().items():

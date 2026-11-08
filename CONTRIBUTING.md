@@ -47,6 +47,7 @@ The GUI is designed to run both standalone and as a QGIS plugin (QGIS >= 4.4, so
 | `QPushButton` | `btn_` |
 | `QRadioButton` | `rbn_` |
 | `QSpinBox` | `sbx_` |
+| `QStackedWidget` | `stk_` |
 | `QTabWidget` | `tab_` |
 | `QTableView` | `tbv_` |
 | `QTableWidget` | `tbw_` |

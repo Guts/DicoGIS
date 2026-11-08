@@ -181,47 +181,22 @@ def test_folder_scan_worker_run_emits_error_on_failure(qtbot, monkeypatch):
     assert "boom" in blocker.args[0]
 
 
-def test_publish_worker_run_emits_finished(qtbot, tmp_path, monkeypatch):
+def test_publish_worker_run_emits_finished(qtbot):
     expected_report = PublishReport(published=2, ignored=1, failed=0)
 
-    received_kwargs = {}
-
-    def _fake_publish_metadata_folder(**kwargs):
-        received_kwargs.update(kwargs)
-        return expected_report
-
-    monkeypatch.setattr(
-        "dicogis.ui.workers.publish_metadata_folder", _fake_publish_metadata_folder
-    )
-    reporter = QtProgressReporter()
-
-    worker = PublishWorker(
-        input_folder=tmp_path,
-        udata_api_key="fake-api-key",
-        udata_api_url_base="https://udata-test.example/api/",
-        udata_api_version="1",
-        progress_reporter=reporter,
-    )
+    worker = PublishWorker(publish_function=lambda: expected_report)
 
     with qtbot.waitSignal(worker.finished, timeout=5000) as blocker:
         worker.run()
 
     assert blocker.args[0] is expected_report
-    assert received_kwargs["progress_reporter"] is reporter
 
 
-def test_publish_worker_run_emits_error_on_failure(qtbot, tmp_path, monkeypatch):
-    def _boom(**kwargs) -> NoReturn:
+def test_publish_worker_run_emits_error_on_failure(qtbot):
+    def _boom() -> NoReturn:
         raise RuntimeError("boom")
 
-    monkeypatch.setattr("dicogis.ui.workers.publish_metadata_folder", _boom)
-
-    worker = PublishWorker(
-        input_folder=tmp_path,
-        udata_api_key="fake-api-key",
-        udata_api_url_base="https://udata-test.example/api/",
-        udata_api_version="1",
-    )
+    worker = PublishWorker(publish_function=_boom)
 
     with qtbot.waitSignal(worker.error, timeout=5000) as blocker:
         worker.run()

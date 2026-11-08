@@ -68,138 +68,173 @@
 </context><context>
     <name>DicoGIS</name>
     <message>
-        <location filename="../mw_dicogis.py" line="236" />
+        <location filename="../mw_dicogis.py" line="249" />
         <source>Hello </source>
         <translation>Bonjour </translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="237" />
+        <location filename="../mw_dicogis.py" line="250" />
         <source>Quit</source>
         <translation>Quitter</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="238" />
+        <location filename="../mw_dicogis.py" line="251" />
         <source> Output file </source>
         <translation> Fichier en sortie </translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="239" />
+        <location filename="../mw_dicogis.py" line="252" />
         <source>Progression</source>
         <translation>Progression</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="240" />
+        <location filename="../mw_dicogis.py" line="253" />
         <source>Go!</source>
         <translation>C'est tipar !</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="241" />
+        <location filename="../mw_dicogis.py" line="254" />
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="242" />
+        <location filename="../mw_dicogis.py" line="255" />
         <source>Name of output file: </source>
         <translation>Nom du fichier en sortie : </translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="243" />
+        <location filename="../mw_dicogis.py" line="256" />
         <source>Output format: </source>
         <translation>Format de sortie : </translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="245" />
+        <location filename="../mw_dicogis.py" line="258" />
         <source>Excel workbook (.xlsx)</source>
         <translation>Classeur Excel (.xlsx)</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="246" />
+        <location filename="../mw_dicogis.py" line="259" />
         <source>JSON files</source>
         <translation>Fichiers JSON</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="247" />
+        <location filename="../mw_dicogis.py" line="260" />
         <source>JSON files for uData</source>
         <translation>Fichiers JSON pour uData</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="257" />
+        <location filename="../mw_dicogis.py" line="261" />
+        <source>ISO 19139 XML files</source>
+        <translation>Fichiers XML ISO 19139</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="271" />
         <source> Files </source>
         <translation> Fichiers </translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="258" />
+        <location filename="../mw_dicogis.py" line="272" />
         <source> Database </source>
         <translation> Base de données </translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="259" />
+        <location filename="../mw_dicogis.py" line="273" />
         <source> Settings </source>
         <translation> Options </translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="260" />
+        <location filename="../mw_dicogis.py" line="274" />
         <source>Publish</source>
         <translation>Publier</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="261" />
+        <location filename="../mw_dicogis.py" line="275" />
         <source> Credits </source>
         <translation> Crédits </translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="377" />
+        <location filename="../mw_dicogis.py" line="391" />
         <source>Progress: parsing and retrieving compatible files</source>
         <translation>Progression : recherche des fichiers compatibles</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="429" />
+        <location filename="../mw_dicogis.py" line="443" />
         <source>Canceling...</source>
         <translation>Annulation en cours…</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="443" />
+        <location filename="../mw_dicogis.py" line="457" />
         <source>Folder scan canceled.</source>
         <translation>Analyse du dossier annulée.</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="508" />
+        <location filename="../mw_dicogis.py" line="522" />
         <source> folders.</source>
         <translation> dossiers.</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="647" />
+        <location filename="../mw_dicogis.py" line="667" />
         <source>Any compatible geographic data (.shp / .tab) has been found.</source>
         <translation>Aucune donnée géographique compatible trouvée.</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="775" />
+        <location filename="../mw_dicogis.py" line="800" />
         <source>Processing canceled. Partial results were saved to the output.</source>
         <translation>Traitement annulé. Les résultats partiels ont été enregistrés dans le fichier en sortie.</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="948" />
-        <location filename="../mw_dicogis.py" line="923" />
+        <location filename="../mw_dicogis.py" line="918" />
+        <source>Publishing...</source>
+        <translation>Publication en cours...</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="952" />
+        <source>Publishing DicoGIS metadata</source>
+        <translation>Publication des métadonnées DicoGIS</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="1029" />
+        <source>Publication canceled: {summary}</source>
+        <translation>Publication annulée : {summary}</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="1084" />
+        <location filename="../mw_dicogis.py" line="1051" />
         <source>Any folder selected</source>
         <translation>Aucun dossier sélectionné</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="933" />
-        <source>Any format selected</source>
-        <translation>Aucun format sélectionné</translation>
-    </message>
-    <message>
-        <location filename="../mw_dicogis.py" line="941" />
-        <source>required field</source>
-        <translation>champ requis</translation>
-    </message>
-    <message>
-        <location filename="../mw_dicogis.py" line="955" />
+        <location filename="../mw_dicogis.py" line="1055" />
         <source>A uData API key is required to publish.</source>
         <translation>Une clé API uData est requise pour publier.</translation>
     </message>
     <message>
-        <location filename="../mw_dicogis.py" line="1004" />
+        <location filename="../mw_dicogis.py" line="1059" />
+        <source>A GeoNetwork URL is required to publish.</source>
+        <translation>L'URL de GeoNetwork est requise pour publier.</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="1061" />
+        <source>GeoNetwork requires the numeric identifier of a group to publish.</source>
+        <translation>GeoNetwork requiert l'identifiant numérique d'un groupe pour publier.</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="1067" />
+        <source>A GeoNetwork username and password are required to publish.</source>
+        <translation>Un identifiant et un mot de passe GeoNetwork sont requis pour publier.</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="1094" />
+        <source>Any format selected</source>
+        <translation>Aucun format sélectionné</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="1102" />
+        <source>required field</source>
+        <translation>champ requis</translation>
+    </message>
+    <message>
+        <location filename="../mw_dicogis.py" line="1157" />
         <source>Connection failed</source>
         <translation>La connexion a échoué</translation>
     </message>
@@ -328,69 +363,171 @@
 </context><context>
     <name>TabPublish</name>
     <message>
-        <location filename="../wdg_tab_publish.py" line="101" />
-        <source>Pick the folder containing JSON metadata</source>
-        <translation>Choisir le dossier contenant les métadonnées JSON</translation>
+        <location filename="../wdg_tab_publish.py" line="148" />
+        <source>Pick the folder containing the metadata</source>
+        <translation>Choisir le dossier contenant les métadonnées</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="123" />
+        <location filename="../wdg_tab_publish.py" line="169" />
         <source>{published} published - {ignored} ignored - {failed} failed</source>
         <translation>{published} publiés - {ignored} ignorés - {failed} échoués</translation>
     </message>
     <message>
+        <location filename="../wdg_tab_publish.py" line="175" />
+        <source>{up_to_date} already complete</source>
+        <translation>{up_to_date} déjà complètes</translation>
+    </message>
+    <message>
         <location filename="../wdg_tab_publish.py" line="182" />
+        <source>Added: {fields}</source>
+        <translation>Ajouté : {fields}</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="343" />
         <source>Metadata source</source>
         <translation>Source des métadonnées</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="183" />
-        <source>JSON metadata folder: </source>
-        <translation>Dossier des métadonnées JSON : </translation>
+        <location filename="../wdg_tab_publish.py" line="344" />
+        <source>Catalog type:</source>
+        <translation>Type de catalogue :</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="184" />
+        <location filename="../wdg_tab_publish.py" line="347" />
+        <source>uData (JSON files for uData)</source>
+        <translation>uData (fichiers JSON pour uData)</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="351" />
+        <source>GeoNetwork (ISO 19139 XML files)</source>
+        <translation>GeoNetwork (fichiers XML ISO 19139)</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="353" />
+        <source>Metadata folder: </source>
+        <translation>Dossier des métadonnées : </translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="354" />
         <source>Browse</source>
         <translation>Parcourir</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="185" />
+        <location filename="../wdg_tab_publish.py" line="355" />
         <source>uData catalog</source>
         <translation>Catalogue uData</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="186" />
+        <location filename="../wdg_tab_publish.py" line="356" />
         <source>API URL:</source>
         <translation>URL de l'API :</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="187" />
+        <location filename="../wdg_tab_publish.py" line="357" />
         <source>API version:</source>
         <translation>Version de l'API :</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="188" />
+        <location filename="../wdg_tab_publish.py" line="358" />
         <source>API key:</source>
         <translation>Clé API :</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="189" />
+        <location filename="../wdg_tab_publish.py" line="359" />
         <source>Organization ID (optional):</source>
         <translation>ID de l'organisation (facultatif) :</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="190" />
+        <location filename="../wdg_tab_publish.py" line="360" />
+        <source>GeoNetwork catalog</source>
+        <translation>Catalogue GeoNetwork</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="361" />
+        <source>URL:</source>
+        <translation>URL :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="365" />
+        <source>Portal:</source>
+        <translation>Portail :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="366" />
+        <source>Username:</source>
+        <translation>Identifiant :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="367" />
+        <source>Password:</source>
+        <translation>Mot de passe :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="368" />
+        <source>QGIS authentication ID:</source>
+        <translation>Identifiant d'authentification QGIS :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="369" />
+        <source>Group ID:</source>
+        <translation>Identifiant du groupe :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="371" />
+        <source>Category IDs (comma separated, optional):</source>
+        <translation>Identifiants des catégories (séparés par des virgules, facultatif) :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="374" />
+        <source>Records already in the catalog:</source>
+        <translation>Fiches déjà dans le catalogue :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="380" />
+        <source>Overwrite them</source>
+        <translation>Les écraser</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="386" />
+        <source>Only fill their empty fields</source>
+        <translation>Compléter seulement leurs champs vides</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="389" />
+        <source>Make the records visible to everyone</source>
+        <translation>Rendre les fiches visibles par tous</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="392" />
+        <source>Reject the records invalid against the schema</source>
+        <translation>Rejeter les fiches invalides au regard du schéma</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.py" line="394" />
         <source>Publication report</source>
         <translation>Rapport de publication</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="193" />
+        <location filename="../wdg_tab_publish.py" line="397" />
         <source>File</source>
         <translation>Fichier</translation>
     </message>
     <message>
-        <location filename="../wdg_tab_publish.py" line="194" />
+        <location filename="../wdg_tab_publish.py" line="398" />
+        <source>Detail</source>
+        <translation>Détail</translation>
+    </message>
+    <message>
+        <source>Pick the folder containing JSON metadata</source>
+        <translation type="vanished">Choisir le dossier contenant les métadonnées JSON</translation>
+    </message>
+    <message>
+        <source>JSON metadata folder: </source>
+        <translation type="vanished">Dossier des métadonnées JSON : </translation>
+    </message>
+    <message>
         <source>Error</source>
-        <translation>Erreur</translation>
+        <translation type="vanished">Erreur</translation>
     </message>
 </context><context>
     <name>TabSettings</name>
@@ -636,8 +773,13 @@
     </message>
     <message>
         <location filename="../wdg_tab_publish.ui" line="0" />
-        <source>JSON metadata folder:</source>
-        <translation>Dossier des métadonnées JSON :</translation>
+        <source>Catalog type:</source>
+        <translation>Type de catalogue :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Metadata folder:</source>
+        <translation>Dossier des métadonnées :</translation>
     </message>
     <message>
         <location filename="../wdg_tab_publish.ui" line="0" />
@@ -671,8 +813,67 @@
     </message>
     <message>
         <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>GeoNetwork catalog</source>
+        <translation>Catalogue GeoNetwork</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>URL:</source>
+        <translation>URL :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Portal:</source>
+        <translation>Portail :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Username:</source>
+        <translation>Identifiant :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Password:</source>
+        <translation>Mot de passe :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>QGIS authentication ID:</source>
+        <translation>Identifiant d'authentification QGIS :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Group ID:</source>
+        <translation>Identifiant du groupe :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Category IDs (comma separated, optional):</source>
+        <translation>Identifiants des catégories (séparés par des virgules, facultatif) :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Records already in the catalog:</source>
+        <translation>Fiches déjà dans le catalogue :</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Make the records visible to everyone</source>
+        <translation>Rendre les fiches visibles par tous</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
+        <source>Reject the records invalid against the schema</source>
+        <translation>Rejeter les fiches invalides au regard du schéma</translation>
+    </message>
+    <message>
+        <location filename="../wdg_tab_publish.ui" line="0" />
         <source>Publication report</source>
         <translation>Rapport de publication</translation>
+    </message>
+    <message>
+        <source>JSON metadata folder:</source>
+        <translation type="vanished">Dossier des métadonnées JSON :</translation>
     </message>
     <message>
         <source>JSON metadata folder: </source>

@@ -49,6 +49,7 @@ WIDGET_PREFIXES: dict[str, str] = {
     "QPushButton": "btn_",
     "QRadioButton": "rbn_",
     "QSpinBox": "sbx_",
+    "QStackedWidget": "stk_",
     "QTabWidget": "tab_",
     "QTableView": "tbv_",
     "QTableWidget": "tbw_",
