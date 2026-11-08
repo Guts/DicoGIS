@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
 from typing import TYPE_CHECKING
 
 # 3rd party
@@ -21,6 +22,7 @@ from dicogis.export.catalog_record import CatalogRecord, CatalogRecordSettings
 
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from datetime import date
     from pathlib import Path
 
@@ -36,6 +38,8 @@ logger = logging.getLogger(__name__)
 GCO_NS: str = "http://www.isotc211.org/2005/gco"
 GMD_NS: str = "http://www.isotc211.org/2005/gmd"
 ISO19139_NAMESPACES: dict[str, str] = {"gco": GCO_NS, "gmd": GMD_NS}
+
+XLINK_HREF: str = "{http://www.w3.org/1999/xlink}href"
 
 _CODELISTS: str = "http://standards.iso.org/iso/19139/resources/gmxCodelists.xml"
 _LANGUAGE_CODELIST: str = "http://www.loc.gov/standard/iso639-2/"
@@ -58,6 +62,11 @@ ISO19139_FIELDS: dict[str, str] = {
     "original_path": f"{_DATA_IDENTIFICATION}/gmd:supplementalInformation",
     "formats": "gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat",
 }
+
+# what never gets created to complete a record: see _find_or_create_parent()
+_NEVER_CREATED: frozenset[str] = frozenset(
+    {"gmd:identificationInfo", "gmd:MD_DataIdentification"}
+)
 
 # Order of the children of the elements fields are added to, from the XSD
 # (schemas.opengis.net/iso/19139/20070417/gmd): a valid record must follow it.
@@ -136,6 +145,28 @@ ISO19139_SEQUENCES: dict[str, tuple[str, ...]] = {
 # ##############################################################################
 # ########## Functions #############
 # ##################################
+
+
+def safe_xml_parser() -> etree.XMLParser:
+    """Build the parser of the XML files and of what the catalogs answer: they aren't
+    trusted enough to have their entities resolved or to reach the network.
+
+    Returns:
+        XML parser
+    """
+    return etree.XMLParser(resolve_entities=False, no_network=True, huge_tree=False)
+
+
+def is_iso19139_record(root: etree._Element) -> bool:
+    """Tell whether a document is an ISO 19139 record, not ISO 19115-3 for instance.
+
+    Args:
+        root: root of the document
+
+    Returns:
+        True if the root is gmd:MD_Metadata
+    """
+    return root.tag == _gmd("MD_Metadata")
 
 
 def _gmd(tag: str) -> str:
@@ -350,6 +381,137 @@ def record_to_iso19139(record: CatalogRecord) -> etree._Element:
             # mandatory, and GDAL doesn't tell the version of a format
             _add(md_format, "version").set(_gco("nilReason"), "unknown")
     return root
+
+
+def _local_name(element: etree._Element) -> str:
+    """Get the name of an element, without its namespace.
+
+    Args:
+        element: element to name
+
+    Returns:
+        local name
+    """
+    return etree.QName(element).localname
+
+
+def _is_filled(element: etree._Element) -> bool:
+    """Tell whether an element holds a value, whatever the way it's written: character
+    string, anchor, localised strings, codelist value, reference to another record.
+    An element with only a gco:nilReason, or nothing, is empty.
+
+    Args:
+        element: element to check
+
+    Returns:
+        True if it holds a value
+    """
+    for node in element.iter(etree.Element):
+        if node.text and node.text.strip():
+            return True
+        if node.get("codeListValue") or node.get(XLINK_HREF):
+            return True
+    return False
+
+
+def _insert_in_sequence(parent: etree._Element, new_child: etree._Element) -> None:
+    """Add an element at the place the XSD expects it among its siblings.
+
+    Args:
+        parent: element to add to
+        new_child: element to add, after its possible namesakes
+    """
+    sequence = ISO19139_SEQUENCES.get(_local_name(parent))
+    if sequence is None:
+        parent.append(new_child)
+        return
+
+    rank = sequence.index(_local_name(new_child))
+    for index, sibling in enumerate(parent):
+        if not isinstance(sibling.tag, str):
+            continue
+        sibling_name = _local_name(sibling)
+        if sibling_name in sequence and sequence.index(sibling_name) > rank:
+            parent.insert(index, new_child)
+            return
+    parent.append(new_child)
+
+
+def _find_or_create_parent(
+    root: etree._Element, field_path: str
+) -> etree._Element | None:
+    """Get the element holding a field, creating what's missing on the way.
+
+    Never creates the description of the resource: its absence tells a record of
+    another kind, a service for instance, not a missing value.
+
+    Args:
+        root: root of the record
+        field_path: XPath of the field, from the root
+
+    Returns:
+        parent of the field, or None if the record has no place for it
+    """
+    current = root
+    for step in field_path.split("/")[:-1]:
+        child = current.find(step, ISO19139_NAMESPACES)
+        if child is None:
+            if step in _NEVER_CREATED:
+                return None
+            child = etree.Element(_gmd(step.removeprefix("gmd:")))
+            _insert_in_sequence(current, child)
+        current = child
+    return current
+
+
+def complete_record(
+    remote: etree._Element,
+    local: etree._Element,
+    fields: Mapping[str, str] = ISO19139_FIELDS,
+) -> tuple[etree._Element, list[str]]:
+    """Fill the empty fields of a record with the values of another one.
+
+    What the record already holds is left as is, whoever wrote it.
+
+    Args:
+        remote: record to complete, changed in place
+        local: record holding the values to add
+        fields: fields to look at: name -> XPath from the root
+
+    Raises:
+        ValueError: if the record to complete isn't an ISO 19139 one
+
+    Returns:
+        completed record, names of the fields added
+    """
+    if not is_iso19139_record(remote):
+        raise ValueError(
+            f"Not an ISO 19139 record: its root is {etree.QName(remote).text}."
+        )
+
+    added_fields: list[str] = []
+    for field_name, field_path in fields.items():
+        existing = remote.findall(field_path, ISO19139_NAMESPACES)
+        if any(_is_filled(element) for element in existing):
+            continue
+        new_values = [
+            element
+            for element in local.findall(field_path, ISO19139_NAMESPACES)
+            if _is_filled(element)
+        ]
+        if not new_values:
+            continue
+        parent = _find_or_create_parent(remote, field_path)
+        if parent is None:
+            continue
+
+        for element in existing:
+            element.getparent().remove(element)
+        for element in new_values:
+            _insert_in_sequence(parent, deepcopy(element))
+        added_fields.append(field_name)
+
+    return remote, added_fields
 
 
 # ##############################################################################
