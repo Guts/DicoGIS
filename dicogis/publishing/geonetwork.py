@@ -17,13 +17,16 @@ import base64
 import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from urllib.parse import quote
 
 # 3rd party
 from lxml import etree
 
 # project
+from dicogis.constants import GeonetworkUpdateModes
 from dicogis.export.to_iso19139 import (
     ISO19139_NAMESPACES,
+    complete_record,
     is_iso19139_record,
     safe_xml_parser,
 )
@@ -79,6 +82,7 @@ class _Options:
 
     group: str
     categories: tuple[str, ...] = ()
+    update_mode: GeonetworkUpdateModes = GeonetworkUpdateModes.overwrite
     publish_to_all: bool = False
     reject_if_invalid: bool = False
 
@@ -276,6 +280,88 @@ def _upload_record(session: GeonetworkSession, xml: bytes, options: _Options) ->
         raise ValueError(f"Processing report: {response.text[:500]}")
 
 
+def _fetch_record(session: GeonetworkSession, identifier: str) -> etree._Element | None:
+    """Retrieve a record of the catalog as an editor sees it.
+
+    `approved=false` gets the working copy when the workflow is enabled: it's the one
+    an update goes to, whereas the approved version would ignore what editors did since.
+    The popularity of a record must not grow because of DicoGIS looking at it.
+
+    Args:
+        session: open session
+        identifier: identifier of the record
+
+    Raises:
+        HttpError: if the catalog refused to answer or couldn't be reached
+        etree.XMLSyntaxError: if the catalog answered with something else than XML
+
+    Returns:
+        root of the record, or None if the catalog doesn't have it
+    """
+    response = session.request(
+        "GET",
+        f"records/{quote(identifier, safe='')}/formatters/xml",
+        params={"approved": "false", "increasePopularity": "false"},
+        headers={"Accept": "application/xml"},
+    )
+    if response.status_code == 404:
+        return None
+    response.raise_for_status()
+    return etree.fromstring(response.content, parser=safe_xml_parser())
+
+
+def _complete_or_insert(
+    session: GeonetworkSession,
+    xml_file: Path,
+    document: etree._Element,
+    identifier: str,
+    report: PublishReport,
+    options: _Options,
+) -> None:
+    """Insert a record the catalog doesn't have, or fill the empty fields of its own.
+
+    Args:
+        session: open session
+        xml_file: file holding the record
+        document: root of the record
+        identifier: identifier of the record
+        report: run report, updated with this file's outcome
+        options: publication options
+
+    Raises:
+        HttpError: if the catalog refused the record or couldn't be reached
+        ValueError: if the catalog accepted the request but reported an error
+        etree.XMLSyntaxError: if the catalog answered with something else than XML
+    """
+    remote = _fetch_record(session, identifier)
+    if remote is None:
+        _upload_record(session, xml_file.read_bytes(), options)
+        report.published += 1
+        return
+
+    if not is_iso19139_record(remote):
+        report.ignored += 1
+        report.errors.append(
+            f"The record of {xml_file} in the catalog isn't an ISO 19139 one "
+            f"({etree.QName(remote).text}): it was left as is."
+        )
+        logger.warning(report.errors[-1])
+        return
+
+    completed, added_fields = complete_record(remote, document)
+    if not added_fields:
+        report.up_to_date += 1
+        return
+
+    _upload_record(
+        session,
+        etree.tostring(completed, encoding="UTF-8", xml_declaration=True),
+        options,
+    )
+    report.published += 1
+    report.added_fields[xml_file.name] = added_fields
+
+
 def _publish_file(
     session: GeonetworkSession, xml_file: Path, report: PublishReport, options: _Options
 ) -> None:
@@ -313,19 +399,21 @@ def _publish_file(
         return
 
     try:
-        _upload_record(session, xml_file.read_bytes(), options)
+        if options.update_mode == GeonetworkUpdateModes.complete:
+            _complete_or_insert(
+                session, xml_file, document, identifier, report, options
+            )
+        else:
+            _upload_record(session, xml_file.read_bytes(), options)
+            report.published += 1
     except HttpStatusError as err:
         report.failed += 1
         report.errors.append(f"Publish {xml_file} failed. {describe_http_error(err)}")
         logger.error(report.errors[-1])
-        return
-    except (HttpError, OSError, ValueError) as err:
+    except (HttpError, OSError, ValueError, etree.XMLSyntaxError) as err:
         report.failed += 1
         report.errors.append(f"Publish {xml_file} failed. Trace: {err}")
         logger.error(report.errors[-1])
-        return
-
-    report.published += 1
 
 
 def publish_metadata_folder(
@@ -336,6 +424,7 @@ def publish_metadata_folder(
     credentials: GeonetworkCredentials | None = None,
     portal: str = "srv",
     categories: Sequence[str] = (),
+    update_mode: str = GeonetworkUpdateModes.overwrite,
     publish_to_all: bool = False,
     reject_if_invalid: bool = False,
     timeout: float | None = None,
@@ -353,6 +442,9 @@ def publish_metadata_folder(
             authentication itself (authentication configuration of QGIS).
         portal: portal (sub-catalog) of the instance
         categories: identifiers of the categories of the records
+        update_mode: what to do with a record the catalog already has: `overwrite`
+            replaces it, `complete` only fills its empty fields, leaving what was
+            changed by hand in the catalog as is.
         publish_to_all: make the records visible to everyone. Forced to false by
             GeoNetwork when its workflow is enabled.
         reject_if_invalid: have the catalog refuse the records invalid against the XSD
@@ -364,7 +456,8 @@ def publish_metadata_folder(
 
     Raises:
         FileNotFoundError: if input_folder contains no XML file
-        ValueError: if the URL is missing or the group isn't an identifier
+        ValueError: if the URL is missing, the group isn't an identifier or the update
+            mode is unknown
         GeonetworkAuthenticationError: if the account can't write to the catalog
         HttpTransportError: if the catalog can't be reached
 
@@ -385,6 +478,7 @@ def publish_metadata_folder(
     options = _Options(
         group=str(group).strip(),
         categories=tuple(categories),
+        update_mode=GeonetworkUpdateModes(update_mode),
         publish_to_all=publish_to_all,
         reject_if_invalid=reject_if_invalid,
     )
