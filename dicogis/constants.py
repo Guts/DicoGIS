@@ -71,6 +71,20 @@ class OutputFormats(str, ExtendedEnum):
     iso19139 = "iso19139"
 
 
+class PublishTargets(str, ExtendedEnum):
+    """Supported kinds of catalogs to publish to."""
+
+    udata = "udata"
+    geonetwork = "geonetwork"
+
+
+class GeonetworkUpdateModes(str, ExtendedEnum):
+    """How to deal with a record already in a GeoNetwork catalog."""
+
+    overwrite = "overwrite"  # replace it
+    complete = "complete"  # only fill its empty fields
+
+
 class FormatsVector(ExtendedEnum):
     """Supported vectors formats. Key=name, value = extension."""
 
