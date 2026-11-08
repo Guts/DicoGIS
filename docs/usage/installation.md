@@ -25,41 +25,6 @@ package on PyPI is not a portable wheel: it must match the version of the
 pip cannot resolve on its own inside an isolated pipx venv. You need to get a
 matching GDAL into that venv yourself, using one of the options below.
 
-## Prebuilt wheels, any platform
-
-[Geospatial Wheels Index](https://geospatial-wheels-index.readthedocs.io/en/latest/)
-publishes prebuilt GDAL wheels behind a package index, so pip can resolve and
-install them like any other package: no manual `.whl` download and no
-compilation against `libgdal-dev`.
-
-On Linux, the wheel still links against the system `libgdal` (install it first,
-see below), so the version has to be pinned to it:
-
-```sh
-python -m pip install --index-url https://gisidx.github.io/gwi gdal=="$(gdal-config --version).*"
-```
-
-On Windows, where there is no system GDAL to match, the version can be left to
-pip:
-
-```powershell
-python -m pip install --index-url https://gisidx.github.io/gwi gdal
-```
-
-Within a DicoGIS installed through pipx (Linux form shown):
-
-```sh
-pipx install dicogis
-pipx inject dicogis "gdal==$(gdal-config --version).*" --pip-args="--index-url https://gisidx.github.io/gwi"
-```
-
-```{note}
-This is a third-party index, not an official PyPI channel: it is a convenience,
-and you should weigh it against your own supply-chain policy. The
-platform/Python-version coverage is the index's, so check its documentation if
-your combination is unusual. The per-OS options below have no such caveat.
-```
-
 ## Linux (Debian/Ubuntu)
 
 First, install the GDAL system library and its `gdal-config` companion (see
@@ -103,13 +68,26 @@ There is no official portable `gdal` wheel for Windows on PyPI. Two options:
 
 ### Option A — inject an unofficial prebuilt wheel
 
-Download the wheel matching your Python version from
-[cgohlke/geospatial-wheels](https://github.com/cgohlke/geospatial-wheels/releases)
-(e.g. `GDAL-3.11.1-cp312-cp312-win_amd64.whl` for Python 3.12), then:
+[Geospatial Wheels Index](https://geospatial-wheels-index.readthedocs.io/en/latest/)
+serves the [cgohlke/geospatial-wheels](https://github.com/cgohlke/geospatial-wheels/releases)
+builds behind a package index, so pip picks the wheel matching your Python
+version itself (Windows only: the index has no Linux/macOS wheels):
 
 ```powershell
 pipx install dicogis
+pipx inject dicogis gdal --pip-args="--index-url https://gisidx.github.io/gwi"
+```
+
+Alternatively, download the matching wheel from the releases page (e.g.
+`GDAL-3.11.1-cp312-cp312-win_amd64.whl` for Python 3.12) and inject it:
+
+```powershell
 pipx inject dicogis C:\path\to\GDAL-3.11.1-cp312-cp312-win_amd64.whl
+```
+
+```{note}
+These are third-party builds, not an official PyPI channel: weigh them against
+your own supply-chain policy.
 ```
 
 ### Option B — use conda instead of pipx
