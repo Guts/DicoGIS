@@ -74,25 +74,7 @@ class TextsManager:
         Returns:
             dict: dictonary filled by methods
         """
-        # handle locale.getlocale()
-        if isinstance(language_code, tuple):
-            language_code = language_code[0]
-
-        # handle en_EN form
-        if "_" in language_code:
-            language_code = language_code.split("_")[1]
-
-        # handle some aliases
-        if language_code.upper() in ("GB", "US"):
-            language_code = "EN"
-
-        # if language not available, fallback to English
-        if not AvailableLocales.has_value(language_code):
-            logger.warning(
-                f"'{language_code}' is not part of available languages. "
-                "Fallbacking to English."
-            )
-            language_code = "EN"
+        language_code = normalize_language_code(language_code)
 
         self.language_code = language_code.upper()
 
@@ -113,6 +95,43 @@ class TextsManager:
 # #############################################################################
 # ########## Functions #############
 # ##################################
+
+
+def normalize_language_code(language_code: str | tuple | None) -> str:
+    """Turn the language forms found around DicoGIS into an available locale.
+
+    Args:
+        language_code: 2 letters prefix, `AvailableLocales` member, "fr_FR" form or
+            locale.getlocale() result
+
+    Returns:
+        value of `AvailableLocales`, English if the language isn't available
+    """
+    # handle locale.getlocale()
+    if isinstance(language_code, tuple):
+        language_code = language_code[0]
+
+    # locale.getlocale() gives (None, None) when the locale is not set
+    if not language_code:
+        return AvailableLocales.english.value
+
+    # handle en_EN form
+    if "_" in language_code:
+        language_code = language_code.split("_")[1]
+
+    # handle some aliases
+    if language_code.upper() in ("GB", "US"):
+        language_code = "EN"
+
+    # if language not available, fallback to English
+    if not AvailableLocales.has_value(language_code):
+        logger.warning(
+            f"'{language_code}' is not part of available languages. "
+            "Fallbacking to English."
+        )
+        language_code = "EN"
+
+    return language_code
 
 
 @lru_cache
