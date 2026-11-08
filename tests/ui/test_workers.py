@@ -184,32 +184,30 @@ def test_folder_scan_worker_run_emits_error_on_failure(qtbot, monkeypatch):
 def test_publish_worker_run_emits_finished(qtbot, tmp_path, monkeypatch):
     expected_report = PublishReport(published=2, ignored=1, failed=0)
 
+    received_kwargs = {}
+
     def _fake_publish_metadata_folder(**kwargs):
-        kwargs["progress_callback"](1, 3, tmp_path / "a.json")
-        kwargs["progress_callback"](3, 3, tmp_path / "c.json")
+        received_kwargs.update(kwargs)
         return expected_report
 
     monkeypatch.setattr(
         "dicogis.ui.workers.publish_metadata_folder", _fake_publish_metadata_folder
     )
+    reporter = QtProgressReporter()
 
     worker = PublishWorker(
         input_folder=tmp_path,
         udata_api_key="fake-api-key",
         udata_api_url_base="https://udata-test.example/api/",
         udata_api_version="1",
-    )
-
-    progress_updates = []
-    worker.progress_changed.connect(
-        lambda done, total: progress_updates.append((done, total))
+        progress_reporter=reporter,
     )
 
     with qtbot.waitSignal(worker.finished, timeout=5000) as blocker:
         worker.run()
 
     assert blocker.args[0] is expected_report
-    assert progress_updates == [(1, 3), (3, 3)]
+    assert received_kwargs["progress_reporter"] is reporter
 
 
 def test_publish_worker_run_emits_error_on_failure(qtbot, tmp_path, monkeypatch):

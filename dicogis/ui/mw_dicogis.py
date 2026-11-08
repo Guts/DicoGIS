@@ -850,10 +850,14 @@ class DicoGIS(QMainWindow):
 
     def process_publish(self) -> None:
         """Launch uData publication of metadata JSON files in a background worker."""
-        self._progress_reporter = None
         self.prg_layers.setRange(0, 0)  # indeterminate mode while fetching the catalog
         self.set_status_message("Publishing to uData...")
         self.wdg_tab_publish.clear_report()
+
+        self._progress_reporter = QtProgressReporter(self)
+        self._progress_reporter.total_changed.connect(self._on_publish_total_known)
+        self._progress_reporter.progress_incremented.connect(self._on_publish_progress)
+        self._enable_cancel_button(True)
 
         self._proc_thread = QThread(self)
         self._proc_worker = PublishWorker(
@@ -862,10 +866,10 @@ class DicoGIS(QMainWindow):
             udata_api_url_base=self.wdg_tab_publish.get_udata_api_url_base(),
             udata_api_version=self.wdg_tab_publish.get_udata_api_version(),
             udata_organization_id=self.wdg_tab_publish.get_udata_organization_id(),
+            progress_reporter=self._progress_reporter,
         )
         self._proc_worker.moveToThread(self._proc_thread)
         self._proc_thread.started.connect(self._proc_worker.run)
-        self._proc_worker.progress_changed.connect(self._on_publish_progress)
         self._proc_worker.finished.connect(self._on_publish_finished)
         self._proc_worker.error.connect(self._on_processing_error)
         self._proc_worker.finished.connect(self._proc_thread.quit)
@@ -876,17 +880,22 @@ class DicoGIS(QMainWindow):
         self._proc_thread.finished.connect(self._clear_proc_thread_ref)
         self._proc_thread.start()
 
-    def _on_publish_progress(self, files_done: int, files_total: int) -> None:
-        """React to a uData publication progress update.
+    def _on_publish_total_known(self, files_total: int) -> None:
+        """Leave the indeterminate mode, now that the catalog has answered.
 
         Args:
-            files_done: number of JSON files already examined.
-            files_total: total number of JSON files to examine.
+            files_total: total number of files to examine.
         """
-        if self.prg_layers.maximum() != files_total:
-            self.prg_layers.setRange(0, files_total)
+        self.prg_layers.setRange(0, files_total)
+
+    def _on_publish_progress(self, files_done: int) -> None:
+        """React to a publication progress update.
+
+        Args:
+            files_done: number of files already examined.
+        """
         self.prg_layers.setValue(files_done)
-        self.set_status_message(f"Publishing to uData: {files_done}/{files_total}")
+        self.set_status_message(f"Publishing: {files_done}/{self.prg_layers.maximum()}")
 
     def _on_publish_finished(self, report: PublishReport) -> None:
         """React to a successful uData publication run.
@@ -896,9 +905,14 @@ class DicoGIS(QMainWindow):
         """
         self.prg_layers.setRange(0, max(report.total, 1))
         self.prg_layers.setValue(report.total)
-        self.set_status_message(
+        summary = (
             f"{report.published} published, {report.ignored} ignored, "
             f"{report.failed} failed."
+        )
+        self.set_status_message(
+            self.tr("Publication canceled: {summary}").format(summary=summary)
+            if report.canceled
+            else summary
         )
         self.wdg_tab_publish.show_report(report)
         send_system_notify(

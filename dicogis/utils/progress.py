@@ -34,8 +34,8 @@ class ProgressReporter(Protocol):
     letting the caller interrupt it.
 
     Kept free of any Qt/GDAL import on purpose: it's implemented by the PyQt6
-    GUI (dicogis.ui.workers.QtProgressReporter), it's passed as None by
-    dicogis-cli, and it's what a QGIS plugin would implement on top of
+    GUI (dicogis.ui.workers.QtProgressReporter), it's passed as None or implemented
+    with Rich by dicogis-cli, and it's what a QGIS plugin would implement on top of
     QgsTask.setProgress()/QgsTask.isCanceled(). Which is also why it lives
     here rather than next to the pipeline that consumes it: importing it from
     dicogis.georeaders.process_files would drag GDAL in (see that module's

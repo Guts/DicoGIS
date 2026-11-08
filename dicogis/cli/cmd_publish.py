@@ -35,6 +35,41 @@ logger = logging.getLogger(__name__)
 state = {"verbose": False}
 
 # ############################################################################
+# ########## Classes ###############
+# ##################################
+
+
+class RichProgressReporter:
+    """ProgressReporter on top of a Rich progress bar. Nothing cancels it: Ctrl+C
+    interrupts the command."""
+
+    def __init__(self, progress: Progress) -> None:
+        """Add a task to a progress bar.
+
+        Args:
+            progress: running Rich progress bar
+        """
+        self.progress = progress
+        self.task_id = progress.add_task("Processing...", total=None)
+
+    def set_message(self, message: str) -> None:
+        """Update the description of the task."""
+        self.progress.update(self.task_id, description=message)
+
+    def increment(self, amount: int = 1) -> None:
+        """Increment the progress counter."""
+        self.progress.advance(self.task_id, amount)
+
+    def set_total(self, total: int) -> None:
+        """Set the total value of the progress counter."""
+        self.progress.update(self.task_id, total=total)
+
+    def is_canceled(self) -> bool:
+        """Tell the operation has not been asked to stop."""
+        return False
+
+
+# ############################################################################
 # ########## Functions #############
 # ##################################
 
@@ -136,20 +171,13 @@ def publish(
 
     try:
         with Progress(console=console_out) as progress:
-            task_id = progress.add_task("Processing...", total=None)
-
-            def _on_progress(
-                files_done: int, files_total: int, current_file: Path
-            ) -> None:
-                progress.update(task_id, total=files_total, completed=files_done)
-
             report = publish_metadata_folder(
                 input_folder=input_folder,
                 udata_api_key=udata_api_key,
                 udata_api_url_base=udata_api_url_base,
                 udata_api_version=udata_api_version,
                 udata_organization_id=udata_organization_id,
-                progress_callback=_on_progress,
+                progress_reporter=RichProgressReporter(progress),
                 verbose=verbose,
                 timeout=timeout,
             )

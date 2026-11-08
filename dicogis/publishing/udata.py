@@ -13,13 +13,13 @@ UI-agnostic core shared by the `dicogis-cli publish` command and the GUI's
 # standard lib
 import json
 import logging
-from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
 # project
 from dicogis.publishing.settings import get_publish_timeout
 from dicogis.utils.http import HttpClient, get_http_client
+from dicogis.utils.progress import ProgressReporter
 
 
 # ############################################################################
@@ -41,6 +41,7 @@ class PublishReport:
     ignored: int = 0
     failed: int = 0
     errors: list[str] = field(default_factory=list)
+    canceled: bool = False
 
     @property
     def total(self) -> int:
@@ -239,7 +240,7 @@ def publish_metadata_folder(
     udata_api_url_base: str = "https://demo.data.gouv.fr/api/",
     udata_api_version: str = "1",
     udata_organization_id: str | None = None,
-    progress_callback: Callable[[int, int, Path], None] | None = None,
+    progress_reporter: ProgressReporter | None = None,
     verbose: bool = False,
     timeout: float | None = None,
     http_client: HttpClient | None = None,
@@ -257,8 +258,8 @@ def publish_metadata_folder(
         udata_organization_id: organization ID in the uData instance. If set,
             datasets are added to the organization instead of the user
             authenticated with the API key.
-        progress_callback: called after each JSON file has been examined, with
-            (files_done, files_total, current_json_file).
+        progress_reporter: told about each JSON file examined. Asking it to stop ends
+            the run between two files, with a report of what was done until then.
         verbose: log ignored files (not DicoGIS or already published) at info level.
         timeout: seconds to wait for the catalog. Defaults to the
             DICOGIS_PUBLISH_TIMEOUT environment variable, or 30 seconds.
@@ -291,9 +292,13 @@ def publish_metadata_folder(
     already_published_slugs, already_published_signature = _fetch_already_published(api)
 
     report = PublishReport()
-    files_total = len(li_json_files)
+    if progress_reporter is not None:
+        progress_reporter.set_total(len(li_json_files))
 
-    for files_done, json_file in enumerate(li_json_files, start=1):
+    for json_file in li_json_files:
+        if progress_reporter is not None and progress_reporter.is_canceled():
+            report.canceled = True
+            break
         _publish_json_file(
             json_file=json_file,
             report=report,
@@ -302,7 +307,8 @@ def publish_metadata_folder(
             already_published_signatures=already_published_signature,
             verbose=verbose,
         )
-        if progress_callback:
-            progress_callback(files_done, files_total, json_file)
+        if progress_reporter is not None:
+            progress_reporter.set_message(json_file.name)
+            progress_reporter.increment()
 
     return report

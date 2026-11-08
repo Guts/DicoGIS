@@ -36,6 +36,33 @@ UDATA_API_URL_BASE = "https://udata-test.example/api/"
 UDATA_API_VERSION = "1"
 
 # ##############################################################################
+# ########## Classes ###############
+# ##################################
+
+
+class _RecordingReporter:
+    """ProgressReporter recording what it's told, asking to stop after some files."""
+
+    def __init__(self, cancel_after: int | None = None) -> None:
+        self.cancel_after = cancel_after
+        self.total = None
+        self.count = 0
+        self.messages: list[str] = []
+
+    def set_message(self, message: str) -> None:
+        self.messages.append(message)
+
+    def increment(self, amount: int = 1) -> None:
+        self.count += amount
+
+    def set_total(self, total: int) -> None:
+        self.total = total
+
+    def is_canceled(self) -> bool:
+        return self.cancel_after is not None and self.count >= self.cancel_after
+
+
+# ##############################################################################
 # ########## Functions #############
 # ##################################
 
@@ -62,7 +89,7 @@ def _dicogis_metadata(slug: str) -> dict:
 @responses.activate
 def test_each_file_is_counted_and_reported_once(tmp_path: Path) -> None:
     """One file per outcome: unreadable, not DicoGIS', already published, new.
-    The progress callback is called once per file, whatever its outcome."""
+    The progress is reported once per file, whatever its outcome."""
     (tmp_path / "a_broken.json").write_text("{not json", encoding="UTF-8")
     _write_json(tmp_path, "b_foreign.json", {"title": "not from DicoGIS"})
     _write_json(tmp_path, "c_published.json", _dicogis_metadata("already-there"))
@@ -75,28 +102,55 @@ def test_each_file_is_counted_and_reported_once(tmp_path: Path) -> None:
     responses.post(
         f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/datasets", json={}, status=201
     )
-    progress_calls: list[tuple[int, int, str]] = []
+    reporter = _RecordingReporter()
 
     report = publish_metadata_folder(
         input_folder=tmp_path,
         udata_api_key="fake-api-key",
         udata_api_url_base=UDATA_API_URL_BASE,
         udata_api_version=UDATA_API_VERSION,
-        progress_callback=lambda done, total, json_file: progress_calls.append(
-            (done, total, json_file.name)
-        ),
+        progress_reporter=reporter,
     )
 
     assert (report.published, report.ignored, report.failed) == (1, 2, 1)
     assert len(report.errors) == 1
-    assert [done for done, _, _ in progress_calls] == [1, 2, 3, 4]
-    assert {name for _, _, name in progress_calls} == {
+    assert report.canceled is False
+    assert reporter.total == 4
+    assert reporter.count == 4
+    assert set(reporter.messages) == {
         "a_broken.json",
         "b_foreign.json",
         "c_published.json",
         "d_new.json",
     }
-    assert all(total == 4 for _, total, _ in progress_calls)
+
+
+@responses.activate
+def test_cancellation_stops_between_two_files_and_keeps_the_report(
+    tmp_path: Path,
+) -> None:
+    _write_json(tmp_path, "a.json", _dicogis_metadata("a"))
+    _write_json(tmp_path, "b.json", _dicogis_metadata("b"))
+    _write_json(tmp_path, "c.json", _dicogis_metadata("c"))
+    responses.get(
+        f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/me/datasets/", json=[], status=200
+    )
+    responses.post(
+        f"{UDATA_API_URL_BASE}{UDATA_API_VERSION}/datasets", json={}, status=201
+    )
+    reporter = _RecordingReporter(cancel_after=2)
+
+    report = publish_metadata_folder(
+        input_folder=tmp_path,
+        udata_api_key="fake-api-key",
+        udata_api_url_base=UDATA_API_URL_BASE,
+        udata_api_version=UDATA_API_VERSION,
+        progress_reporter=reporter,
+    )
+
+    assert report.canceled is True
+    assert report.published == 2
+    assert len(responses.calls) == 3
 
 
 @responses.activate
