@@ -67,6 +67,9 @@ class MetaDataset:
     storage_type: str | None = None
     # data
     bbox: tuple[float] | None = None
+    # (west, south, east, north) in degrees, None if the CRS is unknown: what
+    # catalogs expect, unlike bbox which is in the dataset's own CRS
+    bbox_wgs84: tuple[float, float, float, float] | None = None
     envelope: tuple[float] | None = None
     crs_name: str | None = None
     crs_registry: str = "EPSG"

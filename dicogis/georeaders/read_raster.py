@@ -133,6 +133,7 @@ class ReadRasters(GeoReaderBase):
 
         # geometry information
         metadataset.bbox = self.get_extent_as_tuple(dataset_or_layer=dataset)
+        metadataset.bbox_wgs84 = self.get_extent_wgs84(dataset_or_layer=dataset)
         geotransform = dataset.GetGeoTransform()
         metadataset.origin_x = geotransform[0]
         metadataset.origin_y = geotransform[3]
