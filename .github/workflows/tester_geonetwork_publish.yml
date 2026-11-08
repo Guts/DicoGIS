@@ -87,7 +87,8 @@ jobs:
       - name: Publication scenarios
         env:
           DICOGIS_TEST_GEONETWORK_URL: http://localhost:8080/geonetwork
-        run: pytest -o addopts="" tests/integration/test_geonetwork_publish.py -v
+        # pytest-qt, pulled by the test extra, aborts pytest without a Qt binding
+        run: pytest -o addopts="" -p no:pytest-qt tests/integration/test_geonetwork_publish.py -v
 
       - name: Generate ISO 19139 metadata from test fixtures
         run: |
