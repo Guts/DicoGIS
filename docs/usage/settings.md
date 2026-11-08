@@ -30,7 +30,7 @@ and the choice persists across runs in `options.ini`.
 | `DICOGIS_EXPORT_SIZE_PRETTIFY`      | `--opt-prettify-size` / `--no-opt-prettify-size` | `false`       |
 | `DICOGIS_LISTING_MAX_WORKERS`       | `--listing-max-workers`                          | unset (auto, based on CPU count) |
 | `DICOGIS_LISTING_PARALLEL_SCAN`     | `--opt-parallel-scan` / `--no-opt-parallel-scan` | `false`       |
-| `DICOGIS_OUTPUT_FORMAT`             | `--output-format` (`excel`, `json` or `udata`)   | `excel`       |
+| `DICOGIS_OUTPUT_FORMAT`             | `--output-format` (`excel`, `json`, `udata` or `iso19139`) | `excel` |
 | `DICOGIS_QUICK_FAIL`                | `--opt-quick-fail`                               | `false`       |
 
 #### About the parallel folder scan
@@ -75,12 +75,23 @@ At the end of a run, DicoGIS sends a system notification through [notify-py](htt
 | `DICOGIS_POSTGRES_SERVICES`         | `--pg-services`                                  | `None`             |
 | `DICOGIS_START_FOLDER`              | `--input-folder`                                 | `None`             |
 
+### ISO 19139 export
+
+The first two are read by the CLI and the GUI, the last one is also an option of the `inventory` subcommand. Without a contact, `gmd:contact` only holds its role and a warning is logged. The location of the datasets stays out of the records unless asked for, since they are meant to be published.
+
+| Variable name                       | Corresponding CLI argument    | Default value |
+| :---------------------------------- | :---------------------------: | :-----------: |
+| `DICOGIS_ISO_CONTACT_ORGANISATION`  |                               | `None`        |
+| `DICOGIS_ISO_CONTACT_EMAIL`         |                               | `None`        |
+| `DICOGIS_ISO_INCLUDE_ORIGINAL_PATH` | `--opt-include-original-path` | `false`       |
+
 ### Shared (CLI `publish` subcommand and GUI `Publish` tab)
 
 These set the initial value of their `Publish` tab widget, same as the "Shared"
-table above, except `DICOGIS_UDATA_API_KEY`: for security, the API key typed into
-the GUI is never written to `options.ini`, so it must be re-entered (or re-exposed
-through the environment variable) on every run.
+table above, except `DICOGIS_UDATA_API_KEY` and `DICOGIS_GEONETWORK_PASSWORD`: for
+security, the API key and the password typed into the GUI are never written to
+`options.ini`, so they must be re-entered (or re-exposed through the environment
+variable) on every run.
 
 | Variable name                    | Corresponding CLI argument    | Default value                    |
 | :------------------------------- | :---------------------------: | :------------------------------: |
@@ -89,3 +100,18 @@ through the environment variable) on every run.
 | `DICOGIS_UDATA_API_URL_BASE`     | `--udata-api-url-base`        | `https://demo.data.gouv.fr/api/` |
 | `DICOGIS_UDATA_API_VERSION`      | `--udata-api-version`         | `1`                              |
 | `DICOGIS_UDATA_ORGANIZATION_ID`  | `--udata-organization-id`     | `None`                           |
+| `DICOGIS_PUBLISH_TARGET`         | `--target` (`udata` or `geonetwork`) | `udata`                   |
+| `DICOGIS_PUBLISH_TIMEOUT`        | `--timeout`                   | `30` (seconds)                   |
+| `DICOGIS_GEONETWORK_URL_BASE`    | `--geonetwork-url-base`       | `None` (e.g. `https://catalogue.example/geonetwork`) |
+| `DICOGIS_GEONETWORK_PORTAL`      | `--geonetwork-portal`         | `srv`                            |
+| `DICOGIS_GEONETWORK_USERNAME`    | `--geonetwork-username`       | `None`                           |
+| `DICOGIS_GEONETWORK_PASSWORD`    | `--geonetwork-password`       | `None`                           |
+| `DICOGIS_GEONETWORK_GROUP`       | `--geonetwork-group`          | `None` (mandatory, numeric)      |
+| `DICOGIS_GEONETWORK_CATEGORIES`  | `--geonetwork-categories`     | `None` (identifiers, comma separated) |
+| `DICOGIS_GEONETWORK_UPDATE_MODE` | `--geonetwork-update-mode` (`overwrite` or `complete`) | `overwrite` |
+| `DICOGIS_GEONETWORK_PUBLISH_TO_ALL` | `--geonetwork-publish-to-all` | `false`                       |
+| `DICOGIS_GEONETWORK_REJECT_IF_INVALID` | `--geonetwork-reject-if-invalid` | `false`                 |
+| `DICOGIS_GEONETWORK_AUTHCFG`     |                               | `None` (QGIS only, replaces the username and the password) |
+| `DICOGIS_HTTP_BACKEND`           |                               | `auto`: the network stack of QGIS when running inside QGIS, `requests` otherwise. `requests` or `qgis` force one: only useful for development and troubleshooting. |
+
+See [Publishing to GeoNetwork](./publish_geonetwork.md).
