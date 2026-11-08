@@ -138,6 +138,28 @@ ISO19139_SEQUENCES: dict[str, tuple[str, ...]] = {
 # ##################################
 
 
+def safe_xml_parser() -> etree.XMLParser:
+    """Build the parser of the XML files and of what the catalogs answer: they aren't
+    trusted enough to have their entities resolved or to reach the network.
+
+    Returns:
+        XML parser
+    """
+    return etree.XMLParser(resolve_entities=False, no_network=True, huge_tree=False)
+
+
+def is_iso19139_record(root: etree._Element) -> bool:
+    """Tell whether a document is an ISO 19139 record, not ISO 19115-3 for instance.
+
+    Args:
+        root: root of the document
+
+    Returns:
+        True if the root is gmd:MD_Metadata
+    """
+    return root.tag == _gmd("MD_Metadata")
+
+
 def _gmd(tag: str) -> str:
     return f"{{{GMD_NS}}}{tag}"
 

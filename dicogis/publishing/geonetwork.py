@@ -18,11 +18,26 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+# 3rd party
+from lxml import etree
+
+# project
+from dicogis.export.to_iso19139 import (
+    ISO19139_NAMESPACES,
+    is_iso19139_record,
+    safe_xml_parser,
+)
+from dicogis.publishing.report import PublishReport
+from dicogis.publishing.settings import get_publish_timeout
+from dicogis.utils.http import HttpError, HttpStatusError, get_http_client
+
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
+    from pathlib import Path
 
-    from dicogis.utils.http import HttpClient, HttpResponse, HttpStatusError
+    from dicogis.utils.http import HttpClient, HttpResponse
+    from dicogis.utils.progress import ProgressReporter
 
 
 # ############################################################################
@@ -56,6 +71,16 @@ class GeonetworkCredentials:
             representation of the credentials
         """
         return f"GeonetworkCredentials(username={self.username!r})"
+
+
+@dataclass(frozen=True)
+class _Options:
+    """How to publish the records."""
+
+    group: str
+    categories: tuple[str, ...] = ()
+    publish_to_all: bool = False
+    reject_if_invalid: bool = False
 
 
 class GeonetworkSession:
@@ -205,3 +230,184 @@ def describe_http_error(error: HttpStatusError) -> str:
     """
     response = error.response
     return f"HTTP {response.status_code}: {response.text[:500]}"
+
+
+def _upload_record(session: GeonetworkSession, xml: bytes, options: _Options) -> None:
+    """Insert a record in the catalog, or replace the one with the same identifier.
+
+    Args:
+        session: open session
+        xml: ISO 19139 document
+        options: publication options
+
+    Raises:
+        HttpError: if the catalog refused the record or couldn't be reached
+        ValueError: if the catalog accepted the request but reported an error
+    """
+    params: dict[str, str | Sequence[str]] = {
+        "metadataType": "METADATA",
+        "uuidProcessing": "OVERWRITE",
+        "group": options.group,
+        "publishToAll": str(options.publish_to_all).lower(),
+        "rejectIfInvalid": str(options.reject_if_invalid).lower(),
+    }
+    if options.categories:
+        params["category"] = list(options.categories)
+
+    response = session.request(
+        "PUT",
+        "records",
+        params=params,
+        headers={"Content-Type": "application/xml", "Accept": "application/json"},
+        data=xml,
+    )
+    response.raise_for_status()
+
+    # some failures only show in the processing report of a successful response
+    try:
+        processing_report = response.json()
+    except ValueError:
+        logger.debug(f"Unexpected response of the catalog: {response.text[:500]}")
+        return
+    if isinstance(processing_report, dict) and (
+        processing_report.get("numberOfRecordsWithErrors")
+        or processing_report.get("errors")
+    ):
+        raise ValueError(f"Processing report: {response.text[:500]}")
+
+
+def _publish_file(
+    session: GeonetworkSession, xml_file: Path, report: PublishReport, options: _Options
+) -> None:
+    """Publish one XML file and count the outcome into the report.
+
+    Args:
+        session: open session
+        xml_file: file to publish
+        report: run report, updated with this file's outcome
+        options: publication options
+    """
+    try:
+        document = etree.parse(str(xml_file), parser=safe_xml_parser()).getroot()
+    except (OSError, etree.XMLSyntaxError) as err:
+        report.failed += 1
+        report.errors.append(f"Impossible to load {xml_file}. Trace: {err}")
+        logger.error(report.errors[-1])
+        return
+
+    if not is_iso19139_record(document):
+        logger.info(f"Not an ISO 19139 record, ignored: {xml_file}")
+        report.ignored += 1
+        return
+
+    identifier = document.findtext(
+        "gmd:fileIdentifier/gco:CharacterString", namespaces=ISO19139_NAMESPACES
+    )
+    if not identifier or not identifier.strip():
+        report.failed += 1
+        report.errors.append(
+            f"{xml_file} has no gmd:fileIdentifier: publishing it would make a new "
+            "record each time."
+        )
+        logger.error(report.errors[-1])
+        return
+
+    try:
+        _upload_record(session, xml_file.read_bytes(), options)
+    except HttpStatusError as err:
+        report.failed += 1
+        report.errors.append(f"Publish {xml_file} failed. {describe_http_error(err)}")
+        logger.error(report.errors[-1])
+        return
+    except (HttpError, OSError, ValueError) as err:
+        report.failed += 1
+        report.errors.append(f"Publish {xml_file} failed. Trace: {err}")
+        logger.error(report.errors[-1])
+        return
+
+    report.published += 1
+
+
+def publish_metadata_folder(
+    input_folder: Path,
+    url_base: str,
+    *,
+    group: str,
+    credentials: GeonetworkCredentials | None = None,
+    portal: str = "srv",
+    categories: Sequence[str] = (),
+    publish_to_all: bool = False,
+    reject_if_invalid: bool = False,
+    timeout: float | None = None,
+    http_client: HttpClient | None = None,
+    progress_reporter: ProgressReporter | None = None,
+) -> PublishReport:
+    """Publish every ISO 19139 file of a folder to a GeoNetwork 4.4 catalog.
+
+    Args:
+        input_folder: folder where the XML files are stored
+        url_base: URL of the instance, e.g. https://catalogue.example/geonetwork
+        group: identifier of the group the records are attached to. Mandatory:
+            GeoNetwork 4.4 refuses an insertion without it.
+        credentials: account to log in with. None when the HTTP client handles the
+            authentication itself (authentication configuration of QGIS).
+        portal: portal (sub-catalog) of the instance
+        categories: identifiers of the categories of the records
+        publish_to_all: make the records visible to everyone. Forced to false by
+            GeoNetwork when its workflow is enabled.
+        reject_if_invalid: have the catalog refuse the records invalid against the XSD
+        timeout: seconds to wait for the catalog. Defaults to the
+            DICOGIS_PUBLISH_TIMEOUT environment variable, or 30 seconds.
+        http_client: HTTP client. Defaults to the one of the running environment.
+        progress_reporter: told about each file examined. Asking it to stop ends the
+            run between two files, with a report of what was done until then.
+
+    Raises:
+        FileNotFoundError: if input_folder contains no XML file
+        ValueError: if the URL is missing or the group isn't an identifier
+        GeonetworkAuthenticationError: if the account can't write to the catalog
+        HttpTransportError: if the catalog can't be reached
+
+    Returns:
+        counters and per-file error messages for the run
+    """
+    xml_files = sorted(input_folder.glob("*.xml"))
+    if not xml_files:
+        raise FileNotFoundError(f"No XML files found into {input_folder.resolve()}")
+    if not url_base:
+        raise ValueError("No URL defined for GeoNetwork.")
+    if not str(group).strip().isdigit():
+        raise ValueError(
+            f"The GeoNetwork group must be given by its numeric identifier, got: "
+            f"'{group}'."
+        )
+
+    options = _Options(
+        group=str(group).strip(),
+        categories=tuple(categories),
+        publish_to_all=publish_to_all,
+        reject_if_invalid=reject_if_invalid,
+    )
+    session = GeonetworkSession(
+        http_client=http_client or get_http_client(),
+        url_base=url_base,
+        portal=portal,
+        credentials=credentials,
+        timeout=get_publish_timeout() if timeout is None else timeout,
+    )
+    session.open()
+
+    report = PublishReport()
+    if progress_reporter is not None:
+        progress_reporter.set_total(len(xml_files))
+
+    for xml_file in xml_files:
+        if progress_reporter is not None and progress_reporter.is_canceled():
+            report.canceled = True
+            break
+        _publish_file(session, xml_file, report, options)
+        if progress_reporter is not None:
+            progress_reporter.set_message(xml_file.name)
+            progress_reporter.increment()
+
+    return report
