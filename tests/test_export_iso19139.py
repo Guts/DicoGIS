@@ -4,8 +4,8 @@
 Tests for dicogis.export.to_iso19139.
 
 Checks the mandatory elements and the order of the XSD against the tables of the
-serializer: the real validation against the XSD happens in a GeoNetwork instance (see
-tests/container and the rejectIfInvalid scenario of the integration workflow).
+serializer: the real validation against the XSD and the ISO Schematron rules happens
+in a GeoNetwork instance (see tests/integration/test_geonetwork_publish.py).
 
 Usage from the repo root folder:
     pytest tests/test_export_iso19139.py
@@ -75,6 +75,7 @@ def _record(**overrides) -> CatalogRecord:
         formats=("ESRI Shapefile",),
         contact_organisation="Org",
         contact_email="a@example.org",
+        topic_category="environment",
     )
     values.update(overrides)
     return CatalogRecord(**values)
@@ -257,6 +258,69 @@ def test_contact_without_value_only_holds_its_role():
     assert [etree.QName(child).localname for child in party] == ["role"]
 
 
+def test_resource_contact_is_the_contact_of_the_metadata():
+    root = record_to_iso19139(_record())
+
+    contact = root.find("gmd:contact", ISO19139_NAMESPACES)
+    resource_contact = root.find(f"{IDENT}/gmd:pointOfContact", ISO19139_NAMESPACES)
+
+    assert etree.QName(resource_contact).localname == "pointOfContact"
+    assert [
+        (etree.QName(node).localname, node.text, node.get("codeListValue"))
+        for node in resource_contact.iter()
+    ][1:] == [
+        (etree.QName(node).localname, node.text, node.get("codeListValue"))
+        for node in contact.iter()
+    ][1:]
+
+
+def test_no_resource_contact_without_value():
+    """Optional, unlike the contact of the metadata: no role-only one."""
+    root = record_to_iso19139(_record(contact_organisation=None, contact_email=None))
+
+    assert root.find(f"{IDENT}/gmd:pointOfContact", ISO19139_NAMESPACES) is None
+
+
+def test_topic_category():
+    root = record_to_iso19139(_record(topic_category="planningCadastre"))
+
+    code = root.find(
+        f"{IDENT}/gmd:topicCategory/gmd:MD_TopicCategoryCode", ISO19139_NAMESPACES
+    )
+
+    assert code.text == "planningCadastre"
+    # an enumeration, not a codelist
+    assert code.get("codeList") is None
+
+
+def test_no_topic_category_when_unknown():
+    root = record_to_iso19139(_record(topic_category=None))
+
+    assert root.find(f"{IDENT}/gmd:topicCategory", ISO19139_NAMESPACES) is None
+
+
+def test_unknown_extent_is_declared_as_such():
+    """ISO 19115 requires a geographic extent for a dataset, without a CRS DicoGIS
+    can't tell it."""
+    root = record_to_iso19139(_record(bbox_wgs84=None))
+
+    box = root.find(
+        f"{IDENT}/gmd:extent/gmd:EX_Extent/gmd:geographicElement"
+        "/gmd:EX_GeographicBoundingBox",
+        ISO19139_NAMESPACES,
+    )
+
+    assert [
+        (etree.QName(bound).localname, bound.get(f"{{{GCO_NS}}}nilReason"), len(bound))
+        for bound in box
+    ] == [
+        ("westBoundLongitude", "unknown", 0),
+        ("eastBoundLongitude", "unknown", 0),
+        ("southBoundLatitude", "unknown", 0),
+        ("northBoundLatitude", "unknown", 0),
+    ]
+
+
 def test_original_path_only_when_given():
     assert (
         record_to_iso19139(_record()).find(
@@ -286,6 +350,7 @@ def test_original_path_only_when_given():
             "keywords": (),
             "contact_email": None,
         },
+        {"contact_organisation": None, "contact_email": None, "topic_category": None},
         {"crs_codes": ("EPSG:4326", "EPSG:2154"), "formats": ("A", "B")},
     ],
 )
@@ -304,6 +369,7 @@ def test_mandatory_elements_are_always_there():
             formats=(),
             contact_organisation=None,
             contact_email=None,
+            topic_category=None,
         )
     )
 
@@ -315,6 +381,8 @@ def test_mandatory_elements_are_always_there():
         f"{IDENT}/gmd:citation/gmd:CI_Citation/gmd:date",
         f"{IDENT}/gmd:abstract",
         f"{IDENT}/gmd:language",
+        # required by ISO 19115 for a dataset, beyond the XSD
+        f"{IDENT}/gmd:extent/gmd:EX_Extent/gmd:geographicElement",
     ):
         assert root.find(xpath, ISO19139_NAMESPACES) is not None, xpath
 
@@ -498,7 +566,14 @@ def test_serialize_a_dataset_without_crs(serializer):
     root = etree.parse(str(serializer.serialize_metadaset(metadataset))).getroot()
 
     assert root.find("gmd:referenceSystemInfo", ISO19139_NAMESPACES) is None
-    assert root.find(f"{IDENT}/gmd:extent", ISO19139_NAMESPACES) is None
+    assert (
+        root.find(
+            f"{IDENT}/gmd:extent/gmd:EX_Extent/gmd:geographicElement"
+            "/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/gco:Decimal",
+            ISO19139_NAMESPACES,
+        )
+        is None
+    )
     assert "srs_" not in etree.tostring(root, encoding="unicode")
 
 
@@ -582,6 +657,28 @@ def test_contact_set_is_not_logged(tmp_path: Path, caplog):
         )
 
     assert "DICOGIS_ISO_CONTACT_ORGANISATION" not in caplog.text
+
+
+def test_missing_topic_category_is_logged(tmp_path: Path, caplog):
+    with caplog.at_level(logging.WARNING):
+        MetadatasetSerializerIso19139(
+            settings=CatalogRecordSettings(),
+            localized_strings={},
+            output_path=tmp_path,
+        )
+
+    assert "DICOGIS_ISO_TOPIC_CATEGORY" in caplog.text
+
+
+def test_topic_category_set_is_not_logged(tmp_path: Path, caplog):
+    with caplog.at_level(logging.WARNING):
+        MetadatasetSerializerIso19139(
+            settings=CatalogRecordSettings(topic_category="environment"),
+            localized_strings={},
+            output_path=tmp_path,
+        )
+
+    assert "DICOGIS_ISO_TOPIC_CATEGORY" not in caplog.text
 
 
 def test_dates_of_a_real_dataset_are_dates_not_datetimes(serializer):
