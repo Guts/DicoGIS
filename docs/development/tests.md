@@ -112,3 +112,15 @@ Two separate CI checks cover uData publication:
   Redis (`tests/container/docker-compose.ci-udata.yml`), bootstraps an admin user and API
   token, then runs a real `dicogis-cli inventory --output-format udata` + `dicogis-cli
   publish` and checks the dataset actually appears in the instance.
+
+GeoNetwork publication is covered the same way:
+
+- `tests/test_publishing_geonetwork.py` and `tests/test_cli_publish_geonetwork.py` (regular `pytest` suite) exercise the publication against fake HTTP clients.
+- [`.github/workflows/tester_geonetwork_publish.yml`](../../.github/workflows/tester_geonetwork_publish.yml) boots a GeoNetwork 4.4 with its Elasticsearch (`tests/container/docker-compose.ci-geonetwork.yml`), runs the scenarios of `tests/integration/test_geonetwork_publish.py`, then a real `dicogis-cli inventory --output-format iso19139` + `dicogis-cli publish --geonetwork-reject-if-invalid`. The DataCite and DCAT-AP HVD Schematron rules of the catalog are made report only first (`tests/fixtures/geonetwork_setup.py`): required on a fresh GeoNetwork, they would refuse every record, see [Publishing to GeoNetwork](../usage/publish_geonetwork.md#validity).
+
+To run the scenarios locally, against a throwaway catalog only, since they change its configuration:
+
+```sh
+docker compose -f tests/container/docker-compose.ci-geonetwork.yml up -d --wait --wait-timeout 420
+DICOGIS_TEST_GEONETWORK_URL=http://localhost:8080/geonetwork pytest -o addopts="" -p no:pytest-qt tests/integration/test_geonetwork_publish.py
+```

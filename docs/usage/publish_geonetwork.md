@@ -14,7 +14,7 @@ Each dataset makes one XML file, a file geodatabase (GeoPackage, Esri FileGDB, S
 
 Records are identified by a UUID derived from the location of the dataset: publishing again updates the same record. The same dataset seen through two locations (drive letter and UNC path, two PostgreSQL services) makes two records.
 
-The contact of the records comes from `DICOGIS_ISO_CONTACT_ORGANISATION` and `DICOGIS_ISO_CONTACT_EMAIL` (see [settings](./settings.md)). The location of the datasets only ends up in the records with `--opt-include-original-path`.
+The contact of the records comes from `DICOGIS_ISO_CONTACT_ORGANISATION` and `DICOGIS_ISO_CONTACT_EMAIL`, and their topic category from `DICOGIS_ISO_TOPIC_CATEGORY` (see [settings](./settings.md)). The same contact is used for the metadata and for the datasets. The location of the datasets only ends up in the records with `--opt-include-original-path`.
 
 ## Publish them
 
@@ -39,7 +39,11 @@ Reading a record in `complete` mode looks at what an editor sees, the working co
 
 ## Validity
 
-With `--geonetwork-reject-if-invalid`, the catalog refuses the records invalid against the XSD and tells why in the report. Records valid against the XSD can still be reported by the Schematron rules of the catalog (ISO, INSPIRE): DicoGIS targets the XSD only.
+With `--geonetwork-reject-if-invalid`, the catalog validates each record against its XSD and against the Schematron rules it requires, refuses the invalid ones and tells why in the report. Without it, the records are published whatever their validity, to be completed in the catalog.
+
+DicoGIS writes records valid against the XSD and the ISO 19115 rules of GeoNetwork (`schematron-rules-iso`), provided a topic category is set with `DICOGIS_ISO_TOPIC_CATEGORY`: ISO 19115 requires one for a dataset, and DicoGIS can't tell it. It requires a geographic extent too: its bounds are declared unknown when the dataset doesn't tell, without a CRS for example.
+
+On a fresh GeoNetwork 4.4, every Schematron rule set is required, the DataCite and DCAT-AP HVD (High Value Datasets of the European Union) ones included. Their rules apply to every record and ask for what DicoGIS can't know: publisher, publication year, applicable legislation, HVD category... As long as they are required, the option refuses every record. An administrator sets the requirement of each rule set (required, report only or disabled) in the administration console of the catalog, under _Metadata & templates_ > _Validation_.
 
 ## Inside QGIS
 

@@ -77,12 +77,17 @@ At the end of a run, DicoGIS sends a system notification through [notify-py](htt
 
 ### ISO 19139 export
 
-The first two are read by the CLI and the GUI, the last one is also an option of the `inventory` subcommand. Without a contact, `gmd:contact` only holds its role and a warning is logged. The location of the datasets stays out of the records unless asked for, since they are meant to be published.
+The first three are read by the CLI and the GUI, the last one is also an option of the `inventory` subcommand. The contact is the one of the metadata (`gmd:contact`) and of the datasets (`gmd:pointOfContact`): without it, `gmd:contact` only holds its role, the datasets get no point of contact and a warning is logged.
+
+The topic category is a value of the ISO 19139 `MD_TopicCategoryCode` enumeration (`environment`, `planningCadastre`, `transportation`...), the same for every record: ISO 19115 requires one for a dataset, and DicoGIS can't tell it. Without it, a warning is logged and catalogs checking it, like GeoNetwork, refuse the records when asked to reject the invalid ones. An unknown value stops the export, since no record would be valid.
+
+The location of the datasets stays out of the records unless asked for, since they are meant to be published.
 
 | Variable name                       | Corresponding CLI argument    | Default value |
 | :---------------------------------- | :---------------------------: | :-----------: |
 | `DICOGIS_ISO_CONTACT_ORGANISATION`  |                               | `None`        |
 | `DICOGIS_ISO_CONTACT_EMAIL`         |                               | `None`        |
+| `DICOGIS_ISO_TOPIC_CATEGORY`        |                               | `None`        |
 | `DICOGIS_ISO_INCLUDE_ORIGINAL_PATH` | `--opt-include-original-path` | `false`       |
 
 ### Shared (CLI `publish` subcommand and GUI `Publish` tab)
