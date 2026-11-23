@@ -5,7 +5,10 @@ Publication against a real GeoNetwork.
 
 Skipped unless DICOGIS_TEST_GEONETWORK_URL is set, which the workflow
 .github/workflows/tester_geonetwork_publish.yml does, after starting
-tests/container/docker-compose.ci-geonetwork.yml.
+tests/container/docker-compose.ci-geonetwork.yml. The DataCite and DCAT-AP HVD
+Schematron rules of the catalog are made report only first (see
+tests/fixtures/geonetwork_setup.py): changes the configuration of the catalog, to
+be run against a throwaway one only.
 
 Usage from the repo root folder, a GeoNetwork running:
     DICOGIS_TEST_GEONETWORK_URL=http://localhost:8080/geonetwork \
@@ -45,6 +48,7 @@ from dicogis.publishing.geonetwork import (
     publish_metadata_folder,
 )
 from dicogis.utils.http import get_http_client
+from tests.fixtures.geonetwork_setup import report_only_schematrons
 
 
 # ##############################################################################
@@ -69,6 +73,12 @@ pytestmark = pytest.mark.skipif(
 # ##############################################################################
 # ########## Fixtures ##############
 # ##################################
+
+
+@pytest.fixture(scope="module", autouse=True)
+def catalog_rules() -> None:
+    """Require the ISO and GeoNetwork rules only, as a catalog in production would."""
+    report_only_schematrons(GEONETWORK_URL, ADMIN.username, ADMIN.password)
 
 
 @pytest.fixture
@@ -138,12 +148,15 @@ def _metadatasets(run_id: str) -> list:
     ]
 
 
-def _export(folder: Path, metadatasets: list) -> list[Path]:
+def _export(
+    folder: Path, metadatasets: list, topic_category: str | None = "environment"
+) -> list[Path]:
     serializer = MetadatasetSerializerIso19139(
         settings=CatalogRecordSettings(
             language="fre",
             contact_organisation="DicoGIS CI",
             contact_email="ci@example.org",
+            topic_category=topic_category,
         ),
         localized_strings={},
         output_path=folder,
@@ -184,8 +197,9 @@ def _text(root: etree._Element, xpath: str) -> str | None:
 # ##################################
 
 
-def test_every_kind_of_record_is_valid_against_the_xsd(tmp_path, session):
-    """rejectIfInvalid has the catalog validate them against its XSD."""
+def test_every_kind_of_record_is_valid(tmp_path, session):
+    """rejectIfInvalid has the catalog validate them against its XSD and the
+    Schematron rules it requires."""
     metadatasets = _metadatasets(uuid4().hex)
     _export(tmp_path, metadatasets)
 
@@ -198,6 +212,17 @@ def test_every_kind_of_record_is_valid_against_the_xsd(tmp_path, session):
         assert (
             _text(record, "gmd:fileIdentifier/gco:CharacterString") == metadataset.uuid
         )
+
+
+def test_record_without_topic_category_is_refused(tmp_path):
+    """Valid against the XSD, not against the ISO rules: the condition on the
+    hierarchy level is beyond the XSD."""
+    _export(tmp_path, _metadatasets(uuid4().hex)[:1], topic_category=None)
+
+    report = _publish(tmp_path, reject_if_invalid=True)
+
+    assert report.failed == 1
+    assert "schematron-rules-iso" in report.errors[0]
 
 
 def test_publishing_twice_keeps_one_record(tmp_path, session):

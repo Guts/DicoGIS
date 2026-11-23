@@ -1,8 +1,8 @@
 name: "Tester GeoNetwork publish 📤"
 
 # Exercises the publication against a real GeoNetwork 4.4: the validation of the records
-# against its XSD and its CSRF protection can't be mocked. With the requests backend: the
-# QGIS one is only tested with fakes (tests/test_utils_http.py).
+# against its XSD and its Schematron rules, and its CSRF protection, can't be mocked. With
+# the requests backend: the QGIS one is only tested with fakes (tests/test_utils_http.py).
 
 on:
   push:
@@ -11,11 +11,13 @@ on:
     paths:
       - ".github/workflows/tester_geonetwork_publish.yml"
       - "dicogis/cli/cmd_publish.py"
+      - "dicogis/constants.py"
       - "dicogis/export/catalog_record.py"
       - "dicogis/export/to_iso19139.py"
       - "dicogis/publishing/**"
       - "dicogis/utils/http/**"
       - "tests/container/docker-compose.ci-geonetwork.yml"
+      - "tests/fixtures/geonetwork_setup.py"
       - "tests/integration/**"
       - "pyproject.toml"
 
@@ -26,11 +28,13 @@ on:
     paths:
       - ".github/workflows/tester_geonetwork_publish.yml"
       - "dicogis/cli/cmd_publish.py"
+      - "dicogis/constants.py"
       - "dicogis/export/catalog_record.py"
       - "dicogis/export/to_iso19139.py"
       - "dicogis/publishing/**"
       - "dicogis/utils/http/**"
       - "tests/container/docker-compose.ci-geonetwork.yml"
+      - "tests/fixtures/geonetwork_setup.py"
       - "tests/integration/**"
       - "pyproject.toml"
 
@@ -84,6 +88,12 @@ jobs:
       - name: Start GeoNetwork stack
         run: docker compose -f "$COMPOSE_FILE" up -d --wait --wait-timeout 420
 
+      - name: Make the DataCite and HVD rules report only, as in production
+        # a fresh GeoNetwork 4.4 requires its DataCite and DCAT-AP HVD Schematron rules
+        # too: rejectIfInvalid would refuse every record. The publication scenarios do
+        # it again, for local runs.
+        run: python -m tests.fixtures.geonetwork_setup http://localhost:8080/geonetwork
+
       - name: Publication scenarios
         env:
           DICOGIS_TEST_GEONETWORK_URL: http://localhost:8080/geonetwork
@@ -91,6 +101,11 @@ jobs:
         run: pytest -o addopts="" -p no:pytest-qt tests/integration/test_geonetwork_publish.py -v
 
       - name: Generate ISO 19139 metadata from test fixtures
+        env:
+          DICOGIS_ISO_CONTACT_ORGANISATION: DicoGIS CI
+          DICOGIS_ISO_CONTACT_EMAIL: ci@example.org
+          # required by the ISO rules for a dataset, DicoGIS can't tell it
+          DICOGIS_ISO_TOPIC_CATEGORY: environment
         run: |
           dicogis-cli inventory --input-folder ./tests/fixtures/gisdata/data/good \
             --language FR --output-format iso19139 \
