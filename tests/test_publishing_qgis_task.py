@@ -1,8 +1,8 @@
 #! python3  # noqa: E265
 
 """
-Tests for dicogis.publishing.qgis_task, with a fake qgis.core: its integration with the
-real task manager runs in the QGIS job of the integration workflow.
+Tests for dicogis.publishing.qgis_task, with a fake qgis.core: nothing runs it in the
+real task manager of QGIS.
 
 Usage from the repo root folder:
     pytest tests/test_publishing_qgis_task.py

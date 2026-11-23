@@ -268,13 +268,32 @@ def test_settings_language(language, expected):
 def test_settings_from_environment(monkeypatch):
     monkeypatch.setenv("DICOGIS_ISO_CONTACT_ORGANISATION", "Org")
     monkeypatch.setenv("DICOGIS_ISO_CONTACT_EMAIL", "a@example.org")
+    monkeypatch.setenv("DICOGIS_ISO_TOPIC_CATEGORY", " planningCadastre ")
     monkeypatch.setenv("DICOGIS_ISO_INCLUDE_ORIGINAL_PATH", "true")
 
     settings = CatalogRecordSettings.from_environment()
 
     assert settings.contact_organisation == "Org"
     assert settings.contact_email == "a@example.org"
+    assert settings.topic_category == "planningCadastre"
     assert settings.include_original_path is True
+
+
+def test_settings_unknown_topic_category_is_refused(monkeypatch):
+    """The XSD would refuse every record: better stop before exporting any."""
+    monkeypatch.setenv("DICOGIS_ISO_TOPIC_CATEGORY", "planning")
+
+    with pytest.raises(ValueError, match="planning.*planningCadastre"):
+        CatalogRecordSettings.from_environment()
+
+
+def test_record_gets_the_topic_category_of_the_settings():
+    record = CatalogRecord.from_metadataset(
+        MetaVectorDataset(name="parcels", path=Path("parcels.shp")),
+        CatalogRecordSettings(topic_category="environment"),
+    )
+
+    assert record.topic_category == "environment"
 
 
 def test_settings_explicit_option_wins_over_environment(monkeypatch):
@@ -289,6 +308,7 @@ def test_settings_defaults(monkeypatch):
     for name in (
         "DICOGIS_ISO_CONTACT_ORGANISATION",
         "DICOGIS_ISO_CONTACT_EMAIL",
+        "DICOGIS_ISO_TOPIC_CATEGORY",
         "DICOGIS_ISO_INCLUDE_ORIGINAL_PATH",
     ):
         monkeypatch.delenv(name, raising=False)
@@ -297,6 +317,7 @@ def test_settings_defaults(monkeypatch):
 
     assert settings.contact_organisation is None
     assert settings.contact_email is None
+    assert settings.topic_category is None
     assert settings.include_original_path is False
 
 

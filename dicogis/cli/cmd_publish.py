@@ -297,7 +297,10 @@ def publish(
         bool,
         typer.Option(
             envvar="DICOGIS_GEONETWORK_REJECT_IF_INVALID",
-            help="Have the catalog refuse the records invalid against the XSD.",
+            help=(
+                "Have the catalog refuse the records invalid against its XSD or the "
+                "Schematron rules it requires."
+            ),
         ),
     ] = False,
     timeout: Annotated[

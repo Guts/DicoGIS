@@ -12,6 +12,7 @@ Usage from the repo root folder:
 # ##################################
 
 # standard library
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -308,8 +309,10 @@ def test_help_lists_the_options():
     )
 
     assert result.exit_code == 0
+    # on GitHub Actions, Typer forces styles that NO_COLOR doesn't remove
+    output = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
     for option in ("--target", "--geonetwork-url-base", "--geonetwork-update-mode"):
-        assert option in result.output
+        assert option in output
 
 
 # ##############################################################################

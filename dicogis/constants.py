@@ -14,6 +14,30 @@ DICOGIS_UUID_NAMESPACE: UUID = UUID("4153fd9e-10a6-51f2-bed8-004e872b02c5")
 
 GDAL_POSTGIS_OPEN_OPTIONS: list[str] = []
 
+# values of the MD_TopicCategoryCode enumeration of ISO 19139, from
+# schemas.opengis.net/iso/19139/20070417/gmd/identification.xsd
+ISO_TOPIC_CATEGORIES: tuple[str, ...] = (
+    "farming",
+    "biota",
+    "boundaries",
+    "climatologyMeteorologyAtmosphere",
+    "economy",
+    "elevation",
+    "environment",
+    "geoscientificInformation",
+    "health",
+    "imageryBaseMapsEarthCover",
+    "intelligenceMilitary",
+    "inlandWaters",
+    "location",
+    "oceans",
+    "planningCadastre",
+    "society",
+    "structure",
+    "transportation",
+    "utilitiesCommunication",
+)
+
 
 class ExtendedEnum(Enum):
     """Custom Enum with extended methods."""

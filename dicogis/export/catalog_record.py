@@ -22,6 +22,7 @@ from os import getenv
 from typing import Literal
 
 # project
+from dicogis.constants import ISO_TOPIC_CATEGORIES
 from dicogis.models.metadataset import (
     MetaDatabaseFlat,
     MetaDataset,
@@ -58,15 +59,32 @@ class CatalogRecordSettings:
 
     Attributes:
         language: language of the record, as an ISO 639-2/B code
-        contact_organisation: organisation to contact about the metadata
-        contact_email: email address to contact about the metadata
+        contact_organisation: organisation to contact about the metadata and the
+            datasets
+        contact_email: email address to contact about the metadata and the datasets
+        topic_category: ISO topic category of the datasets, one of
+            ISO_TOPIC_CATEGORIES. ISO 19115 requires one for a dataset, and DicoGIS
+            can't tell it.
         include_original_path: publish the location of the dataset
     """
 
     language: str = "eng"
     contact_organisation: str | None = None
     contact_email: str | None = None
+    topic_category: str | None = None
     include_original_path: bool = False
+
+    def __post_init__(self) -> None:
+        """Refuse a topic category the XSD doesn't know: no record would be valid.
+
+        Raises:
+            ValueError: if the topic category isn't one of ISO_TOPIC_CATEGORIES
+        """
+        if self.topic_category and self.topic_category not in ISO_TOPIC_CATEGORIES:
+            raise ValueError(
+                f"Unknown ISO topic category: {self.topic_category!r}. Expected one "
+                f"of: {', '.join(ISO_TOPIC_CATEGORIES)}."
+            )
 
     @classmethod
     def from_environment(
@@ -81,6 +99,9 @@ class CatalogRecordSettings:
             include_original_path: publish the location of the dataset. Defaults to
                 the DICOGIS_ISO_INCLUDE_ORIGINAL_PATH environment variable.
 
+        Raises:
+            ValueError: if DICOGIS_ISO_TOPIC_CATEGORY isn't an ISO topic category
+
         Returns:
             settings
         """
@@ -92,6 +113,7 @@ class CatalogRecordSettings:
             language=ISO_639_2_LANGUAGES[normalize_language_code(language)],
             contact_organisation=getenv("DICOGIS_ISO_CONTACT_ORGANISATION") or None,
             contact_email=getenv("DICOGIS_ISO_CONTACT_EMAIL") or None,
+            topic_category=getenv("DICOGIS_ISO_TOPIC_CATEGORY", "").strip() or None,
             include_original_path=include_original_path,
         )
 
@@ -113,8 +135,10 @@ class CatalogRecord:
         bbox_wgs84: (west, south, east, north) in degrees, if known
         crs_codes: unique CRS, as "registry:code"
         formats: names of the formats of the dataset
-        contact_organisation: organisation to contact about the metadata
-        contact_email: email address to contact about the metadata
+        contact_organisation: organisation to contact about the metadata and the
+            dataset
+        contact_email: email address to contact about the metadata and the dataset
+        topic_category: ISO topic category of the dataset, if known
         original_path: location of the dataset, only if asked for
     """
 
@@ -132,6 +156,7 @@ class CatalogRecord:
     formats: tuple[str, ...] = ()
     contact_organisation: str | None = None
     contact_email: str | None = None
+    topic_category: str | None = None
     original_path: str | None = None
 
     @classmethod
@@ -186,6 +211,7 @@ class CatalogRecord:
             formats=_unique(metadataset.format_gdal_long_name),
             contact_organisation=settings.contact_organisation,
             contact_email=settings.contact_email,
+            topic_category=settings.topic_category,
             original_path=(
                 metadataset.path_as_str if settings.include_original_path else None
             ),

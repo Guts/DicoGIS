@@ -164,6 +164,24 @@ def test_writes_send_the_token_as_cookie_and_header(tmp_path):
     assert headers["Content-Type"] == "application/xml"
 
 
+def test_every_request_says_what_it_accepts(tmp_path):
+    """Without it, GeoNetwork falls back on XML: the routes producing JSON don't match
+    and its old dispatcher answers 500, "Service not found"."""
+    _write_record(tmp_path)
+    client = _client()
+    client.add("GET", FORMATTER_URL, 404)
+
+    _publish(tmp_path, client, update_mode="complete")
+
+    assert client.calls_to("GET", ME_URL)[0].headers["Accept"] == "application/json"
+    assert (
+        client.calls_to("PUT", RECORDS_URL)[0].headers["Accept"] == "application/json"
+    )
+    assert (
+        client.calls_to("GET", FORMATTER_URL)[0].headers["Accept"] == "application/xml"
+    )
+
+
 def test_a_renewed_token_is_used_afterwards(tmp_path):
     _write_record(tmp_path, "a.xml", identifier="a")
     _write_record(tmp_path, "b.xml", identifier="b")

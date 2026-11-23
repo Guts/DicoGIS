@@ -55,9 +55,11 @@ ISO19139_FIELDS: dict[str, str] = {
     "title": f"{_CITATION}/gmd:title",
     "dates": f"{_CITATION}/gmd:date",
     "abstract": f"{_DATA_IDENTIFICATION}/gmd:abstract",
+    "resource_contact": f"{_DATA_IDENTIFICATION}/gmd:pointOfContact",
     "keywords": f"{_DATA_IDENTIFICATION}/gmd:descriptiveKeywords",
     "spatial_representation": f"{_DATA_IDENTIFICATION}/gmd:spatialRepresentationType",
     "language": f"{_DATA_IDENTIFICATION}/gmd:language",
+    "topic_category": f"{_DATA_IDENTIFICATION}/gmd:topicCategory",
     "bbox_wgs84": f"{_DATA_IDENTIFICATION}/gmd:extent",
     "original_path": f"{_DATA_IDENTIFICATION}/gmd:supplementalInformation",
     "formats": "gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat",
@@ -243,14 +245,16 @@ def _add_language(parent: etree._Element, language: str) -> None:
     code.text = language
 
 
-def _add_contact(root: etree._Element, record: CatalogRecord) -> None:
-    """Add the point of contact of the metadata. Its role alone is enough for the XSD.
+def _add_contact(parent: etree._Element, tag: str, record: CatalogRecord) -> None:
+    """Add a point of contact. Its role alone is enough for the XSD.
 
     Args:
-        root: root of the record
+        parent: element to add to: the root for the contact of the metadata, the
+            identification section for the one of the resource
+        tag: name of the element: "contact" or "pointOfContact"
         record: catalog record
     """
-    party = _add(root, "contact", "CI_ResponsibleParty")
+    party = _add(parent, tag, "CI_ResponsibleParty")
     if record.contact_organisation:
         _add_text(party, "organisationName", record.contact_organisation)
     if record.contact_email:
@@ -291,15 +295,17 @@ def _add_citation(identification: etree._Element, record: CatalogRecord) -> None
 
 
 def _add_extent(
-    identification: etree._Element, bbox: tuple[float, float, float, float]
+    identification: etree._Element, bbox: tuple[float, float, float, float] | None
 ) -> None:
-    """Add the geographic extent of the resource.
+    """Add the geographic extent of the resource. ISO 19115 requires one for a
+    dataset: its bounds are declared unknown when the dataset doesn't tell, without a
+    CRS for instance.
 
     Args:
         identification: identification section to add to
-        bbox: (west, south, east, north) in degrees
+        bbox: (west, south, east, north) in degrees, or None if unknown
     """
-    west, south, east, north = bbox
+    west, south, east, north = bbox or (None, None, None, None)
     box = _add(
         identification,
         "extent",
@@ -313,7 +319,11 @@ def _add_extent(
         ("southBoundLatitude", south),
         ("northBoundLatitude", north),
     ):
-        etree.SubElement(_add(box, tag), _gco("Decimal")).text = str(value)
+        bound = _add(box, tag)
+        if value is None:
+            bound.set(_gco("nilReason"), "unknown")
+        else:
+            etree.SubElement(bound, _gco("Decimal")).text = str(value)
 
 
 def _add_identification(root: etree._Element, record: CatalogRecord) -> None:
@@ -326,6 +336,10 @@ def _add_identification(root: etree._Element, record: CatalogRecord) -> None:
     identification = _add(root, "identificationInfo", "MD_DataIdentification")
     _add_citation(identification, record)
     _add_text(identification, "abstract", record.abstract)
+    # optional in ISO 19115, unlike the contact of the metadata: only when there's
+    # someone to point at. Catalogs show it as the contact of the dataset.
+    if record.contact_organisation or record.contact_email:
+        _add_contact(identification, "pointOfContact", record)
     if record.keywords:
         keywords = _add(identification, "descriptiveKeywords", "MD_Keywords")
         for keyword in record.keywords:
@@ -337,8 +351,12 @@ def _add_identification(root: etree._Element, record: CatalogRecord) -> None:
         record.spatial_representation,
     )
     _add_language(identification, record.language)
-    if record.bbox_wgs84:
-        _add_extent(identification, record.bbox_wgs84)
+    if record.topic_category:
+        # an enumeration, not a codelist: no codeList attribute
+        _add(
+            identification, "topicCategory", "MD_TopicCategoryCode"
+        ).text = record.topic_category
+    _add_extent(identification, record.bbox_wgs84)
     if record.original_path:
         _add_text(identification, "supplementalInformation", record.original_path)
 
@@ -358,7 +376,7 @@ def record_to_iso19139(record: CatalogRecord) -> etree._Element:
     _add_language(root, record.language)
     _add_code(root, "characterSet", "MD_CharacterSetCode", "utf8")
     _add_code(root, "hierarchyLevel", "MD_ScopeCode", "dataset")
-    _add_contact(root, record)
+    _add_contact(root, "contact", record)
     date_stamp = _add(root, "dateStamp")
     etree.SubElement(date_stamp, _gco("Date")).text = record.metadata_date.isoformat()
     _add_text(root, "metadataStandardName", "ISO 19115:2003/19139")
@@ -551,8 +569,16 @@ class MetadatasetSerializerIso19139(MetadatasetSerializerBase):
         if not self.settings.contact_organisation and not self.settings.contact_email:
             logger.warning(
                 "No contact set for the metadata records: gmd:contact only holds its "
-                "role. Set DICOGIS_ISO_CONTACT_ORGANISATION and "
-                "DICOGIS_ISO_CONTACT_EMAIL to fill it."
+                "role and the datasets get no point of contact. Set "
+                "DICOGIS_ISO_CONTACT_ORGANISATION and DICOGIS_ISO_CONTACT_EMAIL to "
+                "fill them."
+            )
+        if not self.settings.topic_category:
+            logger.warning(
+                "No topic category set for the metadata records: ISO 19115 requires "
+                "one for a dataset, and catalogs checking it, like GeoNetwork, refuse "
+                "the records when asked to reject the invalid ones. Set "
+                "DICOGIS_ISO_TOPIC_CATEGORY to fill it."
             )
 
         super().__init__(

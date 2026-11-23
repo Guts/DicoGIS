@@ -61,6 +61,7 @@ def _local() -> etree._Element:
             crs_codes=("EPSG:4326",),
             formats=("GeoPackage",),
             contact_organisation="Local org",
+            topic_category="environment",
         )
     )
 
@@ -105,9 +106,11 @@ def test_empty_fields_are_filled():
         "crs_codes",
         "dates",
         "abstract",
+        "resource_contact",
         "keywords",
         "spatial_representation",
         "language",
+        "topic_category",
         "bbox_wgs84",
         "formats",
     }
@@ -145,13 +148,14 @@ def test_added_elements_follow_the_order_of_the_xsd():
         </gmd:topicCategory>"""
     )
 
-    completed, _added = complete_record(remote, _local())
+    completed, added = complete_record(remote, _local())
 
     identification = completed.find(IDENT, ISO19139_NAMESPACES)
     assert _names(identification) == [
         "citation",
         "abstract",
         "purpose",
+        "pointOfContact",
         "descriptiveKeywords",
         "spatialRepresentationType",
         "language",
@@ -165,6 +169,11 @@ def test_added_elements_follow_the_order_of_the_xsd():
         "identificationInfo",
         "distributionInfo",
     ]
+    # the one of the catalog stays
+    assert "topic_category" not in added
+    assert _text(completed, f"{IDENT}/gmd:topicCategory/gmd:MD_TopicCategoryCode") == (
+        "farming"
+    )
     for parent in completed.iter(etree.Element):
         sequence = ISO19139_SEQUENCES.get(etree.QName(parent).localname)
         if sequence:

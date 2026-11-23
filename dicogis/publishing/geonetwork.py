@@ -447,7 +447,9 @@ def publish_metadata_folder(
             changed by hand in the catalog as is.
         publish_to_all: make the records visible to everyone. Forced to false by
             GeoNetwork when its workflow is enabled.
-        reject_if_invalid: have the catalog refuse the records invalid against the XSD
+        reject_if_invalid: have the catalog refuse the records invalid against its
+            XSD or the Schematron rules it requires (all of them on a fresh
+            GeoNetwork 4.4, DataCite and DCAT-AP HVD included)
         timeout: seconds to wait for the catalog. Defaults to the
             DICOGIS_PUBLISH_TIMEOUT environment variable, or 30 seconds.
         http_client: HTTP client. Defaults to the one of the running environment.

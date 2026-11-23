@@ -4,8 +4,7 @@
 Tests for the HTTP clients and the selection of their backend.
 
 The QGIS backend is exercised with a fake qgis package around the real PyQt6 network
-classes: it checks how requests are built, not QGIS itself (see the QGIS job of the
-integration workflow for that).
+classes: it checks how requests are built, not QGIS itself, which no test runs.
 
 Usage from the repo root folder:
     pytest tests/test_utils_http.py
